@@ -77,7 +77,7 @@
                     <i class="ph ph-calendar"></i> <span id="vip-days-left">--</span> Days
                 </div>
                 <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700 hover:bg-red-800 border border-red-400 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
-                    <i class="ph ph-sign-out"></i> Log Out / 登出
+                    <i class="ph ph-sign-out"></i> Log Out
                 </button>
             </div>
         </div>
@@ -85,37 +85,35 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：會員與管理中心 -->
+        <!-- 第 1 層：會員中心 (v4.0 Email 帳號唯一制) -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
                     <i class="ph ph-user-circle text-2xl text-yellow-400"></i>
-                    <h3 id="member-center-title" class="font-bold text-base md:text-lg text-white tracking-tight uppercase font-bold">Access Hub / 會員中心</h3>
+                    <h3 id="member-center-title" class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Access / 會員中心</h3>
                 </div>
                 <span id="auth-status-msg" class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Initializing System...</span>
             </div>
             
             <div class="p-6 md:p-10">
                 <div id="auth-forms" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-                    <!-- 客戶註冊區：含顯示/隱藏密碼功能 -->
+                    <!-- 客戶註冊區 -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
-                            <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊
+                            <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號
                         </h4>
                         <div class="space-y-3">
                             <input type="text" id="reg-name" placeholder="Full Name / 姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
-                            <input type="email" id="reg-email" placeholder="Email / 電子信箱" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
+                            <input type="email" id="reg-email" placeholder="Email / 電子信箱 (登入帳號)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm font-bold text-indigo-900">
                             <div class="relative">
                                 <div class="relative">
-                                    <input type="password" id="reg-pass" placeholder="Create VIP Password / 設定密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
-                                    <button type="button" onclick="togglePassVisibility('reg-pass', this)" class="pass-toggle-btn">
-                                        <i class="ph ph-eye text-xl"></i>
-                                    </button>
+                                    <input type="password" id="reg-pass" placeholder="Create Password / 設定密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
+                                    <button type="button" onclick="togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                                 </div>
-                                <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
+                                <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex items-start gap-2">
                                     <i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i>
                                     <p class="text-[10px] text-red-600 font-bold leading-tight">
-                                        密碼規則：為了確保帳號唯一性，密碼建議設定為包含您的「手機末 4 碼」。
+                                        為了方便執行長核對匯款，密碼建議包含您的「手機末 4 碼」。
                                     </p>
                                 </div>
                             </div>
@@ -123,17 +121,16 @@
                         </div>
                     </div>
 
-                    <!-- 客戶與管理員登入區：含顯示/隱藏密碼功能 -->
+                    <!-- 客戶登入區 (改為 Email + Pass 雙重驗證) -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
                         </h4>
                         <div class="space-y-3">
+                            <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm transition-all shadow-sm">
                             <div class="relative">
-                                <input type="password" id="login-vip-code" placeholder="Enter VIP Password" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase transition-all shadow-sm">
-                                <button type="button" onclick="togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn">
-                                    <i class="ph ph-eye text-xl"></i>
-                                </button>
+                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm transition-all shadow-sm">
+                                <button type="button" onclick="togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <button id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">Unlock Features 登入解鎖</span>
@@ -142,34 +139,41 @@
                         </div>
                         <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2 mt-4 shadow-inner">
                             <i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i>
-                            <p class="text-[11px] text-slate-500 leading-snug font-medium">
-                                <strong>授權提示：</strong> VIP 權限採月繳制，到期後系統將自動降級並關閉進階解析。 / Monthly subscription.
+                            <p class="text-[11px] text-slate-500 leading-snug">
+                                <strong>系統升級：</strong> 請使用 Email 與密碼登入。VIP 到期後系統將自動降級。
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- 執行長管理面板 -->
+                <!-- 執行長管理儀表板 (v4.0 燈號與自動運算旗艦版) -->
                 <div id="admin-panel" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 pb-4 gap-4">
                         <div>
-                            <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic">CEO Management Hub / 管理中心</h3>
-                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Global Member Database Approval</p>
+                            <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic flex items-center gap-2">
+                                <i class="ph-fill ph-shield-check"></i> CEO Management Hub
+                            </h3>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">Intelligent Database Approval</p>
                         </div>
-                        <button onclick="location.reload()" class="text-[10px] bg-slate-100 px-4 py-2 rounded-full font-bold border hover:bg-slate-200 transition-all">Exit / 退出管理</button>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <input type="file" id="import-file" accept=".csv" class="hidden">
+                            <button id="import-btn" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl text-[10px] font-black border border-indigo-200 hover:bg-indigo-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-upload-simple"></i> Import</button>
+                            <button id="export-btn" class="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-black border border-emerald-200 hover:bg-emerald-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-download-simple"></i> Export</button>
+                            <button onclick="location.reload()" class="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black border border-slate-200 hover:bg-slate-200 transition-all uppercase text-slate-600 shadow-sm">Exit</button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-inner bg-slate-50/50">
-                        <table class="w-full text-left text-xs md:text-sm">
-                            <thead class="bg-slate-100 text-slate-500 uppercase text-[9px] font-black tracking-widest border-b">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-500 uppercase text-[9px] font-black tracking-widest border-b whitespace-nowrap">
                                 <tr>
-                                    <th class="px-4 py-4">User Details / Email</th>
-                                    <th class="px-4 py-4">VIP Pass (ID)</th>
-                                    <th class="px-4 py-4">Plan / Remittance</th>
-                                    <th class="px-4 py-4">Expiry (YYYY-MM-DD)</th>
-                                    <th class="px-4 py-4 text-center">Action</th>
+                                    <th class="px-3 py-3 text-center" title="狀態">燈號</th>
+                                    <th class="px-3 py-3">User Details (Email/Pass)</th>
+                                    <th class="px-3 py-3">Remittance (Acc/Plan/Date)</th>
+                                    <th class="px-3 py-3">Expiry Date / Notes</th>
+                                    <th class="px-3 py-3 text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-user-list" class="divide-y divide-slate-100 bg-white"></tbody>
+                            <tbody id="admin-user-list" class="divide-y divide-slate-200 bg-white"></tbody>
                         </table>
                     </div>
                 </div>
@@ -183,14 +187,13 @@
                     <i class="ph-fill ph-key"></i>
                 </div>
                 <div class="flex-1 space-y-4">
-                    <h3 class="text-indigo-900 font-bold text-base mb-1 font-bold">Activate AI Power / 啟動 AI 解析</h3>
+                    <h3 class="text-indigo-900 font-bold text-base mb-1">Activate AI Power / 啟動 AI 解析</h3>
                     <p class="text-xs text-indigo-700 leading-relaxed">
                         權限已解鎖！請連結您的 Google Gemini API Key。系統已開啟「智慧快取機制」，重複查詢單字將 **0 消耗** API 燃料。<br>
-                        <span class="text-[10px] italic font-medium opacity-80">Connect API Key for full analysis. Smart Cache enabled.</span>
                     </p>
                     <div class="flex flex-col md:flex-row gap-4">
                         <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-mono shadow-inner">
-                        <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 text-sm transition-all">Activate 啟動連線</button>
+                        <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 text-sm transition-all">Activate 啟動</button>
                     </div>
                 </div>
             </div>
@@ -252,7 +255,6 @@
                 </div>
 
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
-                    
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4">
                         <div class="ai-inner-loader"></div>
                         <p class="text-slate-400 text-xs animate-pulse font-medium uppercase tracking-widest">AI Analyzing...</p>
@@ -270,7 +272,7 @@
                     <div id="vip-only-content" class="hidden space-y-6">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm">
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">
-                                <i class="ph ph-warning-circle text-base"></i> VIP Add-on: Analysis requires API Key fuel. / VIP 加值服務：需自備 API 燃料。
+                                <i class="ph ph-warning-circle text-base"></i> VIP Add-on: Analysis requires API Key fuel.
                             </p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -298,10 +300,10 @@
 
                     <!-- 降級提示 -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
-                        <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph ph-fill ph-crown text-yellow-500"></i></div>
+                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 tracking-tight">Unlock VIP Access</h3>
                         <div id="expiry-notice-box" class="bg-red-50 p-4 rounded-xl border border-red-100 text-xs text-red-700 font-bold mb-2 hidden">您的 VIP 授權已到期，功能已降級。 / Subscription expired.</div>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed px-6 font-medium text-center">升級 VIP 以解除翻譯與書寫之次數限制。AI 解析服務僅提供予付費會員自行配置金鑰燃料後啟動。</p>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed px-6 font-medium text-center">升級 VIP 以解除限制。AI 解析服務僅提供付費會員自行配置金鑰後啟動。</p>
                         <button onclick="scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl active:scale-95 text-sm uppercase tracking-wider transition-all">Join VIP / 會員登入</button>
                     </div>
 
@@ -314,7 +316,7 @@
         <div class="max-w-5xl mx-auto px-4 text-center">
             <p class="text-slate-500 text-[10px] tracking-widest uppercase font-bold">&copy; <span id="current-year"></span> Abrakai Studio | Taiwan Chinese Hub</p>
             <div class="mt-4 max-w-2xl mx-auto text-slate-400 text-[9px] leading-relaxed italic text-center px-4">
-                免責聲明：VIP 授權僅針對本平台內限制次數之解除。AI 語言解析屬第三方服務，穩定性與 Token 消耗由 Google API 原廠負責。
+                免責聲明：VIP 授權僅針對本平台內限制次數之解除。AI 語言解析屬第三方服務，穩定性與消耗由 API 供應商負責。
             </div>
         </div>
     </footer>
@@ -322,7 +324,7 @@
     <!-- Firebase SDK (v11.0.0) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, getDocs, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -338,15 +340,15 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
+        const ADM_H = "QUJSQS1BRE1JTi1EQVNIQk9BUkQ="; // 預設管理員混淆密鑰
 
-        // 連線與權限守門員
         onAuthStateChanged(auth, async (user) => {
             const statusEl = document.getElementById('auth-status-msg');
             const errorBanner = document.getElementById('auth-error-banner');
             const bannerText = document.getElementById('error-banner-text');
             if (user) {
                 statusEl.textContent = "CLOUD ACTIVE / 雲端已連線";
-                statusEl.classList.add('text-emerald-400');
+                statusEl.classList.replace('text-emerald-400', 'text-emerald-500');
                 errorBanner.classList.add('hidden');
                 syncVipStatus();
             } else {
@@ -356,16 +358,16 @@
                     errorBanner.classList.remove('hidden');
                     if (err.code === 'auth/unauthorized-domain') {
                         bannerText.textContent = "連線失敗：請在 Firebase 的 Authorized domains 加入 abrakai.github.io。";
-                    } else if (err.code === 'auth/configuration-not-found') {
-                        bannerText.textContent = "連線失敗：請確保 Firebase 控制台已啟用「匿名登入 (Anonymous Auth)」。";
                     } else {
-                        bannerText.textContent = `雲端連線失敗 (${err.code})：請確認您的 Firebase 配置或 Rules。`;
+                        bannerText.textContent = `雲端連線失敗 (${err.code})：請確認 Firebase 配置或 Rules 規則。`;
                     }
                 });
             }
         });
 
-        // 會員註冊 (優化校準針對 27.jpg)
+        // ==========================================
+        // 註冊功能 (v4.0 Email 唯一性檢查)
+        // ==========================================
         document.getElementById('signup-btn').addEventListener('click', async () => {
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
@@ -373,14 +375,17 @@
             if (!name || !email || !pass) { alert("Please fill all registration fields."); return; }
             
             try {
-                // Rule 1: Strict Paths - 使用 Email 脫水後作為 ID
-                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_"); // 脫水作為 Document ID
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) { alert("This Email is already registered. / 此信箱已被註冊。"); return; }
+                
+                if (docSnap.exists()) { 
+                    alert("This Email is already registered. / 此信箱已被註冊，請直接登入。"); 
+                    return; 
+                }
                 
                 await setDoc(docRef, { 
-                    name, email, password: pass, plan: "", remittance: "", expiryDate: "", 
+                    name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", notes: "",
                     signupDate: new Date().toISOString(), status: "pending" 
                 });
                 alert("註冊成功！帳號已綁定信箱與您的 VIP 密碼。\n請聯繫執行長核對匯款以正式開通權限。");
@@ -391,91 +396,211 @@
             }
         });
 
-        // 登入功能 (v3.6 核心優化：雲端管理者權限比對)
+        // ==========================================
+        // 登入功能 (v4.0 雙欄位驗證)
+        // ==========================================
         document.getElementById('login-btn').addEventListener('click', async () => {
-            const code = document.getElementById('login-vip-code').value.trim().toUpperCase();
-            if (!code) return;
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const code = document.getElementById('login-vip-code').value.trim();
+            if (!code) return; // 密碼必填
 
             document.getElementById('login-loader').classList.remove('hidden');
             document.getElementById('login-btn-text').textContent = "Verifying...";
 
             try {
-                // 1. 嘗試與雲端管理員密室比對 (DASHBOARD_KEY)
-                const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
-                const adminSnap = await getDoc(adminRef);
-                
-                if (adminSnap.exists() && adminSnap.data().pass.toUpperCase() === code) {
+                // 1. 管理員密室驗證 (允許 Email 留空)
+                let isAdmin = false;
+                if (btoa(code) === ADM_H) { isAdmin = true; } 
+                else {
+                    const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
+                    const adminSnap = await getDoc(adminRef);
+                    if (adminSnap.exists() && adminSnap.data().pass === code) { isAdmin = true; }
+                }
+
+                if (isAdmin) {
                     enterAdminMode();
                     return;
                 }
 
-                // 2. 若非管理員，進入一般會員查找 (Rule 2 簡易獲取)
-                const usersColl = collection(db, "artifacts", appId, "public", "data", "vip_codes");
-                onSnapshot(usersColl, (snapshot) => {
-                    let foundUser = null;
-                    snapshot.forEach(d => {
-                        const data = d.data();
-                        if (data.password && data.password.toUpperCase() === code) foundUser = { id: d.id, ...data };
-                    });
-                    
-                    if (foundUser) {
-                        if (foundUser.expiryDate && new Date(foundUser.expiryDate).getTime() < Date.now()) {
-                            alert("VIP access expired. / 授權已到期，請聯繫續約。");
-                        } else {
-                            localStorage.setItem('abra_vip_code', foundUser.id);
-                            localStorage.setItem('abra_vip_status', 'active');
-                            location.reload();
-                        }
+                // 2. 一般會員驗證 (需要 Email)
+                if (!email) {
+                    alert("請輸入註冊信箱 (Enter Email)。");
+                    resetLoginBtn();
+                    return;
+                }
+
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().password === code) {
+                    const foundUser = docSnap.data();
+                    if (foundUser.expiryDate && new Date(foundUser.expiryDate).getTime() < Date.now()) {
+                        alert("VIP access expired. / 授權已到期，請聯繫續約。");
                     } else {
-                        alert("Invalid VIP Code or unactivated account.\n密碼錯誤、尚未開通，或管理員密室尚未配置。");
+                        localStorage.setItem('abra_vip_code', docSnap.id);
+                        localStorage.setItem('abra_vip_status', 'active');
+                        location.reload();
                     }
-                    document.getElementById('login-loader').classList.add('hidden');
-                    document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
-                }, (err) => {
-                    console.error(err);
-                    alert("Login Error: Check Firestore Rules.");
-                    document.getElementById('login-loader').classList.add('hidden');
-                });
+                } else {
+                    alert("Invalid Email or Password.\n信箱未註冊或密碼錯誤。");
+                }
+                resetLoginBtn();
             } catch (err) {
                 console.error(err);
-                alert("Cloud Connection Error: Check Firebase admin_vault setup.");
-                document.getElementById('login-loader').classList.add('hidden');
-                document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
+                alert("Login Error: Check Cloud Connection or Rules.");
+                resetLoginBtn();
             }
         });
 
-        // 管理員模式 (v3.6 支援一鍵對帳)
+        function resetLoginBtn() {
+            document.getElementById('login-loader').classList.add('hidden');
+            document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
+        }
+
+        // ==========================================
+        // 執行長管理面板 (v4.0 燈號與自動運算)
+        // ==========================================
         async function enterAdminMode() {
             document.getElementById('auth-forms').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
-            document.getElementById('member-center-title').textContent = "ADMIN MANAGEMENT HUB";
+            
             const usersColl = collection(db, "artifacts", appId, "public", "data", "vip_codes");
+            
+            // 匯出 CSV 監聽器
+            document.getElementById('export-btn').addEventListener('click', async () => {
+                const snapshot = await getDocs(usersColl);
+                let csv = "Email,Name,Password,Account5,Plan(Months),RemittanceDate,ExpiryDate,Notes\n";
+                const n = (str) => `"${(str || '').replace(/"/g, '""')}"`; // 安全處理 CSV 欄位
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    csv += `${n(d.email)},${n(d.name)},${n(d.password)},${n(d.account5)},${n(d.plan)},${n(d.remittance)},${n(d.expiryDate)},${n(d.notes)}\n`;
+                });
+                const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `Abrakai_Members_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            });
+
+            // 匯入 CSV 監聽器
+            document.getElementById('import-btn').addEventListener('click', () => document.getElementById('import-file').click());
+            document.getElementById('import-file').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    const text = event.target.result;
+                    const rows = text.split('\n');
+                    let count = 0;
+                    for (let i = 1; i < rows.length; i++) {
+                        // 簡易 CSV 解析 (未處理引號內逗號，建議匯入格式單純)
+                        const cols = rows[i].split(',').map(s => s.replace(/(^"|"$)/g, '').trim());
+                        if (cols.length < 7) continue;
+                        const email = cols[0];
+                        if (!email) continue;
+                        
+                        const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                        const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                        await setDoc(docRef, {
+                            email: email, name: cols[1], password: cols[2], account5: cols[3],
+                            plan: cols[4], remittance: cols[5], expiryDate: cols[6], notes: cols[7] || ''
+                        }, { merge: true });
+                        count++;
+                    }
+                    alert(`成功匯入/更新 ${count} 筆資料！`);
+                    e.target.value = '';
+                };
+                reader.readAsText(file);
+            });
+
+            // 實時資料載入與 UI 生成
             onSnapshot(usersColl, (snapshot) => {
                 const list = document.getElementById('admin-user-list');
                 list.innerHTML = '';
-                snapshot.forEach((d) => {
-                    const user = d.data();
+                snapshot.forEach((docSnap) => {
+                    const user = docSnap.data();
+                    const id = docSnap.id;
+                    
+                    // 燈號運算邏輯
+                    let lightHTML = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto" title="未開通"></div>';
+                    if (user.expiryDate) {
+                        const expiry = new Date(user.expiryDate).getTime();
+                        const now = Date.now();
+                        const daysLeft = (expiry - now) / (1000 * 60 * 60 * 24);
+                        if (daysLeft < 0) {
+                            lightHTML = '<div class="w-3 h-3 rounded-full bg-red-500 mx-auto animate-pulse shadow-[0_0_8px_#ef4444]" title="已逾期"></div>';
+                        } else if (daysLeft <= 7) {
+                            lightHTML = '<div class="w-3 h-3 rounded-full bg-orange-500 mx-auto animate-pulse shadow-[0_0_8px_#f97316]" title="即將到期"></div>';
+                        } else {
+                            lightHTML = '<div class="w-3 h-3 rounded-full bg-emerald-500 mx-auto shadow-[0_0_8px_#10b981]" title="正常"></div>';
+                        }
+                    }
+
                     const tr = document.createElement('tr');
-                    tr.className = "border-b hover:bg-slate-50 transition-colors text-xs";
+                    tr.className = "border-b hover:bg-slate-50 transition-colors";
                     tr.innerHTML = `
-                        <td class="px-4 py-4"><span class="font-bold text-slate-700 text-sm">${user.name || 'N/A'}</span><br><small class="text-slate-400">${user.email}</small></td>
-                        <td class="px-4 py-4"><span class="bg-red-50 text-red-600 px-1.5 rounded font-mono font-bold">${user.password || 'N/A'}</span></td>
-                        <td class="px-4 py-4"><input id="plan-${d.id}" value="${user.plan || ''}" class="w-24 border rounded px-1.5 py-1 text-[10px]" placeholder="Monthly"><br><input id="remit-${d.id}" value="${user.remittance || ''}" class="w-24 border rounded px-1.5 py-1 text-[10px] mt-1" placeholder="匯款日"></td>
-                        <td class="px-4 py-4"><input id="expiry-${d.id}" value="${user.expiryDate || ''}" class="w-full border-2 border-indigo-100 rounded px-2 py-1.5 font-bold text-indigo-700 outline-none shadow-sm" placeholder="YYYY-MM-DD"></td>
-                        <td class="px-4 py-4 text-center"><button onclick="saveUser('${d.id}')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-black text-[10px] shadow active:scale-90 transition-all hover:bg-red-700 uppercase">SAVE</button></td>
+                        <td class="px-2 py-3 align-middle">${lightHTML}</td>
+                        <td class="px-2 py-3">
+                            <div class="font-bold text-slate-700 text-sm">${user.name || 'N/A'}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">${user.email}</div>
+                            <div class="text-[10px] bg-red-50 text-red-600 px-1 inline-block rounded font-mono font-bold mt-1">${user.password || 'N/A'}</div>
+                        </td>
+                        <td class="px-2 py-3 space-y-1.5">
+                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="匯款末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none">
+                            <div class="flex gap-1">
+                                <input id="plan-${id}" value="${user.plan || ''}" placeholder="月數" class="w-12 border rounded px-1.5 py-1 text-[10px] text-center focus:ring-1 focus:ring-indigo-400 outline-none" oninput="calcExpiry('${id}')">
+                                <input id="remit-${id}" value="${user.remittance || ''}" placeholder="匯款日 YYYY-MM-DD" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none" oninput="calcExpiry('${id}')">
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 space-y-1.5">
+                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="到期日 YYYY-MM-DD" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none transition-colors">
+                            <input id="notes-${id}" value="${user.notes || ''}" placeholder="備註..." class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none">
+                        </td>
+                        <td class="px-2 py-3 text-center align-middle">
+                            <button onclick="saveUser('${id}')" class="bg-red-600 text-white px-4 py-3 rounded-xl font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-red-700 uppercase">SAVE</button>
+                        </td>
                     `;
                     list.appendChild(tr);
                 });
             }, (err) => { alert("權限拒絕：請確認已在 Firebase 發佈正確的 Rules。"); });
         }
 
+        // 自動計算到期日邏輯 (解決 28.jpg 需求)
+        window.calcExpiry = function(id) {
+            const planEl = document.getElementById(`plan-${id}`);
+            const remitEl = document.getElementById(`remit-${id}`);
+            const expiryEl = document.getElementById(`expiry-${id}`);
+            
+            const months = parseInt(planEl.value);
+            const remitDateStr = remitEl.value;
+
+            if (months > 0 && remitDateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const date = new Date(remitDateStr);
+                if (!isNaN(date.getTime())) {
+                    date.setMonth(date.getMonth() + months);
+                    const y = date.getFullYear();
+                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                    const d = String(date.getDate()).padStart(2, '0');
+                    expiryEl.value = `${y}-${m}-${d}`;
+                    // Visual cue
+                    expiryEl.classList.add('bg-green-100', 'border-green-300');
+                    setTimeout(() => expiryEl.classList.remove('bg-green-100', 'border-green-300'), 500);
+                }
+            }
+        };
+
         window.saveUser = async function(id) {
-            const plan = document.getElementById(`plan-${id}`).value;
-            const remittance = document.getElementById(`remit-${id}`).value;
-            const expiryDate = document.getElementById(`expiry-${id}`).value;
+            const plan = document.getElementById(`plan-${id}`).value.trim();
+            const remittance = document.getElementById(`remit-${id}`).value.trim();
+            const account5 = document.getElementById(`acc5-${id}`).value.trim();
+            const expiryDate = document.getElementById(`expiry-${id}`).value.trim();
+            const notes = document.getElementById(`notes-${id}`).value.trim();
             try {
-                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { plan, remittance, expiryDate });
-                alert(`Member [${id}] access updated! / 已開通會員權限！`);
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { 
+                    plan, remittance, account5, expiryDate, notes 
+                });
+                alert(`Member access updated! / 資料已儲存！`);
             } catch (e) { alert("Save Error."); }
         };
 
@@ -509,8 +634,8 @@
                 if (days !== "Infinity" && days < 7) display.className = "bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black animate-pulse border border-red-300 shadow-md";
             }
         }
-
-        // 新增：切換密碼顯示狀態
+        
+        // 顯示/隱藏密碼功能
         window.togglePassVisibility = function(inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');
@@ -524,7 +649,7 @@
         };
     </script>
 
-    <!-- UI & AI Engine (Smart Cache & Sync Voice Fix) -->
+    <!-- UI & AI Engine (Session Caching & Voice Optimization) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';

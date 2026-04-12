@@ -31,8 +31,8 @@
     <header class="bg-red-600 text-white shadow-md">
         <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold tracking-wider">Learn Traditional Chinese</h1>
-                <p class="text-red-100 text-sm mt-1 font-medium">Taiwan Edition | CEO: Abrakai Studio</p>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-wider text-white">Learn Traditional Chinese</h1>
+                <p class="text-red-100 text-sm mt-1 font-medium italic">Taiwan Edition | CEO: Abrakai Studio</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all shadow-inner">
@@ -48,14 +48,14 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (Cloud Active) -->
+        <!-- 第 1 層：VIP 驗證區 (Cloud Enabled) -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
                     <i class="ph-fill ph-crown text-2xl text-yellow-300"></i>
-                    <h3 class="font-bold text-lg text-white">Abrakai VIP Premium Access</h3>
+                    <h3 class="font-bold text-lg text-white tracking-tight">Abrakai VIP Premium Access</h3>
                 </div>
-                <span class="text-xs bg-emerald-700 px-2 py-1 rounded-full border border-emerald-400">Cloud Sync Active</span>
+                <span class="text-xs bg-emerald-700 px-2 py-1 rounded-full border border-emerald-400 font-bold">Cloud Sync Ready</span>
             </div>
             
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -64,11 +64,11 @@
                         <i class="ph ph-shield-check text-emerald-600"></i> Active Protection
                     </h4>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        請輸入您的授權碼。系統將連線至 <strong>Abrakai Studio Cloud</strong> 進行資料比對。
+                        您的密碼將連線至 <strong>Abrakai Studio Cloud</strong>。若驗證失敗，請檢查密碼是否正確或聯絡執行長。
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Report</h5>
-                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic tracking-wide">Connecting to Google Cloud...</div>
+                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Database Sync Status</h5>
+                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic tracking-wide">Syncing with Google...</div>
                     </div>
                 </div>
 
@@ -85,7 +85,7 @@
                     </div>
 
                     <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Global Support</h4>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">CEO Direct Support</h4>
                         <a href="tel:+886975762513" class="flex items-center gap-3 text-emerald-400 hover:text-emerald-300 transition-colors text-lg font-bold">
                             <i class="ph ph-chat-circle-dots text-2xl"></i> +886 975-762-513
                         </a>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Connect Abrakai AI Insights</h3>
-                    <p class="text-sm text-indigo-700 mb-4">VIP Verified. Please link your personal Gemini API Key below to activate deep intelligence features.</p>
+                    <p class="text-sm text-indigo-700 mb-4">Cloud VIP Verified. Please link your personal Gemini API Key below to activate deep intelligence features.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                         <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Activate AI</button>
@@ -114,33 +114,35 @@
 
         <!-- 翻譯區 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
-            <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">FREE LIMIT</div>
+            <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl">1</div>
                 <h2 class="text-xl font-semibold">Translate to Chinese</h2>
             </div>
             <div class="flex flex-col md:flex-row gap-4">
-                <input type="text" id="eng-input" placeholder="English word..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="translate-btn" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 flex items-center justify-center gap-2">
+                <input type="text" id="eng-input" placeholder="English word..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                <button id="translate-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 flex items-center justify-center gap-2">
                     <span id="translate-btn-text">Translate</span>
                     <div id="translate-loader" class="loader hidden w-5 h-5 border-2"></div>
                 </button>
             </div>
-            <div id="translate-error" class="text-red-500 mt-3 text-sm hidden"></div>
+            <div id="translate-error" class="text-red-500 mt-3 text-sm hidden font-medium"></div>
         </section>
 
         <!-- 拆字區 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
-            <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">FREE LIMIT</div>
+            <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xl">2</div>
                 <h2 class="text-xl font-semibold">Learn Writing</h2>
             </div>
             <div class="flex flex-col md:flex-row gap-4 mb-6">
-                <input type="text" id="zh-input" placeholder="Chinese text..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <button id="split-btn" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Reload</button>
+                <input type="text" id="zh-input" placeholder="Chinese text..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <button id="split-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Reload</button>
             </div>
-            <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner"></div>
+            <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner">
+                <span class="text-slate-400 text-sm">Characters will appear here...</span>
+            </div>
         </section>
 
         <!-- 學習面板 -->
@@ -157,8 +159,8 @@
                 <div class="md:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3"></svg>
                     <div class="flex gap-3 mt-8 w-full max-w-[220px]">
-                        <button id="animate-stroke-btn" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold shadow-md text-xs">Animate</button>
-                        <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md text-xs">Test</button>
+                        <button id="animate-stroke-btn" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Animate</button>
+                        <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Test</button>
                     </div>
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
@@ -178,11 +180,11 @@
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-books text-indigo-500"></i> Vocabulary</h3>
+                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-books text-indigo-500 text-xl"></i> Vocabulary</h3>
                         <div id="words-container" class="flex flex-wrap gap-2"></div>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-quotes text-rose-500"></i> Idioms</h3>
+                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-quotes text-rose-500 text-xl"></i> Idioms</h3>
                         <div id="idioms-container" class="space-y-3"></div>
                     </div>
                 </div>
@@ -192,20 +194,22 @@
 
     <footer class="bg-slate-100 border-t border-slate-200 py-12">
         <div class="max-w-5xl mx-auto px-4 text-center">
-            <span class="text-slate-800 font-bold">阿布拉.凱|工作室 / Abrakai Studio</span>
-            <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase font-medium">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <i class="ph ph-terminal-window text-2xl text-slate-400"></i>
+                <span class="text-slate-800 font-bold tracking-tight">阿布拉.凱|工作室 / Abrakai Studio</span>
+            </div>
+            <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase font-bold">
                 &copy; <span id="current-year"></span> Traditional Chinese Learning Hub. (Taiwan Edition) **© Abrakai Studio**
             </p>
         </div>
     </footer>
 
-    <!-- Firebase System Module (The Heart of Cloud Auth) -->
+    <!-- Firebase Core Module -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-        // 專屬配置：abra-learn-zh-vip
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
             authDomain: "abra-learn-zh-vip.firebaseapp.com",
@@ -219,33 +223,32 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // 初始化匿名登入
+        // 初始化身份驗證
         onAuthStateChanged(auth, (user) => {
             const statusEl = document.getElementById('auth-status-msg');
             if (user) {
                 statusEl.textContent = "Cloud Sync Active (Connected)";
                 statusEl.className = "text-[10px] text-emerald-600 font-bold italic tracking-wide";
-                console.log("Abrakai Cloud Linked.");
+                console.log("Connected as anonymous user:", user.uid);
             } else {
                 signInAnonymously(auth).catch(e => {
-                    statusEl.textContent = "Connection Refused. Check Rules.";
+                    statusEl.textContent = "Connection Refused. Check Firestore Rules.";
                     statusEl.className = "text-[10px] text-red-500 font-bold italic tracking-wide";
                 });
             }
         });
 
-        // 綁定解鎖按鈕
+        // 解鎖按鈕事件 (強化診斷版)
         const vipBtn = document.getElementById('save-vip-btn');
         vipBtn.addEventListener('click', async () => {
-            // 自動修復：去空格、轉大寫，消除客戶輸入與資料庫的差異
-            const rawInput = document.getElementById('vip-code-input').value;
-            const code = rawInput.trim().toUpperCase();
+            const inputField = document.getElementById('vip-code-input');
+            const code = inputField.value.trim().toUpperCase();
             const btnText = document.getElementById('vip-btn-text');
             const loader = document.getElementById('vip-loader');
 
             if (!code) { alert("Please enter a code."); return; }
 
-            // 管理員後門 (緊急對抗任何雲端不穩定)
+            // 管理員備用後門
             if (code === 'ABRA-ADMIN-PASS') { grantVip(); alert("Admin Override Active."); return; }
 
             vipBtn.disabled = true;
@@ -253,9 +256,10 @@
             loader.classList.remove('hidden');
 
             try {
-                // 強制超時保護 (5秒)
+                // 超時保護 (5秒)
                 const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
                 const fetchTask = (async () => {
+                    // 指向集合 vip_codes，文件 ID 使用去空格大寫後的 code
                     const docRef = doc(db, "vip_codes", code);
                     const docSnap = await getDoc(docRef);
                     return docSnap;
@@ -265,17 +269,17 @@
 
                 if (docSnap.exists()) {
                     grantVip();
-                    alert("Cloud Access Granted! VIP Unlocked.");
+                    alert("Verification Success! VIP Unlocked.");
                 } else {
-                    console.log("Searching for:", code);
-                    alert("Access Denied: Code not active.\n\nPM提示：請檢查 Firestore 是否有名為 'vip_codes' 的集合，且文件 ID 精確為 '" + code + "'。");
+                    // 詳細報錯，顯示搜尋字串長度，抓出隱形空格
+                    alert(`Access Denied: Code not active.\n\nSearched for: [${code}]\nString Length: ${code.length}\n\nPM建議：請確認 Firebase 文件 ID 完全一致。`);
                 }
             } catch (err) {
                 console.error("Cloud Error Detail:", err);
                 if (err.message === "Timeout") {
-                    alert("Cloud connection too slow. Please refresh and try again.");
+                    alert("Cloud Busy. Please ensure you clicked 'Publish' on the Rules page.");
                 } else {
-                    alert("Database Locked: Please check your Firestore Rules (allow read: if true).");
+                    alert(`Sync Error: ${err.message}\n\n請確認 Firestore 安全規則已發佈為 allow read: if true;`);
                 }
             } finally {
                 vipBtn.disabled = false;
@@ -291,7 +295,7 @@
         }
     </script>
 
-    <!-- UI Interaction Script -->
+    <!-- UI Logic -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
@@ -317,7 +321,7 @@
             const removeBtn = document.getElementById('remove-key-btn');
             if (isVIP) {
                 quotaDisplay.className = "bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-black border border-yellow-300 shadow-lg flex items-center gap-2";
-                quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP UNLIMITED';
+                quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP ACCESS UNLIMITED';
                 removeBtn.classList.remove('hidden');
                 document.querySelectorAll('[id^="badge-"]').forEach(el => { if (el.id !== 'badge-ai') el.textContent = "VIP PREMIUM ACTIVE"; });
                 document.getElementById('vip-setup-section').classList.add('hidden');
@@ -341,7 +345,7 @@
         function speak(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            // 自然停頓優化：避開符號，僅算式念出
+            // 自然播報：避開符號，僅算式唸出
             const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }

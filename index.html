@@ -48,7 +48,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (Cloud Enabled) -->
+        <!-- 第 1 層：VIP 驗證區 (只有在額度用完時才會顯現引導) -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -64,11 +64,11 @@
                         <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證
                     </h4>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        請輸入您持有的 VIP 授權碼以解鎖全部 AI 教學功能。系統將連線至 <strong>Abrakai Studio Cloud</strong> 進行即時驗證。
+                        您已達到每日試用上限。請輸入您的 VIP 授權碼以解鎖<strong>無限次數</strong>及全部 AI 教學功能。
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態</h5>
-                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic tracking-wide">Cloud System Initializing...</div>
+                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic tracking-wide">Cloud System Ready</div>
                     </div>
                 </div>
 
@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <!-- 第 2 層：API Key 教學 -->
+        <!-- 第 2 層：API Key 教學 (僅 VIP 可見) -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
@@ -112,7 +112,7 @@
             </div>
         </div>
 
-        <!-- 翻譯區 (限額或 VIP) -->
+        <!-- 翻譯區 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -129,7 +129,7 @@
             <div id="translate-error" class="text-red-500 mt-3 text-sm hidden font-medium"></div>
         </section>
 
-        <!-- 拆字區 (限額或 VIP) -->
+        <!-- 拆字區 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -145,49 +145,91 @@
             </div>
         </section>
 
-        <!-- 學習面板 (動畫/練習免費; AI 加值鎖定) -->
+        <!-- 學習面板 -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <h2 class="text-xl font-semibold flex items-center gap-2"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center</h2>
                 <span id="current-learning-char" class="text-4xl font-bold text-yellow-400"></span>
             </div>
+            
             <div id="dashboard-loader" class="p-16 flex flex-col items-center justify-center hidden">
                 <div class="loader mb-4 border-slate-300 border-t-slate-900 w-10 h-10"></div>
                 <p class="text-slate-400 animate-pulse font-medium">Abrakai AI Analyzing...</p>
             </div>
+
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
                 <!-- 筆畫區 (此功能對所有額度內使用者開放) -->
-                <div class="md:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
-                    <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3"></svg>
+                <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
+                    <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
+                        <i class="ph-fill ph-scribble-loop text-lg"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Writing Mechanics</span>
+                    </div>
+                    <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 mt-4"></svg>
                     <div class="flex gap-3 mt-8 w-full max-w-[220px]">
                         <button id="animate-stroke-btn" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Animate</button>
                         <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Test</button>
                     </div>
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
-                <!-- AI 進階解析區 (VIP + API Key 限定) -->
-                <div class="md:col-span-8 p-8 space-y-8 relative bg-white">
-                    <div id="badge-ai" class="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight">VIP + AI KEY ONLY</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 shadow-sm">
-                            <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-2">Zhuyin</div>
-                            <div class="flex items-center gap-4">
-                                <div id="zhuyin-display" class="text-4xl font-bold text-slate-800"></div>
-                                <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-lg flex items-center justify-center transition-transform active:scale-90"><i class="ph-fill ph-speaker-high"></i></button>
+
+                <!-- AI 解析區 / VIP 轉化引導區 -->
+                <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 space-y-8 relative bg-white">
+                    <!-- VIP 使用者顯示內容 -->
+                    <div id="vip-only-content" class="hidden space-y-8">
+                        <div id="badge-ai" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight">VIP AI INSIGHTS</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 shadow-sm">
+                                <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-2">Zhuyin</div>
+                                <div class="flex items-center gap-4">
+                                    <div id="zhuyin-display" class="text-4xl font-bold text-slate-800"></div>
+                                    <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-lg flex items-center justify-center transition-transform active:scale-90"><i class="ph-fill ph-speaker-high"></i></button>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 shadow-sm">
+                                <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-2">Polyphonic</div>
+                                <div id="polyphonic-display"></div>
                             </div>
                         </div>
-                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 shadow-sm">
-                            <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-2">Polyphonic</div>
-                            <div id="polyphonic-display"></div>
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-books text-indigo-500 text-xl"></i> Vocabulary</h3>
+                            <div id="words-container" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-quotes text-rose-500 text-xl"></i> Idioms</h3>
+                            <div id="idioms-container" class="space-y-3"></div>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-books text-indigo-500 text-xl"></i> Vocabulary</h3>
-                        <div id="words-container" class="flex flex-wrap gap-2"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-quotes text-rose-500 text-xl"></i> Idioms</h3>
-                        <div id="idioms-container" class="space-y-3"></div>
+
+                    <!-- 非 VIP 使用者顯示引導卡片 (新加入) -->
+                    <div id="free-promo-content" class="flex flex-col items-center justify-center py-6 text-center space-y-6">
+                        <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
+                            <i class="ph-fill ph-crown"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Upgrade to Abrakai VIP</h3>
+                            <p class="text-sm text-slate-500 max-w-md mx-auto">您正在試用強大的漢字書寫系統！加入 VIP 即可解鎖完整的 AI 語言引擎：</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
+                                <i class="ph-fill ph-speaker-high text-yellow-500 text-2xl"></i>
+                                <span class="text-xs font-bold text-slate-700">Native Audio Voice<br><small class="text-slate-400 font-normal">正宗台灣配音</small></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
+                                <i class="ph-fill ph-sparkle text-indigo-500 text-2xl"></i>
+                                <span class="text-xs font-bold text-slate-700">AI Idiom Insights<br><small class="text-slate-400 font-normal">深度成語解析</small></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
+                                <i class="ph-fill ph-infinity text-rose-500 text-2xl"></i>
+                                <span class="text-xs font-bold text-slate-700">Unlimited Access<br><small class="text-slate-400 font-normal">永久解除每日限額</small></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
+                                <i class="ph-fill ph-chat-circle-dots text-emerald-500 text-2xl"></i>
+                                <span class="text-xs font-bold text-slate-700">CEO Support<br><small class="text-slate-400 font-normal">執行長技術支援</small></span>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="bg-slate-900 text-white px-8 py-3 rounded-2xl font-bold shadow-xl hover:bg-slate-800 transition-all active:scale-95">
+                            Enter VIP Code
+                        </button>
                     </div>
                 </div>
             </div>
@@ -316,8 +358,14 @@
                 document.getElementById('vip-setup-section').classList.add('hidden');
                 if (!activeApiKey) { document.getElementById('api-key-setup').classList.remove('hidden'); } 
                 else { document.getElementById('api-key-setup').classList.add('hidden'); }
+                
+                // VIP 同步切換面板內容
+                document.getElementById('vip-only-content').classList.remove('hidden');
+                document.getElementById('free-promo-content').classList.add('hidden');
             } else { 
                 quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; 
+                document.getElementById('vip-only-content').classList.add('hidden');
+                document.getElementById('free-promo-content').classList.remove('hidden');
             }
         }
 
@@ -336,12 +384,13 @@
         function speak(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
+            // 語音優化：避開符號採自然停頓
             const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }
 
         async function doTranslate() {
-            if (!checkQuota()) return;
+            if (!checkQuota()) return; // 翻譯功能受限額保護
             const word = document.getElementById('eng-input').value.trim();
             if (!word) return;
             document.getElementById('translate-loader').classList.remove('hidden');
@@ -349,12 +398,14 @@
                 const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
                 const data = await res.json();
                 const trans = data?.responseData?.translatedText.replace(/[^\u4e00-\u9fa5]/g, '') || "";
-                if (trans) { document.getElementById('zh-input').value = trans; executeSplit(); }
+                if (trans) { document.getElementById('zh-input').value = trans; executeSplit(true); }
             } catch (err) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
         }
 
-        function executeSplit() {
-            if (!checkQuota()) return; // 檢查拆字次數限制
+        function executeSplit(fromTranslation = false) {
+            // 如果是手動 reload 且非 VIP，才檢查限額
+            if (!fromTranslation && !checkQuota()) return; 
+            
             const container = document.getElementById('char-container');
             container.innerHTML = '';
             const chars = document.getElementById('zh-input').value.split('');
@@ -377,22 +428,33 @@
             document.getElementById('learning-dashboard').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             
-            // 無論是否為 VIP，筆順動畫基礎功能均可顯示 (符合 CEO 要求)
+            // 重要：優先加載筆順動畫 (CEO 指示：先試用書寫功能)
             document.getElementById('hanzi-target').innerHTML = '';
-            writer = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true });
+            writer = HanziWriter.create('hanzi-target', char, { 
+                width: 200, 
+                height: 200, 
+                padding: 15, 
+                strokeColor: '#1e293b', 
+                radicalColor: '#ef4444', 
+                showOutline: true,
+                drawingColor: '#3b82f6'
+            });
 
-            // 僅 VIP 且有 Key 才能載入 AI 進階解析
+            // 處理 AI 解析與 VIP 引導
             if (!isVIP) { 
+                // 非 VIP：直接顯示寫字區，右側顯示升級引導卡片 (已在 updateGlobalUI 處理)
                 document.getElementById('dashboard-content').classList.remove('hidden'); 
-                return; // 一般使用者至此結束
+                return; 
             }
+            
             if (isVIP && !activeApiKey) { 
+                // VIP 但沒 Key：顯示 API 設定區
                 document.getElementById('api-key-setup').classList.remove('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
                 return;
             }
             
-            // 執行 VIP AI 載入
+            // 執行 VIP AI 資料載入
             document.getElementById('dashboard-content').classList.add('hidden');
             document.getElementById('dashboard-loader').classList.remove('hidden');
 
@@ -408,7 +470,7 @@
                 const text = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
                 charCache[char] = data; renderResult(char, data);
-            } catch (err) { alert("AI 分析連線異常。"); } finally { isFetching = false; finalize(); }
+            } catch (err) { alert("AI 分析連線忙碌中。"); } finally { isFetching = false; finalize(); }
         }
 
         function finalize() { document.getElementById('dashboard-loader').classList.add('hidden'); document.getElementById('dashboard-content').classList.remove('hidden'); }
@@ -442,7 +504,7 @@
             document.getElementById('split-btn').addEventListener('click', () => { executeSplit(); });
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => {
-                if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent!' }); }
+                if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent Writing!' }); }
             });
             document.getElementById('remove-key-btn').addEventListener('click', () => {
                 if (confirm('是否確定登出並重設所有設定？')) { localStorage.clear(); location.reload(); }

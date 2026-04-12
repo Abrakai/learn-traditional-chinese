@@ -1,4 +1,4 @@
-.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -137,7 +137,7 @@
                                 <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex items-start gap-2">
                                     <i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i>
                                     <p class="text-[10px] text-red-600 font-bold leading-tight">
-                                        為了方便執行長核對匯款，密碼建議包含您的「手機末 4 碼」。
+                                        為了方便執行長核對匯款，密碼建議設定為包含您的「手機末 4 碼」。
                                     </p>
                                 </div>
                             </div>
@@ -205,7 +205,7 @@
             </div>
         </section>
 
-        <!-- 第 2 層：API 燃料配置區 (針對 31.jpg 優化文案與導引) -->
+        <!-- 第 2 層：API 燃料配置區 -->
         <div id="api-key-setup" class="hidden bg-gradient-to-r from-indigo-600 to-indigo-900 rounded-3xl p-[2px] shadow-2xl relative overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -343,7 +343,7 @@
                         </button>
                     </div>
 
-                    <!-- VIP 解析數據 -->
+                    <!-- VIP 解析數據 (配合 32.jpg 指示：去拼音、現英譯) -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm flex items-start gap-2">
                             <i class="ph-fill ph-check-circle text-amber-500 mt-0.5"></i>
@@ -359,9 +359,10 @@
                                     <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-transform active:scale-90 hover:scale-105 transition-all"><i class="ph-fill ph-speaker-high text-lg"></i></button>
                                 </div>
                             </div>
+                            <!-- 破音字語詞示範 -->
                             <div id="poly-container" class="bg-purple-50 p-4 rounded-2xl border border-purple-100 shadow-sm">
-                                <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1">Polyphonic / 破音字</div>
-                                <div id="polyphonic-display" class="flex flex-col gap-2"></div>
+                                <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
+                                <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
                             </div>
                         </div>
                         <div>
@@ -370,7 +371,7 @@
                         </div>
                         <div id="idioms-section">
                             <h3 class="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-slate-400 border-b border-slate-100 pb-2">Idioms / 成語解析</h3>
-                            <div id="idioms-container" class="space-y-4"></div>
+                            <div id="idioms-container" class="space-y-4 mt-2"></div>
                         </div>
                     </div>
 
@@ -401,7 +402,7 @@
     <!-- 模態框 (Modals) 區域 -->
     <!-- ========================================== -->
 
-    <!-- 會員個人設定 Modal (含 API Key 整合與安全連結) -->
+    <!-- 會員個人設定 Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -478,7 +479,7 @@
 
     <!-- 刪除確認 Modal -->
     <div id="confirm-delete-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-sm text-center animate-in zoom-in-95 duration-200">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-sm text-center animate-in zoom-in-95 duration-200">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner">
                 <i class="ph-fill ph-warning"></i>
             </div>
@@ -491,7 +492,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (v11.0.0) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -637,7 +638,7 @@
             document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
         }
 
-        // 會員個人設定 (含 API Key 綁定整合)
+        // 會員個人設定
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) return;
@@ -666,11 +667,9 @@
             if (!newName || !newPass) { showToast("姓名與密碼不可為空！", true); return; }
 
             try {
-                // 更新雲端
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
                 await updateDoc(docRef, { name: newName, password: newPass });
                 
-                // 更新本地金鑰
                 if (newApiKey !== window.activeApiKey) {
                     if (newApiKey === '') {
                         localStorage.removeItem('gemini_api_key');
@@ -681,10 +680,10 @@
                     window.updateGlobalUI(); 
                 }
 
-                showToast("個人設定已更新完成！");
+                showToast("個人資料與設定已成功更新！");
                 closeProfileModal();
             } catch(e) {
-                showToast("更新失敗，請檢查網路狀態。", true);
+                showToast("儲存失敗，請重試。", true);
             }
         };
 
@@ -942,13 +941,16 @@
             window.updateGlobalUI(); return true;
         }
 
+        // 語音播報優化：過濾括號內容 (針對 32.jpg 指示：標準發音且不唸出拼音)
         function speak(text) {
             const now = Date.now();
             if (now - lastSpeakTime < 600) return; 
             lastSpeakTime = now;
             if (!text || !window.speechSynthesis || !isVIP || !window.activeApiKey) return;
             window.speechSynthesis.cancel(); 
-            let pureText = text.replace(/[\/\-_|]/g, ' '); 
+            
+            // 語音脫水：移除括號及其內容，並避開特殊符號採自然停頓
+            let pureText = text.replace(/\([^)]*\)/g, ' ').replace(/[\/\-_|]/g, ' '); 
             const ut = new SpeechSynthesisUtterance(pureText);
             ut.lang = 'zh-TW'; ut.rate = 0.8;
             window.speechSynthesis.speak(ut);
@@ -1007,7 +1009,6 @@
 
             if (!isVIP) { document.getElementById('free-promo-content').classList.remove('hidden'); return; }
             
-            // v4.3 修正 30.jpg 問題：若無金鑰則顯示質感引導並終止
             if (!window.activeApiKey) { 
                 document.getElementById('api-key-setup').classList.remove('hidden');
                 document.getElementById('api-key-missing-content').classList.remove('hidden');
@@ -1055,6 +1056,7 @@
             if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
         }
 
+        // 渲染結果 (配合 32.jpg 指示：去拼音、現英譯)
         function renderResult(char, data) {
             document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn');
@@ -1066,27 +1068,38 @@
             if (data.polyphonic) data.polyphonic.forEach(p => {
                 const wrap = document.createElement('div'); wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between w-full shadow-sm';
                 let exHTML = ''; 
-                if(p.examples) p.examples.forEach(ex => exHTML += `<button onclick="speak('${ex}')" class="text-[10px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black hover:bg-purple-100 shadow-inner">🔊 ${ex}</button>`);
-                wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${p.zhuyin}</span><div class="flex gap-1.5">${exHTML}</div>`;
+                if(p.examples) p.examples.forEach(ex => {
+                    // 去除拼音符號：僅保留漢字
+                    const pureEx = ex.replace(/\([^)]*\)/g, '').trim();
+                    exHTML += `<button onclick="speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black hover:bg-purple-100 transition-all shadow-inner">🔊 ${pureEx}</button>`;
+                });
+                wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${p.zhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
                 polyDisp.appendChild(wrap);
             });
 
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
-                const s = document.createElement('span'); s.className = 'px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-all shadow-sm'; 
-                s.textContent = w; s.onclick = () => speak(w); words.appendChild(s); 
+                // 去除拼音符號
+                const pureWord = w.replace(/\([^)]*\)/g, '').trim();
+                const s = document.createElement('span'); 
+                s.className = 'px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-all shadow-sm'; 
+                s.textContent = pureWord; s.onclick = () => speak(pureWord); words.appendChild(s); 
             });
 
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             if (data.idioms && data.idioms.length > 0) {
                 document.getElementById('idioms-section').classList.remove('hidden');
                 data.idioms.forEach(i => {
-                    const div = document.createElement('div'); div.className = 'p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm hover:bg-white transition-all group text-left';
+                    const div = document.createElement('div'); 
+                    div.className = 'p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm hover:bg-white transition-all text-left';
                     div.innerHTML = `
                         <div class="flex-1 pr-6">
                             <div class="text-slate-800 text-base font-black tracking-tight font-bold">${i.idiom}</div>
                             <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${i.meaning}</div>
-                            <div class="text-[10px] text-indigo-500 font-bold mt-2 italic border-t border-slate-200 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">${i.english || "View AI analysis"}</div>
+                            <!-- 針對 32.jpg 指示：英文翻譯直接呈現，不設隱藏 -->
+                            <div class="text-[10px] text-indigo-500 font-bold mt-2.5 italic border-t border-slate-200 pt-2.5 block">
+                                <i class="ph-fill ph-translate"></i> ${i.english || "Standard AI context analysis"}
+                            </div>
                         </div>
                         <button class="text-rose-400 p-2 hover:scale-110 transition-all bg-white rounded-full shadow-md"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
                     `;

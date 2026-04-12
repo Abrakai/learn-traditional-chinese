@@ -56,7 +56,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (商業定義強化版) -->
+        <!-- 第 1 層：VIP 驗證區 (商業定義與效期校準版) -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -71,10 +71,9 @@
                     <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
                         <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證 / License Auth
                     </h4>
-                    <!-- 修正 VIP 定義：僅限翻譯與書寫教學次數 -->
                     <p id="vip-intro-text" class="text-sm text-slate-600 leading-relaxed">
-                        請輸入 VIP 授權碼以解鎖<strong>翻譯與書寫功能之無限使用次數</strong>。 AI 深度解析為加值服務，需自備 API Key。<br>
-                        <span class="text-[11px] text-slate-400 italic">Enter code to unlock unlimited Translation & Writing mechanics. AI insights require a personal API Key.</span>
+                        請輸入 VIP 授權碼以解鎖<strong>翻譯與書寫功能之無限使用次數</strong>。 AI 深度解析為進階加值服務，需自行開通 API Key。<br>
+                        <span class="text-[11px] text-slate-400 italic">Enter code to unlock unlimited Translation & Writing mechanics. AI insights require your own API Key.</span>
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態 / Sync Status</h5>
@@ -96,8 +95,8 @@
 
                     <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
                         <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest text-center">如何升級 VIP？ / How to Upgrade</h4>
-                        <div class="text-sm text-slate-300 space-y-2 leading-relaxed text-center">
-                            <p>請聯繫<strong>阿布拉工作室</strong>獲取官方授權碼。<br><small class="text-slate-500 italic">Contact Abrakai Studio for an official code.</small></p>
+                        <div class="text-sm text-slate-300 space-y-2 leading-relaxed text-center font-medium">
+                            <p>請聯繫<strong>阿布拉工作室</strong>獲取官方授權碼。</p>
                         </div>
                         <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-3 uppercase font-bold text-center">Abrakai Studio | Ed-Tech Division</div>
                     </div>
@@ -105,7 +104,7 @@
             </div>
         </div>
 
-        <!-- 第 2 層：API Key 教學 -->
+        <!-- 第 2 層：API Key 教學 (更新最新模型清單) -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
@@ -114,24 +113,26 @@
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Activate AI Insights / 啟動 AI 引擎</h3>
                     <p class="text-sm text-indigo-700 mb-4 leading-relaxed">
-                        次數限制已解鎖！若要開啟注音、發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。若發生 Token 或連線問題，請檢查您的 Google 帳戶設定。<br>
-                        <span class="text-[11px] italic">Unlimited use activated! To enable Zhuyin & Idioms (Premium Add-on), please connect your Gemini API Key.</span>
+                        無限次數已解鎖！若要開啟注音發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
+                        <span class="text-[11px] italic">Unlock Zhuyin & Idioms (Premium Add-on) by connecting your API Key.</span>
                     </p>
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                             <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Activate 連結啟動</button>
                         </div>
+                        <!-- 更新版模型切換器 -->
                         <div class="flex flex-col sm:flex-row items-center gap-3 bg-white/50 p-3 rounded-xl border border-indigo-100">
                             <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
                                 <i class="ph ph-gear"></i> AI Engine Selection 引擎版本：
                             </label>
-                            <select id="model-selector" class="bg-white border border-indigo-200 rounded-lg px-2 py-1 text-xs text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                            <select id="model-selector" class="bg-white border border-indigo-200 rounded-lg px-2 py-1 text-xs text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <option value="auto">Auto-Fallback 自動備援 (Recommended)</option>
-                                <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fastest / 最新高速版)</option>
-                                <option value="gemini-2.0-flash-lite-preview-02-05">Gemini 2.0 Flash Lite (Low Latency / 輕量版)</option>
-                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Balanced / 標準穩定版)</option>
-                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Logic / 深度邏輯版)</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Main / 推薦主力版)</option>
+                                <option value="gemini-3-flash">Gemini 3 Flash (High Speed / 極速效能版)</option>
+                                <option value="gemini-3.1-pro">Gemini 3.1 Pro (Advanced / 進階邏輯版)</option>
+                                <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Lite / 輕量備援版)</option>
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash (Stable / 標準穩定版)</option>
                             </select>
                         </div>
                     </div>
@@ -177,7 +178,7 @@
             </div>
         </section>
 
-        <!-- 學習面板 (Study Center) -->
+        <!-- 學習面板 (重構版：書寫區恆定，AI 區獨立狀態) -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
@@ -188,7 +189,7 @@
             </div>
 
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 左側：筆畫區 (恆定顯示) -->
+                <!-- 左側：筆畫區 (恆定顯示，不因 AI 故障受阻) -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative min-h-[480px]">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
@@ -206,7 +207,7 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6 text-center"></p>
                 </div>
 
-                <!-- 右側：AI 解析區 (責任劃分強化版) -->
+                <!-- 右側：AI 解析區 (狀態解耦版) -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     
                     <!-- 狀態 1: AI 載入中 -->
@@ -215,15 +216,15 @@
                         <p class="text-slate-400 text-sm animate-pulse font-medium">AI Analyzing... / AI 分析中...</p>
                     </div>
 
-                    <!-- 狀態 2: 異常診斷區 (加註責任說明) -->
+                    <!-- 狀態 2: 異常診斷與原地修復 (配合 05.jpg/06.jpg) -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-300">
                         <div class="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl">
                             <i class="ph ph-warning-circle"></i>
                         </div>
                         <div>
-                            <h3 class="text-red-600 font-bold text-base mb-1">Engine Error / 連線異常</h3>
+                            <h3 class="text-red-600 font-bold text-base mb-1">Engine Busy / 連線異常</h3>
                             <p class="text-slate-500 text-[11px] px-6 leading-relaxed">
-                                連線繁忙或 Token 上限已到。<strong>此異常與本平台授權無關</strong>，請更換引擎版本或 API Key。<br>
+                                次數限制或連線繁忙。此異常與本平台授權無關，請嘗試切換版本，或更換另一個專案的 API Key。<br>
                                 <span class="italic">Rate limit reached. Token or connectivity issues are independent of Hub service.</span>
                             </p>
                         </div>
@@ -234,15 +235,15 @@
                                 <div class="flex gap-2">
                                     <select id="inline-model-selector" class="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
                                         <option value="auto">Auto 自動備援</option>
-                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                        <option value="gemini-3-flash">Gemini 3 Flash</option>
+                                        <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
                                     </select>
                                     <button id="ai-retry-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-md active:scale-95 transition-all">Retry 重試</button>
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2 text-left border-t border-slate-200 pt-3">
-                                <label class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Solution 2: Change Fuel 更換金鑰</label>
+                                <label class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Solution 2: Change Key 更換金鑰燃料</label>
                                 <input type="password" id="inline-api-key" placeholder="Paste New API Key..." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500">
                                 <button id="inline-save-key-btn" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs shadow-sm active:scale-95 transition-all">Update & Connect 更新並連線</button>
                             </div>
@@ -253,14 +254,14 @@
                     <div id="vip-only-content" class="hidden space-y-6">
                         <div id="badge-ai" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight shadow-sm">VIP AI INSIGHTS</div>
                         
-                        <!-- VIP 加值服務重要提示 (符合執行長需求：以免造成消費糾紛) -->
-                        <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-4">
+                        <!-- VIP 服務邊界提示 (避免消費糾紛) -->
+                        <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold">
-                                <i class="ph ph-warning"></i> 標註此為 VIP 額外加值服務。
+                                <i class="ph ph-warning-circle"></i> 標註此為 VIP 額外加值服務。
                             </p>
                             <p class="text-[9px] text-amber-700 leading-relaxed">
-                                如需注音、發音、成語等解析，需自行開通 Google API Key。連線穩定性或 Token 次數消耗由使用者端負擔，與本工作室軟體服務無關。<br>
-                                <span class="italic opacity-75">Premium Add-on: Advanced analysis requires a personal API Key. Token limits and connectivity are not managed by Abrakai Studio.</span>
+                                如需注音、發音、成語等解析，需自行開通 Google API Key。連線穩定性與 Token 消耗與本工作室軟體服務無關。<br>
+                                <span class="italic opacity-75">Advanced analysis requires a personal API Key. Abrakai Studio is not responsible for 3rd-party API connectivity or limits.</span>
                             </p>
                         </div>
 
@@ -287,7 +288,7 @@
                         </div>
                     </div>
 
-                    <!-- 狀態 4: VIP 但無 Key (引導區) -->
+                    <!-- 狀態 4: VIP 但無燃料 -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
@@ -296,7 +297,7 @@
                         <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-left w-full max-w-md shadow-sm">
                             <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-3 border-b border-indigo-200 pb-2">關於加值服務 / ABOUT PREMIUM ADD-ONS</h4>
                             <p class="text-[11px] text-indigo-700 leading-relaxed mb-4">
-                                您已擁有翻譯與書寫功能的無限次數權限。如需啟動進階 AI 解析（注音、成語），請自行連結 API 金鑰。請注意，<strong>API 維護與費用與本平台無涉</strong>。
+                                您已擁有無限次數的翻譯與書寫權限。如需啟動進階 AI 解析，請自行連結金鑰燃料。請注意，<strong>API 維護與連線問題與本平台無涉</strong>。
                             </p>
                             <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg">
                                 連結 Google API Key / Activate Add-ons
@@ -311,7 +312,7 @@
                         </div>
                         <h3 class="text-xl font-bold text-slate-800">Upgrade to Abrakai VIP</h3>
                         <p class="text-sm text-slate-500 max-w-sm mx-auto">
-                            升級 VIP 以解除<strong>翻譯與書寫教學</strong>之次數限制，並可選配 AI 加值分析服務。
+                            升級 VIP 以解除<strong>翻譯與書寫教學</strong>之次數限制。
                         </p>
                         <button onclick="document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl active:scale-95">
                             Enter VIP Code / 解鎖無限使用
@@ -323,6 +324,7 @@
         </section>
     </main>
 
+    <!-- Footer -->
     <footer class="bg-slate-100 border-t border-slate-200 py-12">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <div class="flex items-center justify-center gap-2 mb-4">
@@ -338,7 +340,7 @@
         </div>
     </footer>
 
-    <!-- Firebase Logic -->
+    <!-- Firebase Logic (Security Guard) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -417,7 +419,7 @@
                         alert("授權碼已過期。 / Expired.");
                         return;
                     }
-                    alert("驗證成功！已解鎖翻譯與書寫次數限制。 / Verified! Unlimited access granted.");
+                    alert("驗證成功！已解鎖無限次數權限。 / Verified! Unlimited access granted.");
                     grantVip(code);
                 } else {
                     alert("您的 VIP 密碼錯誤，請與 Abrakai Studio 聯繫。 / Incorrect code.");
@@ -436,7 +438,7 @@
         }
     </script>
 
-    <!-- UI & AI Engine Logic -->
+    <!-- UI & AI Engine (Modernized for Gemini 2.5/3/3.1) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
@@ -488,9 +490,11 @@
             updateGlobalUI(); return true;
         }
 
+        // 語音播報優化：避開特殊符號採自然停頓
         function speak(text) {
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel();
+            // 只提取漢字部分，過濾拼音與特殊括號
             const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || text;
             const ut = new SpeechSynthesisUtterance(pureChinese);
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
@@ -535,7 +539,7 @@
             document.getElementById('learning-dashboard').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             
-            // 左側書寫區：次數解鎖後恆定顯示
+            // 左側書寫區：立即載入 (第一性原理：書寫體驗不應受 AI 故障影響)
             document.getElementById('hanzi-target').innerHTML = '';
             writer = HanziWriter.create('hanzi-target', char, { 
                 width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6'
@@ -566,7 +570,8 @@
             [vipPanel, errorPanel].forEach(p => p.classList.add('hidden'));
             loader.classList.remove('hidden');
 
-            const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite-preview-02-05", "gemini-1.5-flash", "gemini-1.5-pro"];
+            // 根據執行長提供的影片資料同步模型清單
+            const models = ["gemini-2.5-flash", "gemini-3-flash", "gemini-3.1-pro", "gemini-3.1-flash-lite", "gemini-2.0-flash"];
             const selectedMode = document.getElementById('model-selector').value;
             const modelList = selectedMode === 'auto' ? models : [selectedMode];
             
@@ -580,10 +585,11 @@
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
                     });
                     const result = await res.json();
-                    if (result.error || !result.candidates) throw new Error("API error");
+                    if (result.error || !result.candidates) throw new Error("API Limit/Incompatible");
+                    
                     const rawText = result.candidates[0].content.parts[0].text;
                     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-                    if (!jsonMatch) throw new Error("Parse Error");
+                    if (!jsonMatch) throw new Error("Format Error");
                     
                     const data = JSON.parse(jsonMatch[0]);
                     charCache[char] = data; 
@@ -591,7 +597,7 @@
                     success = true;
                     updateEngineStatus(`Powered by: ${modelName}`);
                     break; 
-                } catch (err) { console.warn(`${modelName} failed...`); }
+                } catch (err) { console.warn(`${modelName} unavailable, retrying...`); }
             }
 
             loader.classList.add('hidden');

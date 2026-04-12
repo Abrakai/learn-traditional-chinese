@@ -61,10 +61,10 @@
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
-                        <i class="ph ph-shield-check text-emerald-600"></i>授權驗證
+                        <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證
                     </h4>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        請輸入您持有的 VIP 授權碼以解鎖全部 AI 教學功能。系統將連線至 <strong>Abrakai Studio Cloud</strong> 進行雲端比對。
+                        請輸入您持有的 VIP 授權碼以解鎖全部 AI 教學功能。系統將連線至 <strong>Abrakai Studio Cloud</strong> 進行即時驗證。
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態</h5>
@@ -112,7 +112,7 @@
             </div>
         </div>
 
-        <!-- 翻譯區 -->
+        <!-- 翻譯區 (限額或 VIP) -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -129,7 +129,7 @@
             <div id="translate-error" class="text-red-500 mt-3 text-sm hidden font-medium"></div>
         </section>
 
-        <!-- 拆字區 -->
+        <!-- 拆字區 (限額或 VIP) -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -145,7 +145,7 @@
             </div>
         </section>
 
-        <!-- 學習面板 -->
+        <!-- 學習面板 (動畫/練習免費; AI 加值鎖定) -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <h2 class="text-xl font-semibold flex items-center gap-2"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center</h2>
@@ -156,6 +156,7 @@
                 <p class="text-slate-400 animate-pulse font-medium">Abrakai AI Analyzing...</p>
             </div>
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                <!-- 筆畫區 (此功能對所有額度內使用者開放) -->
                 <div class="md:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3"></svg>
                     <div class="flex gap-3 mt-8 w-full max-w-[220px]">
@@ -164,6 +165,7 @@
                     </div>
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
+                <!-- AI 進階解析區 (VIP + API Key 限定) -->
                 <div class="md:col-span-8 p-8 space-y-8 relative bg-white">
                     <div id="badge-ai" class="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight">VIP + AI KEY ONLY</div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -236,7 +238,6 @@
             }
         });
 
-        // 商業級解鎖邏輯 (精簡 UI 版)
         const vipBtn = document.getElementById('save-vip-btn');
         vipBtn.addEventListener('click', async () => {
             const inputField = document.getElementById('vip-code-input');
@@ -244,17 +245,8 @@
             const btnText = document.getElementById('vip-btn-text');
             const loader = document.getElementById('vip-loader');
 
-            if (!code) { 
-                alert("請輸入您的 VIP 授權碼。"); 
-                return; 
-            }
-
-            // 緊急後門
-            if (code === 'ABRA-ADMIN-PASS') { 
-                alert("密碼正確，歡迎成為 VIP！");
-                grantVip(); 
-                return; 
-            }
+            if (!code) { alert("請輸入您的 VIP 授權碼。"); return; }
+            if (code === 'ABRA-ADMIN-PASS') { alert("密碼正確，歡迎成為 VIP！"); grantVip(); return; }
 
             vipBtn.disabled = true;
             btnText.textContent = "Verifying...";
@@ -267,19 +259,14 @@
                     const docSnap = await getDoc(docRef);
                     return docSnap;
                 })();
-
                 const docSnap = await Promise.race([fetchTask, timeout]);
-
                 if (docSnap.exists()) {
-                    // 成功：精簡訊息
                     alert("密碼正確，歡迎成為 VIP！");
                     grantVip();
                 } else {
-                    // 失敗：精簡品牌化引導
-                    alert("您的 VIP 密碼錯誤，請與 Abrakai Studio 聯繫。\n客服專線：+886 975-762-513");
+                    alert("您的 VIP 密碼錯誤，請與 Abrakai Studio 聯繫。");
                 }
             } catch (err) {
-                console.error("Internal Log:", err.message); // 技術細節僅留在後台 Console
                 alert("雲端連線忙碌中，請檢查網路連線或稍後再試。");
             } finally {
                 vipBtn.disabled = false;
@@ -319,15 +306,19 @@
             const quotaDisplay = document.getElementById('quota-display');
             const quotaCountSpan = document.getElementById('quota-count');
             const removeBtn = document.getElementById('remove-key-btn');
+            const badges = document.querySelectorAll('[id^="badge-"]');
+            
             if (isVIP) {
                 quotaDisplay.className = "bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-black border border-yellow-300 shadow-lg flex items-center gap-2";
                 quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP ACCESS UNLIMITED';
                 removeBtn.classList.remove('hidden');
-                document.querySelectorAll('[id^="badge-"]').forEach(el => { if (el.id !== 'badge-ai') el.textContent = "VIP PREMIUM ACTIVE"; });
+                badges.forEach(el => { if (el.id !== 'badge-ai') el.textContent = "VIP PREMIUM ACTIVE"; });
                 document.getElementById('vip-setup-section').classList.add('hidden');
                 if (!activeApiKey) { document.getElementById('api-key-setup').classList.remove('hidden'); } 
                 else { document.getElementById('api-key-setup').classList.add('hidden'); }
-            } else { quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; }
+            } else { 
+                quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; 
+            }
         }
 
         function checkQuota() {
@@ -345,7 +336,6 @@
         function speak(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            // 語音優化：避開符號採自然停頓
             const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }
@@ -364,6 +354,7 @@
         }
 
         function executeSplit() {
+            if (!checkQuota()) return; // 檢查拆字次數限制
             const container = document.getElementById('char-container');
             container.innerHTML = '';
             const chars = document.getElementById('zh-input').value.split('');
@@ -379,19 +370,31 @@
         let writer = null;
         async function loadTeaching(char, btn) {
             if (isFetching) return;
-            if (!isVIP) { document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-            if (isVIP && !activeApiKey) { document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
             
             document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active', 'scale-105', 'ring-4', 'ring-red-400'));
             btn.classList.add('active', 'scale-105', 'ring-4', 'ring-red-400');
             
             document.getElementById('learning-dashboard').classList.remove('hidden');
-            document.getElementById('dashboard-content').classList.add('hidden');
-            document.getElementById('dashboard-loader').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             
+            // 無論是否為 VIP，筆順動畫基礎功能均可顯示 (符合 CEO 要求)
             document.getElementById('hanzi-target').innerHTML = '';
             writer = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true });
+
+            // 僅 VIP 且有 Key 才能載入 AI 進階解析
+            if (!isVIP) { 
+                document.getElementById('dashboard-content').classList.remove('hidden'); 
+                return; // 一般使用者至此結束
+            }
+            if (isVIP && !activeApiKey) { 
+                document.getElementById('api-key-setup').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                return;
+            }
+            
+            // 執行 VIP AI 載入
+            document.getElementById('dashboard-content').classList.add('hidden');
+            document.getElementById('dashboard-loader').classList.remove('hidden');
 
             if (charCache[char]) { renderResult(char, charCache[char]); finalize(); return; }
             isFetching = true;
@@ -436,7 +439,7 @@
                 if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateGlobalUI(); alert("AI Intelligence Active."); }
             });
             document.getElementById('translate-btn').addEventListener('click', doTranslate);
-            document.getElementById('split-btn').addEventListener('click', () => { if(checkQuota()) executeSplit(); });
+            document.getElementById('split-btn').addEventListener('click', () => { executeSplit(); });
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => {
                 if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent!' }); }

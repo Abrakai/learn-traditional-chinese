@@ -31,7 +31,7 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
-        /* 美化捲軸 */
+        /* 美化滾動條 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -39,13 +39,13 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col">
 
-    <!-- 雲端異常診斷橫幅 (處理 GitHub 網域或 Rules 規則問題) -->
-    <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg">
+    <!-- 雲端異常橫幅 (針對連線故障診斷) -->
+    <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">連線異常：請確認已在 Firebase Console 設定 Authorized domains 並發佈正確的 Rules。</span>
     </div>
 
-    <!-- Header (包含 VIP 標籤與效期) -->
+    <!-- Header (包含 VIP 狀態與效期) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
@@ -56,17 +56,17 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all">
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
-                <!-- VIP 會員標章 -->
+                <!-- VIP 標章 -->
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border-2 border-yellow-200 shadow-lg flex flex-col items-center leading-none tracking-tighter animate-in zoom-in">
                     <div class="flex items-center gap-1"><i class="ph-fill ph-crown text-lg"></i> VIP MEMBER</div>
                     <div class="mt-1 opacity-80 uppercase text-[9px]">月繳制會員</div>
                 </div>
-                <!-- 到期天數 -->
+                <!-- 效期提醒 -->
                 <div id="vip-expiry-display" class="hidden bg-white/10 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/20 flex items-center gap-1.5 transition-all">
                     <i class="ph ph-calendar"></i> <span id="vip-days-left">--</span> Days
                 </div>
                 <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700 hover:bg-red-800 border border-red-400 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
-                    <i class="ph ph-sign-out"></i> Log Out
+                    <i class="ph ph-sign-out"></i> Log Out / 登出
                 </button>
             </div>
         </div>
@@ -74,60 +74,63 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：會員中心 (修復註冊邏輯針對執行長需求) -->
+        <!-- 第 1 層：會員與管理中心 (v3.6 雲端權限整合) -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
                     <i class="ph ph-user-circle text-2xl text-yellow-400"></i>
-                    <h3 id="member-center-title" class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Access / 會員中心</h3>
+                    <h3 id="member-center-title" class="font-bold text-base md:text-lg text-white tracking-tight uppercase font-bold">Access Hub / 會員與管理</h3>
                 </div>
                 <span id="auth-status-msg" class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Initializing System...</span>
             </div>
             
             <div class="p-6 md:p-10">
                 <div id="auth-forms" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-                    <!-- 客戶註冊區：加入密碼建立規則引導 -->
+                    <!-- 客戶註冊區：含密碼建立規則 (針對 27.jpg) -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
-                            <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊
+                            <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 會員註冊
                         </h4>
                         <div class="space-y-3">
                             <input type="text" id="reg-name" placeholder="Full Name / 姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
                             <input type="email" id="reg-email" placeholder="Email / 電子信箱" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
                             <div class="relative">
                                 <input type="password" id="reg-pass" placeholder="Create VIP Password / 設定密碼" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
-                                <!-- 執行長要求之密碼規則提示 -->
+                                <!-- 規則導引提示 -->
                                 <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
                                     <i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i>
                                     <p class="text-[10px] text-red-600 font-bold leading-tight">
-                                        密碼規則：為了確保帳號唯一性且方便核對匯款，密碼建議設定為包含您的「手機末 4 碼」。
+                                        密碼建立規則：為了確保帳號唯一性並方便核對匯款，建議密碼包含您的「手機末 4 碼」。
                                     </p>
                                 </div>
                             </div>
                             <button id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">Create Account 建立帳號</button>
                         </div>
-                        <p class="text-[10px] text-slate-400 leading-relaxed italic text-center md:text-left">註冊後請聯繫執行長核對。帳號須唯一，密碼具備個人辨識性為佳。</p>
+                        <p class="text-[10px] text-slate-400 leading-relaxed italic text-center md:text-left">註冊後請聯繫執行長核對匯款。信箱須唯一，密碼具備辨識性為佳。</p>
                     </div>
 
-                    <!-- 客戶登入區 -->
+                    <!-- 客戶與管理員登入區 (v3.6 支援後端密室比對) -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
                         </h4>
                         <div class="space-y-3">
                             <input type="password" id="login-vip-code" placeholder="Enter VIP Password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase transition-all shadow-sm">
-                            <button id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">Unlock Features 解鎖進場</button>
+                            <button id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                                <span id="login-btn-text">Unlock Features 登入解鎖</span>
+                                <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
+                            </button>
                         </div>
                         <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2 mt-4 shadow-inner">
                             <i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i>
                             <p class="text-[11px] text-slate-500 leading-snug">
-                                <strong>授權說明：</strong> VIP 權限採月繳制，到期後系統將自動降級。 / Monthly subscription required for VIP access.
+                                <strong>授權提示：</strong> VIP 權限採月繳制，到期後系統將自動降級並關閉進階解析。 / Monthly subscription.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- 執行長管理員儀表板 (隱藏入口：ABRA-ADMIN-DASHBOARD) -->
+                <!-- 執行長管理面板 (v3.6 支援 Email+Password 顯示與一鍵審核) -->
                 <div id="admin-panel" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
                         <div>
@@ -140,11 +143,11 @@
                         <table class="w-full text-left text-xs md:text-sm">
                             <thead class="bg-slate-100 text-slate-500 uppercase text-[9px] font-black tracking-widest border-b">
                                 <tr>
-                                    <th class="px-4 py-4">Member Info</th>
-                                    <th class="px-4 py-4">VIP Pass (ID)</th>
-                                    <th class="px-4 py-4">Plan / Remit</th>
+                                    <th class="px-4 py-4">User Details / Email</th>
+                                    <th class="px-4 py-4">VIP Pass (Password)</th>
+                                    <th class="px-4 py-4">Plan / Remittance</th>
                                     <th class="px-4 py-4">Expiry (YYYY-MM-DD)</th>
-                                    <th class="px-4 py-4 text-center">Save</th>
+                                    <th class="px-4 py-4 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-user-list" class="divide-y divide-slate-100 bg-white"></tbody>
@@ -154,7 +157,7 @@
             </div>
         </section>
 
-        <!-- 第 2 層：API 燃料配置區 (優先 Gemini 3.1 Flash Lite) -->
+        <!-- 第 2 層：API 燃料配置區 (保護機制針對 11.jpg) -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border border-indigo-100 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg flex-shrink-0">
@@ -163,8 +166,8 @@
                 <div class="flex-1 space-y-4">
                     <h3 class="text-indigo-900 font-bold text-base mb-1 font-bold">Activate AI Power / 啟動 AI 解析</h3>
                     <p class="text-xs text-indigo-700 leading-relaxed">
-                        權限已解鎖！請連結您的 Google Gemini API Key。系統已開啟「智慧快取機制」，重複點擊單字將 **0 消耗** API 燃料。<br>
-                        <span class="text-[10px] italic font-medium opacity-80">Connect your API Key for full analysis. Priority: Gemini 3.1 Flash Lite.</span>
+                        權限已解鎖！請連結您的 Google Gemini API Key。系統已開啟「智慧快取機制」，重複查詢單字將 **0 消耗** API 燃料。<br>
+                        <span class="text-[10px] italic font-medium opacity-80">Connect API Key for full analysis. Smart Cache enabled to save quota. Priority: 3.1 Lite.</span>
                     </p>
                     <div class="flex flex-col md:flex-row gap-4">
                         <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-mono shadow-inner">
@@ -174,7 +177,7 @@
             </div>
         </div>
 
-        <!-- 翻譯與拆字基礎功能 -->
+        <!-- 翻譯與書寫 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -205,7 +208,7 @@
             </div>
         </section>
 
-        <!-- 學習面板 (Study Center / 全功能恢復針對 11.jpg) -->
+        <!-- 學習面板 (全功能恢復：成語英譯、語詞發音) -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
@@ -230,7 +233,7 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6 text-center"></p>
                 </div>
 
-                <!-- 右側：AI 解析區 (含 Session 智慧快取) -->
+                <!-- 右側：AI 解析區 (含 Session 智慧快取保護) -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4">
@@ -238,7 +241,7 @@
                         <p class="text-slate-400 text-xs animate-pulse font-medium uppercase tracking-widest">AI Analyzing...</p>
                     </div>
 
-                    <!-- 連線故障診斷區 -->
+                    <!-- 故障診斷區 -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-300">
                         <div class="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-warning-circle"></i></div>
                         <div>
@@ -248,7 +251,7 @@
                         <button id="ai-retry-btn" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg active:scale-95 text-xs transition-all uppercase tracking-wider">Retry 重新嘗試</button>
                     </div>
 
-                    <!-- VIP 解析數據區 (恢復全功能) -->
+                    <!-- VIP 解析數據 (含英譯、語詞朗讀) -->
                     <div id="vip-only-content" class="hidden space-y-6">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm">
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">
@@ -263,7 +266,7 @@
                                     <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-transform active:scale-90 hover:scale-105 transition-all"><i class="ph-fill ph-speaker-high text-lg"></i></button>
                                 </div>
                             </div>
-                            <!-- 破音字語詞示範方案 (iPhone 穩定版) -->
+                            <!-- 破音字語詞示範 -->
                             <div id="poly-container" class="bg-purple-50 p-4 rounded-2xl border border-purple-100 shadow-sm">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2"></div>
@@ -273,7 +276,7 @@
                             <h3 class="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-slate-400 border-b border-slate-100 pb-2">Vocabulary / 常用詞彙</h3>
                             <div id="words-container" class="flex flex-wrap gap-2"></div>
                         </div>
-                        <!-- 成語與發音恢復 -->
+                        <!-- 成語與發音 -->
                         <div id="idioms-section">
                             <h3 class="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-slate-400 border-b border-slate-100 pb-2">Idioms / 成語解析</h3>
                             <div id="idioms-container" class="space-y-4"></div>
@@ -282,7 +285,7 @@
 
                     <!-- 非 VIP 或到期之降級提示 -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
-                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-crown text-yellow-500"></i></div>
+                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 tracking-tight">Unlock VIP Access</h3>
                         <div id="expiry-notice-box" class="bg-red-50 p-4 rounded-xl border border-red-100 text-xs text-red-700 font-bold mb-2 hidden">您的 VIP 授權已到期，功能已降級。 / Subscription expired.</div>
                         <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed px-6 font-medium text-center">升級 VIP 以解除翻譯與書寫之次數限制。AI 解析服務僅提供予付費會員自行配置金鑰燃料後啟動。</p>
@@ -294,7 +297,7 @@
         </section>
     </main>
 
-    <footer class="bg-slate-100 border-t border-slate-200 py-12">
+    <footer class="bg-slate-100 border-t border-slate-200 py-12 mt-12">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <p class="text-slate-500 text-[10px] tracking-widest uppercase font-bold">&copy; <span id="current-year"></span> Abrakai Studio | Taiwan Chinese Hub</p>
             <div class="mt-4 max-w-2xl mx-auto text-slate-400 text-[9px] leading-relaxed italic text-center px-4">
@@ -303,7 +306,7 @@
         </div>
     </footer>
 
-    <!-- Firebase SDK (Version 11.0.0) -->
+    <!-- Firebase SDK (v11.0.0) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -323,19 +326,18 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
 
-        // 連線守門員 (解決 GitHub 網域授權與 Rules 診斷)
+        // 連線與權限守門員
         onAuthStateChanged(auth, async (user) => {
             const statusEl = document.getElementById('auth-status-msg');
             const errorBanner = document.getElementById('auth-error-banner');
             const bannerText = document.getElementById('error-banner-text');
             if (user) {
                 statusEl.textContent = "CLOUD ACTIVE / 雲端已連線";
-                statusEl.classList.replace('text-emerald-400', 'text-emerald-500');
+                statusEl.classList.add('text-emerald-400');
                 errorBanner.classList.add('hidden');
                 syncVipStatus();
             } else {
                 signInAnonymously(auth).catch((err) => {
-                    console.error("Auth Error:", err.code);
                     statusEl.textContent = "AUTH ERROR / 連線失敗";
                     statusEl.classList.add('text-red-500');
                     errorBanner.classList.remove('hidden');
@@ -344,7 +346,7 @@
                     } else if (err.code === 'auth/configuration-not-found') {
                         bannerText.textContent = "連線失敗：請確保 Firebase 控制台已啟用「匿名登入 (Anonymous Auth)」。";
                     } else {
-                        bannerText.textContent = `雲端連線失敗 (${err.code})：請確認您的 Firebase 配置或 Rules 規則。`;
+                        bannerText.textContent = `雲端連線失敗 (${err.code})：請確認您的 Firebase 配置或 Rules。`;
                     }
                 });
             }
@@ -358,7 +360,7 @@
             if (!name || !email || !pass) { alert("Please fill all registration fields."); return; }
             
             try {
-                // 以 Email 脫水後作為保險箱 ID (Rule 1)
+                // Rule 1: Strict Paths - 使用 Email 脫水後作為 ID
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 const docSnap = await getDoc(docRef);
@@ -376,34 +378,60 @@
             }
         });
 
-        // 登入功能 (搜尋密碼邏輯 - Rule 2 簡易過濾)
+        // 登入功能 (v3.6 核心優化：雲端管理者權限比對)
         document.getElementById('login-btn').addEventListener('click', async () => {
             const code = document.getElementById('login-vip-code').value.trim().toUpperCase();
             if (!code) return;
-            if (code === 'ABRA-ADMIN-DASHBOARD') { enterAdminMode(); return; }
 
-            const usersColl = collection(db, "artifacts", appId, "public", "data", "vip_codes");
-            // Rule 3: Auth guard exists via onAuthStateChanged
-            onSnapshot(usersColl, (snapshot) => {
-                let foundUser = null;
-                snapshot.forEach(d => {
-                    const data = d.data();
-                    if (data.password && data.password.toUpperCase() === code) foundUser = { id: d.id, ...data };
-                });
-                if (foundUser) {
-                    if (foundUser.expiryDate && new Date(foundUser.expiryDate).getTime() < Date.now()) {
-                        alert("VIP access expired. / 授權已到期，請聯繫續約。"); return;
-                    }
-                    localStorage.setItem('abra_vip_code', foundUser.id);
-                    localStorage.setItem('abra_vip_status', 'active');
-                    location.reload();
-                } else {
-                    alert("Invalid VIP Code or unactivated account.\n密碼錯誤或尚未由執行長開通。");
+            document.getElementById('login-loader').classList.remove('hidden');
+            document.getElementById('login-btn-text').textContent = "Verifying...";
+
+            try {
+                // 1. 嘗試與雲端管理員密室比對 (DASHBOARD_KEY)
+                const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
+                const adminSnap = await getDoc(adminRef);
+                
+                if (adminSnap.exists() && adminSnap.data().pass.toUpperCase() === code) {
+                    enterAdminMode();
+                    return;
                 }
-            }, (err) => alert("Login Error: Check Firestore Rules."));
+
+                // 2. 若非管理員，進入一般會員查找 (Rule 2 簡易獲取)
+                const usersColl = collection(db, "artifacts", appId, "public", "data", "vip_codes");
+                onSnapshot(usersColl, (snapshot) => {
+                    let foundUser = null;
+                    snapshot.forEach(d => {
+                        const data = d.data();
+                        if (data.password && data.password.toUpperCase() === code) foundUser = { id: d.id, ...data };
+                    });
+                    
+                    if (foundUser) {
+                        if (foundUser.expiryDate && new Date(foundUser.expiryDate).getTime() < Date.now()) {
+                            alert("VIP access expired. / 授權已到期，請聯繫續約。");
+                        } else {
+                            localStorage.setItem('abra_vip_code', foundUser.id);
+                            localStorage.setItem('abra_vip_status', 'active');
+                            location.reload();
+                        }
+                    } else {
+                        alert("Invalid VIP Code or unactivated account.\n密碼錯誤、尚未開通，或管理員密室尚未配置。");
+                    }
+                    document.getElementById('login-loader').classList.add('hidden');
+                    document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
+                }, (err) => {
+                    console.error(err);
+                    alert("Login Error: Check Firestore Rules.");
+                    document.getElementById('login-loader').classList.add('hidden');
+                });
+            } catch (err) {
+                console.error(err);
+                alert("Cloud Connection Error: Check Firebase admin_vault setup.");
+                document.getElementById('login-loader').classList.add('hidden');
+                document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
+            }
         });
 
-        // 管理員模式：網頁端直接批核
+        // 管理員模式 (v3.6 支援一鍵對帳)
         async function enterAdminMode() {
             document.getElementById('auth-forms').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
@@ -415,17 +443,17 @@
                 snapshot.forEach((d) => {
                     const user = d.data();
                     const tr = document.createElement('tr');
-                    tr.className = "border-b hover:bg-slate-50 transition-colors";
+                    tr.className = "border-b hover:bg-slate-50 transition-colors text-xs";
                     tr.innerHTML = `
-                        <td class="px-4 py-4"><span class="font-bold text-slate-700">${user.name || 'Anonymous'}</span><br><small class="text-slate-400 text-[10px]">${user.email}</small></td>
-                        <td class="px-4 py-4"><span class="bg-red-50 text-red-600 px-1.5 rounded text-[11px] font-mono font-bold">${user.password || 'N/A'}</span></td>
-                        <td class="px-4 py-4"><input id="plan-${d.id}" value="${user.plan || ''}" class="w-24 border rounded px-1.5 py-1 text-xs" placeholder="Plan"><br><input id="remit-${d.id}" value="${user.remittance || ''}" class="w-24 border rounded px-1.5 py-1 text-xs mt-1" placeholder="YYYY-MM-DD"></td>
-                        <td class="px-4 py-4"><input id="expiry-${d.id}" value="${user.expiryDate || ''}" class="w-full border-2 border-indigo-100 rounded px-2 py-1.5 text-xs font-bold text-indigo-700 outline-none shadow-sm" placeholder="YYYY-MM-DD"></td>
-                        <td class="px-4 py-4 text-center"><button onclick="saveUser('${d.id}')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-black text-[10px] shadow active:scale-90 transition-all hover:bg-red-700">SAVE</button></td>
+                        <td class="px-4 py-4"><span class="font-bold text-slate-700 text-sm">${user.name || 'N/A'}</span><br><small class="text-slate-400">${user.email}</small></td>
+                        <td class="px-4 py-4"><span class="bg-red-50 text-red-600 px-1.5 rounded font-mono font-bold">${user.password || 'N/A'}</span></td>
+                        <td class="px-4 py-4"><input id="plan-${d.id}" value="${user.plan || ''}" class="w-24 border rounded px-1.5 py-1 text-[10px]" placeholder="Monthly"><br><input id="remit-${d.id}" value="${user.remittance || ''}" class="w-24 border rounded px-1.5 py-1 text-[10px] mt-1" placeholder="匯款日"></td>
+                        <td class="px-4 py-4"><input id="expiry-${d.id}" value="${user.expiryDate || ''}" class="w-full border-2 border-indigo-100 rounded px-2 py-1.5 font-bold text-indigo-700 outline-none shadow-sm" placeholder="YYYY-MM-DD"></td>
+                        <td class="px-4 py-4 text-center"><button onclick="saveUser('${d.id}')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-black text-[10px] shadow active:scale-90 transition-all hover:bg-red-700 uppercase">SAVE</button></td>
                     `;
                     list.appendChild(tr);
                 });
-            }, (err) => { alert("權限拒絕：請確認 Firebase Rules 發佈。"); });
+            }, (err) => { alert("權限拒絕：請確認已在 Firebase 發佈正確的 Rules。"); });
         }
 
         window.saveUser = async function(id) {
@@ -470,14 +498,14 @@
         }
     </script>
 
-    <!-- UI & AI Engine (Session Caching & Vocabulary TTS Optimization) -->
+    <!-- UI & AI Engine (Smart Cache & Sync Voice Fix) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';
         let activeApiKey = localStorage.getItem('gemini_api_key') || "";
         const MAX_FREE_USES = 20; 
         let freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
-        const charCache = {}; // 智慧 Session 快取機制 (針對 11.jpg 資源守護)
+        const charCache = {}; // 針對 11.jpg 營運風險：智慧快取機制，同一單字不重複消耗 API
         let currentTargetChar = "";
         let lastSpeakTime = 0;
 
@@ -502,14 +530,14 @@
             updateGlobalUI(); return true;
         }
 
-        // 語音引擎：針對符號優化自然停頓
+        // 語音引擎：優化自然停頓
         function speak(text) {
             const now = Date.now();
             if (now - lastSpeakTime < 600) return; 
             lastSpeakTime = now;
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel(); 
-            // 語音脫水：只唸漢字，符號採空白間隔產生自然停頓
+            // 語音脫水：只唸漢字，符號採空白間隔
             let pureText = text.replace(/[^\u4e00-\u9fa5]/g, ' '); 
             const ut = new SpeechSynthesisUtterance(pureText);
             ut.lang = 'zh-TW'; ut.rate = 0.8;
@@ -569,7 +597,7 @@
                 document.getElementById('vip-only-content').classList.remove('hidden');
             }
 
-            // 智慧快取判斷 (針對 11.jpg 資源保護)
+            // 針對 11.jpg 資源保護：智慧快取
             if (charCache[char]) { 
                 renderResult(char, charCache[char]); 
                 document.getElementById('vip-only-content').classList.remove('hidden'); 
@@ -585,36 +613,49 @@
             const vipPanel = document.getElementById('vip-only-content');
             const errorPanel = document.getElementById('ai-error-panel');
             loader.classList.remove('hidden');
+
+            const selectedMode = document.getElementById('model-selector').value;
+            // 針對 12.jpg 指示：優先採用 Gemini 3.1 Flash Lite
             const models = ["gemini-3.1-flash-lite", "gemini-2.5-flash"];
+            const modelList = selectedMode === 'auto' ? models : [selectedMode];
+            
             let success = false;
-            for (const modelName of models) {
+            for (const modelName of modelList) {
                 try {
-                    const prompt = `針對繁體中文字「${char}」提供台灣繁體教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["語詞1", "語詞2"]}], "words": ["造詞1", "造詞2"], "idioms": [{"idiom": "成語", "meaning": "中文意思", "english": "English context"}]}`;
+                    const prompt = `針對繁體中文字「${char}」提供台灣繁體教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["代表語詞1", "代表語詞2"]}], "words": ["造詞1", "造詞2"], "idioms": [{"idiom": "成語", "meaning": "中文意思", "english": "English context for learners"}]}`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, { 
                         method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
                     });
                     const result = await res.json();
-                    if (result.error || !result.candidates) throw new Error("Limit Reached");
+                    if (result.error || !result.candidates) throw new Error(result.error ? result.error.message : "Limit Reached");
+                    
                     const rawText = result.candidates[0].content.parts[0].text;
                     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
                     if (!jsonMatch) throw new Error("Format Error");
+                    
                     const data = JSON.parse(jsonMatch[0]);
-                    charCache[char] = data; renderResult(char, data); success = true;
+                    charCache[char] = data; // 寫入 Session 快取
+                    renderResult(char, data); success = true;
                     document.getElementById('active-engine-badge').textContent = `Powered by: ${modelName}`;
                     document.getElementById('active-engine-badge').classList.remove('hidden');
                     break; 
-                } catch (err) { console.warn(modelName, "failed:", err.message); }
+                } catch (err) { 
+                    console.warn(modelName, "failed:", err.message);
+                    document.getElementById('ai-error-debug').textContent = err.message;
+                }
             }
             loader.classList.add('hidden');
             if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
         }
 
         function renderResult(char, data) {
+            // 1. 注音與主發音
             document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn');
             pb.classList.toggle('hidden', !data.zhuyin);
             pb.onclick = () => speak(char);
             
+            // 2. 破音字語詞方案 (針對 iPhone 優化)
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
             if (data.polyphonic) data.polyphonic.forEach(p => {
@@ -625,19 +666,21 @@
                 polyDisp.appendChild(wrap);
             });
 
+            // 3. 造詞
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
                 const s = document.createElement('span'); s.className = 'px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-all shadow-sm'; 
                 s.textContent = w; s.onclick = () => speak(w); words.appendChild(s); 
             });
 
+            // 4. 成語與英譯 (全功能恢復)
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             if (data.idioms && data.idioms.length > 0) {
                 document.getElementById('idioms-section').classList.remove('hidden');
                 data.idioms.forEach(i => {
-                    const div = document.createElement('div'); div.className = 'p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm hover:bg-white transition-all group';
+                    const div = document.createElement('div'); div.className = 'p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm hover:bg-white transition-all group text-left';
                     div.innerHTML = `
-                        <div class="flex-1 pr-6 text-left">
+                        <div class="flex-1 pr-6">
                             <div class="text-slate-800 text-base font-black tracking-tight font-bold">${i.idiom}</div>
                             <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${i.meaning}</div>
                             <div class="text-[10px] text-indigo-500 font-bold mt-2 italic border-t border-slate-200 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">${i.english || "View AI analysis"}</div>
@@ -660,7 +703,7 @@
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => writer && writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect! / 書寫正確！' }));
             document.getElementById('ai-retry-btn').addEventListener('click', () => executeAIFetch(currentTargetChar));
-            document.getElementById('remove-key-btn').addEventListener('click', () => { if (confirm('Log out? / 確定要登出並清除目前設定嗎？')) { localStorage.clear(); location.reload(); } });
+            document.getElementById('remove-key-btn').addEventListener('click', () => { if (confirm('Log out? / 確定要登出並清除所有暫存嗎？')) { localStorage.clear(); location.reload(); } });
         };
     </script>
 </body>

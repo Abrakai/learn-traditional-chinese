@@ -27,12 +27,12 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col">
 
-    <!-- Header -->
+    <!-- Header (Studio Brand Only) -->
     <header class="bg-red-600 text-white shadow-md">
         <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-wider text-white">Learn Traditional Chinese</h1>
-                <p class="text-red-100 text-sm mt-1 font-medium italic">Taiwan Edition | CEO: Abrakai Studio</p>
+                <p class="text-red-100 text-sm mt-1 font-medium italic">Taiwan Edition | Abrakai Studio Official</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all shadow-inner">
@@ -48,7 +48,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (只有在額度用完時才會顯現引導) -->
+        <!-- 第 1 層：VIP 驗證與升級引導區 -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -61,13 +61,13 @@
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
-                        <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證
+                        <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證 / License Auth
                     </h4>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        您已達到每日試用上限。請輸入您的 VIP 授權碼以解鎖<strong>無限次數</strong>及全部 AI 教學功能。
+                        您已達到每日免費試用上限。請輸入您的 VIP 授權碼以解鎖<strong>無限使用次數</strong>及全部進階 AI 教學功能。
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態</h5>
+                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態 / Sync Status</h5>
                         <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic tracking-wide">Cloud System Ready</div>
                     </div>
                 </div>
@@ -84,12 +84,14 @@
                         </div>
                     </div>
 
-                    <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden text-center">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">技術支援聯繫</h4>
-                        <a href="tel:+886975762513" class="flex items-center justify-center gap-3 text-emerald-400 hover:text-emerald-300 transition-colors text-lg font-bold">
-                            <i class="ph ph-chat-circle-dots text-2xl"></i> +886 975-762-513
-                        </a>
-                        <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-1 uppercase font-bold">Abrakai Studio | Specialized in Taiwan Ed-Tech</div>
+                    <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest text-center">如何升級 VIP？ / How to Upgrade</h4>
+                        <div class="text-sm text-slate-300 space-y-2 leading-relaxed">
+                            <p>1. 聯繫阿布拉工作室獲取官方授權碼。</p>
+                            <p>2. 取得密碼後於上方欄位輸入並點擊解鎖。</p>
+                            <p>3. 系統將同步您的 VIP 狀態至全球雲端。</p>
+                        </div>
+                        <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-3 uppercase font-bold text-center">Abrakai Studio | Specialized in Taiwan Ed-Tech</div>
                     </div>
                 </div>
             </div>
@@ -103,7 +105,7 @@
                 </div>
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Activate AI Insights</h3>
-                    <p class="text-sm text-indigo-700 mb-4">You are now a VIP! To unlock the AI Sound Engine (Zhuyin) and Deep Meanings, please connect your <strong>Google Gemini API Key</strong>.</p>
+                    <p class="text-sm text-indigo-700 mb-4">VIP Verified. To unlock the AI Sound Engine (Zhuyin) and Deep Meanings, please connect your <strong>Google Gemini API Key</strong>.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                         <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Activate Power</button>
@@ -172,14 +174,14 @@
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 mt-4"></svg>
                     <div class="flex gap-3 mt-8 w-full max-w-[220px]">
                         <button id="animate-stroke-btn" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Animate</button>
-                        <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Test</button>
+                        <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">跟著嘗試</button>
                     </div>
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
 
                 <!-- AI 解析區 / VIP 轉化引導區 -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 space-y-8 relative bg-white">
-                    <!-- VIP + API Key 使用者顯示內容 -->
+                    <!-- 狀態 A: 已完全解鎖 (VIP + API Key) -->
                     <div id="vip-only-content" class="hidden space-y-8">
                         <div id="badge-ai" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight">VIP AI INSIGHTS</div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -205,7 +207,7 @@
                         </div>
                     </div>
 
-                    <!-- VIP 但沒有 API Key 的引導卡片 -->
+                    <!-- 狀態 B: VIP 但沒有 API Key (解釋為什麼是空的) -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center py-6 text-center space-y-6 animate-in fade-in zoom-in duration-300">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
@@ -213,65 +215,79 @@
                         <div>
                             <h3 class="text-xl font-bold text-slate-800 mb-2">VIP Membership Active!</h3>
                             <p class="text-sm text-slate-500 max-w-sm mx-auto">
-                                密碼正確！已為您解除使用次數限制。為了啟動 AI 注音、發音與成語解析，您還需要「啟動 AI 引擎」。
+                                密碼正確！已為您解除試用限制。<br>
+                                為了啟動 AI 注音、發音與成語解析，您還需要「啟動 AI 引擎」。
                             </p>
                         </div>
                         <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100 text-left w-full max-w-md">
-                            <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-2">為什麼現在是空的？</h4>
+                            <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-2">為什麼內容尚未顯示？ / Why is it empty?</h4>
                             <p class="text-[11px] text-indigo-700 leading-relaxed">
-                                AI 解析是由 <strong>Google Gemini</strong> 提供的即時運算。為了確保您的專屬隱私與效能，VIP 採用「BYOK (自備金鑰)」模式。這就像您買了跑車(VIP)，現在只需要加入燃油(API Key)即可發動。
+                                AI 解析是由 <strong>Google Gemini</strong> 提供之即時運算。為了確保您的個人隱私與最佳效能，VIP 模組採用「BYOK (自備金鑰)」模式。這就像您購買了頂級跑車(VIP)，現在只需加入燃油(API Key)即可發動。
                             </p>
-                            <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="mt-4 w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg">
-                                即刻連結 Google API Key
+                            <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="mt-4 w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95">
+                                立即申請並連結 Google API Key
                             </button>
                         </div>
                     </div>
 
-                    <!-- 非 VIP 使用者顯示引導卡片 -->
+                    <!-- 狀態 C: 非 VIP 使用者顯示引導卡片 -->
                     <div id="free-promo-content" class="flex flex-col items-center justify-center py-6 text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-crown"></i>
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-slate-800 mb-2">Upgrade to Abrakai VIP</h3>
-                            <p class="text-sm text-slate-500 max-w-md mx-auto">您正在試用強大的漢字書寫系統！加入 VIP 即可解鎖完整的 AI 語言引擎：</p>
+                            <p class="text-sm text-slate-500 max-w-[500px] mx-auto px-4">
+                                您正在試用強大的中文字書寫系統！<br>
+                                加入 VIP 即可解鎖完整 AI 語言解析引擎與雲端同步功能。<br>
+                                <span class="text-[11px] text-slate-400 block mt-2">Unlock the full AI engine and cloud sync for deep Hanzi insights.</span>
+                            </p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-[500px]">
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
                                 <i class="ph-fill ph-speaker-high text-yellow-500 text-2xl"></i>
-                                <span class="text-xs font-bold text-slate-700">Native Audio Voice<br><small class="text-slate-400 font-normal">正宗台灣配音</small></span>
+                                <span class="text-xs font-bold text-slate-700">Native Audio Voice<br><small class="text-slate-400 font-normal">正宗台灣配音 (需 API Key)</small></span>
                             </div>
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
                                 <i class="ph-fill ph-sparkle text-indigo-500 text-2xl"></i>
-                                <span class="text-xs font-bold text-slate-700">AI Idiom Insights<br><small class="text-slate-400 font-normal">深度成語解析</small></span>
+                                <span class="text-xs font-bold text-slate-700">AI Idiom Insights<br><small class="text-slate-400 font-normal">深度成語解析 (需 API Key)</small></span>
                             </div>
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
                                 <i class="ph-fill ph-infinity text-rose-500 text-2xl"></i>
-                                <span class="text-xs font-bold text-slate-700">Unlimited Access<br><small class="text-slate-400 font-normal">永久解除每日限額</small></span>
+                                <span class="text-xs font-bold text-slate-700">Unlimited Access<br><small class="text-slate-400 font-normal">永久解除每日試用限額</small></span>
                             </div>
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3 text-left">
                                 <i class="ph-fill ph-cloud-check text-emerald-500 text-2xl"></i>
-                                <span class="text-xs font-bold text-slate-700">Commercial License<br><small class="text-slate-400 font-normal">雲端同步授權</small></span>
+                                <span class="text-xs font-bold text-slate-700">Commercial License<br><small class="text-slate-400 font-normal">官方雲端同步與商業授權</small></span>
                             </div>
                         </div>
-                        <button onclick="document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="bg-slate-900 text-white px-8 py-3 rounded-2xl font-bold shadow-xl hover:bg-slate-800 transition-all active:scale-95">
-                            Enter VIP Code
-                        </button>
+                        <div class="pt-2">
+                            <p class="text-[10px] text-slate-400 font-bold mb-4 uppercase tracking-widest">【 免費聲明：書寫與動畫功能每日可試用 20 次 】</p>
+                            <button onclick="document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl hover:bg-slate-800 transition-all active:scale-95">
+                                Enter VIP Code
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Footer (Copyright & Legal Only) -->
     <footer class="bg-slate-100 border-t border-slate-200 py-12">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <div class="flex items-center justify-center gap-2 mb-4">
                 <i class="ph ph-terminal-window text-2xl text-slate-400"></i>
-                <span class="text-slate-800 font-bold tracking-tight">阿布拉.凱|工作室 / Abrakai Studio</span>
+                <span class="text-slate-800 font-bold tracking-tight">阿布拉.凱 | 工作室 / Abrakai Studio</span>
             </div>
             <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase font-bold">
-                &copy; <span id="current-year"></span> Traditional Chinese Learning Hub. (Taiwan Edition) **© Abrakai Studio**
+                &copy; <span id="current-year"></span> Traditional Chinese Learning Hub. (Taiwan Edition)
             </p>
+            <div class="mt-6 max-w-2xl mx-auto">
+                <p class="text-slate-400 text-[9px] leading-relaxed text-justify md:text-center italic">
+                    免責聲明 (Disclaimer)：本系統所提供之 AI 語言解析、注音及翻譯功能，皆基於 Google Gemini 雲端運算結果。阿布拉工作室僅提供軟體展示架構與學習介面，不保證 AI 運算結果之百分之百準確性。所有 VIP 授權碼僅供本平台之特定功能解鎖使用，使用者需自備合法之 API Key 以啟動雲端運算引擎。
+                </p>
+            </div>
         </div>
     </footer>
 
@@ -376,7 +392,6 @@
             const quotaCountSpan = document.getElementById('quota-count');
             const removeBtn = document.getElementById('remove-key-btn');
             
-            // 面板控制區
             const vipPanel = document.getElementById('vip-only-content');
             const vipNoKeyPanel = document.getElementById('vip-no-key-content');
             const freePromoPanel = document.getElementById('free-promo-content');
@@ -388,20 +403,17 @@
                 document.getElementById('vip-setup-section').classList.add('hidden');
                 
                 if (!activeApiKey) {
-                    // VIP 但沒有 Key
                     document.getElementById('api-key-setup').classList.remove('hidden');
                     vipPanel.classList.add('hidden');
                     vipNoKeyPanel.classList.remove('hidden');
                     freePromoPanel.classList.add('hidden');
                 } else {
-                    // VIP 且有 Key (完全解鎖)
                     document.getElementById('api-key-setup').classList.add('hidden');
                     vipPanel.classList.remove('hidden');
                     vipNoKeyPanel.classList.add('hidden');
                     freePromoPanel.classList.add('hidden');
                 }
             } else {
-                // 非 VIP
                 quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; 
                 vipPanel.classList.add('hidden');
                 vipNoKeyPanel.classList.add('hidden');
@@ -422,9 +434,8 @@
         }
 
         function speak(text) {
-            if (!text || !window.speechSynthesis) return;
+            if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel();
-            // 語音優化底層：避開符號採自然停頓，僅算式念出
             const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }
@@ -466,13 +477,11 @@
             document.getElementById('learning-dashboard').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             
-            // 第一性原理：優先加載筆順動畫 (試用體驗的核心)
             document.getElementById('hanzi-target').innerHTML = '';
             writer = HanziWriter.create('hanzi-target', char, { 
                 width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6'
             });
 
-            // VIP 且具備 API Key 才能執行後續 AI 資料載入
             if (!isVIP || !activeApiKey) { 
                 document.getElementById('dashboard-content').classList.remove('hidden'); 
                 return; 
@@ -493,7 +502,7 @@
                 const text = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
                 charCache[char] = data; renderResult(char, data);
-            } catch (err) { alert("AI 分析連線忙碌中。"); } finally { isFetching = false; finalize(); }
+            } catch (err) { alert("AI 分析服務連線中。"); } finally { isFetching = false; finalize(); }
         }
 
         function finalize() { document.getElementById('dashboard-loader').classList.add('hidden'); document.getElementById('dashboard-content').classList.remove('hidden'); }

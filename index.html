@@ -48,7 +48,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 -->
+        <!-- 第 1 層：VIP 驗證區 (Cloud Active) -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -61,14 +61,14 @@
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
-                        <i class="ph ph-shield-check text-emerald-600"></i> Live Protection
+                        <i class="ph ph-shield-check text-emerald-600"></i> Active Protection
                     </h4>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        您的密碼將與 <strong>Abrakai Studio Cloud</strong> 進行實時比對。若驗證按鈕持續旋轉超過 5 秒，請檢查網路連線或重新整理頁面。
+                        請輸入您的授權碼。系統將連線至 <strong>Abrakai Studio Cloud</strong> 進行資料比對。
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Security Status</h5>
-                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic">Cloud System Initializing...</div>
+                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Report</h5>
+                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic tracking-wide">Connecting to Google Cloud...</div>
                     </div>
                 </div>
 
@@ -76,7 +76,7 @@
                     <div class="space-y-3">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">VIP Passcode</label>
                         <div class="flex gap-2">
-                            <input type="text" id="vip-code-input" placeholder="Enter Official Code" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-base uppercase shadow-inner">
+                            <input type="text" id="vip-code-input" placeholder="ABRA-XXXXXX" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-base uppercase shadow-inner">
                             <button id="save-vip-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 min-w-[120px]">
                                 <span id="vip-btn-text">Unlock</span>
                                 <div id="vip-loader" class="loader hidden w-4 h-4 border-2 border-white/30 border-t-white"></div>
@@ -89,7 +89,7 @@
                         <a href="tel:+886975762513" class="flex items-center gap-3 text-emerald-400 hover:text-emerald-300 transition-colors text-lg font-bold">
                             <i class="ph ph-chat-circle-dots text-2xl"></i> +886 975-762-513
                         </a>
-                        <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-1 uppercase font-bold">Abrakai Studio | CEO: Yu, Chih-Kai</div>
+                        <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-1 uppercase font-bold text-center">Abrakai Studio | CEO: Yu, Chih-Kai</div>
                     </div>
                 </div>
             </div>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Connect Abrakai AI Insights</h3>
-                    <p class="text-sm text-indigo-700 mb-4">Cloud VIP Verified. Please link your personal Gemini API Key to activate deep intelligence modules (Zhuyin & Idioms).</p>
+                    <p class="text-sm text-indigo-700 mb-4">VIP Verified. Please link your personal Gemini API Key below to activate deep intelligence features.</p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                         <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Activate AI</button>
@@ -205,7 +205,7 @@
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-        // 配置資訊
+        // 專屬配置：abra-learn-zh-vip
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
             authDomain: "abra-learn-zh-vip.firebaseapp.com",
@@ -218,42 +218,42 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        let userAuthenticated = false;
 
-        // 監控身份狀態
+        // 初始化匿名登入
         onAuthStateChanged(auth, (user) => {
+            const statusEl = document.getElementById('auth-status-msg');
             if (user) {
-                userAuthenticated = true;
-                document.getElementById('auth-status-msg').textContent = "Cloud System Ready (Auth Active)";
-                console.log("Firebase Anonymous Auth Success.");
+                statusEl.textContent = "Cloud Sync Active (Connected)";
+                statusEl.className = "text-[10px] text-emerald-600 font-bold italic tracking-wide";
+                console.log("Abrakai Cloud Linked.");
             } else {
-                signInAnonymously(auth);
+                signInAnonymously(auth).catch(e => {
+                    statusEl.textContent = "Connection Refused. Check Rules.";
+                    statusEl.className = "text-[10px] text-red-500 font-bold italic tracking-wide";
+                });
             }
         });
 
-        // 綁定 VIP 解鎖按鈕事件
+        // 綁定解鎖按鈕
         const vipBtn = document.getElementById('save-vip-btn');
         vipBtn.addEventListener('click', async () => {
-            const code = document.getElementById('vip-code-input').value.trim();
+            // 自動修復：去空格、轉大寫，消除客戶輸入與資料庫的差異
+            const rawInput = document.getElementById('vip-code-input').value;
+            const code = rawInput.trim().toUpperCase();
             const btnText = document.getElementById('vip-btn-text');
             const loader = document.getElementById('vip-loader');
 
             if (!code) { alert("Please enter a code."); return; }
 
-            // 執行長緊急後門 (永遠最速放行)
-            if (code === 'ABRA-ADMIN-PASS') { 
-                grantVipAccess(); 
-                alert("Admin Override Success."); 
-                return; 
-            }
+            // 管理員後門 (緊急對抗任何雲端不穩定)
+            if (code === 'ABRA-ADMIN-PASS') { grantVip(); alert("Admin Override Active."); return; }
 
-            // 開始旋轉
             vipBtn.disabled = true;
             btnText.textContent = "Verifying...";
             loader.classList.remove('hidden');
 
             try {
-                // 強制超時保護 (5秒內沒結果就報錯)
+                // 強制超時保護 (5秒)
                 const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
                 const fetchTask = (async () => {
                     const docRef = doc(db, "vip_codes", code);
@@ -264,30 +264,30 @@
                 const docSnap = await Promise.race([fetchTask, timeout]);
 
                 if (docSnap.exists()) {
-                    grantVipAccess();
-                    alert("VIP Unlocked Successfully!");
+                    grantVip();
+                    alert("Cloud Access Granted! VIP Unlocked.");
                 } else {
-                    alert("Access Denied: Code not found in cloud database.");
+                    console.log("Searching for:", code);
+                    alert("Access Denied: Code not active.\n\nPM提示：請檢查 Firestore 是否有名為 'vip_codes' 的集合，且文件 ID 精確為 '" + code + "'。");
                 }
             } catch (err) {
-                console.error("Cloud Auth Error:", err);
+                console.error("Cloud Error Detail:", err);
                 if (err.message === "Timeout") {
-                    alert("Network Timeout. Google Cloud is not responding. Please try again.");
+                    alert("Cloud connection too slow. Please refresh and try again.");
                 } else {
-                    alert("Cloud Sync Error. Please check if Firestore Rules are set to 'allow read'.");
+                    alert("Database Locked: Please check your Firestore Rules (allow read: if true).");
                 }
             } finally {
-                // 強制停止旋轉
                 vipBtn.disabled = false;
                 btnText.textContent = "Unlock";
                 loader.classList.add('hidden');
             }
         });
 
-        function grantVipAccess() {
+        function grantVip() {
             localStorage.setItem('abra_vip_time', Date.now().toString());
             localStorage.setItem('abra_vip_status', 'active');
-            location.reload(); // 重新整理以套用 VIP 狀態
+            location.reload(); 
         }
     </script>
 
@@ -341,6 +341,7 @@
         function speak(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
+            // 自然停頓優化：避開符號，僅算式念出
             const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }
@@ -400,7 +401,7 @@
                 const text = result.candidates[0].content.parts[0].text;
                 const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
                 charCache[char] = data; renderResult(char, data);
-            } catch (err) { alert("AI Intelligence Connection Error."); } finally { isFetching = false; finalize(); }
+            } catch (err) { alert("AI Insights Syncing Error."); } finally { isFetching = false; finalize(); }
         }
 
         function finalize() { document.getElementById('dashboard-loader').classList.add('hidden'); document.getElementById('dashboard-content').classList.remove('hidden'); }
@@ -419,7 +420,7 @@
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             data.idioms.forEach(i => {
                 const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center hover:bg-white transition-all';
-                div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic">${i.meaning}</small></span><button class="text-rose-400 p-2"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
+                div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic">${i.meaning}</small></span><button class="text-rose-400 p-2 hover:scale-110 transition-all"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
                 div.querySelector('button').onclick = () => speak(i.idiom); idioms.appendChild(div);
             });
         }
@@ -428,7 +429,7 @@
             initUI();
             document.getElementById('save-key-btn').addEventListener('click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();
-                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateGlobalUI(); alert("AI Intelligence Active."); }
+                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateGlobalUI(); alert("AI Insights Connected."); }
             });
             document.getElementById('translate-btn').addEventListener('click', doTranslate);
             document.getElementById('split-btn').addEventListener('click', () => { if(checkQuota()) executeSplit(); });
@@ -437,7 +438,7 @@
                 if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent!' }); }
             });
             document.getElementById('remove-key-btn').addEventListener('click', () => {
-                if (confirm('Sign out and reset status?')) { localStorage.clear(); location.reload(); }
+                if (confirm('Sign out and reset all settings?')) { localStorage.clear(); location.reload(); }
             });
         };
     </script>

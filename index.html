@@ -104,7 +104,7 @@
             </div>
         </div>
 
-        <!-- 第 2 層：API Key 教學 (更新最新模型清單) -->
+        <!-- 第 2 層：API Key 教學 -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
@@ -113,7 +113,7 @@
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Activate AI Insights / 啟動 AI 引擎</h3>
                     <p class="text-sm text-indigo-700 mb-4 leading-relaxed">
-                        無限次數已解鎖！若要開啟注音發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
+                        次數限制已解鎖！若要開啟注音、發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
                         <span class="text-[11px] italic">Unlock Zhuyin & Idioms (Premium Add-on) by connecting your API Key.</span>
                     </p>
                     <div class="flex flex-col gap-4">
@@ -121,7 +121,7 @@
                             <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                             <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Activate 連結啟動</button>
                         </div>
-                        <!-- 更新版模型切換器 -->
+                        <!-- 最新模型切換器 -->
                         <div class="flex flex-col sm:flex-row items-center gap-3 bg-white/50 p-3 rounded-xl border border-indigo-100">
                             <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
                                 <i class="ph ph-gear"></i> AI Engine Selection 引擎版本：
@@ -178,7 +178,7 @@
             </div>
         </section>
 
-        <!-- 學習面板 (重構版：書寫區恆定，AI 區獨立狀態) -->
+        <!-- 學習面板 -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
@@ -189,7 +189,7 @@
             </div>
 
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 左側：筆畫區 (恆定顯示，不因 AI 故障受阻) -->
+                <!-- 左側：筆畫區 (恆定顯示) -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative min-h-[480px]">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
@@ -207,7 +207,7 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6 text-center"></p>
                 </div>
 
-                <!-- 右側：AI 解析區 (狀態解耦版) -->
+                <!-- 右側：AI 解析區 -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     
                     <!-- 狀態 1: AI 載入中 -->
@@ -224,7 +224,7 @@
                         <div>
                             <h3 class="text-red-600 font-bold text-base mb-1">Engine Busy / 連線異常</h3>
                             <p class="text-slate-500 text-[11px] px-6 leading-relaxed">
-                                次數限制或連線繁忙。此異常與本平台授權無關，請嘗試切換版本，或更換另一個專案的 API Key。<br>
+                                連線繁忙或 Token 上限已到。<strong>此異常與本平台授權無關</strong>，請嘗試切換版本或更換 API Key。<br>
                                 <span class="italic">Rate limit reached. Token or connectivity issues are independent of Hub service.</span>
                             </p>
                         </div>
@@ -243,7 +243,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2 text-left border-t border-slate-200 pt-3">
-                                <label class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Solution 2: Change Key 更換金鑰燃料</label>
+                                <label class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Solution 2: Change Fuel 更換金鑰</label>
                                 <input type="password" id="inline-api-key" placeholder="Paste New API Key..." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500">
                                 <button id="inline-save-key-btn" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs shadow-sm active:scale-95 transition-all">Update & Connect 更新並連線</button>
                             </div>
@@ -254,14 +254,14 @@
                     <div id="vip-only-content" class="hidden space-y-6">
                         <div id="badge-ai" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight shadow-sm">VIP AI INSIGHTS</div>
                         
-                        <!-- VIP 服務邊界提示 (避免消費糾紛) -->
+                        <!-- VIP 服務邊界提示 -->
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold">
                                 <i class="ph ph-warning-circle"></i> 標註此為 VIP 額外加值服務。
                             </p>
                             <p class="text-[9px] text-amber-700 leading-relaxed">
                                 如需注音、發音、成語等解析，需自行開通 Google API Key。連線穩定性與 Token 消耗與本工作室軟體服務無關。<br>
-                                <span class="italic opacity-75">Advanced analysis requires a personal API Key. Abrakai Studio is not responsible for 3rd-party API connectivity or limits.</span>
+                                <span class="italic opacity-75">Advanced analysis requires a personal API Key. Abrakai Studio is not responsible for 3rd-party API connectivity.</span>
                             </p>
                         </div>
 
@@ -334,13 +334,13 @@
             <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase font-bold">
                 &copy; <span id="current-year"></span> Traditional Chinese Learning Hub. (Taiwan Edition)
             </p>
-            <div class="mt-6 max-w-2xl mx-auto px-4 text-slate-400 text-[9px] leading-relaxed italic">
+            <div class="mt-6 max-w-2xl mx-auto px-4 text-slate-400 text-[9px] leading-relaxed italic text-center">
                 免責聲明 (Disclaimer)：本系統 VIP 授權僅針對軟體內限制次數之解除。AI 語言解析功能屬第三方 API 銜接之加值服務，使用者需自行負擔 Google API 連線狀態、費用與 Token 消耗。阿布拉工作室不保證第三方 API 之永久連線品質。
             </div>
         </div>
     </footer>
 
-    <!-- Firebase Logic (Security Guard) -->
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -438,12 +438,13 @@
         }
     </script>
 
-    <!-- UI & AI Engine (Modernized for Gemini 2.5/3/3.1) -->
+    <!-- UI & AI Engine (Purification & Robustness) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
         let isFetching = false; const charCache = {};
         let currentTargetChar = "";
+        let lastSpeakTime = 0;
 
         function initUI() {
             try {
@@ -490,14 +491,26 @@
             updateGlobalUI(); return true;
         }
 
-        // 語音播報優化：避開特殊符號採自然停頓
+        // 語音播報優化：防震盪、去拼音、去冗餘
         function speak(text) {
+            const now = Date.now();
+            if (now - lastSpeakTime < 500) return; // 防震盪處理 (防止重複發音)
+            lastSpeakTime = now;
+
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
-            window.speechSynthesis.cancel();
-            // 只提取漢字部分，過濾拼音與特殊括號
-            const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || text;
-            const ut = new SpeechSynthesisUtterance(pureChinese);
-            ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
+            
+            window.speechSynthesis.cancel(); // 先取消當前隊列
+            
+            setTimeout(() => {
+                // 語音脫水技術：只提取漢字 (\u4e00-\u9fa5)，過濾所有拼音、符號、括號
+                const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || "";
+                if (!pureChinese) return;
+
+                const ut = new SpeechSynthesisUtterance(pureChinese);
+                ut.lang = 'zh-TW'; 
+                ut.rate = 0.8; // 固定語速，專業教學感
+                window.speechSynthesis.speak(ut);
+            }, 50); // 延遲 50ms 確保 cancel 生效
         }
 
         async function doTranslate() {
@@ -509,9 +522,7 @@
                 const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
                 const data = await res.json();
                 const trans = data?.responseData?.translatedText.replace(/[^\u4e00-\u9fa5]/g, '') || "";
-                if (trans) { 
-                    document.getElementById('zh-input').value = trans; executeSplit(true); 
-                }
+                if (trans) { document.getElementById('zh-input').value = trans; executeSplit(true); }
             } catch (err) { alert("翻譯服務繁忙。 / Translation busy."); } finally { document.getElementById('translate-loader').classList.add('hidden'); }
         }
 
@@ -539,7 +550,7 @@
             document.getElementById('learning-dashboard').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             
-            // 左側書寫區：立即載入 (第一性原理：書寫體驗不應受 AI 故障影響)
+            // 左側書寫區恆定加載 (不因 AI 故障而受阻)
             document.getElementById('hanzi-target').innerHTML = '';
             writer = HanziWriter.create('hanzi-target', char, { 
                 width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6'
@@ -570,7 +581,6 @@
             [vipPanel, errorPanel].forEach(p => p.classList.add('hidden'));
             loader.classList.remove('hidden');
 
-            // 根據執行長提供的影片資料同步模型清單
             const models = ["gemini-2.5-flash", "gemini-3-flash", "gemini-3.1-pro", "gemini-3.1-flash-lite", "gemini-2.0-flash"];
             const selectedMode = document.getElementById('model-selector').value;
             const modelList = selectedMode === 'auto' ? models : [selectedMode];
@@ -585,19 +595,18 @@
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
                     });
                     const result = await res.json();
-                    if (result.error || !result.candidates) throw new Error("API Limit/Incompatible");
+                    if (result.error || !result.candidates) throw new Error("API Limit");
                     
                     const rawText = result.candidates[0].content.parts[0].text;
                     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
                     if (!jsonMatch) throw new Error("Format Error");
-                    
                     const data = JSON.parse(jsonMatch[0]);
                     charCache[char] = data; 
                     renderResult(char, data);
                     success = true;
                     updateEngineStatus(`Powered by: ${modelName}`);
                     break; 
-                } catch (err) { console.warn(`${modelName} unavailable, retrying...`); }
+                } catch (err) { console.warn(`${modelName} failed...`); }
             }
 
             loader.classList.add('hidden');
@@ -626,20 +635,21 @@
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
             if (data.polyphonic && data.polyphonic.length > 0) {
-                document.getElementById('poly-container').classList.remove('hidden');
                 data.polyphonic.forEach(p => {
-                    const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 cursor-pointer border border-purple-200';
-                    d.textContent = p.zhuyin; d.onclick = () => speak(p.homophone || char); polyDisp.appendChild(d);
+                    const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 cursor-pointer border border-purple-200 hover:bg-purple-200 transition-all';
+                    d.textContent = p.zhuyin; 
+                    d.onclick = () => speak(p.homophone || char); 
+                    polyDisp.appendChild(d);
                 });
-            } else { document.getElementById('poly-container').classList.add('hidden'); }
+            }
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
-                const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer'; 
+                const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100'; 
                 s.textContent = w; s.onclick = () => speak(w); words.appendChild(s); 
             });
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             if (data.idioms) data.idioms.forEach(i => {
-                const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center hover:bg-white transition-all';
+                const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center hover:bg-white transition-all shadow-sm';
                 div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic">${i.meaning}</small></span><button class="text-rose-400 p-2 hover:scale-110 transition-all"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
                 div.querySelector('button').onclick = () => speak(i.idiom); idioms.appendChild(div);
             });
@@ -667,7 +677,7 @@
                 executeAIFetch(currentTargetChar);
             });
             document.getElementById('remove-key-btn').addEventListener('click', () => {
-                if (confirm('是否登出？ / Sign out?')) { localStorage.clear(); location.reload(); }
+                if (confirm('是否登出並清除所有設定？ / Sign out and clear?')) { localStorage.clear(); location.reload(); }
             });
         };
     </script>

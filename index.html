@@ -35,7 +35,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col">
 
-    <!-- Header (Bilingual Navigation & Subscription Status) -->
+    <!-- Header (Bilingual Navigation & VIP Badge) -->
     <header class="bg-red-600 text-white shadow-md">
         <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
@@ -46,9 +46,14 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all shadow-inner">
                     <i class="ph-fill ph-lightning"></i> 免費次數 / Free Uses: <span id="quota-count">20/20</span>
                 </div>
-                <!-- VIP 剩餘天數標籤 -->
-                <div id="vip-expiry-display" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-xs font-black border border-yellow-200 shadow-md flex items-center gap-2">
-                    <i class="ph-fill ph-calendar"></i> <span id="vip-days-left">--</span> Days Left / 剩餘天數
+                <!-- VIP 月繳會員標章 (針對 10.jpg) -->
+                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-200 shadow-md flex flex-col items-center leading-none">
+                    <div class="flex items-center gap-1"><i class="ph-fill ph-crown"></i> VIP MEMBER</div>
+                    <div class="mt-0.5 opacity-75 uppercase tracking-tighter">月繳制會員</div>
+                </div>
+                <!-- 效期顯示器 -->
+                <div id="vip-expiry-display" class="hidden bg-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-white/20 shadow-inner flex items-center gap-2">
+                    <i class="ph ph-calendar"></i> <span id="vip-days-left">--</span> Days Left
                 </div>
                 <button id="remove-key-btn" class="hidden text-xs md:text-sm bg-red-700 hover:bg-red-800 border border-red-400 px-3 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1">
                     <i class="ph ph-sign-out"></i> 登出 / Sign Out
@@ -60,7 +65,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 -->
+        <!-- 第 1 層：VIP 驗證區 (月繳提醒強化版) -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -76,8 +81,8 @@
                         <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證 / License Auth
                     </h4>
                     <p id="vip-intro-text" class="text-sm text-slate-600 leading-relaxed">
-                        請輸入 VIP 授權碼以解鎖<strong>翻譯與書寫功能之無限使用次數</strong>。 AI 深度解析為進階加值服務，需自備 API Key。<br>
-                        <span class="text-[11px] text-slate-400 italic">Enter code to unlock unlimited Translation & Writing mechanics. AI insights require your own API Key.</span>
+                        請輸入 VIP 授權碼以解鎖<strong>翻譯與書寫功能之無限使用次數</strong>。 AI 深度解析為進階加值服務，需自行開通 API Key。<br>
+                        <span class="text-[11px] text-slate-400 italic">Enter code for unlimited Translation & Writing mechanics. AI insights require your own API Key.</span>
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態 / Sync Status</h5>
@@ -87,7 +92,7 @@
 
                 <div class="flex flex-col justify-between space-y-6">
                     <div class="space-y-3">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">VIP Passcode / 授權碼</label>
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">VIP Passcode (Monthly) / 授權碼 (月繳制)</label>
                         <div class="flex gap-2">
                             <input type="text" id="vip-code-input" placeholder="ABRA-XXXXXX" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-base uppercase shadow-inner">
                             <button id="save-vip-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 min-w-[120px]">
@@ -95,10 +100,14 @@
                                 <div id="vip-loader" class="loader hidden w-4 h-4 border-2 border-white/30 border-t-white"></div>
                             </button>
                         </div>
-                        <p class="text-[10px] text-emerald-600 font-bold italic">
-                            * VIP 授權碼採月繳制度，到期後請更換新碼。<br>
-                            * Codes are subscription-based (monthly). Please renew upon expiry.
-                        </p>
+                        <!-- 針對 09.jpg 的明確提醒 -->
+                        <div class="flex items-start gap-1.5 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                            <i class="ph-fill ph-info text-emerald-600 mt-0.5"></i>
+                            <p class="text-[10px] text-emerald-800 leading-tight">
+                                <strong>授權制度說明：</strong> 本 VIP 授權碼採「月繳制度」，效期到期後需聯繫工作室獲取新碼重新登入。<br>
+                                <span class="italic opacity-75">Subscription Note: Codes are monthly. You must renew to get a new code once expired.</span>
+                            </p>
+                        </div>
                     </div>
 
                     <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
@@ -121,7 +130,7 @@
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Activate AI Insights / 啟動 AI 引擎</h3>
                     <p class="text-sm text-indigo-700 mb-4 leading-relaxed">
-                        授權已啟動！若要開啟注音發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
+                        無限次數已解鎖！若要開啟注音發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
                         <span class="text-[11px] italic">Unlock Zhuyin & Idioms (Premium Add-on) by connecting your API Key.</span>
                     </p>
                     <div class="flex flex-col gap-4">
@@ -223,7 +232,7 @@
                         <p class="text-slate-400 text-sm animate-pulse font-medium">AI Analyzing... / AI 分析中...</p>
                     </div>
 
-                    <!-- 狀態 2: 異常診斷與原地修復 -->
+                    <!-- 狀態 2: 異常診斷區 (符合 06.jpg) -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-300">
                         <div class="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl">
                             <i class="ph ph-warning-circle"></i>
@@ -267,7 +276,7 @@
                             </p>
                             <p class="text-[9px] text-amber-700 leading-relaxed">
                                 如需注音、發音、成語等解析，需自行開通 Google API Key。連線穩定性與 Token 消耗與本工作室軟體服務無關。<br>
-                                <span class="italic opacity-75">Advanced analysis requires your own API Key. Abrakai Studio is not responsible for 3rd-party API connectivity.</span>
+                                <span class="italic opacity-75">Advanced analysis requires a personal API Key. Abrakai Studio is not responsible for 3rd-party API connectivity.</span>
                             </p>
                         </div>
 
@@ -294,7 +303,7 @@
                         </div>
                     </div>
 
-                    <!-- 狀態 4: VIP 但無燃料 -->
+                    <!-- 狀態 4: VIP 但無燃料 (針對 08.jpg 新增英文說明) -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
@@ -303,9 +312,10 @@
                         <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-left w-full max-w-md shadow-sm">
                             <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-3 border-b border-indigo-200 pb-2">關於加值服務 / ABOUT PREMIUM ADD-ONS</h4>
                             <p class="text-[11px] text-indigo-700 leading-relaxed mb-4">
-                                您已擁有無限次數的翻譯與書寫權限。如需啟動進階 AI 解析（注音、成語），請自行連結金鑰燃料。請注意，<strong>API 維護與連線問題與本平台無涉</strong>。
+                                <strong>中文：</strong> 您已擁有無限次數的翻譯與書寫權限。如需啟動進階 AI 解析（注音、成語），請自行連結金鑰燃料。請注意，API 維護與連線問題與本平台無涉。<br><br>
+                                <span class="italic font-medium"><strong>English:</strong> You have unlimited access to translation and writing mechanics. To enable advanced AI insights (Zhuyin, Idioms), please connect your own API Key. Note: API maintenance and connectivity issues are independent of this platform.</span>
                             </p>
-                            <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg">
+                            <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95">
                                 連結 Google API Key / Activate Add-ons
                             </button>
                         </div>
@@ -378,7 +388,6 @@
             }
         });
 
-        // 核心邏輯：透明化到期日提醒
         window.syncVipStatusWithCloud = async function() {
             const savedCode = localStorage.getItem('abra_vip_code');
             if (!savedCode) return { active: false };
@@ -391,13 +400,10 @@
                         const now = Date.now();
                         const expiry = new Date(data.expiryDate).getTime();
                         const diff = expiry - now;
-                        
                         if (diff <= 0) {
                             forceRevokeVip("授權已到期，請聯繫工作室續約。 / License expired.");
                             return { active: false };
                         }
-                        
-                        // 計算並更新 UI 剩餘天數
                         const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
                         updateExpiryUI(daysLeft);
                     }
@@ -415,7 +421,6 @@
             if (display && count) {
                 display.classList.remove('hidden');
                 count.textContent = days;
-                // 如果剩不到 7 天，變紅色提醒
                 if (days < 7) {
                     display.className = "bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-black border border-red-300 shadow-md flex items-center gap-2 animate-pulse";
                 }
@@ -467,7 +472,7 @@
         }
     </script>
 
-    <!-- UI & AI Engine Logic -->
+    <!-- UI & AI Engine (iOS Stability Fix) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
@@ -495,9 +500,11 @@
             const quotaCountSpan = document.getElementById('quota-count');
             const removeBtn = document.getElementById('remove-key-btn');
             const quotaDisplay = document.getElementById('quota-display');
+            const vipBadge = document.getElementById('vip-status-badge');
 
             if (isVIP) {
                 quotaDisplay.classList.add('hidden');
+                vipBadge.classList.remove('hidden');
                 removeBtn.classList.remove('hidden');
                 document.getElementById('vip-setup-section').classList.add('hidden');
             } else {
@@ -517,19 +524,32 @@
             updateGlobalUI(); return true;
         }
 
+        // iPhone 語音深度優化 (解決重複與拼音)
         function speak(text) {
             const now = Date.now();
-            if (now - lastSpeakTime < 800) return; 
+            // iOS 需要較長的冷卻時間 (1秒) 來清空底層語音緩存
+            if (now - lastSpeakTime < 1000) return; 
             lastSpeakTime = now;
+
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
+            
+            // 強制取消所有播放隊列
             window.speechSynthesis.cancel(); 
+            
+            // 延遲 250ms 啟動，確保 iOS 的 cancel 指令已生效
             setTimeout(() => {
+                // 語音脫水技術：嚴格只取漢字，徹底過濾拼音括號與字母
                 const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || "";
                 if (!pureChinese) return;
+
                 const ut = new SpeechSynthesisUtterance(pureChinese);
-                ut.lang = 'zh-TW'; ut.rate = 0.8;
+                ut.lang = 'zh-TW'; 
+                ut.rate = 0.8; // 專業語速
+                
+                // 註冊結束回調防止 iOS 引擎休眠
+                ut.onend = function() { console.log('Speech Ended'); };
                 window.speechSynthesis.speak(ut);
-            }, 100); 
+            }, 250); 
         }
 
         async function doTranslate() {
@@ -613,7 +633,6 @@
                     });
                     const result = await res.json();
                     if (result.error || !result.candidates) throw new Error("API Limit");
-                    
                     const rawText = result.candidates[0].content.parts[0].text;
                     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
                     if (!jsonMatch) throw new Error("Format Error");
@@ -654,9 +673,7 @@
             if (data.polyphonic && data.polyphonic.length > 0) {
                 data.polyphonic.forEach(p => {
                     const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 cursor-pointer border border-purple-200 hover:bg-purple-200 transition-all';
-                    d.textContent = p.zhuyin; 
-                    d.onclick = () => speak(p.homophone || char); 
-                    polyDisp.appendChild(d);
+                    d.textContent = p.zhuyin; d.onclick = () => speak(p.homophone || char); polyDisp.appendChild(d);
                 });
             }
             const words = document.getElementById('words-container'); words.innerHTML = '';
@@ -694,7 +711,7 @@
                 executeAIFetch(currentTargetChar);
             });
             document.getElementById('remove-key-btn').addEventListener('click', () => {
-                if (confirm('是否登出並清除所有設定？ / Sign out and clear?')) { localStorage.clear(); location.reload(); }
+                if (confirm('是否登出？ / Sign out?')) { localStorage.clear(); location.reload(); }
             });
         };
     </script>

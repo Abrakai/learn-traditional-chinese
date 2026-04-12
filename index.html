@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -172,7 +172,7 @@
 
                 <!-- 執行長管理儀表板 -->
                 <div id="admin-panel" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 pb-4 gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-4">
                         <div>
                             <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic flex items-center gap-2">
                                 <i class="ph-fill ph-shield-check"></i> CEO Management Hub
@@ -205,7 +205,7 @@
             </div>
         </section>
 
-        <!-- 第 2 層：API 燃料配置區 (旗艦尊爵版 UI 重塑) -->
+        <!-- 第 2 層：API 燃料配置區 (針對 31.jpg 優化文案與導引) -->
         <div id="api-key-setup" class="hidden bg-gradient-to-r from-indigo-600 to-indigo-900 rounded-3xl p-[2px] shadow-2xl relative overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -214,13 +214,23 @@
                     <i class="ph-fill ph-magic-wand z-10"></i>
                     <div class="absolute inset-0 bg-indigo-200 rounded-2xl animate-ping opacity-40"></div>
                 </div>
-                <!-- 文案 -->
-                <div class="flex-1 text-center md:text-left space-y-2">
+                <!-- 文案：告知 API Key 好處、安全說明與申請連結 (符合 31.jpg 需求) -->
+                <div class="flex-1 text-center md:text-left space-y-3">
                     <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟動 AI 深度解析</h3>
-                    <p class="text-sm text-slate-600 font-medium leading-relaxed">
-                        尊貴的 VIP 會員，您已解鎖進階權限！請綁定您的 Google Gemini API 金鑰。<br>
-                        系統內建<span class="text-indigo-600 font-bold bg-indigo-50 px-1 rounded mx-1">智慧快取</span>機制，同單字重複查詢保證 <strong class="text-red-500">0 消耗</strong>。
-                    </p>
+                    <div class="text-sm text-slate-600 font-medium leading-relaxed space-y-1.5">
+                        <p>
+                            尊貴的 VIP 會員，您已解鎖進階權限！綁定金鑰後可啟動：
+                            <span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋及英文翻譯說明</span>。
+                        </p>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-[10px]">
+                            <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 font-bold flex items-center gap-1">
+                                <i class="ph ph-lock-key"></i> 本地安全：金鑰僅存於瀏覽器，本站伺服器絕不記錄。
+                            </span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-bold hover:text-indigo-800 flex items-center gap-1">
+                                <i class="ph ph-arrow-square-out"></i> 前往 Google AI Studio 免費申請金鑰
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <!-- 綁定欄位 -->
                 <div class="flex w-full md:w-auto flex-col sm:flex-row gap-3 self-center mt-2 md:mt-0">
@@ -295,7 +305,7 @@
                         <p class="text-slate-400 text-xs animate-pulse font-medium uppercase tracking-widest">AI Analyzing...</p>
                     </div>
 
-                    <!-- 故障診斷面板 (優化視覺避免突兀) -->
+                    <!-- 故障診斷面板 -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-300">
                         <div class="relative">
                             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner relative z-10"><i class="ph-fill ph-warning-circle"></i></div>
@@ -310,7 +320,7 @@
                         </button>
                     </div>
 
-                    <!-- 尚未綁定金鑰之引導畫面 (取代原本出錯的畫面 - 針對 30.jpg 修復) -->
+                    <!-- 尚未綁定金鑰之引導畫面 (配合 31.jpg 強化文案) -->
                     <div id="api-key-missing-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6 animate-in fade-in zoom-in duration-500">
                         <div class="relative">
                             <div class="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center text-4xl shadow-inner relative z-10">
@@ -319,16 +329,22 @@
                             <div class="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-20"></div>
                         </div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight">AI 引擎等待點火</h3>
-                        <p class="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed px-6 font-medium text-center">
-                            尊貴的 VIP 會員，您已解鎖進階權限！<br>請綁定您的專屬 API 金鑰，系統將瞬間為您解析注音、破音字、常用語詞與成語英譯。
-                        </p>
+                        <div class="space-y-4 max-w-sm mx-auto">
+                            <p class="text-sm text-slate-500 leading-relaxed font-medium">
+                                尊貴的 VIP 會員，綁定個人 API 金鑰後，即可解鎖注音、造詞與成語深度英譯解析。
+                            </p>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-400 flex flex-col gap-2 italic">
+                                <span><i class="ph ph-info"></i> 金鑰將僅存放於您的瀏覽器本地快取，隱私無虞。</span>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-bold not-italic">點此申請 Google API Key</a>
+                            </div>
+                        </div>
                         <button onclick="scrollToApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl active:scale-95 text-sm uppercase tracking-wider transition-all flex items-center gap-2">
                             <i class="ph-bold ph-plug"></i> 前往綁定金鑰
                         </button>
                     </div>
 
                     <!-- VIP 解析數據 -->
-                    <div id="vip-only-content" class="hidden space-y-6">
+                    <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm flex items-start gap-2">
                             <i class="ph-fill ph-check-circle text-amber-500 mt-0.5"></i>
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">
@@ -360,7 +376,7 @@
 
                     <!-- 降級提示 -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
-                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph ph-fill ph-crown text-yellow-500"></i></div>
+                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 tracking-tight">Unlock VIP Access</h3>
                         <div id="expiry-notice-box" class="bg-red-50 p-4 rounded-xl border border-red-100 text-xs text-red-700 font-bold mb-2 hidden">您的 VIP 授權已到期，功能已降級。 / Subscription expired.</div>
                         <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed px-6 font-medium text-center">升級 VIP 以解除限制。AI 解析服務僅提供付費會員自行配置金鑰後啟動。</p>
@@ -385,7 +401,7 @@
     <!-- 模態框 (Modals) 區域 -->
     <!-- ========================================== -->
 
-    <!-- 會員個人設定 Modal (v4.3 加入 API Key 整合設定) -->
+    <!-- 會員個人設定 Modal (含 API Key 整合與安全連結) -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -409,12 +425,15 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1.5">AI Engine API Key (金鑰綁定)</label>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest">AI Engine API Key</label>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold">申請金鑰</a>
+                    </div>
                     <div class="relative">
                         <input type="password" id="profile-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all shadow-sm font-mono">
                         <button type="button" onclick="togglePassVisibility('profile-api-key', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                     </div>
-                    <p class="text-[9px] text-slate-400 mt-1.5 italic">留空即代表登出並移除本裝置的 API 金鑰。</p>
+                    <p class="text-[9px] text-slate-400 mt-1.5 italic">此金鑰僅存放在您的瀏覽器，留空即代表清除綁定。</p>
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button onclick="closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm">Cancel</button>
@@ -618,7 +637,7 @@
             document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
         }
 
-        // 會員個人設定 (含 API Key 綁定)
+        // 會員個人設定 (含 API Key 綁定整合)
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) return;
@@ -647,11 +666,11 @@
             if (!newName || !newPass) { showToast("姓名與密碼不可為空！", true); return; }
 
             try {
-                // 更新資料庫
+                // 更新雲端
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
                 await updateDoc(docRef, { name: newName, password: newPass });
                 
-                // 更新 API Key (本地儲存)
+                // 更新本地金鑰
                 if (newApiKey !== window.activeApiKey) {
                     if (newApiKey === '') {
                         localStorage.removeItem('gemini_api_key');
@@ -659,17 +678,17 @@
                         localStorage.setItem('gemini_api_key', newApiKey);
                     }
                     window.activeApiKey = newApiKey;
-                    window.updateGlobalUI(); // 重新評估是否要顯示 API Key 引導橫幅
+                    window.updateGlobalUI(); 
                 }
 
-                showToast("個人資料與設定已成功更新！");
+                showToast("個人設定已更新完成！");
                 closeProfileModal();
             } catch(e) {
-                showToast("儲存失敗，請重試。", true);
+                showToast("更新失敗，請檢查網路狀態。", true);
             }
         };
 
-        // 執行長管理面板
+        // 管理員模組
         let currentDeleteId = null;
 
         async function enterAdminMode() {
@@ -689,7 +708,7 @@
                 const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = `Abrakai_Members_${new Date().toISOString().split('T')[0]}.csv`;
+                link.download = `Members_Export_${new Date().toISOString().split('T')[0]}.csv`;
                 link.click();
             });
 
@@ -716,7 +735,7 @@
                         }, { merge: true });
                         count++;
                     }
-                    showToast(`成功匯入/更新 ${count} 筆資料！`);
+                    showToast(`成功匯入 ${count} 筆會員資料！`);
                     e.target.value = '';
                 };
                 reader.readAsText(file);
@@ -729,17 +748,17 @@
                     const user = docSnap.data();
                     const id = docSnap.id;
                     
-                    let lightHTML = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto" title="未開通"></div>';
+                    let lightHTML = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto" title="未審核"></div>';
                     if (user.expiryDate) {
                         const expiry = new Date(user.expiryDate).getTime();
                         const now = Date.now();
                         const daysLeft = (expiry - now) / (1000 * 60 * 60 * 24);
                         if (daysLeft < 0) {
-                            lightHTML = '<div class="w-3 h-3 rounded-full bg-red-500 mx-auto animate-pulse shadow-[0_0_8px_#ef4444]" title="已逾期"></div>';
+                            lightHTML = '<div class="w-3 h-3 rounded-full bg-red-500 mx-auto animate-pulse shadow-[0_0_8px_#ef4444]" title="已到期"></div>';
                         } else if (daysLeft <= 7) {
                             lightHTML = '<div class="w-3 h-3 rounded-full bg-orange-500 mx-auto animate-pulse shadow-[0_0_8px_#f97316]" title="即將到期"></div>';
                         } else {
-                            lightHTML = '<div class="w-3 h-3 rounded-full bg-emerald-500 mx-auto shadow-[0_0_8px_#10b981]" title="正常"></div>';
+                            lightHTML = '<div class="w-3 h-3 rounded-full bg-emerald-500 mx-auto shadow-[0_0_8px_#10b981]" title="使用中"></div>';
                         }
                     }
 
@@ -753,24 +772,24 @@
                             <div class="text-[10px] bg-red-50 text-red-600 px-1 inline-block rounded font-mono font-bold mt-1">${user.password || 'N/A'}</div>
                         </td>
                         <td class="px-2 py-3 space-y-1.5">
-                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="匯款末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
+                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
                             <div class="flex gap-1">
                                 <input id="plan-${id}" value="${user.plan || ''}" placeholder="月數" class="w-12 border rounded px-1.5 py-1 text-[10px] text-center focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
-                                <input id="remit-${id}" value="${user.remittance || ''}" placeholder="匯款日 20260413" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
+                                <input id="remit-${id}" value="${user.remittance || ''}" placeholder="匯款日" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
                             </div>
                         </td>
                         <td class="px-2 py-3 space-y-1.5">
-                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="到期日 (自動運算)" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none transition-colors shadow-sm bg-indigo-50/30">
-                            <input id="notes-${id}" value="${user.notes || ''}" placeholder="備註..." class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
+                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="自動運算到期日" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none bg-indigo-50/30">
+                            <input id="notes-${id}" value="${user.notes || ''}" placeholder="備註..." class="w-full border rounded px-1.5 py-1 text-[10px] shadow-sm">
                         </td>
                         <td class="px-2 py-3 text-center align-middle whitespace-nowrap">
-                            <button onclick="saveUser('${id}')" class="bg-red-600 text-white px-3 py-2 rounded-lg font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-red-700 uppercase" title="儲存修改"><i class="ph-bold ph-floppy-disk"></i></button>
-                            <button onclick="confirmDeleteUser('${id}')" class="bg-slate-200 text-slate-600 px-3 py-2 rounded-lg font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-slate-300 uppercase ml-1" title="刪除會員"><i class="ph-bold ph-trash"></i></button>
+                            <button onclick="saveUser('${id}')" class="bg-red-600 text-white px-3 py-2 rounded-lg font-black text-[10px] shadow-sm active:scale-90 hover:bg-red-700"><i class="ph-bold ph-floppy-disk"></i></button>
+                            <button onclick="confirmDeleteUser('${id}')" class="bg-slate-200 text-slate-600 px-3 py-2 rounded-lg font-black text-[10px] shadow-sm active:scale-90 ml-1 hover:bg-slate-300"><i class="ph-bold ph-trash"></i></button>
                         </td>
                     `;
                     list.appendChild(tr);
                 });
-            }, (err) => { showToast("權限拒絕：請確認已在 Firebase 發佈正確的 Rules。", true); });
+            }, (err) => { showToast("權限拒絕：請確認 Rules 規則是否已發佈。", true); });
         }
 
         window.openAdminAddModal = function() { document.getElementById('admin-add-modal').classList.remove('hidden'); };
@@ -781,36 +800,22 @@
             const name = document.getElementById('admin-add-name').value.trim();
             const pass = document.getElementById('admin-add-pass').value.trim();
             if (!email || !name || !pass) { showToast("請填寫完整資訊！", true); return; }
-
             try {
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) { showToast("此信箱已存在資料庫中。", true); return; }
-                
-                await setDoc(docRef, { 
-                    name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", notes: "",
-                    signupDate: new Date().toISOString(), status: "active" 
-                });
-                showToast("已成功新增會員！");
+                await setDoc(docRef, { name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", signupDate: new Date().toISOString(), status: "active" });
+                showToast("已手動新增會員！");
                 closeAdminAddModal();
-                ['admin-add-email','admin-add-name','admin-add-pass'].forEach(id => document.getElementById(id).value='');
-            } catch(e) { showToast("新增失敗，請檢查連線。", true); }
+            } catch(e) { showToast("連線失敗。", true); }
         };
 
-        window.confirmDeleteUser = function(id) {
-            currentDeleteId = id;
-            document.getElementById('confirm-delete-modal').classList.remove('hidden');
-        };
-        window.closeDeleteModal = function() {
-            currentDeleteId = null;
-            document.getElementById('confirm-delete-modal').classList.add('hidden');
-        };
+        window.confirmDeleteUser = function(id) { currentDeleteId = id; document.getElementById('confirm-delete-modal').classList.remove('hidden'); };
+        window.closeDeleteModal = function() { currentDeleteId = null; document.getElementById('confirm-delete-modal').classList.add('hidden'); };
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
             if(!currentDeleteId) return;
             try {
                 await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", currentDeleteId));
-                showToast("會員資料已徹底刪除。");
+                showToast("資料已徹底抹除。");
                 closeDeleteModal();
             } catch(e) { showToast("刪除失敗。", true); }
         });
@@ -819,15 +824,12 @@
             const planEl = document.getElementById(`plan-${id}`);
             let remitEl = document.getElementById(`remit-${id}`);
             const expiryEl = document.getElementById(`expiry-${id}`);
-            
             const months = parseInt(planEl.value);
             let remitStr = remitEl.value.trim();
-
             if (remitStr.length === 8 && /^\d{8}$/.test(remitStr)) {
                 remitStr = remitStr.substring(0,4) + '-' + remitStr.substring(4,6) + '-' + remitStr.substring(6,8);
                 remitEl.value = remitStr; 
             }
-
             if (months > 0 && remitStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 const date = new Date(remitStr);
                 if (!isNaN(date.getTime())) {
@@ -836,23 +838,23 @@
                     const m = String(date.getMonth() + 1).padStart(2, '0');
                     const d = String(date.getDate()).padStart(2, '0');
                     expiryEl.value = `${y}-${m}-${d}`;
-                    expiryEl.classList.add('bg-green-100', 'border-green-300');
-                    setTimeout(() => expiryEl.classList.remove('bg-green-100', 'border-green-300'), 500);
+                    expiryEl.classList.add('bg-green-100');
+                    setTimeout(() => expiryEl.classList.remove('bg-green-100'), 500);
                 }
             }
         };
 
         window.saveUser = async function(id) {
-            const plan = document.getElementById(`plan-${id}`).value.trim();
-            const remittance = document.getElementById(`remit-${id}`).value.trim();
-            const account5 = document.getElementById(`acc5-${id}`).value.trim();
-            const expiryDate = document.getElementById(`expiry-${id}`).value.trim();
-            const notes = document.getElementById(`notes-${id}`).value.trim();
+            const updates = { 
+                plan: document.getElementById(`plan-${id}`).value.trim(),
+                remittance: document.getElementById(`remit-${id}`).value.trim(),
+                account5: document.getElementById(`acc5-${id}`).value.trim(),
+                expiryDate: document.getElementById(`expiry-${id}`).value.trim(),
+                notes: document.getElementById(`notes-${id}`).value.trim()
+            };
             try {
-                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { 
-                    plan, remittance, account5, expiryDate, notes 
-                });
-                showToast(`會員資料儲存成功！`);
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), updates);
+                showToast(`會員 [${id}] 更新成功！`);
             } catch (e) { showToast("儲存失敗。", true); }
         };
 
@@ -872,16 +874,10 @@
                     updateExpiryUI("Infinity"); 
                     document.getElementById('profile-btn').classList.remove('hidden');
                 }
-            } else {
-                forceRevoke(); 
-            }
+            } else { forceRevoke(); }
         }
 
-        function forceRevoke() {
-            localStorage.removeItem('abra_vip_status');
-            localStorage.removeItem('abra_vip_code');
-            location.reload();
-        }
+        function forceRevoke() { localStorage.removeItem('abra_vip_status'); localStorage.removeItem('abra_vip_code'); location.reload(); }
 
         function updateExpiryUI(days) {
             const display = document.getElementById('vip-expiry-display');
@@ -906,9 +902,8 @@
         };
     </script>
 
-    <!-- UI & AI Engine -->
+    <!-- UI & AI Engine (Smart Cache & Word-based TTS) -->
     <script>
-        document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
         const MAX_FREE_USES = 20; 
@@ -929,7 +924,6 @@
                 removeBtn.classList.remove('hidden');
                 document.getElementById('member-center-section').classList.add('hidden');
                 
-                // 動態顯示或隱藏 API Key 引導橫幅
                 if (!window.activeApiKey) {
                     document.getElementById('api-key-setup').classList.remove('hidden');
                 } else {
@@ -954,7 +948,6 @@
             lastSpeakTime = now;
             if (!text || !window.speechSynthesis || !isVIP || !window.activeApiKey) return;
             window.speechSynthesis.cancel(); 
-            // 語音脫水：避開 / - _ 等符號採自然停頓
             let pureText = text.replace(/[\/\-_|]/g, ' '); 
             const ut = new SpeechSynthesisUtterance(pureText);
             ut.lang = 'zh-TW'; ut.rate = 0.8;
@@ -967,9 +960,9 @@
         }
 
         window.scrollToApiKey = function() {
-            const setupBox = document.getElementById('api-key-setup');
-            setupBox.classList.remove('hidden');
-            window.scrollTo({ top: setupBox.offsetTop - 20, behavior: 'smooth' });
+            const box = document.getElementById('api-key-setup');
+            box.classList.remove('hidden');
+            window.scrollTo({ top: box.offsetTop - 20, behavior: 'smooth' });
             document.getElementById('custom-api-key').focus();
         };
 
@@ -1007,24 +1000,17 @@
             document.getElementById('learning-dashboard').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             document.getElementById('hanzi-target').innerHTML = '';
-            writer = HanziWriter.create('hanzi-target', char, { 
-                width: 200, height: 200, padding: 15, strokeColor: '#1e293b', 
-                radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6' 
-            });
+            writer = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6' });
 
             const panels = ['vip-only-content', 'free-promo-content', 'ai-inner-loader', 'ai-error-panel', 'api-key-missing-content'];
             panels.forEach(id => document.getElementById(id).classList.add('hidden'));
 
-            if (!isVIP) { 
-                document.getElementById('free-promo-content').classList.remove('hidden'); 
-                return; 
-            }
+            if (!isVIP) { document.getElementById('free-promo-content').classList.remove('hidden'); return; }
             
-            // v4.3 安全防禦：如果沒有 API Key，顯示優化過的引導畫面並終止函式
+            // v4.3 修正 30.jpg 問題：若無金鑰則顯示質感引導並終止
             if (!window.activeApiKey) { 
                 document.getElementById('api-key-setup').classList.remove('hidden');
                 document.getElementById('api-key-missing-content').classList.remove('hidden');
-                window.scrollTo({ top: document.getElementById('api-key-setup').offsetTop - 20, behavior: 'smooth' });
                 return; 
             }
 
@@ -1045,7 +1031,6 @@
             loader.classList.remove('hidden');
 
             const models = ["gemini-3.1-flash-lite", "gemini-2.5-flash"];
-            
             let success = false;
             for (const modelName of models) {
                 try {
@@ -1055,12 +1040,7 @@
                     });
                     const result = await res.json();
                     if (result.error || !result.candidates) throw new Error(result.error ? result.error.message : "Limit Reached");
-                    
-                    const rawText = result.candidates[0].content.parts[0].text;
-                    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-                    if (!jsonMatch) throw new Error("Format Error");
-                    
-                    const data = JSON.parse(jsonMatch[0]);
+                    const data = JSON.parse(result.candidates[0].content.parts[0].text.match(/\{[\s\S]*\}/)[0]);
                     charCache[char] = data; 
                     renderResult(char, data); success = true;
                     document.getElementById('active-engine-badge').textContent = `Powered by: ${modelName}`;
@@ -1086,7 +1066,7 @@
             if (data.polyphonic) data.polyphonic.forEach(p => {
                 const wrap = document.createElement('div'); wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between w-full shadow-sm';
                 let exHTML = ''; 
-                if(p.examples) p.examples.forEach(ex => exHTML += `<button onclick="speak('${ex}')" class="text-[10px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black hover:bg-purple-100 transition-all shadow-inner">🔊 ${ex}</button>`);
+                if(p.examples) p.examples.forEach(ex => exHTML += `<button onclick="speak('${ex}')" class="text-[10px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black hover:bg-purple-100 shadow-inner">🔊 ${ex}</button>`);
                 wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${p.zhuyin}</span><div class="flex gap-1.5">${exHTML}</div>`;
                 polyDisp.appendChild(wrap);
             });
@@ -1116,16 +1096,14 @@
         }
 
         window.onload = function() {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
             window.updateGlobalUI();
             document.getElementById('save-key-btn').addEventListener('click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();
                 if (key) { 
-                    window.activeApiKey = key; 
-                    localStorage.setItem('gemini_api_key', key); 
-                    window.updateGlobalUI(); // 更新介面隱藏輸入框
-                    showToast("API 金鑰已綁定成功！");
-                    // 若目前有選中的字，自動重試解析
-                    if(currentTargetChar) executeAIFetch(currentTargetChar);
+                    window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); 
+                    window.updateGlobalUI(); showToast("API 金鑰已綁定成功！");
+                    if(currentTargetChar) loadTeaching(currentTargetChar, document.querySelector('.char-btn.active'));
                 }
             });
             document.getElementById('translate-btn').addEventListener('click', doTranslate);
@@ -1133,12 +1111,7 @@
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => writer && writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect! / 書寫正確！' }));
             document.getElementById('ai-retry-btn').addEventListener('click', () => executeAIFetch(currentTargetChar));
-            
-            document.getElementById('remove-key-btn').addEventListener('click', () => { 
-                if(window.confirm('Log out? / 確定要登出並清除暫存嗎？')) {
-                    localStorage.clear(); location.reload();
-                }
-            });
+            document.getElementById('remove-key-btn').addEventListener('click', () => { if(confirm('Log out? / 確定要登出並清除暫存嗎？')) { localStorage.clear(); location.reload(); } });
         };
     </script>
 </body>

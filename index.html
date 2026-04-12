@@ -46,7 +46,7 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all shadow-inner">
                     <i class="ph-fill ph-lightning"></i> 免費次數 / Free Uses: <span id="quota-count">20/20</span>
                 </div>
-                <!-- VIP 月繳會員標章 (針對 10.jpg) -->
+                <!-- VIP 月繳會員標章 -->
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-200 shadow-md flex flex-col items-center leading-none">
                     <div class="flex items-center gap-1"><i class="ph-fill ph-crown"></i> VIP MEMBER</div>
                     <div class="mt-0.5 opacity-75 uppercase tracking-tighter">月繳制會員</div>
@@ -65,7 +65,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (月繳提醒強化版) -->
+        <!-- 第 1 層：VIP 驗證區 -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -82,7 +82,7 @@
                     </h4>
                     <p id="vip-intro-text" class="text-sm text-slate-600 leading-relaxed">
                         請輸入 VIP 授權碼以解鎖<strong>翻譯與書寫功能之無限使用次數</strong>。 AI 深度解析為進階加值服務，需自行開通 API Key。<br>
-                        <span class="text-[11px] text-slate-400 italic">Enter code for unlimited Translation & Writing mechanics. AI insights require your own API Key.</span>
+                        <span class="text-[11px] text-slate-400 italic">Enter code to unlock unlimited Translation & Writing mechanics. AI insights require your own API Key.</span>
                     </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">雲端連線狀態 / Sync Status</h5>
@@ -100,7 +100,6 @@
                                 <div id="vip-loader" class="loader hidden w-4 h-4 border-2 border-white/30 border-t-white"></div>
                             </button>
                         </div>
-                        <!-- 針對 09.jpg 的明確提醒 -->
                         <div class="flex items-start gap-1.5 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
                             <i class="ph-fill ph-info text-emerald-600 mt-0.5"></i>
                             <p class="text-[10px] text-emerald-800 leading-tight">
@@ -130,7 +129,7 @@
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Activate AI Insights / 啟動 AI 引擎</h3>
                     <p class="text-sm text-indigo-700 mb-4 leading-relaxed">
-                        無限次數已解鎖！若要開啟注音發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
+                        次數限制已解鎖！若要開啟注音發音與成語等<strong>進階加值服務</strong>，請連結您的 Google Gemini API Key。<br>
                         <span class="text-[11px] italic">Unlock Zhuyin & Idioms (Premium Add-on) by connecting your API Key.</span>
                     </p>
                     <div class="flex flex-col gap-4">
@@ -232,7 +231,7 @@
                         <p class="text-slate-400 text-sm animate-pulse font-medium">AI Analyzing... / AI 分析中...</p>
                     </div>
 
-                    <!-- 狀態 2: 異常診斷區 (符合 06.jpg) -->
+                    <!-- 狀態 2: 異常診斷區 (加註責任說明) -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-300">
                         <div class="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl">
                             <i class="ph ph-warning-circle"></i>
@@ -270,13 +269,14 @@
                     <div id="vip-only-content" class="hidden space-y-6">
                         <div id="badge-ai" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight shadow-sm">VIP AI INSIGHTS</div>
                         
+                        <!-- VIP 服務邊界提示 (雙語優化) -->
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold">
                                 <i class="ph ph-warning-circle"></i> 標註此為 VIP 額外加值服務。
                             </p>
                             <p class="text-[9px] text-amber-700 leading-relaxed">
                                 如需注音、發音、成語等解析，需自行開通 Google API Key。連線穩定性與 Token 消耗與本工作室軟體服務無關。<br>
-                                <span class="italic opacity-75">Advanced analysis requires a personal API Key. Abrakai Studio is not responsible for 3rd-party API connectivity.</span>
+                                <span class="italic opacity-75">Advanced analysis requires a personal API Key. Abrakai Studio is not responsible for 3rd-party API connectivity or token limits.</span>
                             </p>
                         </div>
 
@@ -303,7 +303,7 @@
                         </div>
                     </div>
 
-                    <!-- 狀態 4: VIP 但無燃料 (針對 08.jpg 新增英文說明) -->
+                    <!-- 狀態 4: VIP 但無燃料 (加註雙語說明) -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
@@ -312,8 +312,8 @@
                         <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-left w-full max-w-md shadow-sm">
                             <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-3 border-b border-indigo-200 pb-2">關於加值服務 / ABOUT PREMIUM ADD-ONS</h4>
                             <p class="text-[11px] text-indigo-700 leading-relaxed mb-4">
-                                <strong>中文：</strong> 您已擁有無限次數的翻譯與書寫權限。如需啟動進階 AI 解析（注音、成語），請自行連結金鑰燃料。請注意，API 維護與連線問題與本平台無涉。<br><br>
-                                <span class="italic font-medium"><strong>English:</strong> You have unlimited access to translation and writing mechanics. To enable advanced AI insights (Zhuyin, Idioms), please connect your own API Key. Note: API maintenance and connectivity issues are independent of this platform.</span>
+                                您已擁有無限次數的翻譯與書寫權限。如需啟動進階 AI 解析，請自行連結金鑰燃料。請注意，<strong>API 維護與連線問題與本平台無涉</strong>。<br><br>
+                                <span class="italic font-medium">You have unlimited access to translation and writing mechanics. To enable advanced AI insights, please connect your own API Key. Abrakai Studio is not responsible for 3rd-party API connectivity.</span>
                             </p>
                             <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95">
                                 連結 Google API Key / Activate Add-ons
@@ -328,7 +328,7 @@
                         </div>
                         <h3 class="text-xl font-bold text-slate-800">Upgrade to Abrakai VIP</h3>
                         <p class="text-sm text-slate-500 max-w-sm mx-auto">
-                            升級 VIP 以解除<strong>翻譯與書寫教學</strong>之次數限制，並可選配 AI 加值分析服務。
+                            升級 VIP 以解除<strong>翻譯與書寫教學</strong>之次數限制。
                         </p>
                         <button onclick="document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl active:scale-95">
                             Enter VIP Code / 解鎖無限使用
@@ -472,7 +472,7 @@
         }
     </script>
 
-    <!-- UI & AI Engine (iOS Stability Fix) -->
+    <!-- UI & AI Engine (iOS Zero-Latency & Multi-Engine Fix) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
@@ -524,32 +524,28 @@
             updateGlobalUI(); return true;
         }
 
-        // iPhone 語音深度優化 (解決重複與拼音)
+        // 全新語音引擎：同步啟動 (修復 iOS 靜音與疊音)
         function speak(text) {
             const now = Date.now();
-            // iOS 需要較長的冷卻時間 (1秒) 來清空底層語音緩存
-            if (now - lastSpeakTime < 1000) return; 
+            if (now - lastSpeakTime < 600) return; // 基礎防震盪
             lastSpeakTime = now;
 
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             
-            // 強制取消所有播放隊列
+            // 核心修復：立即同步取消
             window.speechSynthesis.cancel(); 
-            
-            // 延遲 250ms 啟動，確保 iOS 的 cancel 指令已生效
-            setTimeout(() => {
-                // 語音脫水技術：嚴格只取漢字，徹底過濾拼音括號與字母
-                const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || "";
-                if (!pureChinese) return;
 
-                const ut = new SpeechSynthesisUtterance(pureChinese);
-                ut.lang = 'zh-TW'; 
-                ut.rate = 0.8; // 專業語速
-                
-                // 註冊結束回調防止 iOS 引擎休眠
-                ut.onend = function() { console.log('Speech Ended'); };
-                window.speechSynthesis.speak(ut);
-            }, 250); 
+            // 語音脫水：僅漢字，杜絕拼音干擾
+            let pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || "";
+            // 如果過濾完沒東西，改讀原始輸入的第一個字(保險)
+            if (!pureChinese) pureChinese = text.charAt(0);
+
+            const ut = new SpeechSynthesisUtterance(pureChinese);
+            ut.lang = 'zh-TW'; 
+            ut.rate = 0.8; 
+            
+            // iOS 關鍵：必須同步呼叫 speak()，不能放在 setTimeout 裡
+            window.speechSynthesis.speak(ut);
         }
 
         async function doTranslate() {
@@ -589,6 +585,7 @@
             document.getElementById('learning-dashboard').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
             
+            // 左側書寫區恆定加載
             document.getElementById('hanzi-target').innerHTML = '';
             writer = HanziWriter.create('hanzi-target', char, { 
                 width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6'
@@ -668,19 +665,25 @@
             const pb = document.getElementById('play-char-btn');
             pb.classList.toggle('hidden', !data.zhuyin);
             pb.onclick = () => speak(char);
+            
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
             if (data.polyphonic && data.polyphonic.length > 0) {
                 data.polyphonic.forEach(p => {
                     const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 cursor-pointer border border-purple-200 hover:bg-purple-200 transition-all';
-                    d.textContent = p.zhuyin; d.onclick = () => speak(p.homophone || char); polyDisp.appendChild(d);
+                    d.textContent = p.zhuyin; 
+                    // 修復點擊行為：如果 AI 提供引導字則讀引導字，否則讀本字
+                    d.onclick = () => speak(p.homophone || char); 
+                    polyDisp.appendChild(d);
                 });
             }
+
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
                 const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100'; 
                 s.textContent = w; s.onclick = () => speak(w); words.appendChild(s); 
             });
+
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             if (data.idioms) data.idioms.forEach(i => {
                 const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center hover:bg-white transition-all shadow-sm';
@@ -711,7 +714,7 @@
                 executeAIFetch(currentTargetChar);
             });
             document.getElementById('remove-key-btn').addEventListener('click', () => {
-                if (confirm('是否登出？ / Sign out?')) { localStorage.clear(); location.reload(); }
+                if (confirm('是否登出並清除所有設定？ / Sign out and clear?')) { localStorage.clear(); location.reload(); }
             });
         };
     </script>

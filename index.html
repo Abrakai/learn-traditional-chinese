@@ -65,7 +65,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (商業定義與月繳提醒) -->
+        <!-- 第 1 層：VIP 驗證區 -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <!-- 第 2 層：API Key 教學 (更新最新模型清單，包含 2.5/3.1 系列) -->
+        <!-- 第 2 層：API Key 教學 -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
@@ -137,7 +137,6 @@
                             <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                             <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Activate 連結啟動</button>
                         </div>
-                        <!-- 模型切換：針對執行長影片環境更新 ID -->
                         <div class="flex flex-col sm:flex-row items-center gap-3 bg-white/50 p-3 rounded-xl border border-indigo-100">
                             <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
                                 <i class="ph ph-gear"></i> AI Engine Selection 引擎版本：
@@ -194,7 +193,7 @@
             </div>
         </section>
 
-        <!-- 學習面板 (Study Center) -->
+        <!-- 學習面板 -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
@@ -286,9 +285,10 @@
                                     <button id="play-char-btn" class="hidden w-8 h-8 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-transform active:scale-90"><i class="ph-fill ph-speaker-high"></i></button>
                                 </div>
                             </div>
+                            <!-- 破音字區：提供詞語範例以供發音 -->
                             <div id="poly-container" class="bg-purple-50 p-4 rounded-2xl border border-purple-100 shadow-sm">
-                                <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1">Polyphonic / 破音字 (Text Only)</div>
-                                <div id="polyphonic-display" class="flex flex-wrap gap-2"></div>
+                                <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1">Polyphonic / 破音字</div>
+                                <div id="polyphonic-display" class="flex flex-col gap-2"></div>
                             </div>
                         </div>
                         <div>
@@ -297,7 +297,7 @@
                         </div>
                         <div id="idioms-section">
                             <h3 class="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph ph-quotes text-rose-500 text-lg"></i> Idioms / 成語解析</h3>
-                            <div id="idioms-container" class="space-y-2"></div>
+                            <div id="idioms-container" class="space-y-3"></div>
                         </div>
                     </div>
 
@@ -468,12 +468,12 @@
         }
     </script>
 
-    <!-- UI & AI Engine Logic (Flash-Lite Priority & Cache & Zero-Latency Voice) -->
+    <!-- UI & AI Engine Logic (Flash-Lite Optimized & Smart Cache) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
         let isFetching = false; 
-        const charCache = {}; 
+        const charCache = {}; // 智慧快取：點過的字不扣點
         let currentTargetChar = "";
         let lastSpeakTime = 0;
 
@@ -585,7 +585,6 @@
             if (charCache[char]) { 
                 renderResult(char, charCache[char]); 
                 document.getElementById('vip-only-content').classList.remove('hidden'); 
-                updateEngineStatus(`Data Cached / 從快取載入`);
                 return; 
             }
 
@@ -602,7 +601,6 @@
             loader.classList.remove('hidden');
 
             const selectedMode = document.getElementById('model-selector').value;
-            // 根據執行長提供的顯示清單精確匹配 API ID
             const models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-3.1-pro", "gemini-3-flash", "gemini-2.0-flash"];
             const modelList = selectedMode === 'auto' ? models : [selectedMode];
             
@@ -612,7 +610,8 @@
             for (const modelName of modelList) {
                 try {
                     updateEngineStatus(`Connecting: ${modelName}`);
-                    const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "homophone": "同音字"}], "words": ["詞1"], "idioms": [{"idiom": "成語", "meaning": "意思"}]}`;
+                    // 針對破音字詞語與成語英譯更新提示語
+                    const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["詞1", "詞2"]}], "words": ["詞1", "詞2"], "idioms": [{"idiom": "成語", "meaning": "中文意思", "english": "English meaning"}]}`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, { 
                         method: 'POST', headers: {'Content-Type': 'application/json'}, 
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
@@ -637,11 +636,7 @@
                     break; 
                 } catch (err) { 
                     console.warn(`${modelName} failed:`, err.message);
-                    // 如果是手動選取的，直接顯示錯誤診斷，不跳轉備援
-                    if (selectedMode !== 'auto') {
-                        finalErrorMsg = err.message;
-                        break;
-                    }
+                    if (selectedMode !== 'auto') { finalErrorMsg = err.message; break; }
                 }
             }
 
@@ -669,35 +664,55 @@
         }
 
         function renderResult(char, data) {
+            // 1. 注音與主發音
             document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn');
             pb.classList.toggle('hidden', !data.zhuyin);
             pb.onclick = () => speak(char);
             
+            // 2. 破音字：改為語詞發音方案 (解決執行長提到的 iPhone 重疊音問題)
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
             if (data.polyphonic && data.polyphonic.length > 0) {
                 data.polyphonic.forEach(p => {
-                    const d = document.createElement('div'); 
-                    d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 border border-purple-200 cursor-default';
-                    d.textContent = p.zhuyin; 
-                    polyDisp.appendChild(d);
+                    const wrap = document.createElement('div');
+                    wrap.className = 'bg-white p-2 rounded-lg border border-purple-100 shadow-sm flex items-center justify-between';
+                    let examplesHTML = '';
+                    if(p.examples) {
+                        p.examples.forEach(ex => {
+                            examplesHTML += `<button onclick="speak('${ex}')" class="text-[10px] bg-purple-50 text-purple-600 px-2 py-1 rounded-md hover:bg-purple-100 transition-all font-bold">🔊 ${ex}</button>`;
+                        });
+                    }
+                    wrap.innerHTML = `
+                        <span class="text-sm font-black text-purple-800">${p.zhuyin}</span>
+                        <div class="flex gap-1">${examplesHTML}</div>
+                    `;
+                    polyDisp.appendChild(wrap);
                 });
             }
 
+            // 3. 詞彙
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
                 const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100'; 
                 s.textContent = w; s.onclick = () => speak(w); words.appendChild(s); 
             });
 
+            // 4. 成語：加入英文翻譯 (針對執行長營運需求)
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             if (data.idioms && data.idioms.length > 0) {
                 document.getElementById('idioms-section').classList.remove('hidden');
                 data.idioms.forEach(i => {
                     const div = document.createElement('div'); 
-                    div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center hover:bg-white transition-all shadow-sm';
-                    div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic">${i.meaning}</small></span><button class="text-rose-400 p-2 hover:scale-110 transition-all"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
+                    div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-start hover:bg-white transition-all shadow-sm';
+                    div.innerHTML = `
+                        <div class="flex-1 pr-4">
+                            <div class="text-slate-800">${i.idiom}</div>
+                            <div class="text-[11px] text-slate-500 font-normal mt-1">${i.meaning}</div>
+                            <div class="text-[10px] text-indigo-500 font-bold mt-1 italic border-t border-slate-100 pt-1">${i.english || "Click for AI insight"}</div>
+                        </div>
+                        <button class="text-rose-400 p-2 hover:scale-110 transition-all flex-shrink-0"><i class="ph-fill ph-speaker-high text-xl"></i></button>
+                    `;
                     div.querySelector('button').onclick = () => speak(i.idiom); 
                     idioms.appendChild(div);
                 });

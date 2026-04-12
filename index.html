@@ -63,7 +63,6 @@
                     <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
                         <i class="ph ph-shield-check text-emerald-600"></i> 授權驗證 / License Auth
                     </h4>
-                    <!-- 此段文字將由 JS 動態更新，避免 22.jpg 中的誤導情況 -->
                     <p id="vip-intro-text" class="text-sm text-slate-600 leading-relaxed">
                         請輸入您的 VIP 授權碼以解鎖全部進階 AI 教學功能與<strong>無限使用次數</strong>。
                     </p>
@@ -166,21 +165,25 @@
             </div>
 
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 筆畫區 (所有額度內使用者均可體驗) -->
+                <!-- 筆畫區 (雙語按鈕優化) -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
                         <span class="text-[10px] font-black uppercase tracking-widest">Writing Mechanics</span>
                     </div>
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 mt-4"></svg>
-                    <div class="flex gap-3 mt-8 w-full max-w-[220px]">
-                        <button id="animate-stroke-btn" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">Animate</button>
-                        <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">跟著嘗試</button>
+                    <div class="flex flex-col gap-2 mt-8 w-full max-w-[220px]">
+                        <button id="animate-stroke-btn" class="bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">
+                            Animate 播放動畫
+                        </button>
+                        <button id="quiz-stroke-btn" class="bg-orange-500 text-white py-3 rounded-xl font-bold shadow-md text-xs active:scale-95 transition-all">
+                            Practice 跟著嘗試
+                        </button>
                     </div>
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
 
-                <!-- AI 解析區 / VIP 轉化引導區 -->
+                <!-- AI 解析區 / VIP 轉化引導區 (雙語化說明優化) -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 space-y-8 relative bg-white">
                     
                     <!-- 狀態 A: 已完全解鎖 (VIP + API Key) -->
@@ -209,24 +212,32 @@
                         </div>
                     </div>
 
-                    <!-- 狀態 B: VIP 但沒有 API Key (解釋為什麼內容是空的) -->
+                    <!-- 狀態 B: VIP 但沒有 API Key (中英文對照說明) -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center py-6 text-center space-y-6 animate-in fade-in zoom-in duration-300">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-slate-800 mb-2">VIP Membership Active!</h3>
-                            <p class="text-sm text-slate-500 max-w-sm mx-auto">
-                                密碼正確！已為您解除試用限制。為了啟動 AI 注音、發音與成語解析，您還需要「連網啟動 AI 引擎」。
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">VIP Membership Active!<br><small class="text-indigo-600">會員資格已啟動</small></h3>
+                            <p class="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                                密碼正確！已為您解除試用限制。<br>為了啟動 AI 注音、發音與成語解析，您還需要「連結 AI 引擎」。<br>
+                                <span class="text-[11px] block mt-1 italic">Code verified! Unlimited access granted. To enable AI Zhuyin, Audio, and Idioms, please connect the engine.</span>
                             </p>
                         </div>
-                        <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100 text-left w-full max-w-md">
-                            <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-2">為什麼現在沒有內容？ / Why is it empty?</h4>
-                            <p class="text-[11px] text-indigo-700 leading-relaxed">
-                                深度解析功能是由 <strong>Google Gemini</strong> 提供的即時運算服務。為了確保您的專屬隱私與最佳效能，VIP 模組採用「BYOK (自備金鑰)」模式。這就像您買了頂級跑車(VIP)，現在只需加入燃油(API Key)即可發動。
-                            </p>
-                            <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="mt-4 w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95">
-                                即刻連結 Google API Key
+                        <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-left w-full max-w-md">
+                            <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-3 border-b border-indigo-200 pb-2">為什麼現在沒有內容？ / WHY IS IT EMPTY?</h4>
+                            <div class="space-y-4 text-[11px] text-indigo-700 leading-relaxed">
+                                <p>
+                                    <strong>中文說明：</strong><br>
+                                    深度解析功能由 <strong>Google Gemini</strong> 提供即時運算。為了確保您的個人隱私與效能，VIP 模組採用「自備金鑰 (BYOK)」模式。這就像您購買了頂級跑車 (VIP)，現在只需加入燃油 (API Key) 即可發動。
+                                </p>
+                                <p class="italic border-t border-indigo-100 pt-3">
+                                    <strong>English Guidance:</strong><br>
+                                    AI insights are powered by <strong>Google Gemini</strong>'s real-time computing. To ensure privacy and performance, we use a "Bring Your Own Key" (BYOK) model. Think of the VIP access as a sports car; you just need to add the fuel (API Key) to start the engine.
+                                </p>
+                            </div>
+                            <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="mt-5 w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95">
+                                立即申請連結 / Activate API Key
                             </button>
                         </div>
                     </div>
@@ -238,7 +249,7 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-slate-800 mb-2">Upgrade to Abrakai VIP</h3>
-                            <p class="text-sm text-slate-500 max-w-[500px] mx-auto px-4">
+                            <p class="text-sm text-slate-500 max-w-[500px] mx-auto px-4 leading-relaxed">
                                 您正在試用強大的中文字書寫系統！<br>
                                 加入 VIP 即可解鎖完整 AI 語言解析引擎與雲端同步功能。<br>
                                 <span class="text-[11px] text-slate-400 block mt-2">Unlock the full AI engine and cloud sync for deep Hanzi insights.</span>
@@ -284,7 +295,7 @@
             <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase font-bold">
                 &copy; <span id="current-year"></span> Traditional Chinese Learning Hub. (Taiwan Edition)
             </p>
-            <div class="mt-6 max-w-2xl mx-auto">
+            <div class="mt-6 max-w-2xl mx-auto px-4">
                 <p class="text-slate-400 text-[9px] leading-relaxed text-justify md:text-center italic">
                     免責聲明 (Disclaimer)：本系統所提供之 AI 語言解析、注音及翻譯功能，皆基於 Google Gemini 雲端運算結果。阿布拉工作室僅提供軟體展示架構與學習介面，不保證 AI 運算結果之百分之百準確性。所有 VIP 授權碼僅供本平台之特定功能解鎖使用，使用者需自備合法之 API Key 以啟動雲端運算引擎。
                 </p>
@@ -416,7 +427,6 @@
                     freePromoPanel.classList.add('hidden');
                 }
             } else {
-                // 修正 22.jpg 中的邏輯顯示：動態切換引導文字
                 quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; 
                 
                 if (freeUsageCount >= MAX_FREE_USES) {
@@ -446,7 +456,6 @@
         function speak(text) {
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel();
-            // 自然停頓優化：避開符號
             const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }
@@ -493,7 +502,6 @@
                 width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6'
             });
 
-            // VIP 且具備燃料 (API Key) 才能載入 AI 資料
             if (!isVIP || !activeApiKey) { 
                 document.getElementById('dashboard-content').classList.remove('hidden'); 
                 return; 

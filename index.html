@@ -11,60 +11,6 @@
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- Firebase Cloud Auth & Firestore -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-
-        // 執行長專屬的 Firebase 金鑰配置 (對接 abra-learn-zh-vip)
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
-            authDomain: "abra-learn-zh-vip.firebaseapp.com",
-            projectId: "abra-learn-zh-vip",
-            storageBucket: "abra-learn-zh-vip.firebasestorage.app",
-            messagingSenderId: "968781909500",
-            appId: "1:968781909500:web:0457924ec29644ea6a7679"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // 初始化匿名登入 (確保連線具備訪客證)
-        signInAnonymously(auth).catch((error) => console.error("Firebase Auth Error:", error));
-
-        // 雲端強韌驗證模組
-        window.checkVipCodeInCloud = async function(code) {
-            try {
-                // 設定 8 秒逾時保護，防止按鈕無限旋轉
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Request Timeout")), 8000)
-                );
-                
-                const fetchPromise = (async () => {
-                    const docRef = doc(db, "vip_codes", code);
-                    const docSnap = await getDoc(docRef);
-                    return docSnap;
-                })();
-
-                const docSnap = await Promise.race([fetchPromise, timeoutPromise]);
-                
-                if (docSnap.exists()) {
-                    return { valid: true };
-                } else {
-                    return { valid: false, error: "Access Denied: Code not active in cloud." };
-                }
-            } catch (error) {
-                console.error("Cloud Connection Error Detail:", error);
-                let userFriendlyError = "Cloud sync failed.";
-                if (error.message.includes("permission")) userFriendlyError = "Database Permission Denied. Check Rules.";
-                if (error.message.includes("Timeout")) userFriendlyError = "Network Timeout. Try again.";
-                return { valid: false, error: userFriendlyError };
-            }
-        };
-    </script>
-
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .char-btn.active { ring: 4px; ring-color: #ef4444; background-color: #fee2e2; }
@@ -102,7 +48,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 (Cloud Enabled) -->
+        <!-- 第 1 層：VIP 驗證區 -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -115,22 +61,14 @@
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
-                        <i class="ph ph-shield-check text-emerald-600"></i> Active Protection
+                        <i class="ph ph-shield-check text-emerald-600"></i> Live Protection
                     </h4>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-2 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                            <i class="ph ph-check-circle-fill text-emerald-500 mt-0.5"></i>
-                            <div class="text-sm text-emerald-900 leading-tight">
-                                <strong class="block">Live Cloud Verification</strong>
-                                <span>Code is checked against the <strong>Abrakai Studio Cloud</strong>. No bypass possible.</span>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        您的密碼將與 <strong>Abrakai Studio Cloud</strong> 進行實時比對。若驗證按鈕持續旋轉超過 5 秒，請檢查網路連線或重新整理頁面。
+                    </p>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Security Disclaimer</h5>
-                        <p class="text-[10px] text-slate-500 leading-relaxed italic">
-                            System security powered by Google Firestore. Any attempt to bypass cloud validation will be blocked.
-                        </p>
+                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Security Status</h5>
+                        <div id="auth-status-msg" class="text-[10px] text-emerald-600 font-bold italic">Cloud System Initializing...</div>
                     </div>
                 </div>
 
@@ -261,12 +199,105 @@
         </div>
     </footer>
 
+    <!-- Firebase System Module (The Heart of Cloud Auth) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+        // 配置資訊
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
+            authDomain: "abra-learn-zh-vip.firebaseapp.com",
+            projectId: "abra-learn-zh-vip",
+            storageBucket: "abra-learn-zh-vip.firebasestorage.app",
+            messagingSenderId: "968781909500",
+            appId: "1:968781909500:web:0457924ec29644ea6a7679"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let userAuthenticated = false;
+
+        // 監控身份狀態
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userAuthenticated = true;
+                document.getElementById('auth-status-msg').textContent = "Cloud System Ready (Auth Active)";
+                console.log("Firebase Anonymous Auth Success.");
+            } else {
+                signInAnonymously(auth);
+            }
+        });
+
+        // 綁定 VIP 解鎖按鈕事件
+        const vipBtn = document.getElementById('save-vip-btn');
+        vipBtn.addEventListener('click', async () => {
+            const code = document.getElementById('vip-code-input').value.trim();
+            const btnText = document.getElementById('vip-btn-text');
+            const loader = document.getElementById('vip-loader');
+
+            if (!code) { alert("Please enter a code."); return; }
+
+            // 執行長緊急後門 (永遠最速放行)
+            if (code === 'ABRA-ADMIN-PASS') { 
+                grantVipAccess(); 
+                alert("Admin Override Success."); 
+                return; 
+            }
+
+            // 開始旋轉
+            vipBtn.disabled = true;
+            btnText.textContent = "Verifying...";
+            loader.classList.remove('hidden');
+
+            try {
+                // 強制超時保護 (5秒內沒結果就報錯)
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+                const fetchTask = (async () => {
+                    const docRef = doc(db, "vip_codes", code);
+                    const docSnap = await getDoc(docRef);
+                    return docSnap;
+                })();
+
+                const docSnap = await Promise.race([fetchTask, timeout]);
+
+                if (docSnap.exists()) {
+                    grantVipAccess();
+                    alert("VIP Unlocked Successfully!");
+                } else {
+                    alert("Access Denied: Code not found in cloud database.");
+                }
+            } catch (err) {
+                console.error("Cloud Auth Error:", err);
+                if (err.message === "Timeout") {
+                    alert("Network Timeout. Google Cloud is not responding. Please try again.");
+                } else {
+                    alert("Cloud Sync Error. Please check if Firestore Rules are set to 'allow read'.");
+                }
+            } finally {
+                // 強制停止旋轉
+                vipBtn.disabled = false;
+                btnText.textContent = "Unlock";
+                loader.classList.add('hidden');
+            }
+        });
+
+        function grantVipAccess() {
+            localStorage.setItem('abra_vip_time', Date.now().toString());
+            localStorage.setItem('abra_vip_status', 'active');
+            location.reload(); // 重新整理以套用 VIP 狀態
+        }
+    </script>
+
+    <!-- UI Interaction Script -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
-        let isFetching = false; const charCache = {}; let synthVoices = [];
+        let isFetching = false; const charCache = {};
 
-        function initApp() {
+        function initUI() {
             try {
                 const savedVipTime = localStorage.getItem('abra_vip_time');
                 const now = Date.now();
@@ -277,18 +308,10 @@
                 if (savedDate !== today) { localStorage.setItem('abra_usage_date', today); localStorage.setItem('abra_usage_count', '0'); freeUsageCount = 0; }
                 else { freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10); }
             } catch (e) {}
-            updateUIState();
+            updateGlobalUI();
         }
 
-        function checkAndConsumeQuota() {
-            if (isVIP) return true;
-            if (freeUsageCount >= MAX_FREE_USES) { toggleUI('vip-setup-section', true); window.scrollTo({ top: 0, behavior: 'smooth' }); return false; }
-            freeUsageCount++;
-            localStorage.setItem('abra_usage_count', freeUsageCount.toString());
-            updateUIState(); return true;
-        }
-
-        function updateUIState() {
+        function updateGlobalUI() {
             const quotaDisplay = document.getElementById('quota-display');
             const quotaCountSpan = document.getElementById('quota-count');
             const removeBtn = document.getElementById('remove-key-btn');
@@ -297,154 +320,124 @@
                 quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP UNLIMITED';
                 removeBtn.classList.remove('hidden');
                 document.querySelectorAll('[id^="badge-"]').forEach(el => { if (el.id !== 'badge-ai') el.textContent = "VIP PREMIUM ACTIVE"; });
-                if (!activeApiKey) { toggleUI('vip-setup-section', false); toggleUI('api-key-setup', true); } 
-                else { toggleUI('vip-setup-section', false); toggleUI('api-key-setup', false); }
+                document.getElementById('vip-setup-section').classList.add('hidden');
+                if (!activeApiKey) { document.getElementById('api-key-setup').classList.remove('hidden'); } 
+                else { document.getElementById('api-key-setup').classList.add('hidden'); }
             } else { quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; }
         }
 
-        function safeStr(str) { return (str && typeof str === 'string') ? str.trim() : ''; }
-        function toggleUI(id, show) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !show); }
-        
-        function speakText(text) {
-            if (!text || !window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const sanitized = text.replace(/[\/\-_]/g, ' '); 
-            const ut = new SpeechSynthesisUtterance(sanitized);
-            ut.lang = 'zh-TW'; ut.rate = 0.85;
-            window.speechSynthesis.speak(ut);
+        function checkQuota() {
+            if (isVIP) return true;
+            if (freeUsageCount >= MAX_FREE_USES) { 
+                document.getElementById('vip-setup-section').classList.remove('hidden'); 
+                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                return false; 
+            }
+            freeUsageCount++;
+            localStorage.setItem('abra_usage_count', freeUsageCount.toString());
+            updateGlobalUI(); return true;
         }
 
-        async function translateEnglishToChinese() {
-            if (!checkAndConsumeQuota()) return;
-            const input = document.getElementById('eng-input'); const word = safeStr(input.value);
+        function speak(text) {
+            if (!text || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const ut = new SpeechSynthesisUtterance(text.replace(/[\/\-_]/g, ' '));
+            ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
+        }
+
+        async function doTranslate() {
+            if (!checkQuota()) return;
+            const word = document.getElementById('eng-input').value.trim();
             if (!word) return;
-            toggleUI('translate-loader', true);
+            document.getElementById('translate-loader').classList.remove('hidden');
             try {
                 const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
                 const data = await res.json();
-                const trans = safeStr(data?.responseData?.translatedText).replace(/[^\u4e00-\u9fa5]/g, '');
-                if (trans) { document.getElementById('zh-input').value = trans; executeSplitInternal(); }
-            } catch (err) {} finally { toggleUI('translate-loader', false); }
+                const trans = data?.responseData?.translatedText.replace(/[^\u4e00-\u9fa5]/g, '') || "";
+                if (trans) { document.getElementById('zh-input').value = trans; executeSplit(); }
+            } catch (err) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
         }
 
-        function splitChineseCharacters() { if (!checkAndConsumeQuota()) return; executeSplitInternal(); }
-        function executeSplitInternal() {
-            const text = safeStr(document.getElementById('zh-input').value);
+        function executeSplit() {
             const container = document.getElementById('char-container');
             container.innerHTML = '';
-            const chars = text.split('');
+            const chars = document.getElementById('zh-input').value.split('');
             chars.forEach(char => {
                 if (!/[\u4e00-\u9fa5]/.test(char)) return;
                 const btn = document.createElement('button');
-                btn.className = 'char-btn w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-2xl font-bold flex items-center justify-center transition-all hover:border-emerald-500 hover:shadow-lg focus:outline-none';
-                btn.textContent = char; btn.onclick = () => loadCharacterTeaching(char, btn);
+                btn.className = 'char-btn w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-2xl font-bold flex items-center justify-center transition-all hover:border-emerald-500 focus:outline-none';
+                btn.textContent = char; btn.onclick = () => loadTeaching(char, btn);
                 container.appendChild(btn);
             });
         }
 
-        let writer = null; let currentBtn = null;
-        async function loadCharacterTeaching(char, btn) {
+        let writer = null;
+        async function loadTeaching(char, btn) {
             if (isFetching) return;
-            if (!isVIP) { toggleUI('vip-setup-section', true); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-            if (isVIP && !activeApiKey) { toggleUI('api-key-setup', true); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+            if (!isVIP) { document.getElementById('vip-setup-section').classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+            if (isVIP && !activeApiKey) { document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
             
             document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active', 'scale-105', 'ring-4', 'ring-red-400'));
-            btn.classList.add('active', 'scale-105', 'ring-4', 'ring-red-400'); currentBtn = btn;
+            btn.classList.add('active', 'scale-105', 'ring-4', 'ring-red-400');
             
-            toggleUI('learning-dashboard', true); toggleUI('dashboard-content', false); toggleUI('dashboard-loader', true);
+            document.getElementById('learning-dashboard').classList.remove('hidden');
+            document.getElementById('dashboard-content').classList.add('hidden');
+            document.getElementById('dashboard-loader').classList.remove('hidden');
             document.getElementById('current-learning-char').textContent = char;
-            initWriter(char);
+            
+            document.getElementById('hanzi-target').innerHTML = '';
+            writer = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true });
 
-            if (charCache[char]) { renderData(char, charCache[char]); finishLoad(); return; }
+            if (charCache[char]) { renderResult(char, charCache[char]); finalize(); return; }
             isFetching = true;
             try {
-                const data = await fetchAI(char); charCache[char] = data; renderData(char, data);
-            } catch (err) { alert("AI Sync Error. Please check Key."); } finally { isFetching = false; finishLoad(); }
+                const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "homophone": "同音字"}], "words": ["詞1"], "idioms": [{"idiom": "成語", "meaning": "意思"}]}`;
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeApiKey}`, { 
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
+                });
+                const result = await res.json();
+                const text = result.candidates[0].content.parts[0].text;
+                const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+                charCache[char] = data; renderResult(char, data);
+            } catch (err) { alert("AI Intelligence Connection Error."); } finally { isFetching = false; finalize(); }
         }
 
-        function finishLoad() { toggleUI('dashboard-loader', false); toggleUI('dashboard-content', true); }
-        function initWriter(char) {
-            document.getElementById('hanzi-target').innerHTML = '';
-            writer = HanziWriter.create('hanzi-target', char, {
-                width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true
-            });
-        }
+        function finalize() { document.getElementById('dashboard-loader').classList.add('hidden'); document.getElementById('dashboard-content').classList.remove('hidden'); }
 
-        async function fetchAI(char) {
-            const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "homophone": "同音字"}], "words": ["詞1"], "idioms": [{"idiom": "成語", "meaning": "意思"}]}`;
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeApiKey}`;
-            const res = await fetch(endpoint, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
-            const result = await res.json();
-            const text = result.candidates[0].content.parts[0].text;
-            return JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-        }
-
-        function renderData(char, data) {
+        function renderResult(char, data) {
             document.getElementById('zhuyin-display').textContent = data.zhuyin;
-            toggleUI('play-char-btn', !!data.zhuyin);
-            document.getElementById('play-char-btn').onclick = () => speakText(char);
-            
+            document.getElementById('play-char-btn').classList.remove('hidden');
+            document.getElementById('play-char-btn').onclick = () => speak(char);
             const poly = document.getElementById('polyphonic-display'); poly.innerHTML = '';
             if (data.polyphonic) data.polyphonic.forEach(p => {
                 const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 cursor-pointer border border-purple-200';
-                d.textContent = p.zhuyin; d.onclick = () => speakText(p.homophone || char); poly.appendChild(d);
+                d.textContent = p.zhuyin; d.onclick = () => speak(p.homophone || char); poly.appendChild(d);
             });
-
             const words = document.getElementById('words-container'); words.innerHTML = '';
             data.words.forEach(w => { const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700'; s.textContent = w; words.appendChild(s); });
-
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             data.idioms.forEach(i => {
-                const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center group hover:bg-white hover:shadow-md transition-all';
-                div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic leading-relaxed">${i.meaning}</small></span><button class="text-rose-400 p-2 hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
-                div.querySelector('button').onclick = () => speakText(i.idiom); idioms.appendChild(div);
+                const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center hover:bg-white transition-all';
+                div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic">${i.meaning}</small></span><button class="text-rose-400 p-2"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
+                div.querySelector('button').onclick = () => speak(i.idiom); idioms.appendChild(div);
             });
-        }
-
-        function grantVip() {
-            isVIP = true;
-            try { 
-                localStorage.setItem('abra_vip_time', Date.now().toString()); 
-                localStorage.setItem('abra_vip_status', 'active'); 
-            } catch(e){}
-            updateUIState();
         }
 
         window.onload = function() {
-            initApp();
-            document.getElementById('save-vip-btn').addEventListener('click', async () => {
-                const code = document.getElementById('vip-code-input').value.trim();
-                const btn = document.getElementById('save-vip-btn');
-                const btnText = document.getElementById('vip-btn-text');
-
-                if (code === 'ABRA-ADMIN-PASS') { grantVip(); alert("Admin Override Active."); return; }
-                
-                toggleUI('vip-loader', true);
-                btnText.textContent = "Verifying...";
-                btn.disabled = true;
-
-                if (window.checkVipCodeInCloud) {
-                    const res = await window.checkVipCodeInCloud(code);
-                    if (res.valid) { grantVip(); alert("Cloud Verification Success. VIP Unlocked."); }
-                    else alert(res.error);
-                } else {
-                    alert("Cloud module not initialized. Please refresh.");
-                }
-
-                toggleUI('vip-loader', false);
-                btnText.textContent = "Unlock";
-                btn.disabled = false;
-            });
-
+            initUI();
             document.getElementById('save-key-btn').addEventListener('click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();
-                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateUIState(); alert("AI Intelligence Active."); }
+                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateGlobalUI(); alert("AI Intelligence Active."); }
             });
-            document.getElementById('translate-btn').addEventListener('click', translateEnglishToChinese);
-            document.getElementById('split-btn').addEventListener('click', splitChineseCharacters);
+            document.getElementById('translate-btn').addEventListener('click', doTranslate);
+            document.getElementById('split-btn').addEventListener('click', () => { if(checkQuota()) executeSplit(); });
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => {
-                if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent Writing!' }); }
+                if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent!' }); }
+            });
+            document.getElementById('remove-key-btn').addEventListener('click', () => {
+                if (confirm('Sign out and reset status?')) { localStorage.clear(); location.reload(); }
             });
         };
     </script>

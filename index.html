@@ -51,11 +51,26 @@
             justify-content: center;
         }
         .pass-toggle-btn:hover { color: #64748b; }
+
+        /* Toast 動畫 */
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            10% { opacity: 1; transform: translate(-50%, 0); }
+            90% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+        .toast-animate { animation: slideUpFade 3s ease-in-out forwards; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col">
+<body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- 雲端異常橫幅 (網域授權與 Rules 診斷) -->
+    <!-- 系統全域 Toast 提示框 -->
+    <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all">
+        <i id="toast-icon" class="ph-fill text-lg"></i>
+        <span id="toast-msg"></span>
+    </div>
+
+    <!-- 雲端異常橫幅 -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">連線異常：請確認已在 Firebase Console 設定 Authorized domains 並發佈正確的 Rules。</span>
@@ -81,7 +96,11 @@
                 <div id="vip-expiry-display" class="hidden bg-white/10 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/20 flex items-center gap-1.5 transition-all">
                     <i class="ph ph-calendar"></i> <span id="vip-days-left">--</span> Days
                 </div>
-                <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700 hover:bg-red-800 border border-red-400 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
+                <!-- 個人設定按鈕 (新增) -->
+                <button id="profile-btn" class="hidden text-[10px] md:text-xs bg-red-700 hover:bg-red-800 border border-red-400 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm" onclick="openProfileModal()">
+                    <i class="ph ph-gear"></i> Profile
+                </button>
+                <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700 hover:bg-red-800 border border-red-400 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
                     <i class="ph ph-sign-out"></i> Log Out
                 </button>
             </div>
@@ -102,7 +121,7 @@
             
             <div class="p-6 md:p-10">
                 <div id="auth-forms" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-                    <!-- 客戶註冊區：Email 唯一制 + 密碼可視化切換 -->
+                    <!-- 客戶註冊區 -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號
@@ -126,7 +145,7 @@
                         </div>
                     </div>
 
-                    <!-- 客戶登入區：雙重驗證 + 密碼可視化切換 -->
+                    <!-- 客戶登入區 -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
@@ -151,7 +170,7 @@
                     </div>
                 </div>
 
-                <!-- 執行長管理儀表板 (智能容錯與自動運算) -->
+                <!-- 執行長管理儀表板 (v4.2 包含 CRUD 全功能) -->
                 <div id="admin-panel" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 pb-4 gap-4">
                         <div>
@@ -161,6 +180,8 @@
                             <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">Intelligent Database Approval</p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
+                            <!-- 新增會員按鈕 -->
+                            <button onclick="openAdminAddModal()" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-[10px] font-black border border-blue-200 hover:bg-blue-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-plus"></i> Add Member</button>
                             <input type="file" id="import-file" accept=".csv" class="hidden">
                             <button id="import-btn" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl text-[10px] font-black border border-indigo-200 hover:bg-indigo-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-upload-simple"></i> Import</button>
                             <button id="export-btn" class="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-black border border-emerald-200 hover:bg-emerald-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-download-simple"></i> Export</button>
@@ -326,10 +347,93 @@
         </div>
     </footer>
 
+    <!-- ========================================== -->
+    <!-- 模態框 (Modals) 區域 -->
+    <!-- ========================================== -->
+
+    <!-- 會員個人設定 Modal -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2"><i class="ph-fill ph-user-gear text-blue-500"></i> My Profile / 個人設定</h3>
+                <button onclick="closeProfileModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Registered Email (帳號不可改)</label>
+                    <input type="email" id="profile-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed font-medium">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Display Name (顯示名稱)</label>
+                    <input type="text" id="profile-name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">VIP Password (修改密碼)</label>
+                    <div class="relative">
+                        <input type="password" id="profile-pass" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all shadow-sm">
+                        <button type="button" onclick="togglePassVisibility('profile-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button onclick="closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm">Cancel</button>
+                    <button onclick="updateProfile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95">Save / 儲存設定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理員新增會員 Modal -->
+    <div id="admin-add-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 border-2 border-indigo-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                <h3 class="text-lg font-black text-indigo-900 tracking-tight flex items-center gap-2"><i class="ph-fill ph-user-plus text-indigo-500"></i> Add Member / 強制新增會員</h3>
+                <button onclick="closeAdminAddModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">User Email (登入帳號)</label>
+                    <input type="email" id="admin-add-email" placeholder="example@email.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">User Name (姓名)</label>
+                    <input type="text" id="admin-add-name" placeholder="Member Name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Password (預設密碼)</label>
+                    <div class="relative">
+                        <input type="password" id="admin-add-pass" placeholder="建議包含手機末碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all shadow-sm">
+                        <button type="button" onclick="togglePassVisibility('admin-add-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button onclick="closeAdminAddModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm">Cancel</button>
+                    <button onclick="adminForceAddUser()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-check"></i> Create 建立
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 刪除確認 Modal -->
+    <div id="confirm-delete-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-sm text-center animate-in zoom-in-95 duration-200">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner">
+                <i class="ph-fill ph-warning"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">Delete Member?</h3>
+            <p class="text-sm text-slate-500 mb-6">確定要刪除此會員嗎？資料將從雲端永久抹除無法復原。</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-bold transition-all text-sm">Cancel 取消</button>
+                <button id="confirm-delete-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95">Delete 刪除</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, getDocs, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -346,6 +450,19 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         const ADM_H = "QUJSQS1BRE1JTi1EQVNIQk9BUkQ=";
+
+        // Toast 提示系統
+        window.showToast = function(msg, isError = false) {
+            const toast = document.getElementById('system-toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').textContent = msg;
+            
+            toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all toast-animate ${isError ? 'bg-red-600 text-white' : 'bg-slate-800 text-emerald-400'}`;
+            icon.className = `ph-fill text-lg ${isError ? 'ph-warning-circle' : 'ph-check-circle'}`;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-animate'); }, 3000);
+        };
 
         onAuthStateChanged(auth, async (user) => {
             const statusEl = document.getElementById('auth-status-msg');
@@ -371,21 +488,21 @@
         });
 
         // ==========================================
-        // 註冊功能 (Email 唯一性檢查)
+        // 註冊功能
         // ==========================================
         document.getElementById('signup-btn').addEventListener('click', async () => {
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
-            if (!name || !email || !pass) { alert("Please fill all registration fields."); return; }
+            if (!name || !email || !pass) { showToast("請填寫完整註冊資料。", true); return; }
             
             try {
-                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_"); // 脫水作為 Document ID
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) { 
-                    alert("This Email is already registered. / 此信箱已被註冊，請直接登入。"); 
+                    showToast("此信箱已被註冊，請直接登入。", true); 
                     return; 
                 }
                 
@@ -393,21 +510,21 @@
                     name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", notes: "",
                     signupDate: new Date().toISOString(), status: "pending" 
                 });
-                alert("註冊成功！帳號已綁定信箱與您的密碼。\n請聯繫執行長核對匯款以正式開通權限。");
+                showToast("註冊成功！請聯繫執行長開通權限。");
                 ["reg-name","reg-email","reg-pass"].forEach(id => document.getElementById(id).value = '');
             } catch (e) { 
                 console.error(e);
-                alert("註冊失敗：請確認網路連線或 Firebase 權限規則設定。"); 
+                showToast("連線失敗：請確認網路或 Rules 設定。", true); 
             }
         });
 
         // ==========================================
-        // 登入功能 (雙欄位驗證與雲端密室比對)
+        // 登入功能
         // ==========================================
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const code = document.getElementById('login-vip-code').value.trim();
-            if (!code) return; // 密碼必填
+            if (!code) return; 
 
             document.getElementById('login-loader').classList.remove('hidden');
             document.getElementById('login-btn-text').textContent = "Verifying...";
@@ -429,7 +546,7 @@
 
                 // 2. 一般會員驗證
                 if (!email) {
-                    alert("請輸入註冊信箱 (Enter Email)。");
+                    showToast("請輸入註冊信箱 (Enter Email)。", true);
                     resetLoginBtn();
                     return;
                 }
@@ -441,19 +558,19 @@
                 if (docSnap.exists() && docSnap.data().password === code) {
                     const foundUser = docSnap.data();
                     if (foundUser.expiryDate && new Date(foundUser.expiryDate).getTime() < Date.now()) {
-                        alert("VIP access expired. / 授權已到期，請聯繫續約。");
+                        showToast("授權已到期，請聯繫續約。", true);
                     } else {
                         localStorage.setItem('abra_vip_code', docSnap.id);
                         localStorage.setItem('abra_vip_status', 'active');
                         location.reload();
                     }
                 } else {
-                    alert("Invalid Email or Password.\n信箱未註冊或密碼錯誤。");
+                    showToast("信箱未註冊或密碼錯誤。", true);
                 }
                 resetLoginBtn();
             } catch (err) {
                 console.error(err);
-                alert("Login Error: Check Cloud Connection or Rules.");
+                showToast("連線錯誤：請檢查雲端設定。", true);
                 resetLoginBtn();
             }
         });
@@ -464,15 +581,53 @@
         }
 
         // ==========================================
-        // 執行長管理面板 (智慧燈號與自動運算)
+        // 會員個人設定 (User Profile)
         // ==========================================
+        window.openProfileModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) return;
+            const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const user = docSnap.data();
+                document.getElementById('profile-email').value = user.email || emailId;
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-pass').value = user.password || '';
+                document.getElementById('profile-modal').classList.remove('hidden');
+            }
+        };
+
+        window.closeProfileModal = function() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        };
+
+        window.updateProfile = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const newName = document.getElementById('profile-name').value.trim();
+            const newPass = document.getElementById('profile-pass').value.trim();
+            if (!newName || !newPass) { showToast("姓名與密碼不可為空！", true); return; }
+
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                await updateDoc(docRef, { name: newName, password: newPass });
+                showToast("個人資料已成功更新！");
+                closeProfileModal();
+            } catch(e) {
+                showToast("儲存失敗，請重試。", true);
+            }
+        };
+
+        // ==========================================
+        // 執行長管理面板 (新增/刪除功能)
+        // ==========================================
+        let currentDeleteId = null;
+
         async function enterAdminMode() {
             document.getElementById('auth-forms').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
             
             const usersColl = collection(db, "artifacts", appId, "public", "data", "vip_codes");
             
-            // 匯出 CSV 監聽器
             document.getElementById('export-btn').addEventListener('click', async () => {
                 const snapshot = await getDocs(usersColl);
                 let csv = "Email,Name,Password,Account5,Plan(Months),RemittanceDate,ExpiryDate,Notes\n";
@@ -488,7 +643,6 @@
                 link.click();
             });
 
-            // 匯入 CSV 監聽器
             document.getElementById('import-btn').addEventListener('click', () => document.getElementById('import-file').click());
             document.getElementById('import-file').addEventListener('change', (e) => {
                 const file = e.target.files[0];
@@ -512,13 +666,12 @@
                         }, { merge: true });
                         count++;
                     }
-                    alert(`成功匯入/更新 ${count} 筆資料！`);
+                    showToast(`成功匯入/更新 ${count} 筆資料！`);
                     e.target.value = '';
                 };
                 reader.readAsText(file);
             });
 
-            // 實時資料載入與 UI 生成 (動態燈號)
             onSnapshot(usersColl, (snapshot) => {
                 const list = document.getElementById('admin-user-list');
                 list.innerHTML = '';
@@ -526,7 +679,6 @@
                     const user = docSnap.data();
                     const id = docSnap.id;
                     
-                    // 燈號判定
                     let lightHTML = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto" title="未開通"></div>';
                     if (user.expiryDate) {
                         const expiry = new Date(user.expiryDate).getTime();
@@ -547,28 +699,73 @@
                         <td class="px-2 py-3 align-middle">${lightHTML}</td>
                         <td class="px-2 py-3">
                             <div class="font-bold text-slate-700 text-sm">${user.name || 'N/A'}</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">${user.email}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 break-all max-w-[120px] md:max-w-none">${user.email}</div>
                             <div class="text-[10px] bg-red-50 text-red-600 px-1 inline-block rounded font-mono font-bold mt-1">${user.password || 'N/A'}</div>
                         </td>
                         <td class="px-2 py-3 space-y-1.5">
-                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="匯款帳號末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
+                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="匯款末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
                             <div class="flex gap-1">
                                 <input id="plan-${id}" value="${user.plan || ''}" placeholder="月數" class="w-12 border rounded px-1.5 py-1 text-[10px] text-center focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
                                 <input id="remit-${id}" value="${user.remittance || ''}" placeholder="匯款日 20260413" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
                             </div>
                         </td>
                         <td class="px-2 py-3 space-y-1.5">
-                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="到期日 (自動計算)" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none transition-colors shadow-sm bg-indigo-50/30">
+                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="到期日 (自動運算)" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none transition-colors shadow-sm bg-indigo-50/30">
                             <input id="notes-${id}" value="${user.notes || ''}" placeholder="備註..." class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
                         </td>
-                        <td class="px-2 py-3 text-center align-middle">
-                            <button onclick="saveUser('${id}')" class="bg-red-600 text-white px-4 py-3 rounded-xl font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-red-700 uppercase">SAVE</button>
+                        <td class="px-2 py-3 text-center align-middle whitespace-nowrap">
+                            <button onclick="saveUser('${id}')" class="bg-red-600 text-white px-3 py-2 rounded-lg font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-red-700 uppercase" title="儲存修改"><i class="ph-bold ph-floppy-disk"></i></button>
+                            <button onclick="confirmDeleteUser('${id}')" class="bg-slate-200 text-slate-600 px-3 py-2 rounded-lg font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-slate-300 uppercase ml-1" title="刪除會員"><i class="ph-bold ph-trash"></i></button>
                         </td>
                     `;
                     list.appendChild(tr);
                 });
-            }, (err) => { alert("權限拒絕：請確認已在 Firebase 發佈正確的 Rules。"); });
+            }, (err) => { showToast("權限拒絕：請確認已在 Firebase 發佈正確的 Rules。", true); });
         }
+
+        // 新增會員 Modal 控制
+        window.openAdminAddModal = function() { document.getElementById('admin-add-modal').classList.remove('hidden'); };
+        window.closeAdminAddModal = function() { document.getElementById('admin-add-modal').classList.add('hidden'); };
+
+        window.adminForceAddUser = async function() {
+            const email = document.getElementById('admin-add-email').value.trim().toLowerCase();
+            const name = document.getElementById('admin-add-name').value.trim();
+            const pass = document.getElementById('admin-add-pass').value.trim();
+            if (!email || !name || !pass) { showToast("請填寫完整資訊！", true); return; }
+
+            try {
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) { showToast("此信箱已存在資料庫中。", true); return; }
+                
+                await setDoc(docRef, { 
+                    name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", notes: "",
+                    signupDate: new Date().toISOString(), status: "active" 
+                });
+                showToast("已成功新增會員！");
+                closeAdminAddModal();
+                ['admin-add-email','admin-add-name','admin-add-pass'].forEach(id => document.getElementById(id).value='');
+            } catch(e) { showToast("新增失敗，請檢查連線。", true); }
+        };
+
+        // 刪除會員 Modal 控制
+        window.confirmDeleteUser = function(id) {
+            currentDeleteId = id;
+            document.getElementById('confirm-delete-modal').classList.remove('hidden');
+        };
+        window.closeDeleteModal = function() {
+            currentDeleteId = null;
+            document.getElementById('confirm-delete-modal').classList.add('hidden');
+        };
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if(!currentDeleteId) return;
+            try {
+                await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", currentDeleteId));
+                showToast("會員資料已徹底刪除。");
+                closeDeleteModal();
+            } catch(e) { showToast("刪除失敗。", true); }
+        });
 
         // 自動計算到期日邏輯 (智能解析)
         window.calcExpiry = function(id) {
@@ -608,8 +805,8 @@
                 await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { 
                     plan, remittance, account5, expiryDate, notes 
                 });
-                alert(`Member access updated! / 資料已儲存，狀態已更新！`);
-            } catch (e) { alert("Save Error."); }
+                showToast(`會員資料儲存成功！`);
+            } catch (e) { showToast("儲存失敗。", true); }
         };
 
         async function syncVipStatus() {
@@ -623,7 +820,13 @@
                     const diff = new Date(data.expiryDate).getTime() - Date.now();
                     if (diff <= 0) { forceRevoke(); return; }
                     updateExpiryUI(Math.ceil(diff / (1000 * 60 * 60 * 24)));
-                } else { updateExpiryUI("Infinity"); }
+                    document.getElementById('profile-btn').classList.remove('hidden'); // 登入成功顯示設定按鈕
+                } else { 
+                    updateExpiryUI("Infinity"); 
+                    document.getElementById('profile-btn').classList.remove('hidden');
+                }
+            } else {
+                forceRevoke(); // 帳號被管理員刪除時自動登出
             }
         }
 
@@ -643,7 +846,7 @@
             }
         }
         
-        // 顯示/隱藏密碼功能
+        // 顯示/隱藏密碼切換器
         window.togglePassVisibility = function(inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');
@@ -856,7 +1059,13 @@
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => writer && writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect! / 書寫正確！' }));
             document.getElementById('ai-retry-btn').addEventListener('click', () => executeAIFetch(currentTargetChar));
-            document.getElementById('remove-key-btn').addEventListener('click', () => { if (confirm('Log out? / 確定要登出並清除暫存嗎？')) { localStorage.clear(); location.reload(); } });
+            
+            // 使用自定義確認框取代瀏覽器原生的 confirm()
+            document.getElementById('remove-key-btn').addEventListener('click', () => { 
+                if(window.confirm('Log out? / 確定要登出並清除暫存嗎？')) {
+                    localStorage.clear(); location.reload();
+                }
+            });
         };
     </script>
 </body>

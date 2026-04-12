@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiwan Chinese Learning Hub | Abrakai Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Hanzi Writer for Stroke Order Animation -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Firebase (用於將來連線會員資料庫，目前採預備引用) -->
+    <script type="module">
+        // 未來在此處初始化 Firebase 即可實現真正的不可破解驗證
+        /*
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        */
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .char-btn.active { ring: 4px; ring-color: #ef4444; background-color: #fee2e2; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ef4444;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-red-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-wider">Learn Traditional Chinese</h1>
+                <p class="text-red-100 text-sm mt-1 font-medium">Taiwan Edition | CEO: Abrakai Studio</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- 狀態指示器 -->
+                <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all">
+                    <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
+                </div>
+                <!-- 登出按鈕 -->
+                <button id="remove-key-btn" class="hidden text-xs md:text-sm bg-red-700 hover:bg-red-800 border border-red-400 px-3 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1">
+                    <i class="ph ph-sign-out"></i> Sign Out
+                </button>
+                <i class="ph ph-translate text-3xl md:text-4xl text-red-200"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
+
+        <!-- 第 1 層：VIP 權益說明與密碼解鎖 (Cloud Auth Ready) -->
+        <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+            <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-crown text-2xl text-yellow-300"></i>
+                    <h3 class="font-bold text-lg text-white">Upgrade to VIP Premium</h3>
+                </div>
+                <span class="text-xs bg-emerald-700 px-2 py-1 rounded-full border border-emerald-400">Monthly Access</span>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 權益清單與免責聲明 -->
+                <div class="space-y-4">
+                    <h4 class="text-slate-800 font-bold flex items-center gap-2 uppercase tracking-wider text-xs">
+                        <i class="ph ph-shield-check text-emerald-600"></i> Subscription Benefits
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-2 bg-emerald-50 p-3 rounded-xl border border-emerald-100 shadow-sm">
+                            <i class="ph ph-check-circle-fill text-emerald-500 mt-0.5"></i>
+                            <div class="text-sm text-emerald-900 leading-tight">
+                                <strong class="block">VIP Tools Access</strong>
+                                <span>Translation and Stroke Writing modules will have <strong>unlimited use</strong> during your subscription.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2 bg-blue-50 p-3 rounded-xl border border-blue-100 shadow-sm">
+                            <i class="ph ph-sparkle-fill text-blue-500 mt-0.5"></i>
+                            <div class="text-sm text-blue-900 leading-tight">
+                                <strong class="block">AI Intelligence Module</strong>
+                                <span>Unlock deep insights: Zhuyin, Polyphonic sounds, Vocabulary, and Idioms. 
+                                <em class="block mt-1 text-[10px] text-blue-600 font-medium">*Requires BYOK (Your own Gemini API Key).</em></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 免責聲明 -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Important Notice / 免責聲明</h5>
+                        <p class="text-[10px] text-slate-500 leading-relaxed italic">
+                            1. Advanced AI features depend on Google Gemini API availability. <br>
+                            2. Abrakai Studio provides the software platform only. AI performance and limits are governed by Google's official policies. <br>
+                            3. Monthly VIP access ensures tool availability; AI tokens are user-managed (BYOK).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 驗證與聯繫 -->
+                <div class="flex flex-col justify-between space-y-6">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Enter VIP Access Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="vip-code-input" placeholder="Enter Monthly Code" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-base uppercase shadow-inner transition-all">
+                            <button id="save-vip-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95">Unlock</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Contact Abrakai Studio</h4>
+                        <div class="space-y-3">
+                            <p class="text-sm text-slate-300 font-medium">To get your monthly access code, contact the CEO directly:</p>
+                            <a href="tel:+886975762513" class="flex items-center gap-3 text-emerald-400 hover:text-emerald-300 transition-colors text-lg font-bold">
+                                <i class="ph ph-chat-circle-dots text-2xl"></i> +886 975-762-513
+                            </a>
+                            <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-1">
+                                阿布拉.凱 | 工作室 (Abrakai Studio)<br>
+                                CEO: Yu, Chih-Kai
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第 2 層：API Key 教學與輸入 (VIP 驗證成功後自動釋放) -->
+        <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
+            <div class="flex items-start gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
+                    <i class="ph-fill ph-key"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Connect Abrakai AI</h3>
+                    <p class="text-sm text-indigo-700 mb-4">Welcome, VIP! To unlock the deep learning modules (Zhuyin & Idioms), please link your Gemini API Key. The system will provide a setup guide below.</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key here (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
+                        <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all whitespace-nowrap shadow-md">Connect AI</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 border-t border-indigo-100 pt-4">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-indigo-500 font-bold underline hover:text-indigo-700 flex items-center gap-1">
+                            <i class="ph ph-book-open"></i> Tutorial: Get a Free Key from Google
+                        </a>
+                        <span class="text-[10px] text-indigo-400 italic">Abrakai Studio provides the platform; AI limits are set by Google.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 1: 翻譯 -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
+            <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">FREE (20/day)</div>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl">1</div>
+                <h2 class="text-xl font-semibold">Translate English to Chinese</h2>
+            </div>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="eng-input" placeholder="Enter word to translate..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg transition-all shadow-inner">
+                <button id="translate-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 min-w-[140px] shadow-md active:scale-95">
+                    <span id="translate-btn-text">Translate</span>
+                    <div id="translate-loader" class="loader hidden w-5 h-5 border-2"></div>
+                </button>
+            </div>
+            <div id="translate-error" class="text-red-500 mt-3 text-sm hidden font-medium"></div>
+        </section>
+
+        <!-- 區塊 2: 拆字 -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
+            <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">FREE (20/day)</div>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xl">2</div>
+                <h2 class="text-xl font-semibold">Select Character to Learn</h2>
+            </div>
+            <p class="text-slate-500 mb-4 text-sm italic">Results from Step 1 are automatically loaded here.</p>
+            
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <input type="text" id="zh-input" placeholder="Chinese text results..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-xl font-sans transition-all">
+                <button id="split-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95">
+                    Refill
+                </button>
+            </div>
+
+            <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner">
+                <span class="text-slate-400 text-sm">Characters will appear here...</span>
+            </div>
+        </section>
+
+        <!-- 儀表板 -->
+        <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="ph ph-graduation-cap text-2xl text-yellow-400"></i>
+                    Study Dashboard
+                </h2>
+                <span id="current-learning-char" class="text-4xl font-bold text-yellow-400"></span>
+            </div>
+
+            <div id="dashboard-loader" class="p-16 flex flex-col items-center justify-center hidden">
+                <div class="loader mb-4 border-slate-300 border-t-slate-900 w-10 h-10"></div>
+                <p class="text-slate-400 animate-pulse font-medium">Abrakai AI Analyzing...</p>
+            </div>
+
+            <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                <!-- 筆畫 -->
+                <div class="md:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
+                    <div id="badge-stroke" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">FREE</div>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 w-full text-center">Writing Mechanics</h3>
+                    <div class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 relative">
+                        <svg id="hanzi-target" width="200" height="200" class="block cursor-crosshair"></svg>
+                    </div>
+                    <div class="flex gap-3 mt-8 w-full max-w-[220px]">
+                        <button id="animate-stroke-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-1 text-xs">
+                            <i class="ph ph-play"></i> Animate
+                        </button>
+                        <button id="quiz-stroke-btn" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-1 text-xs">
+                            <i class="ph ph-pencil"></i> Quiz
+                        </button>
+                    </div>
+                    <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
+                </div>
+
+                <!-- 進階 AI 資料 -->
+                <div class="md:col-span-8 p-8 space-y-8 relative bg-white">
+                    <div id="badge-ai" class="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg tracking-tight uppercase">VIP + AI KEY ONLY</div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 shadow-sm">
+                            <div class="text-yellow-800 text-[10px] font-black uppercase tracking-widest mb-2">Zhuyin (Sound)</div>
+                            <div class="flex items-center gap-4">
+                                <div id="zhuyin-display" class="text-4xl font-sans font-bold text-slate-800"></div>
+                                <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white flex items-center justify-center shadow-lg active:scale-90" title="Play Sound">
+                                    <i class="ph-fill ph-speaker-high text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 shadow-sm">
+                            <div class="text-purple-800 text-[10px] font-black uppercase tracking-widest mb-2">Polyphonic variations</div>
+                            <div id="polyphonic-display" class="mt-1"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                            <i class="ph ph-books text-indigo-500 text-xl"></i> Smart Vocabulary
+                        </h3>
+                        <div id="words-container" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                            <i class="ph ph-quotes text-rose-500 text-xl"></i> Contextual Idioms
+                        </h3>
+                        <div id="idioms-container" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-12 mt-12">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <i class="ph ph-terminal-window text-2xl text-slate-400"></i>
+                <span class="text-slate-800 font-bold tracking-tight">阿布拉.凱|工作室 / Abrakai Studio</span>
+            </div>
+            <p class="text-slate-500 text-xs font-medium tracking-wide uppercase">
+                &copy; <span id="current-year"></span> All rights reserved. Specialized in Taiwan Educational Tech.
+            </p>
+            <p class="text-slate-400 text-[9px] mt-2 uppercase tracking-[0.2em] font-black">
+                Traditional Chinese Learning Suite: Taiwan Edition | CEO: Abrakai Studio
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- 核心系統邏輯 ---
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        let isVIP = false;
+        let activeApiKey = "";
+        const MAX_FREE_USES = 20;
+        let freeUsageCount = 0;
+        let isFetching = false;
+        const charCache = {}; 
+        let synthVoices = [];
+
+        function initApp() {
+            try {
+                // 檢查 VIP 過期時間 (24 小時策略)
+                const savedVipTime = localStorage.getItem('abra_vip_time');
+                const now = Date.now();
+                if (savedVipTime && (now - parseInt(savedVipTime)) < (24 * 60 * 60 * 1000)) {
+                    isVIP = true;
+                } else {
+                    localStorage.removeItem('abra_vip_time');
+                    isVIP = false;
+                }
+
+                activeApiKey = localStorage.getItem('gemini_api_key') || "";
+                
+                const today = new Date().toDateString();
+                const savedDate = localStorage.getItem('abra_usage_date');
+                if (savedDate !== today) {
+                    localStorage.setItem('abra_usage_date', today);
+                    localStorage.setItem('abra_usage_count', '0');
+                    freeUsageCount = 0;
+                } else {
+                    freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
+                }
+            } catch (e) { console.warn("Quota protection active."); }
+            updateUIState();
+        }
+
+        function checkAndConsumeQuota() {
+            if (isVIP) return true;
+            if (freeUsageCount >= MAX_FREE_USES) {
+                toggleUI('vip-setup-section', true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return false;
+            }
+            freeUsageCount++;
+            try { localStorage.setItem('abra_usage_count', freeUsageCount.toString()); } catch(e) {}
+            updateUIState();
+            return true;
+        }
+
+        function updateUIState() {
+            const quotaDisplay = document.getElementById('quota-display');
+            const quotaCountSpan = document.getElementById('quota-count');
+            const removeBtn = document.getElementById('remove-key-btn');
+            
+            if (isVIP) {
+                quotaDisplay.className = "bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-black border border-yellow-300 shadow-lg flex items-center gap-2";
+                quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP ACCESS UNLIMITED';
+                removeBtn.classList.remove('hidden');
+                
+                document.querySelectorAll('[id^="badge-"]').forEach(el => {
+                    if (el.id !== 'badge-ai') {
+                        el.textContent = "VIP PREMIUM ACTIVE";
+                        el.className = "absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg";
+                    }
+                });
+                
+                if (!activeApiKey) {
+                    toggleUI('vip-setup-section', false);
+                    toggleUI('api-key-setup', true);
+                    document.getElementById('badge-ai').textContent = "AI KEY NEEDED";
+                } else {
+                    toggleUI('vip-setup-section', false);
+                    toggleUI('api-key-setup', false);
+                    document.getElementById('badge-ai').textContent = "ABRAKAI AI ACTIVE";
+                    document.getElementById('badge-ai').className = "absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg";
+                }
+            } else {
+                quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`;
+                if (freeUsageCount >= MAX_FREE_USES) quotaDisplay.classList.add('animate-bounce', 'bg-red-600');
+                removeBtn.classList.add('hidden');
+                toggleUI('api-key-setup', false);
+            }
+        }
+
+        function safeStr(str) { return (str && typeof str === 'string') ? str.trim() : ''; }
+
+        function toggleUI(elementId, show) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                if (show) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            }
+        }
+
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        
+        // --- 語音優化 ---
+        function loadVoices() { synthVoices = window.speechSynthesis.getVoices(); }
+        if (window.speechSynthesis) {
+            loadVoices();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function speakText(text) {
+            if (!text || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const sanitizedText = text.replace(/[\/\-_]/g, ' ');
+            const utterance = new SpeechSynthesisUtterance(sanitizedText);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.85; 
+            if (synthVoices.length === 0) loadVoices();
+            const preferredVoices = ['Google 國語（臺灣）', 'Microsoft HsiaoChen', 'Apple Mei-Jia', 'zh-TW'];
+            let bestVoice = null;
+            for (let pref of preferredVoices) {
+                bestVoice = synthVoices.find(v => v.name.includes(pref) || v.lang.includes(pref));
+                if (bestVoice) break;
+            }
+            if (bestVoice) utterance.voice = bestVoice;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        async function translateEnglishToChinese() {
+            if (!checkAndConsumeQuota()) return;
+            const engInput = document.getElementById('eng-input');
+            const word = safeStr(engInput.value);
+            const errorMsg = document.getElementById('translate-error');
+            const btnText = document.getElementById('translate-btn-text');
+
+            if (!word) {
+                errorMsg.textContent = "Please enter an English word.";
+                toggleUI('translate-error', true);
+                return;
+            }
+
+            toggleUI('translate-error', false);
+            toggleUI('translate-loader', true);
+            btnText.textContent = "AI Processing...";
+            document.getElementById('translate-btn').disabled = true;
+
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`;
+
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                const translatedText = safeStr(result?.responseData?.translatedText);
+                
+                if (translatedText) {
+                    const zhInput = document.getElementById('zh-input');
+                    zhInput.value = translatedText.replace(/[^\u4e00-\u9fa5]/g, '');
+                    executeSplitInternal();
+                } else throw new Error("Service returned empty.");
+            } catch (err) {
+                errorMsg.textContent = `Server busy. Please try again.`;
+                toggleUI('translate-error', true);
+            } finally {
+                toggleUI('translate-loader', false);
+                btnText.textContent = "Translate";
+                document.getElementById('translate-btn').disabled = false;
+            }
+        }
+
+        function splitChineseCharacters() {
+            if (!checkAndConsumeQuota()) return;
+            executeSplitInternal();
+        }
+
+        function executeSplitInternal() {
+            const zhInput = document.getElementById('zh-input');
+            const text = safeStr(zhInput.value);
+            const container = document.getElementById('char-container');
+            toggleUI('learning-dashboard', false);
+            if (!text) {
+                container.innerHTML = '<span class="text-slate-400 text-sm">Please input characters.</span>';
+                return;
+            }
+            container.innerHTML = ''; 
+            const chars = text.replace(/[^\u4e00-\u9fa5]/g, '').split('');
+            chars.forEach((char) => {
+                const btn = document.createElement('button');
+                btn.className = 'char-btn w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-2xl font-bold text-slate-800 hover:border-emerald-400 hover:shadow-lg transition-all flex items-center justify-center focus:outline-none';
+                btn.textContent = char;
+                btn.onclick = () => loadCharacterTeaching(char, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        let hanziWriterInstance = null;
+        let currentActiveButton = null;
+
+        async function loadCharacterTeaching(char, btnElement) {
+            if (isFetching) return; 
+
+            if (!isVIP) {
+                toggleUI('vip-setup-section', true); 
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                document.getElementById('current-learning-char').textContent = char;
+                toggleUI('learning-dashboard', true);
+                toggleUI('dashboard-content', true);
+                document.getElementById('zhuyin-display').textContent = "VIP ONLY";
+                document.getElementById('polyphonic-display').innerHTML = '<span class="text-xs font-bold text-slate-400 uppercase">Upgrade to Unlock AI</span>';
+                document.getElementById('words-container').innerHTML = '<span class="text-slate-400 text-xs italic">VIP Access required for deep insights.</span>';
+                document.getElementById('idioms-container').innerHTML = '<span class="text-slate-400 text-xs italic">VIP Access required for deep insights.</span>';
+                initHanziWriter(char); 
+                return;
+            }
+
+            if (isVIP && !activeApiKey) {
+                toggleUI('api-key-setup', true); 
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                document.getElementById('current-learning-char').textContent = char;
+                toggleUI('learning-dashboard', true);
+                toggleUI('dashboard-content', true);
+                document.getElementById('zhuyin-display').textContent = "KEY NEEDED";
+                document.getElementById('polyphonic-display').innerHTML = '<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Connect AI Key</span>';
+                document.getElementById('words-container').innerHTML = '<span class="text-indigo-400 text-xs italic">Please connect Gemini API Key in Step 2.</span>';
+                document.getElementById('idioms-container').innerHTML = '<span class="text-indigo-400 text-xs italic">Please connect Gemini API Key in Step 2.</span>';
+                initHanziWriter(char); 
+                return;
+            }
+
+            const buttons = document.querySelectorAll('.char-btn');
+            buttons.forEach(btn => btn.classList.remove('ring-4', 'ring-red-400', 'bg-red-50', 'scale-105'));
+            btnElement.classList.add('ring-4', 'ring-red-400', 'bg-red-50', 'scale-105');
+            currentActiveButton = btnElement;
+
+            toggleUI('learning-dashboard', true);
+            toggleUI('dashboard-content', false);
+            toggleUI('dashboard-loader', true);
+            
+            document.getElementById('current-learning-char').textContent = char;
+            document.getElementById('quiz-status').textContent = '';
+
+            initHanziWriter(char);
+
+            if (charCache[char]) {
+                renderTeachingData(char, charCache[char]);
+                toggleUI('dashboard-loader', false);
+                toggleUI('dashboard-content', true);
+                return;
+            }
+
+            isFetching = true;
+            try {
+                const parsedData = await fetchCharacterDetailsFromAI(char);
+                charCache[char] = parsedData; 
+                renderTeachingData(char, parsedData);
+            } catch (err) { renderError(err.message); } 
+            finally {
+                isFetching = false;
+                toggleUI('dashboard-loader', false);
+                toggleUI('dashboard-content', true);
+            }
+        }
+
+        function initHanziWriter(char) {
+            const targetId = 'hanzi-target';
+            document.getElementById(targetId).innerHTML = ''; 
+            hanziWriterInstance = HanziWriter.create(targetId, char, {
+                width: 200, height: 200, padding: 15,
+                strokeAnimationSpeed: 1, delayBetweenStrokes: 150,
+                strokeColor: '#1e293b', radicalColor: '#ef4444', 
+                highlightColor: '#fca5a5', outlineColor: '#e2e8f0',
+                drawingColor: '#3b82f6', showOutline: true
+            });
+        }
+
+        async function fetchGeminiAPI(promptText) {
+            const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash"];
+            const payload = { contents: [{ parts: [{ text: promptText }] }] };
+            for (let modelName of modelsToTry) {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`;
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error("API Connection Error.");
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ""; 
+                } catch (e) { console.warn(`Model ${modelName} failed.`); }
+            }
+            throw new Error("System Connection Error.");
+        }
+
+        async function fetchCharacterDetailsFromAI(char) {
+            const prompt = `任務：請針對繁體中文字「${char}」提供台灣教學資訊。要求：嚴格回傳一個純 JSON 物件：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "破音字注音", "homophone": "同音字"}], "words": ["詞1", "詞2"], "idioms": [{"idiom": "成語", "meaning": "意思"}]}`;
+            let jsonText = await fetchGeminiAPI(prompt);
+            const firstBrace = jsonText.indexOf('{');
+            const lastBrace = jsonText.lastIndexOf('}');
+            if (firstBrace === -1 || lastBrace === -1) throw new Error("Data parsing error.");
+            try {
+                let parsed = JSON.parse(jsonText.substring(firstBrace, lastBrace + 1));
+                if (Array.isArray(parsed)) parsed = parsed[0];
+                return parsed;
+            } catch (e) { throw new Error("Format error."); }
+        }
+
+        function renderTeachingData(char, parsedData) {
+            document.getElementById('zhuyin-display').textContent = safeStr(parsedData.zhuyin) || "N/A";
+            const playCharBtn = document.getElementById('play-char-btn');
+            if (safeStr(parsedData.zhuyin)) {
+                playCharBtn.classList.remove('hidden');
+                playCharBtn.onclick = () => speakText(char); 
+            } else { playCharBtn.classList.add('hidden'); }
+
+            const polyEl = document.getElementById('polyphonic-display');
+            polyEl.innerHTML = ''; 
+            if (Array.isArray(parsedData.polyphonic) && parsedData.polyphonic.length > 0) {
+                const flexContainer = document.createElement('div');
+                flexContainer.className = 'flex flex-wrap gap-2';
+                parsedData.polyphonic.forEach(poly => {
+                    const pStr = typeof poly === 'string' ? poly : safeStr(poly.zhuyin);
+                    const homophone = typeof poly === 'string' ? char : (safeStr(poly.homophone) || char);
+                    if(pStr) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'flex items-center gap-1 bg-purple-100/50 px-2 py-1 rounded-lg border border-purple-200/50 group';
+                        wrap.innerHTML = `<span class="text-sm font-bold text-slate-700">${pStr}</span><button class="text-purple-400 hover:text-purple-600 transition-colors"><i class="ph-fill ph-speaker-high text-base"></i></button>`;
+                        wrap.querySelector('button').onclick = () => speakText(homophone);
+                        flexContainer.appendChild(wrap);
+                    }
+                });
+                polyEl.appendChild(flexContainer);
+            } else { polyEl.innerHTML = '<span class="text-xs text-slate-400 italic">No variants</span>'; }
+
+            const wordsContainer = document.getElementById('words-container');
+            wordsContainer.innerHTML = '';
+            if (Array.isArray(parsedData.words)) {
+                parsedData.words.forEach(word => {
+                    const w = safeStr(word);
+                    if(w) {
+                        const span = document.createElement('span');
+                        span.className = 'px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-100 shadow-sm';
+                        span.textContent = w;
+                        wordsContainer.appendChild(span);
+                    }
+                });
+            }
+            const idiomsContainer = document.getElementById('idioms-container');
+            idiomsContainer.innerHTML = '';
+            if (Array.isArray(parsedData.idioms)) {
+                parsedData.idioms.forEach(item => {
+                    const idiom = safeStr(item.idiom);
+                    if(idiom) {
+                        const div = document.createElement('div');
+                        div.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1 group hover:bg-white hover:shadow-md transition-all';
+                        div.innerHTML = `<div class="flex items-center justify-between"><span class="font-bold text-slate-800 text-lg">${idiom}</span><button class="play-idiom-btn w-8 h-8 rounded-full bg-white text-rose-400 hover:text-rose-600 shadow-sm border border-rose-50 flex items-center justify-center transition-all"><i class="ph-fill ph-speaker-high text-lg"></i></button></div><span class="text-xs text-slate-500 font-medium">${safeStr(item.meaning)}</span>`;
+                        div.querySelector('.play-idiom-btn').onclick = () => speakText(idiom);
+                        idiomsContainer.appendChild(div);
+                    }
+                });
+            }
+        }
+
+        function renderError(errMsg) {
+            document.getElementById('zhuyin-display').textContent = "ERROR";
+            document.getElementById('words-container').innerHTML = `<span class="text-red-500 text-xs font-bold">${errMsg}</span>`;
+            if (errMsg.includes("Key")) {
+                toggleUI('api-key-setup', true);
+                activeApiKey = "";
+                try { localStorage.removeItem('gemini_api_key'); } catch (e) {}
+            }
+        }
+
+        window.onload = function() {
+            initApp();
+            
+            document.getElementById('remove-key-btn').addEventListener('click', () => {
+                if (confirm('Sign out and return to Free Mode? This will also RESET your daily free counter for testing.')) {
+                    try { 
+                        localStorage.removeItem('abra_vip_time'); 
+                        localStorage.removeItem('abra_vip_status'); 
+                        localStorage.removeItem('gemini_api_key'); 
+                        localStorage.removeItem('abra_usage_count'); 
+                        localStorage.removeItem('abra_usage_date'); 
+                    } catch (e) {}
+                    location.reload(); 
+                }
+            });
+            
+            document.getElementById('save-vip-btn').addEventListener('click', () => {
+                const inputCode = document.getElementById('vip-code-input').value.trim().toUpperCase();
+                if (inputCode.startsWith('ABRA')) {
+                    isVIP = true;
+                    try { localStorage.setItem('abra_vip_time', Date.now().toString()); localStorage.setItem('abra_vip_status', 'active'); } catch(e){}
+                    updateUIState();
+                    alert("VIP Code Verified! Proceed to Step 2.");
+                } else alert("Invalid VIP Code. Please contact Abrakai Studio.");
+            });
+
+            document.getElementById('save-key-btn').addEventListener('click', () => {
+                const inputKey = document.getElementById('custom-api-key').value.trim();
+                if (inputKey) {
+                    activeApiKey = inputKey; 
+                    try { localStorage.setItem('gemini_api_key', inputKey); } catch (e) {}
+                    updateUIState();
+                    const charTarget = document.getElementById('current-learning-char').textContent;
+                    if (charTarget && currentActiveButton) loadCharacterTeaching(charTarget, currentActiveButton);
+                    else alert("Abrakai AI Engine Connected!");
+                }
+            });
+
+            document.getElementById('translate-btn').addEventListener('click', translateEnglishToChinese);
+            document.getElementById('eng-input').addEventListener('keypress', e => { if (e.key === 'Enter') translateEnglishToChinese(); });
+            document.getElementById('split-btn').addEventListener('click', splitChineseCharacters);
+            document.getElementById('animate-stroke-btn').addEventListener('click', () => { if (hanziWriterInstance) hanziWriterInstance.animateCharacter(); });
+            document.getElementById('quiz-stroke-btn').addEventListener('click', () => {
+                if (hanziWriterInstance) {
+                    const statusEl = document.getElementById('quiz-status');
+                    statusEl.textContent = 'Tracing...';
+                    hanziWriterInstance.quiz({
+                        onMistake: () => statusEl.textContent = 'Oops!',
+                        onComplete: () => statusEl.textContent = 'Great Writing!'
+                    });
+                }
+            });
+        };
+    </script>
+</body>
+</html>

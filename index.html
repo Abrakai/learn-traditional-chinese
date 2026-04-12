@@ -46,13 +46,16 @@
             cursor: pointer;
             padding: 8px;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .pass-toggle-btn:hover { color: #64748b; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col">
 
-    <!-- 雲端異常橫幅 -->
+    <!-- 雲端異常橫幅 (網域授權與 Rules 診斷) -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">連線異常：請確認已在 Firebase Console 設定 Authorized domains 並發佈正確的 Rules。</span>
@@ -69,10 +72,12 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all">
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
+                <!-- VIP 標章 -->
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border-2 border-yellow-200 shadow-lg flex flex-col items-center leading-none tracking-tighter animate-in zoom-in">
                     <div class="flex items-center gap-1"><i class="ph-fill ph-crown text-lg"></i> VIP MEMBER</div>
                     <div class="mt-1 opacity-80 uppercase text-[9px]">月繳制會員</div>
                 </div>
+                <!-- 效期提醒 -->
                 <div id="vip-expiry-display" class="hidden bg-white/10 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/20 flex items-center gap-1.5 transition-all">
                     <i class="ph ph-calendar"></i> <span id="vip-days-left">--</span> Days
                 </div>
@@ -85,7 +90,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：會員中心 (v4.0 Email 帳號唯一制) -->
+        <!-- 第 1 層：會員與管理中心 -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
@@ -97,7 +102,7 @@
             
             <div class="p-6 md:p-10">
                 <div id="auth-forms" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-                    <!-- 客戶註冊區 -->
+                    <!-- 客戶註冊區：Email 唯一制 + 密碼可視化切換 -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號
@@ -121,7 +126,7 @@
                         </div>
                     </div>
 
-                    <!-- 客戶登入區 (改為 Email + Pass 雙重驗證) -->
+                    <!-- 客戶登入區：雙重驗證 + 密碼可視化切換 -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
@@ -129,7 +134,7 @@
                         <div class="space-y-3">
                             <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm transition-all shadow-sm">
                             <div class="relative">
-                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm transition-all shadow-sm">
+                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼 (含管理密鑰)" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase transition-all shadow-sm">
                                 <button type="button" onclick="togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <button id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
@@ -140,13 +145,13 @@
                         <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2 mt-4 shadow-inner">
                             <i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i>
                             <p class="text-[11px] text-slate-500 leading-snug">
-                                <strong>系統升級：</strong> 請使用 Email 與密碼登入。VIP 到期後系統將自動降級。
+                                <strong>系統說明：</strong> 需以 Email 與密碼雙重登入。VIP 到期後系統將自動降級。 / Subscription based.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- 執行長管理儀表板 (v4.0 燈號與自動運算旗艦版) -->
+                <!-- 執行長管理儀表板 (智能容錯與自動運算) -->
                 <div id="admin-panel" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 pb-4 gap-4">
                         <div>
@@ -166,7 +171,7 @@
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-100 text-slate-500 uppercase text-[9px] font-black tracking-widest border-b whitespace-nowrap">
                                 <tr>
-                                    <th class="px-3 py-3 text-center" title="狀態">燈號</th>
+                                    <th class="px-3 py-3 text-center" title="開通燈號狀態">燈號</th>
                                     <th class="px-3 py-3">User Details (Email/Pass)</th>
                                     <th class="px-3 py-3">Remittance (Acc/Plan/Date)</th>
                                     <th class="px-3 py-3">Expiry Date / Notes</th>
@@ -234,7 +239,7 @@
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
-                    <h2 class="text-base font-semibold flex items-center gap-2 tracking-tight font-bold font-bold"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2>
+                    <h2 class="text-base font-semibold flex items-center gap-2 tracking-tight font-bold"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2>
                     <span id="active-engine-badge" class="hidden text-[9px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter text-center"></span>
                 </div>
                 <span id="current-learning-char" class="text-4xl font-bold text-yellow-400 drop-shadow-md"></span>
@@ -244,7 +249,7 @@
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative min-h-[480px]">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest tracking-widest font-bold text-slate-500">Writing Mechanics</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest font-bold text-slate-500">Writing Mechanics</span>
                     </div>
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 mt-4"></svg>
                     <div class="flex flex-col gap-2 mt-8 w-full max-w-[220px]">
@@ -316,12 +321,12 @@
         <div class="max-w-5xl mx-auto px-4 text-center">
             <p class="text-slate-500 text-[10px] tracking-widest uppercase font-bold">&copy; <span id="current-year"></span> Abrakai Studio | Taiwan Chinese Hub</p>
             <div class="mt-4 max-w-2xl mx-auto text-slate-400 text-[9px] leading-relaxed italic text-center px-4">
-                免責聲明：VIP 授權僅針對本平台內限制次數之解除。AI 語言解析屬第三方服務，穩定性與消耗由 API 供應商負責。
+                免責聲明：VIP 授權僅針對本平台內限制次數之解除。AI 語言解析屬第三方服務，穩定性與 Token 消耗由 API 供應商負責。
             </div>
         </div>
     </footer>
 
-    <!-- Firebase SDK (v11.0.0) -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, getDocs, setDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -340,7 +345,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
-        const ADM_H = "QUJSQS1BRE1JTi1EQVNIQk9BUkQ="; // 預設管理員混淆密鑰
+        const ADM_H = "QUJSQS1BRE1JTi1EQVNIQk9BUkQ=";
 
         onAuthStateChanged(auth, async (user) => {
             const statusEl = document.getElementById('auth-status-msg');
@@ -366,7 +371,7 @@
         });
 
         // ==========================================
-        // 註冊功能 (v4.0 Email 唯一性檢查)
+        // 註冊功能 (Email 唯一性檢查)
         // ==========================================
         document.getElementById('signup-btn').addEventListener('click', async () => {
             const name = document.getElementById('reg-name').value.trim();
@@ -388,7 +393,7 @@
                     name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", notes: "",
                     signupDate: new Date().toISOString(), status: "pending" 
                 });
-                alert("註冊成功！帳號已綁定信箱與您的 VIP 密碼。\n請聯繫執行長核對匯款以正式開通權限。");
+                alert("註冊成功！帳號已綁定信箱與您的密碼。\n請聯繫執行長核對匯款以正式開通權限。");
                 ["reg-name","reg-email","reg-pass"].forEach(id => document.getElementById(id).value = '');
             } catch (e) { 
                 console.error(e);
@@ -397,7 +402,7 @@
         });
 
         // ==========================================
-        // 登入功能 (v4.0 雙欄位驗證)
+        // 登入功能 (雙欄位驗證與雲端密室比對)
         // ==========================================
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -408,7 +413,7 @@
             document.getElementById('login-btn-text').textContent = "Verifying...";
 
             try {
-                // 1. 管理員密室驗證 (允許 Email 留空)
+                // 1. 管理員密室驗證
                 let isAdmin = false;
                 if (btoa(code) === ADM_H) { isAdmin = true; } 
                 else {
@@ -422,7 +427,7 @@
                     return;
                 }
 
-                // 2. 一般會員驗證 (需要 Email)
+                // 2. 一般會員驗證
                 if (!email) {
                     alert("請輸入註冊信箱 (Enter Email)。");
                     resetLoginBtn();
@@ -459,7 +464,7 @@
         }
 
         // ==========================================
-        // 執行長管理面板 (v4.0 燈號與自動運算)
+        // 執行長管理面板 (智慧燈號與自動運算)
         // ==========================================
         async function enterAdminMode() {
             document.getElementById('auth-forms').classList.add('hidden');
@@ -471,7 +476,7 @@
             document.getElementById('export-btn').addEventListener('click', async () => {
                 const snapshot = await getDocs(usersColl);
                 let csv = "Email,Name,Password,Account5,Plan(Months),RemittanceDate,ExpiryDate,Notes\n";
-                const n = (str) => `"${(str || '').replace(/"/g, '""')}"`; // 安全處理 CSV 欄位
+                const n = (str) => `"${(str || '').replace(/"/g, '""')}"`; 
                 snapshot.forEach(doc => {
                     const d = doc.data();
                     csv += `${n(d.email)},${n(d.name)},${n(d.password)},${n(d.account5)},${n(d.plan)},${n(d.remittance)},${n(d.expiryDate)},${n(d.notes)}\n`;
@@ -494,7 +499,6 @@
                     const rows = text.split('\n');
                     let count = 0;
                     for (let i = 1; i < rows.length; i++) {
-                        // 簡易 CSV 解析 (未處理引號內逗號，建議匯入格式單純)
                         const cols = rows[i].split(',').map(s => s.replace(/(^"|"$)/g, '').trim());
                         if (cols.length < 7) continue;
                         const email = cols[0];
@@ -514,7 +518,7 @@
                 reader.readAsText(file);
             });
 
-            // 實時資料載入與 UI 生成
+            // 實時資料載入與 UI 生成 (動態燈號)
             onSnapshot(usersColl, (snapshot) => {
                 const list = document.getElementById('admin-user-list');
                 list.innerHTML = '';
@@ -522,7 +526,7 @@
                     const user = docSnap.data();
                     const id = docSnap.id;
                     
-                    // 燈號運算邏輯
+                    // 燈號判定
                     let lightHTML = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto" title="未開通"></div>';
                     if (user.expiryDate) {
                         const expiry = new Date(user.expiryDate).getTime();
@@ -547,15 +551,15 @@
                             <div class="text-[10px] bg-red-50 text-red-600 px-1 inline-block rounded font-mono font-bold mt-1">${user.password || 'N/A'}</div>
                         </td>
                         <td class="px-2 py-3 space-y-1.5">
-                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="匯款末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none">
+                            <input id="acc5-${id}" value="${user.account5 || ''}" placeholder="匯款帳號末五碼" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
                             <div class="flex gap-1">
-                                <input id="plan-${id}" value="${user.plan || ''}" placeholder="月數" class="w-12 border rounded px-1.5 py-1 text-[10px] text-center focus:ring-1 focus:ring-indigo-400 outline-none" oninput="calcExpiry('${id}')">
-                                <input id="remit-${id}" value="${user.remittance || ''}" placeholder="匯款日 YYYY-MM-DD" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none" oninput="calcExpiry('${id}')">
+                                <input id="plan-${id}" value="${user.plan || ''}" placeholder="月數" class="w-12 border rounded px-1.5 py-1 text-[10px] text-center focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
+                                <input id="remit-${id}" value="${user.remittance || ''}" placeholder="匯款日 20260413" class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm" oninput="calcExpiry('${id}')">
                             </div>
                         </td>
                         <td class="px-2 py-3 space-y-1.5">
-                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="到期日 YYYY-MM-DD" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none transition-colors">
-                            <input id="notes-${id}" value="${user.notes || ''}" placeholder="備註..." class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none">
+                            <input id="expiry-${id}" value="${user.expiryDate || ''}" placeholder="到期日 (自動計算)" class="w-full border-2 border-indigo-100 rounded px-1.5 py-1 text-[10px] font-bold text-indigo-700 outline-none transition-colors shadow-sm bg-indigo-50/30">
+                            <input id="notes-${id}" value="${user.notes || ''}" placeholder="備註..." class="w-full border rounded px-1.5 py-1 text-[10px] focus:ring-1 focus:ring-indigo-400 outline-none shadow-sm">
                         </td>
                         <td class="px-2 py-3 text-center align-middle">
                             <button onclick="saveUser('${id}')" class="bg-red-600 text-white px-4 py-3 rounded-xl font-black text-[10px] shadow-sm active:scale-90 transition-all hover:bg-red-700 uppercase">SAVE</button>
@@ -566,24 +570,28 @@
             }, (err) => { alert("權限拒絕：請確認已在 Firebase 發佈正確的 Rules。"); });
         }
 
-        // 自動計算到期日邏輯 (解決 28.jpg 需求)
+        // 自動計算到期日邏輯 (智能解析)
         window.calcExpiry = function(id) {
             const planEl = document.getElementById(`plan-${id}`);
-            const remitEl = document.getElementById(`remit-${id}`);
+            let remitEl = document.getElementById(`remit-${id}`);
             const expiryEl = document.getElementById(`expiry-${id}`);
             
             const months = parseInt(planEl.value);
-            const remitDateStr = remitEl.value;
+            let remitStr = remitEl.value.trim();
 
-            if (months > 0 && remitDateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                const date = new Date(remitDateStr);
+            if (remitStr.length === 8 && /^\d{8}$/.test(remitStr)) {
+                remitStr = remitStr.substring(0,4) + '-' + remitStr.substring(4,6) + '-' + remitStr.substring(6,8);
+                remitEl.value = remitStr; 
+            }
+
+            if (months > 0 && remitStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const date = new Date(remitStr);
                 if (!isNaN(date.getTime())) {
                     date.setMonth(date.getMonth() + months);
                     const y = date.getFullYear();
                     const m = String(date.getMonth() + 1).padStart(2, '0');
                     const d = String(date.getDate()).padStart(2, '0');
                     expiryEl.value = `${y}-${m}-${d}`;
-                    // Visual cue
                     expiryEl.classList.add('bg-green-100', 'border-green-300');
                     setTimeout(() => expiryEl.classList.remove('bg-green-100', 'border-green-300'), 500);
                 }
@@ -600,7 +608,7 @@
                 await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { 
                     plan, remittance, account5, expiryDate, notes 
                 });
-                alert(`Member access updated! / 資料已儲存！`);
+                alert(`Member access updated! / 資料已儲存，狀態已更新！`);
             } catch (e) { alert("Save Error."); }
         };
 
@@ -649,14 +657,14 @@
         };
     </script>
 
-    <!-- UI & AI Engine (Session Caching & Voice Optimization) -->
+    <!-- UI & AI Engine -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';
         let activeApiKey = localStorage.getItem('gemini_api_key') || "";
         const MAX_FREE_USES = 20; 
         let freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
-        const charCache = {}; // 智慧 Session 快取機制
+        const charCache = {}; 
         let currentTargetChar = "";
         let lastSpeakTime = 0;
 
@@ -681,13 +689,15 @@
             updateGlobalUI(); return true;
         }
 
+        // 語音播報優化：過濾特殊符號採自然停頓
         function speak(text) {
             const now = Date.now();
             if (now - lastSpeakTime < 600) return; 
             lastSpeakTime = now;
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel(); 
-            let pureText = text.replace(/[^\u4e00-\u9fa5]/g, ' '); 
+            // 語音脫水：避開 / - _ 等符號採自然停頓
+            let pureText = text.replace(/[\/\-_|]/g, ' '); 
             const ut = new SpeechSynthesisUtterance(pureText);
             ut.lang = 'zh-TW'; ut.rate = 0.8;
             window.speechSynthesis.speak(ut);
@@ -762,14 +772,14 @@
             const errorPanel = document.getElementById('ai-error-panel');
             loader.classList.remove('hidden');
 
-            const selectedMode = document.getElementById('model-selector').value;
             const models = ["gemini-3.1-flash-lite", "gemini-2.5-flash"];
+            const selectedMode = document.getElementById('model-selector') ? document.getElementById('model-selector').value : 'auto';
             const modelList = selectedMode === 'auto' ? models : [selectedMode];
             
             let success = false;
             for (const modelName of modelList) {
                 try {
-                    const prompt = `針對繁體中文字「${char}」提供台灣繁體教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["代表語詞1", "代表語詞2"]}], "words": ["造詞1", "造詞2"], "idioms": [{"idiom": "成語", "meaning": "中文意思", "english": "English context for learners"}]}`;
+                    const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["代表語詞1", "代表語詞2"]}], "words": ["造詞1", "造詞2"], "idioms": [{"idiom": "成語", "meaning": "中文意思", "english": "Precise English context"}]}`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, { 
                         method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
                     });
@@ -846,7 +856,7 @@
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => writer && writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect! / 書寫正確！' }));
             document.getElementById('ai-retry-btn').addEventListener('click', () => executeAIFetch(currentTargetChar));
-            document.getElementById('remove-key-btn').addEventListener('click', () => { if (confirm('Log out? / 確定要登出並清除所有暫存嗎？')) { localStorage.clear(); location.reload(); } });
+            document.getElementById('remove-key-btn').addEventListener('click', () => { if (confirm('Log out? / 確定要登出並清除暫存嗎？')) { localStorage.clear(); location.reload(); } });
         };
     </script>
 </body>

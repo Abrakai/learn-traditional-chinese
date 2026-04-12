@@ -46,7 +46,7 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all shadow-inner">
                     <i class="ph-fill ph-lightning"></i> 免費次數 / Free Uses: <span id="quota-count">20/20</span>
                 </div>
-                <!-- VIP 狀態標章 -->
+                <!-- VIP 狀態標章 (針對 10.jpg 修正展示) -->
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[11px] font-black border-2 border-yellow-200 shadow-lg flex flex-col items-center leading-none">
                     <div class="flex items-center gap-1"><i class="ph-fill ph-crown text-lg"></i> VIP MEMBER</div>
                     <div class="mt-1 opacity-80 uppercase tracking-tighter text-[9px]">月繳制會員</div>
@@ -65,7 +65,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：VIP 驗證區 -->
+        <!-- 第 1 層：VIP 驗證區 (商業定義與月繳提醒) -->
         <div id="vip-setup-section" class="hidden bg-white border-2 border-emerald-500 rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
             <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2">
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <!-- 第 2 層：API Key 教學 (預設優先使用 3.1 Flash Lite) -->
+        <!-- 第 2 層：API Key 教學 (預設優先使用 3.1 Flash Lite - 針對 12.jpg) -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
@@ -137,7 +137,7 @@
                             <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
                             <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Activate 連結啟動</button>
                         </div>
-                        <!-- 最新模型切換器：Lite 優先 -->
+                        <!-- 模型切換：預設調度 3.1 Flash Lite -->
                         <div class="flex flex-col sm:flex-row items-center gap-3 bg-white/50 p-3 rounded-xl border border-indigo-100">
                             <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1">
                                 <i class="ph ph-gear"></i> AI Engine Selection 引擎版本：
@@ -199,13 +199,13 @@
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
                     <h2 class="text-xl font-semibold flex items-center gap-2"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2>
-                    <span id="active-engine-badge" class="hidden text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter"></span>
+                    <span id="active-engine-badge" class="hidden text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter text-center"></span>
                 </div>
                 <span id="current-learning-char" class="text-4xl font-bold text-yellow-400"></span>
             </div>
 
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 左側：筆畫區 (恆定顯示) -->
+                <!-- 左側：筆畫區 -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative min-h-[480px]">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
@@ -223,7 +223,7 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6 text-center"></p>
                 </div>
 
-                <!-- 右側：AI 解析區 (具備故障修復與 Lite 優先調度) -->
+                <!-- 右側：AI 解析區 -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     
                     <!-- 狀態 1: AI 載入中 -->
@@ -259,7 +259,7 @@
                             <div class="flex flex-col gap-2 border-t border-slate-200 pt-3">
                                 <label class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Solution 2: Change Fuel 更換金鑰</label>
                                 <input type="password" id="inline-api-key" placeholder="Paste New API Key..." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500">
-                                <button id="inline-save-key-btn" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs shadow-sm active:scale-95 transition-all">Update 更新燃料</button>
+                                <button id="inline-save-key-btn" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs shadow-sm active:scale-95 transition-all">Update 更新金鑰</button>
                             </div>
                         </div>
                     </div>
@@ -286,6 +286,7 @@
                                     <button id="play-char-btn" class="hidden w-8 h-8 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-transform active:scale-90"><i class="ph-fill ph-speaker-high"></i></button>
                                 </div>
                             </div>
+                            <!-- 破音字區：僅顯示文字不發音 (根除 iPhone 問題) -->
                             <div id="poly-container" class="bg-purple-50 p-4 rounded-2xl border border-purple-100 shadow-sm">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1">Polyphonic / 破音字 (Text Only)</div>
                                 <div id="polyphonic-display" class="flex flex-wrap gap-2"></div>
@@ -295,14 +296,14 @@
                             <h3 class="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph ph-books text-indigo-500 text-lg"></i> Vocabulary / 常用詞彙</h3>
                             <div id="words-container" class="flex flex-wrap gap-2"></div>
                         </div>
-                        <!-- 成語解析區 (針對 11.jpg 恢復) -->
+                        <!-- 成語解析區 (恢復) -->
                         <div id="idioms-section">
                             <h3 class="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph ph-quotes text-rose-500 text-lg"></i> Idioms / 成語解析</h3>
                             <div id="idioms-container" class="space-y-2"></div>
                         </div>
                     </div>
 
-                    <!-- 狀態 4: VIP 但無燃料 (補齊中英雙語說明) -->
+                    <!-- 狀態 4: VIP 但無燃料 (補齊說明) -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
@@ -450,7 +451,7 @@
                         alert("授權碼已過期。 / Expired.");
                         return;
                     }
-                    alert("驗證成功！已解鎖翻譯與書寫次數限制。 / Verified!");
+                    alert("驗證成功！已解鎖無限次數權限。 / Verified!");
                     grantVip(code);
                 } else {
                     alert("您的 VIP 密碼錯誤，請與 Abrakai Studio 聯繫。 / Incorrect code.");
@@ -469,12 +470,12 @@
         }
     </script>
 
-    <!-- UI & AI Engine Logic (Flash-Lite Optimized & Smart Cache) -->
+    <!-- UI & AI Engine Logic (Smart Cache & Sync TTS Fix) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
         let isFetching = false; 
-        const charCache = {}; // 針對 11.jpg 營運風險：實作智慧快取，點過的字不消耗 API 燃料
+        const charCache = {}; // 智慧快取系統：避免執行長擔心的連點扣點危機 (針對 11.jpg)
         let currentTargetChar = "";
         let lastSpeakTime = 0;
 
@@ -502,7 +503,7 @@
 
             if (isVIP) {
                 quotaDisplay.classList.add('hidden');
-                vipBadge.classList.remove('hidden');
+                vipBadge.classList.remove('hidden'); // 確保 VIP 標章顯示 (針對 10.jpg)
                 removeBtn.classList.remove('hidden');
                 document.getElementById('vip-setup-section').classList.add('hidden');
             } else {
@@ -522,19 +523,19 @@
             updateGlobalUI(); return true;
         }
 
+        // 語音修正：同步調用 (解決 iOS 靜音與疊音)
         function speak(text) {
             const now = Date.now();
             if (now - lastSpeakTime < 600) return; 
             lastSpeakTime = now;
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel(); 
-            setTimeout(() => {
-                const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || "";
-                if (!pureChinese) return;
-                const ut = new SpeechSynthesisUtterance(pureChinese);
-                ut.lang = 'zh-TW'; ut.rate = 0.8;
-                window.speechSynthesis.speak(ut);
-            }, 100); 
+            // 語音脫水：只提取漢字
+            let pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || "";
+            if (!pureChinese) pureChinese = text.charAt(0);
+            const ut = new SpeechSynthesisUtterance(pureChinese);
+            ut.lang = 'zh-TW'; ut.rate = 0.8;
+            window.speechSynthesis.speak(ut);
         }
 
         async function doTranslate() {
@@ -585,11 +586,11 @@
             if (!isVIP) { document.getElementById('free-promo-content').classList.remove('hidden'); return; }
             if (!activeApiKey) { document.getElementById('vip-no-key-content').classList.remove('hidden'); return; }
 
-            // 針對 11.jpg 修正：如果這個字載入過，直接渲染快取，不需連網消耗 API 燃料
+            // 智慧快取判斷：重複點擊不消耗額度 (針對 11.jpg 需求)
             if (charCache[char]) { 
                 renderResult(char, charCache[char]); 
                 document.getElementById('vip-only-content').classList.remove('hidden'); 
-                updateEngineStatus(`Data Cached / 已載入快取`);
+                updateEngineStatus(`Data Cached / 從快取載入`);
                 return; 
             }
 
@@ -605,7 +606,7 @@
             [vipPanel, errorPanel].forEach(p => p.classList.add('hidden'));
             loader.classList.remove('hidden');
 
-            // 調整調度清單：Lite 優先 (針對執行長的觀察)
+            // 調整調度：Flash Lite 優先 (針對 12.jpg)
             const models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-3-flash", "gemini-3.1-pro", "gemini-2.0-flash"];
             const selectedMode = document.getElementById('model-selector').value;
             const modelList = selectedMode === 'auto' ? models : [selectedMode];
@@ -624,9 +625,10 @@
                     
                     const rawText = result.candidates[0].content.parts[0].text;
                     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-                    if (!jsonMatch) throw new Error("Format Error");
+                    if (!jsonMatch) throw new Error("Parse Error");
+                    
                     const data = JSON.parse(jsonMatch[0]);
-                    charCache[char] = data; // 存入快取
+                    charCache[char] = data; // 存入內存快取
                     renderResult(char, data);
                     success = true;
                     updateEngineStatus(`Powered by: ${modelName}`);
@@ -653,11 +655,13 @@
         }
 
         function renderResult(char, data) {
+            // 1. 注音與發音
             document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn');
             pb.classList.toggle('hidden', !data.zhuyin);
             pb.onclick = () => speak(char);
             
+            // 2. 破音字 (純顯示不發音 - 解決 iPhone 異常與疊音問題)
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
             if (data.polyphonic && data.polyphonic.length > 0) {
@@ -669,13 +673,14 @@
                 });
             }
 
+            // 3. 詞彙
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
                 const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100'; 
                 s.textContent = w; s.onclick = () => speak(w); words.appendChild(s); 
             });
 
-            // 成語解析區 (針對 11.jpg 恢復功能)
+            // 4. 成語 (恢復成語解析功能 - 針對 11.jpg)
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             if (data.idioms && data.idioms.length > 0) {
                 document.getElementById('idioms-section').classList.remove('hidden');
@@ -713,7 +718,7 @@
                 executeAIFetch(currentTargetChar);
             });
             document.getElementById('remove-key-btn').addEventListener('click', () => {
-                if (confirm('是否登出？ / Sign out?')) { localStorage.clear(); location.reload(); }
+                if (confirm('是否登出並清除所有設定？ / Sign out and clear?')) { localStorage.clear(); location.reload(); }
             });
         };
     </script>

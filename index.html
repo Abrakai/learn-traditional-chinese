@@ -15,8 +15,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-        // 執行長專屬的 Firebase 金鑰配置 (已對接 abra-learn-zh-vip)
+        // 執行長專屬的 Firebase 金鑰配置 (對接 abra-learn-zh-vip)
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
             authDomain: "abra-learn-zh-vip.firebaseapp.com",
@@ -28,13 +29,26 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // 初始化匿名登入 (確保連線具備訪客證)
+        signInAnonymously(auth).catch((error) => console.error("Firebase Auth Error:", error));
 
         // 雲端強韌驗證模組
         window.checkVipCodeInCloud = async function(code) {
             try {
-                // 強制檢查雲端 Firestore 中是否存在該 Document
-                const docRef = doc(db, "vip_codes", code);
-                const docSnap = await getDoc(docRef);
+                // 設定 8 秒逾時保護，防止按鈕無限旋轉
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Request Timeout")), 8000)
+                );
+                
+                const fetchPromise = (async () => {
+                    const docRef = doc(db, "vip_codes", code);
+                    const docSnap = await getDoc(docRef);
+                    return docSnap;
+                })();
+
+                const docSnap = await Promise.race([fetchPromise, timeoutPromise]);
                 
                 if (docSnap.exists()) {
                     return { valid: true };
@@ -42,8 +56,11 @@
                     return { valid: false, error: "Access Denied: Code not active in cloud." };
                 }
             } catch (error) {
-                console.error("Cloud Connection Error:", error);
-                return { valid: false, error: "Cloud sync failed. Please check your network." };
+                console.error("Cloud Connection Error Detail:", error);
+                let userFriendlyError = "Cloud sync failed.";
+                if (error.message.includes("permission")) userFriendlyError = "Database Permission Denied. Check Rules.";
+                if (error.message.includes("Timeout")) userFriendlyError = "Network Timeout. Try again.";
+                return { valid: false, error: userFriendlyError };
             }
         };
     </script>
@@ -72,7 +89,7 @@
                 <p class="text-red-100 text-sm mt-1 font-medium">Taiwan Edition | CEO: Abrakai Studio</p>
             </div>
             <div class="flex items-center gap-3">
-                <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all">
+                <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500 flex items-center gap-2 transition-all shadow-inner">
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
                 <button id="remove-key-btn" class="hidden text-xs md:text-sm bg-red-700 hover:bg-red-800 border border-red-400 px-3 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1">
@@ -104,15 +121,15 @@
                         <div class="flex items-start gap-2 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
                             <i class="ph ph-check-circle-fill text-emerald-500 mt-0.5"></i>
                             <div class="text-sm text-emerald-900 leading-tight">
-                                <strong class="block">Live Verification</strong>
-                                <span>Code is checked against the <strong>Abrakai Studio Cloud</strong> in real-time.</span>
+                                <strong class="block">Live Cloud Verification</strong>
+                                <span>Code is checked against the <strong>Abrakai Studio Cloud</strong>. No bypass possible.</span>
                             </div>
                         </div>
                     </div>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Disclaimer / 免責聲明</h5>
+                        <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Security Disclaimer</h5>
                         <p class="text-[10px] text-slate-500 leading-relaxed italic">
-                            System security powered by Google Firestore. Unauthorized attempts are logged.
+                            System security powered by Google Firestore. Any attempt to bypass cloud validation will be blocked.
                         </p>
                     </div>
                 </div>
@@ -121,20 +138,20 @@
                     <div class="space-y-3">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">VIP Passcode</label>
                         <div class="flex gap-2">
-                            <input type="text" id="vip-code-input" placeholder="Enter Cloud Code" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-base uppercase shadow-inner">
-                            <button id="save-vip-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+                            <input type="text" id="vip-code-input" placeholder="Enter Official Code" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-base uppercase shadow-inner">
+                            <button id="save-vip-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 min-w-[120px]">
                                 <span id="vip-btn-text">Unlock</span>
                                 <div id="vip-loader" class="loader hidden w-4 h-4 border-2 border-white/30 border-t-white"></div>
                             </button>
                         </div>
                     </div>
 
-                    <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Support Line</h4>
+                    <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Global Support</h4>
                         <a href="tel:+886975762513" class="flex items-center gap-3 text-emerald-400 hover:text-emerald-300 transition-colors text-lg font-bold">
                             <i class="ph ph-chat-circle-dots text-2xl"></i> +886 975-762-513
                         </a>
-                        <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-1">Abrakai Studio | CEO: Yu, Chih-Kai</div>
+                        <div class="text-[10px] text-slate-500 border-t border-white/10 pt-3 mt-1 uppercase font-bold">Abrakai Studio | CEO: Yu, Chih-Kai</div>
                     </div>
                 </div>
             </div>
@@ -148,10 +165,10 @@
                 </div>
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Connect Abrakai AI Insights</h3>
-                    <p class="text-sm text-indigo-700 mb-4">VIP Verified. Please link your personal Gemini API Key below to activate deep intelligence features.</p>
+                    <p class="text-sm text-indigo-700 mb-4">Cloud VIP Verified. Please link your personal Gemini API Key to activate deep intelligence modules (Zhuyin & Idioms).</p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="password" id="custom-api-key" placeholder="Paste Gemini API Key (AIza...)" class="flex-1 px-4 py-3 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
-                        <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Activate</button>
+                        <button id="save-key-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-md">Activate AI</button>
                     </div>
                 </div>
             </div>
@@ -183,7 +200,7 @@
             </div>
             <div class="flex flex-col md:flex-row gap-4 mb-6">
                 <input type="text" id="zh-input" placeholder="Chinese text..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <button id="split-btn" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-md">Reload</button>
+                <button id="split-btn" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95">Reload</button>
             </div>
             <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner"></div>
         </section>
@@ -208,26 +225,26 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
                 <div class="md:col-span-8 p-8 space-y-8 relative bg-white">
-                    <div id="badge-ai" class="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase">VIP + AI KEY</div>
+                    <div id="badge-ai" class="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight">VIP + AI KEY ONLY</div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100">
+                        <div class="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 shadow-sm">
                             <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-2">Zhuyin</div>
                             <div class="flex items-center gap-4">
-                                <div id="zhuyin-display" class="text-4xl font-bold"></div>
-                                <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-lg flex items-center justify-center"><i class="ph-fill ph-speaker-high"></i></button>
+                                <div id="zhuyin-display" class="text-4xl font-bold text-slate-800"></div>
+                                <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-lg flex items-center justify-center transition-transform active:scale-90"><i class="ph-fill ph-speaker-high"></i></button>
                             </div>
                         </div>
-                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100">
+                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 shadow-sm">
                             <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-2">Polyphonic</div>
                             <div id="polyphonic-display"></div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4">Vocabulary</h3>
+                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-books text-indigo-500"></i> Vocabulary</h3>
                         <div id="words-container" class="flex flex-wrap gap-2"></div>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4">Idioms</h3>
+                        <h3 class="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph ph-quotes text-rose-500"></i> Idioms</h3>
                         <div id="idioms-container" class="space-y-3"></div>
                     </div>
                 </div>
@@ -238,7 +255,7 @@
     <footer class="bg-slate-100 border-t border-slate-200 py-12">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <span class="text-slate-800 font-bold">阿布拉.凱|工作室 / Abrakai Studio</span>
-            <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase">
+            <p class="text-slate-500 text-[10px] mt-2 tracking-widest uppercase font-medium">
                 &copy; <span id="current-year"></span> Traditional Chinese Learning Hub. (Taiwan Edition) **© Abrakai Studio**
             </p>
         </div>
@@ -279,7 +296,7 @@
                 quotaDisplay.className = "bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-black border border-yellow-300 shadow-lg flex items-center gap-2";
                 quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP UNLIMITED';
                 removeBtn.classList.remove('hidden');
-                document.querySelectorAll('[id^="badge-"]').forEach(el => { if (el.id !== 'badge-ai') el.textContent = "VIP ACTIVE"; });
+                document.querySelectorAll('[id^="badge-"]').forEach(el => { if (el.id !== 'badge-ai') el.textContent = "VIP PREMIUM ACTIVE"; });
                 if (!activeApiKey) { toggleUI('vip-setup-section', false); toggleUI('api-key-setup', true); } 
                 else { toggleUI('vip-setup-section', false); toggleUI('api-key-setup', false); }
             } else { quotaCountSpan.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`; }
@@ -288,7 +305,6 @@
         function safeStr(str) { return (str && typeof str === 'string') ? str.trim() : ''; }
         function toggleUI(id, show) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !show); }
         
-        // 語音核心：避開 / - _ 等符號，僅算式念出
         function speakText(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
@@ -320,7 +336,7 @@
             chars.forEach(char => {
                 if (!/[\u4e00-\u9fa5]/.test(char)) return;
                 const btn = document.createElement('button');
-                btn.className = 'char-btn w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-2xl font-bold flex items-center justify-center transition-all';
+                btn.className = 'char-btn w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-2xl font-bold flex items-center justify-center transition-all hover:border-emerald-500 hover:shadow-lg focus:outline-none';
                 btn.textContent = char; btn.onclick = () => loadCharacterTeaching(char, btn);
                 container.appendChild(btn);
             });
@@ -370,43 +386,65 @@
             
             const poly = document.getElementById('polyphonic-display'); poly.innerHTML = '';
             if (data.polyphonic) data.polyphonic.forEach(p => {
-                const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2';
+                const d = document.createElement('div'); d.className = 'text-sm font-bold bg-purple-100 px-2 py-1 rounded inline-block mr-2 cursor-pointer border border-purple-200';
                 d.textContent = p.zhuyin; d.onclick = () => speakText(p.homophone || char); poly.appendChild(d);
             });
 
             const words = document.getElementById('words-container'); words.innerHTML = '';
-            data.words.forEach(w => { const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 rounded-full text-xs font-bold'; s.textContent = w; words.appendChild(s); });
+            data.words.forEach(w => { const s = document.createElement('span'); s.className = 'px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700'; s.textContent = w; words.appendChild(s); });
 
             const idioms = document.getElementById('idioms-container'); idioms.innerHTML = '';
             data.idioms.forEach(i => {
-                const div = document.createElement('div'); div.className = 'p-3 bg-slate-50 rounded-xl text-sm font-bold flex justify-between items-center';
-                div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal">${i.meaning}</small></span><button class="text-rose-400"><i class="ph-fill ph-speaker-high"></i></button>`;
+                const div = document.createElement('div'); div.className = 'p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold flex justify-between items-center group hover:bg-white hover:shadow-md transition-all';
+                div.innerHTML = `<span>${i.idiom}<br><small class="text-slate-500 font-normal italic leading-relaxed">${i.meaning}</small></span><button class="text-rose-400 p-2 hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl"></i></button>`;
                 div.querySelector('button').onclick = () => speakText(i.idiom); idioms.appendChild(div);
             });
+        }
+
+        function grantVip() {
+            isVIP = true;
+            try { 
+                localStorage.setItem('abra_vip_time', Date.now().toString()); 
+                localStorage.setItem('abra_vip_status', 'active'); 
+            } catch(e){}
+            updateUIState();
         }
 
         window.onload = function() {
             initApp();
             document.getElementById('save-vip-btn').addEventListener('click', async () => {
-                const code = document.getElementById('vip-code-input').value.trim().toUpperCase();
+                const code = document.getElementById('vip-code-input').value.trim();
+                const btn = document.getElementById('save-vip-btn');
+                const btnText = document.getElementById('vip-btn-text');
+
                 if (code === 'ABRA-ADMIN-PASS') { grantVip(); alert("Admin Override Active."); return; }
+                
                 toggleUI('vip-loader', true);
+                btnText.textContent = "Verifying...";
+                btn.disabled = true;
+
                 if (window.checkVipCodeInCloud) {
                     const res = await window.checkVipCodeInCloud(code);
-                    if (res.valid) { grantVip(); alert("Cloud Verification Success."); }
+                    if (res.valid) { grantVip(); alert("Cloud Verification Success. VIP Unlocked."); }
                     else alert(res.error);
+                } else {
+                    alert("Cloud module not initialized. Please refresh.");
                 }
+
                 toggleUI('vip-loader', false);
+                btnText.textContent = "Unlock";
+                btn.disabled = false;
             });
+
             document.getElementById('save-key-btn').addEventListener('click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();
-                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateUIState(); alert("AI Connected."); }
+                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateUIState(); alert("AI Intelligence Active."); }
             });
             document.getElementById('translate-btn').addEventListener('click', translateEnglishToChinese);
             document.getElementById('split-btn').addEventListener('click', splitChineseCharacters);
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => {
-                if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Great!' }); }
+                if (writer) { document.getElementById('quiz-status').textContent = 'Tracing...'; writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Excellent Writing!' }); }
             });
         };
     </script>

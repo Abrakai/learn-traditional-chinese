@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <!-- 第 2 層：API Key 教學 (具備多版本 AI 引擎切換) -->
+        <!-- 第 2 層：API Key 教學 -->
         <div id="api-key-setup" class="hidden bg-indigo-50 border-2 border-indigo-200 p-6 rounded-3xl shadow-sm animate-pulse">
             <div class="flex items-start gap-4">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
@@ -105,7 +105,7 @@
                 <div class="flex-1">
                     <h3 class="text-indigo-900 font-bold text-lg mb-1">Step 2: Activate AI Insights / 啟動 AI 引擎</h3>
                     <p class="text-sm text-indigo-700 mb-4 leading-relaxed">
-                        會員資格已啟動！若要開啟注音發音與成語解析，請連結您的 Google Gemini API Key。<br>
+                        授權已啟動！若要開啟注音發音與成語解析，請連結您的 Google Gemini API Key。<br>
                         <span class="text-[11px] italic">License verified! Connect your Gemini API Key to enable AI Zhuyin and Idioms.</span>
                     </p>
                     <div class="flex flex-col gap-4">
@@ -169,20 +169,23 @@
             </div>
         </section>
 
-        <!-- 學習面板 (Study Center) -->
+        <!-- 學習面板 -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
-                <h2 class="text-xl font-semibold flex items-center gap-2"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2>
+                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                    <h2 class="text-xl font-semibold flex items-center gap-2"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2>
+                    <!-- 新增引擎狀態顯示 -->
+                    <span id="active-engine-badge" class="hidden text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter"></span>
+                </div>
                 <span id="current-learning-char" class="text-4xl font-bold text-yellow-400"></span>
             </div>
             
             <div id="dashboard-loader" class="p-16 flex flex-col items-center justify-center hidden">
                 <div class="loader mb-4 border-slate-300 border-t-slate-900 w-10 h-10"></div>
-                <p class="text-slate-400 animate-pulse font-medium text-center">AI Analyzing... / AI 分析中...</p>
+                <p id="loader-text" class="text-slate-400 animate-pulse font-medium text-center">AI Analyzing... / AI 分析中...</p>
             </div>
 
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 筆畫區 -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
@@ -200,9 +203,8 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6 text-center"></p>
                 </div>
 
-                <!-- AI 解析區 / VIP 轉化引導區 -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 space-y-8 relative bg-white">
-                    <!-- 狀態 A: 已完全解鎖 (VIP + API Key) -->
+                    <!-- VIP 完整解析 -->
                     <div id="vip-only-content" class="hidden space-y-8">
                         <div id="badge-ai" class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-tight">VIP AI INSIGHTS</div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -228,7 +230,7 @@
                         </div>
                     </div>
 
-                    <!-- 狀態 B: VIP 但沒有 API Key -->
+                    <!-- VIP 但無 Key -->
                     <div id="vip-no-key-content" class="hidden flex flex-col items-center justify-center py-6 text-center space-y-6 animate-in fade-in zoom-in duration-300">
                         <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-lightning"></i>
@@ -240,13 +242,13 @@
                             </p>
                         </div>
                         <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-left w-full max-w-md">
-                            <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-3 border-b border-indigo-200 pb-2">為什麼現在沒有內容？ / WHY IS IT EMPTY?</h4>
+                            <h4 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-3 border-b border-indigo-200 pb-2 text-center md:text-left">為什麼現在沒有內容？ / WHY IS IT EMPTY?</h4>
                             <div class="space-y-4 text-[11px] text-indigo-700 leading-relaxed">
                                 <p>
-                                    深度解析功能由 <strong>Google Gemini</strong> 提供即時運算服務。為了確保您的個人隱私與效能，VIP 模組採用「自備金鑰 (BYOK)」模式。這就像您購買了頂級跑車(VIP)，現在只需加入燃油(API Key)即可發動。
+                                    深度解析功能由 <strong>Google Gemini</strong> 提供。為了確保您的隱私，VIP 模組採用「自備金鑰 (BYOK)」模式。這就像您購買了跑車 (VIP)，現在只需加入燃油 (API Key) 即可發動。
                                 </p>
                                 <p class="italic border-t border-indigo-100 pt-3">
-                                    AI insights are powered by <strong>Google Gemini</strong>. To ensure privacy and performance, we use a "Bring Your Own Key" (BYOK) model. Add your API Key to start the engine.
+                                    AI insights are powered by <strong>Google Gemini</strong>. To ensure privacy, we use a "Bring Your Own Key" (BYOK) model. Add your API Key to start the engine.
                                 </p>
                             </div>
                             <button onclick="document.getElementById('api-key-setup').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'})" class="mt-5 w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg transition-transform active:scale-95">
@@ -255,7 +257,7 @@
                         </div>
                     </div>
 
-                    <!-- 狀態 C: 非 VIP 使用者引導 -->
+                    <!-- 非 VIP -->
                     <div id="free-promo-content" class="flex flex-col items-center justify-center py-6 text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner">
                             <i class="ph-fill ph-crown"></i>
@@ -265,7 +267,7 @@
                             <p class="text-sm text-slate-500 max-w-[500px] mx-auto px-4 leading-relaxed">
                                 您正在試用強大的中文字書寫系統！<br>
                                 加入 VIP 即可解鎖完整 AI 語言解析引擎與雲端同步功能。<br>
-                                <span class="text-[11px] text-slate-400 block mt-2">Unlock the full AI engine and cloud sync for deep Hanzi insights.</span>
+                                <span class="text-[11px] text-slate-400 block mt-2">Unlock full AI engine and cloud sync for deep Hanzi insights.</span>
                             </p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-[500px]">
@@ -298,7 +300,6 @@
         </section>
     </main>
 
-    <!-- Footer (Copyright & Legal - Bilingual) -->
     <footer class="bg-slate-100 border-t border-slate-200 py-12">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <div class="flex items-center justify-center gap-2 mb-4">
@@ -310,14 +311,14 @@
             </p>
             <div class="mt-6 max-w-2xl mx-auto px-4">
                 <p class="text-slate-400 text-[9px] leading-relaxed text-justify md:text-center italic">
-                    免責聲明 (Disclaimer)：本系統所提供之 AI 語言解析功能皆基於 Google Gemini 雲端運算。阿布拉工作室僅提供軟體展示架構，不保證 AI 運算結果之百分之百準確性。所有 VIP 授權碼之有效性與效期以雲端資料庫實時同步結果為準，使用者需自備合法之 API Key 以啟動雲端運算引擎。<br><br>
-                    AI insights and translations are powered by Google Gemini. Abrakai Studio provides the interface but does not guarantee 100% accuracy of AI results. VIP access and expiry dates are synchronized via cloud. Users must provide their own Gemini API Key.
+                    免責聲明 (Disclaimer)：本系統所提供之 AI 語言解析功能皆基於 Google Gemini 雲端運算。阿布拉工作室僅提供展示架構，不保證 AI 運算結果之百分之百準確性。所有 VIP 授權碼之有效性與效期以雲端資料庫同步為準。<br><br>
+                    AI insights and translations are powered by Google Gemini. Abrakai Studio provides the interface but does not guarantee 100% accuracy of AI results. VIP access and expiry dates are synchronized via cloud.
                 </p>
             </div>
         </div>
     </footer>
 
-    <!-- Firebase Logic (Cloud Authority Enforcement) -->
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -341,7 +342,6 @@
             if (user) {
                 statusEl.textContent = "Cloud Active: Ready / 雲端連線正常";
                 statusEl.className = "text-[10px] text-emerald-600 font-bold italic tracking-wide";
-                // 背景靜默檢查效期
                 syncVipStatusWithCloud();
             } else {
                 signInAnonymously(auth).catch(e => {
@@ -351,7 +351,6 @@
             }
         });
 
-        // 核心商業邏輯：與雲端同步效期，解決執行長擔心的「永不登出」漏洞
         window.syncVipStatusWithCloud = async function() {
             const savedCode = localStorage.getItem('abra_vip_code');
             if (!savedCode) return { active: false };
@@ -375,7 +374,7 @@
                 }
             } catch (err) {
                 console.error("Cloud Sync Error:", err);
-                return { active: true }; // 網路異常時暫時寬容處理
+                return { active: true }; 
             }
         };
 
@@ -386,13 +385,13 @@
             location.reload();
         }
 
-        const vipBtn = document.getElementById('save-vip-btn');
-        vipBtn.addEventListener('click', async () => {
+        document.getElementById('save-vip-btn').addEventListener('click', async () => {
             const code = document.getElementById('vip-code-input').value.trim().toUpperCase();
             if (!code) { alert("請輸入您的 VIP 授權碼。 / Please enter VIP code."); return; }
             if (code === 'ABRA-ADMIN-PASS') { grantVip(code); return; }
 
-            vipBtn.disabled = true;
+            const btn = document.getElementById('save-vip-btn');
+            btn.disabled = true;
             document.getElementById('vip-btn-text').textContent = "Verifying 驗證中...";
             document.getElementById('vip-loader').classList.remove('hidden');
 
@@ -413,7 +412,7 @@
             } catch (err) {
                 alert("雲端同步異常，請檢查網路。 / Cloud sync error.");
             } finally {
-                vipBtn.disabled = false;
+                btn.disabled = false;
                 document.getElementById('vip-btn-text').textContent = "Unlock 解鎖";
                 document.getElementById('vip-loader').classList.add('hidden');
             }
@@ -426,7 +425,7 @@
         }
     </script>
 
-    <!-- UI Logic & AI Multi-Model Auto-Fallback -->
+    <!-- UI Logic & AI Engine (Dynamic Fallback & Model Status) -->
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         let isVIP = false; let activeApiKey = ""; const MAX_FREE_USES = 20; let freeUsageCount = 0;
@@ -453,7 +452,6 @@
             const quotaDisplay = document.getElementById('quota-display');
             const quotaCountSpan = document.getElementById('quota-count');
             const removeBtn = document.getElementById('remove-key-btn');
-            
             const vipPanel = document.getElementById('vip-only-content');
             const vipNoKeyPanel = document.getElementById('vip-no-key-content');
             const freePromoPanel = document.getElementById('free-promo-content');
@@ -464,7 +462,6 @@
                 quotaDisplay.innerHTML = '<i class="ph-fill ph-crown"></i> VIP ACCESS UNLIMITED';
                 removeBtn.classList.remove('hidden');
                 document.getElementById('vip-setup-section').classList.add('hidden');
-                
                 if (!activeApiKey) {
                     document.getElementById('api-key-setup').classList.remove('hidden');
                     vipPanel.classList.add('hidden');
@@ -504,7 +501,6 @@
         function speak(text) {
             if (!text || !window.speechSynthesis || !isVIP || !activeApiKey) return;
             window.speechSynthesis.cancel();
-            // 語音純化：僅漢字，杜絕拼音與重複
             const pureChinese = text.match(/[\u4e00-\u9fa5]+/g)?.join('') || text;
             const ut = new SpeechSynthesisUtterance(pureChinese);
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
@@ -524,7 +520,7 @@
                     executeSplit(true); 
                 }
             } catch (err) {
-                alert("翻譯服務忙碌中。 / Translation busy.");
+                alert("翻譯服務繁忙。 / Translation busy.");
             } finally { document.getElementById('translate-loader').classList.add('hidden'); }
         }
 
@@ -560,31 +556,35 @@
                 return; 
             }
 
-            // 執行關鍵價值請求前，強制執行雲端效期同步 (月繳防禦點)
             const syncStatus = await window.syncVipStatusWithCloud();
             if (!syncStatus.active) return;
 
             document.getElementById('dashboard-content').classList.add('hidden');
             document.getElementById('dashboard-loader').classList.remove('hidden');
 
-            if (charCache[char]) { renderResult(char, charCache[char]); finalize(); return; }
+            if (charCache[char]) { renderResult(char, charCache[char]); finalize(null); return; }
             isFetching = true;
             
-            // 實作自動備援與模型選擇邏輯
+            // AI 備援陣列
             const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite-preview-02-05", "gemini-1.5-flash", "gemini-1.5-pro"];
             const selectedMode = document.getElementById('model-selector').value;
             const modelList = selectedMode === 'auto' ? models : [selectedMode];
             
             let success = false;
+            let lastUsedModel = "";
+
             for (const modelName of modelList) {
                 try {
+                    lastUsedModel = modelName;
+                    updateEngineStatus(`Using: ${modelName} / 引擎調度中...`);
+                    
                     const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "homophone": "同音字"}], "words": ["詞1"], "idioms": [{"idiom": "成語", "meaning": "意思"}]}`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, { 
                         method: 'POST', headers: {'Content-Type': 'application/json'}, 
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
                     });
                     const result = await res.json();
-                    if (result.error || !result.candidates) throw new Error("API Limit");
+                    if (result.error || !result.candidates) throw new Error("Connection/Quota error");
 
                     const rawText = result.candidates[0].content.parts[0].text;
                     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
@@ -595,17 +595,41 @@
                     renderResult(char, data);
                     success = true;
                     break; 
-                } catch (err) { console.warn(`Model ${modelName} unavailable, falling back...`); }
+                } catch (err) { 
+                    console.warn(`Model ${modelName} failed, retrying...`);
+                }
             }
 
             if (!success) {
-                alert("AI 分析服務連線異常，請檢查金鑰或切換版本。 / AI Service connection error. Check key or change version."); 
-                document.getElementById('dashboard-content').classList.remove('hidden'); 
+                // 優化報錯：不直接 Alert，改在面板提示可切換版本
+                updateEngineStatus(`Engine Error / 連線異常`, true);
+                const loaderText = document.getElementById('loader-text');
+                loaderText.innerHTML = `<span class="text-red-500 font-bold">連線繁忙，請嘗試於 API 設定區手動切換版本。<br><small class="font-normal">API busy. Please check key or change engine version.</small></span>`;
+                // 延遲一段時間後顯示寫字區，不阻斷基礎功能
+                setTimeout(() => {
+                    document.getElementById('dashboard-content').classList.remove('hidden'); 
+                    document.getElementById('dashboard-loader').classList.add('hidden');
+                }, 1500);
+            } else {
+                finalize(lastUsedModel);
             }
-            isFetching = false; finalize();
+            isFetching = false; 
         }
 
-        function finalize() { document.getElementById('dashboard-loader').classList.add('hidden'); document.getElementById('dashboard-content').classList.remove('hidden'); }
+        function updateEngineStatus(msg, isError = false) {
+            const badge = document.getElementById('active-engine-badge');
+            badge.classList.remove('hidden');
+            badge.textContent = msg;
+            badge.className = isError ? 
+                "text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200 uppercase font-black tracking-tighter" : 
+                "text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter";
+        }
+
+        function finalize(modelName) { 
+            document.getElementById('dashboard-loader').classList.add('hidden'); 
+            document.getElementById('dashboard-content').classList.remove('hidden'); 
+            if(modelName) updateEngineStatus(`Powered by: ${modelName}`);
+        }
 
         function renderResult(char, data) {
             document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
@@ -640,7 +664,12 @@
             initUI();
             document.getElementById('save-key-btn').addEventListener('click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();
-                if (key) { activeApiKey = key; localStorage.setItem('gemini_api_key', key); updateGlobalUI(); alert("AI Power Active! / AI 引擎已連結！"); }
+                if (key) { 
+                    activeApiKey = key; 
+                    localStorage.setItem('gemini_api_key', key); 
+                    updateGlobalUI(); 
+                    alert("AI Power Active! / AI 引擎已連結！"); 
+                }
             });
             document.getElementById('translate-btn').addEventListener('click', doTranslate);
             document.getElementById('split-btn').addEventListener('click', () => { executeSplit(); });

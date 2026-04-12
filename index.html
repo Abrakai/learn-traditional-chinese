@@ -522,6 +522,11 @@
             if (charCache[char]) { renderResult(char, charCache[char]); finalize(); return; }
             isFetching = true;
             try {
+                // 強制檢查是否有 API Key
+                if (!activeApiKey || activeApiKey.length < 10) {
+                    throw new Error("Invalid API Key / 金鑰格式無效");
+                }
+
                 const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "homophone": "同音字"}], "words": ["詞1"], "idioms": [{"idiom": "成語", "meaning": "意思"}]}`;
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeApiKey}`, { 
                     method: 'POST', headers: {'Content-Type': 'application/json'}, 
@@ -529,18 +534,28 @@
                 });
                 const result = await res.json();
                 
-                // 檢查 API 是否成功回傳資料
+                if (result.error) {
+                    throw new Error(`API Error: ${result.error.message}`);
+                }
+
                 if (!result.candidates || result.candidates.length === 0) {
-                    throw new Error("API Limit Reached or Invalid Key");
+                    throw new Error("API Limit Reached or Empty Response");
                 }
 
                 const text = result.candidates[0].content.parts[0].text;
-                const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+                const jsonMatch = text.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) throw new Error("AI parsing error");
+                
+                const data = JSON.parse(jsonMatch[0]);
                 charCache[char] = data; renderResult(char, data);
             } catch (err) { 
-                // 修正 24.jpg 報錯：彈出雙語異常訊息
-                console.error("AI Sync Error:", err);
-                alert("AI 分析服務連線異常，請檢查 API Key 或網路。 / AI Service connection error. Please check your API Key or Network."); 
+                console.error("AI Sync Error Detail:", err);
+                // 修正 24.jpg 報錯：彈出精確的雙語報錯訊息，引導使用者檢查金鑰
+                const errorMsg = err.message.includes("API Key") ? 
+                    "您的 Google API Key 無效或已過期，請重新連結。 / Your Google API Key is invalid or expired. Please reconnect." : 
+                    "AI 分析服務連線忙碌或網路異常，請稍後再試。 / AI Service busy or network error. Please try again later.";
+                
+                alert(errorMsg); 
                 document.getElementById('dashboard-content').classList.remove('hidden'); 
             } finally { isFetching = false; finalize(); }
         }

@@ -858,7 +858,6 @@
                         }
                     }
                     
-                    // [PM] 偵測未讀訊息：加入本機已讀數量比對，避免重複亮燈
                     const messages = data.messages || [];
                     const lastReadCount = parseInt(localStorage.getItem(`abra_msg_read_${emailId}`) || '0', 10);
                     const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
@@ -902,7 +901,6 @@
                         }
                     }
 
-                    // 判斷最後一則訊息是否為會員回覆，動態調整按鈕樣式
                     const messages = data.messages || [];
                     const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
                     const hasUnread = lastMsg && lastMsg.role === 'user';
@@ -936,7 +934,6 @@
                     tbody.innerHTML = html;
                 }
 
-                // 解決 innerHTML 阻擋 onclick 的問題 (Event Delegation)
                 if (!window.adminTableBound) {
                     tbody.addEventListener('click', (e) => {
                         const btn = e.target.closest('.admin-action-btn');
@@ -1099,7 +1096,6 @@
         };
 
         window.deleteAdminMember = async function(emailId, btnElement) {
-            // 改採雙擊防呆機制取代 confirm()，繞過沙盒封鎖
             if (btnElement && btnElement.textContent !== '確認刪除') {
                 const originalText = btnElement.textContent;
                 btnElement.textContent = '確認刪除';
@@ -1260,7 +1256,6 @@
                     window.currentUserMsgName = data.name || '我';
                     renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName, emailId);
                     
-                    // [PM] 標記為已讀
                     localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
                     
                     const hasAdminMsg = messages.some(m => m.role === 'admin');
@@ -1297,7 +1292,6 @@
                 messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 
-                // [PM] 更新已讀數量，避免自己發完訊息後紅點錯亂
                 localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
                 
                 inputEl.value = '';
@@ -1630,17 +1624,27 @@
                 if (!word) return;
                 document.getElementById('translate-loader').classList.remove('hidden');
                 try {
-                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
+                    // [PM] 修復點：棄用常有幻覺且限流的 MyMemory API，升級為 Google Translate 引擎
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
-                    const trans = (d.responseData.translatedText || "").replace(/[^\u4e00-\u9fa5]/g, '');
-                    document.getElementById('zh-input').value = trans;
+                    let trans = "";
+                    if (d && d[0]) {
+                        trans = d[0].map(item => item[0]).join('');
+                    }
+                    // 移除過於激進的正則表達式，保留標點符號讓句意完整
+                    document.getElementById('zh-input').value = trans.trim();
+                    
                     if (!window.isVIP) { 
                         window.freeUsageCount++; 
                         localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                         if(window.updateGlobalUI) window.updateGlobalUI(); 
                     }
                     document.getElementById('split-btn').click();
-                } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
+                } catch(e) {
+                    window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
+                } finally { 
+                    document.getElementById('translate-loader').classList.add('hidden'); 
+                }
             });
             
             safeBind('split-btn', 'click', () => {

@@ -169,7 +169,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
+                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
 
@@ -185,7 +185,7 @@
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             
-                            <button type="button" id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">UNLOCK FEATURES / 登入解鎖</span>
                                 <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
@@ -202,26 +202,34 @@
             </div>
         </section>
 
-        <!-- [PM] 新增：管理員專屬介面 (Admin Console) -->
-        <section id="admin-dashboard-section" class="hidden bg-slate-900 border border-slate-700 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
-            <div class="px-6 py-4 flex items-center justify-between text-white border-b border-slate-700">
+        <!-- [PM] 完整復原：管理員專屬介面 (Admin Console) -->
+        <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
                     <i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i>
-                    <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 系統管理後台</h3>
+                    <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3>
                 </div>
-                <span class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Secured System</span>
+                <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
+                    <i class="ph-bold ph-plus"></i> 新增會員
+                </button>
             </div>
-            <div class="p-6 md:p-10 text-center">
-                <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-4xl text-emerald-400 mx-auto mb-6 shadow-inner">
-                    <i class="ph-fill ph-database"></i>
-                </div>
-                <h4 class="text-xl font-black text-white mb-2">會員資料庫與發證系統</h4>
-                <p class="text-slate-400 text-sm leading-relaxed max-w-md mx-auto mb-8">
-                    執行長您好，本區塊為前端防護與展示介面。<br>為確保會員個資與系統安全，請直接前往 Firebase 官方控制台進行核對與 VIP 開通操作。
-                </p>
-                <a href="https://console.firebase.google.com/" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-8 py-3.5 rounded-xl font-black shadow-lg active:scale-95 transition-all text-sm uppercase tracking-wider">
-                    <i class="ph-bold ph-arrow-square-out text-lg"></i> 前往 Firebase Console
-                </a>
+            <div class="p-0 overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-wider text-[10px] font-bold">
+                        <tr>
+                            <th class="px-6 py-4">狀態</th>
+                            <th class="px-6 py-4">Email (帳號)</th>
+                            <th class="px-6 py-4">姓名 / 密碼</th>
+                            <th class="px-6 py-4">匯款日 / 期數</th>
+                            <th class="px-6 py-4">到期日</th>
+                            <th class="px-6 py-4">備註 (末五碼)</th>
+                            <th class="px-6 py-4 text-right">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700">
+                        <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">載入會員資料中...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -419,6 +427,58 @@
         </div>
     </div>
 
+    <!-- [PM] 管理員專屬：新增與編輯會員資料 Modal -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-user-list text-emerald-500"></i> Edit Member / 編輯會員資料</h3>
+                <button type="button" onclick="window.closeAdminModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="space-y-4 text-left">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Email (帳號)</label>
+                        <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Password (密碼)</label>
+                        <input type="text" id="admin-member-pass" placeholder="建議含手機末4碼" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Display Name (姓名)</label>
+                    <input type="text" id="admin-member-name" placeholder="會員姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Payment Date (匯款日)</label>
+                        <input type="date" id="admin-pay-date" onchange="window.calculateExpiry()" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-xs shadow-sm bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Months (期數/月)</label>
+                        <input type="number" id="admin-months" oninput="window.calculateExpiry()" placeholder="12" min="1" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-xs shadow-sm bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5">Expiry (到期日)</label>
+                        <input type="date" id="admin-expiry-date" class="w-full px-3 py-2 rounded-lg border border-emerald-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs shadow-sm bg-white font-bold text-emerald-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Remarks (備註 - 匯款後五碼)</label>
+                    <input type="text" id="admin-member-remarks" placeholder="例如：台新 88392" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="window.closeAdminModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wider">Cancel / 取消</button>
+                    <button type="button" id="admin-save-btn" onclick="window.saveAdminMember()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-900 py-3 rounded-xl font-black shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存會員</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 法律聲明 Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
@@ -463,7 +523,7 @@
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
         window.isVIP = localStorage.getItem('abra_vip_status') === 'active';
 
-        // [PM] 修復點 2：加入 isAdmin 判定，解鎖 Admin Dashboard 的顯示
+        // 包含 Admin UI 判定，並載入管理員資料表
         window.updateGlobalUI = function() {
             window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
             window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
@@ -489,6 +549,10 @@
                 if(memberSection) memberSection.classList.add('hidden');
                 if(adminSection) adminSection.classList.remove('hidden');
                 if(apiKeySetup) apiKeySetup.classList.add('hidden');
+                
+                // 觸發載入管理員資料
+                if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
+
             } else if (window.isVIP) {
                 if(qDisplay) qDisplay.classList.add('hidden');
                 if(vBadge) {
@@ -530,9 +594,25 @@
             }
         };
 
+        // [PM] 管理員：自動計算到期日 (匯款日 + 購買期數)
+        window.calculateExpiry = function() {
+            const payDate = document.getElementById('admin-pay-date').value;
+            const months = parseInt(document.getElementById('admin-months').value, 10);
+            if (payDate && !isNaN(months) && months > 0) {
+                const d = new Date(payDate);
+                d.setMonth(d.getMonth() + months);
+                document.getElementById('admin-expiry-date').value = d.toISOString().split('T')[0];
+            }
+        };
+
         window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
+        window.closeAdminModal = () => {
+            document.getElementById('admin-modal')?.classList.add('hidden');
+            document.getElementById('admin-member-email').removeAttribute('readonly');
+            document.getElementById('admin-member-email').classList.remove('bg-slate-100', 'text-slate-500');
+        };
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
         const getStr = (val) => (val === null || val === undefined) ? "" : String(val);
@@ -552,7 +632,7 @@
     <!-- Firebase 模組 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -638,6 +718,171 @@
                 }
             } catch(e) { console.error("Sync Error"); }
         };
+
+        // ==========================================
+        // [PM] 管理員系統：CRUD 核心邏輯補回
+        // ==========================================
+
+        // 讀取所有會員資料
+        window.loadAdminMembers = async function() {
+            const tbody = document.getElementById('admin-members-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">載入會員資料中...</td></tr>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let html = '';
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const emailId = docSnap.id;
+                    
+                    // 動態計算狀態燈號
+                    let statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>`;
+                    let daysText = "未開通";
+                    if (data.expiryDate) {
+                        const diff = new Date(data.expiryDate).getTime() - Date.now();
+                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        if (daysLeft > 7) {
+                            statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-emerald-500 light-glow"></div>`;
+                            daysText = `剩餘 ${daysLeft} 天`;
+                        } else if (daysLeft > 0) {
+                            statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-orange-500 light-glow animate-pulse"></div>`;
+                            daysText = `即將到期 (${daysLeft}天)`;
+                        } else {
+                            statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-red-500 light-glow animate-pulse"></div>`;
+                            daysText = "已過期";
+                        }
+                    }
+
+                    html += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    ${statusHTML} <span class="text-xs font-bold">${daysText}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">${data.email || emailId}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-indigo-700">${data.name || '無'}<br><span class="text-slate-400 font-mono font-normal">${data.password || ''}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' 個月' : '-'}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">${data.remarks || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
+                                <button type="button" onclick="window.deleteAdminMember('${emailId}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                if(html === '') {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">目前尚無會員資料</td></tr>';
+                } else {
+                    tbody.innerHTML = html;
+                }
+            } catch(e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500 font-bold">載入失敗，請檢查權限或網路。</td></tr>';
+            }
+        };
+
+        // 開啟新增/編輯 Modal
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            
+            if (emailId) {
+                // 編輯模式
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                try {
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
+                        document.getElementById('admin-months').value = data.months || '';
+                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
+                        document.getElementById('admin-member-remarks').value = data.remarks || '';
+                    }
+                } catch(e) {
+                    window.showToast("資料讀取失敗", true);
+                }
+            } else {
+                // 新增模式
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                document.getElementById('admin-member-pass').value = '';
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+            }
+        };
+
+        // 儲存會員資料 (包含新增與覆寫)
+        window.saveAdminMember = async function() {
+            const email = document.getElementById('admin-member-email').value.trim().toLowerCase();
+            const password = document.getElementById('admin-member-pass').value.trim();
+            const name = document.getElementById('admin-member-name').value.trim();
+            const paymentDate = document.getElementById('admin-pay-date').value;
+            const months = document.getElementById('admin-months').value;
+            const expiryDate = document.getElementById('admin-expiry-date').value;
+            const remarks = document.getElementById('admin-member-remarks').value.trim();
+
+            if (!email || !password || !name) {
+                window.showToast("Email、密碼與姓名為必填欄位", true);
+                return;
+            }
+
+            const saveBtn = document.getElementById('admin-save-btn');
+            saveBtn.textContent = "Saving...";
+            saveBtn.disabled = true;
+
+            try {
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                
+                // 使用 setDoc 配合 merge: true，可同時處理新增與更新
+                await setDoc(docRef, {
+                    email: email,
+                    password: password,
+                    name: name,
+                    paymentDate: paymentDate,
+                    months: months,
+                    expiryDate: expiryDate,
+                    remarks: remarks,
+                    status: expiryDate ? "active" : "pending"
+                }, { merge: true });
+                
+                window.showToast("會員資料已儲存成功！");
+                window.closeAdminModal();
+                window.loadAdminMembers(); // 重新載入表格
+            } catch(e) {
+                window.showToast("儲存失敗，請重試", true);
+            } finally {
+                saveBtn.textContent = "Save / 儲存會員";
+                saveBtn.disabled = false;
+            }
+        };
+
+        // 刪除會員
+        window.deleteAdminMember = async function(emailId) {
+            if(confirm(`警告：確定要刪除會員 ${emailId} 嗎？此操作無法復原。`)) {
+                try {
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                    await deleteDoc(docRef);
+                    window.showToast("會員已成功刪除");
+                    window.loadAdminMembers();
+                } catch(e) {
+                    window.showToast("刪除失敗", true);
+                }
+            }
+        };
         
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -655,7 +900,6 @@
 
             try {
                 if (await verifyAdminCloud(code)) {
-                    // [PM] 修復點 2：管理員驗證成功後，啟動 Dashboard
                     localStorage.setItem('abra_admin_status', 'active');
                     window.showToast("管理員身分確認 / Admin Verified.");
                     setTimeout(() => location.reload(), 800);
@@ -756,17 +1000,6 @@
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         });
 
-        window.handleLogout = function() {
-            if(confirm('確定要登出嗎？ / Confirm Logout?')) { 
-                localStorage.removeItem('abra_vip_status');
-                localStorage.removeItem('abra_vip_code');
-                localStorage.removeItem('abra_usage_count'); 
-                // [PM] 清除管理員狀態
-                localStorage.removeItem('abra_admin_status');
-                location.reload(); 
-            }
-        };
-
         window.firebaseApp = { db, appId };
     </script>
 
@@ -862,7 +1095,7 @@
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
 
-            const modelNames = ["gemini-3.1-flash-lite", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+            const modelNames = ["gemini-2.0-flash", "gemini-1.5-flash"];
             let success = false;
             for (const model of modelNames) {
                 try {
@@ -911,7 +1144,6 @@
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
                     
                     const pureZhuyin = getStr(p.zhuyin).replace(/\s+/g, '');
-                    // [PM] 修復點 1：拔除 w-14 固定寬度，改用 min-w-[3.5rem] 與 px-2 彈性展開，徹底解決注音擠壓跑版。
                     wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 min-w-[3.5rem] px-2 text-center border-r border-purple-100 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
                     polyDisp.appendChild(wrap);
                 });

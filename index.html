@@ -31,6 +31,7 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
+        /* 美化滾動條 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -114,7 +115,7 @@
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
                 </div>
 
-                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openUserMsgModal()">
+                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
@@ -122,10 +123,10 @@
                     </span>
                 </button>
 
-                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
+                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Profile / 個人設定</span>
                 </button>
-                <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleLogout()">
+                <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
                     <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
                 </button>
             </div>
@@ -134,7 +135,6 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 會員區 -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
@@ -174,7 +174,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
+                            <button type="button" id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
 
@@ -189,7 +189,7 @@
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             
-                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                            <button type="button" id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">UNLOCK FEATURES / 登入解鎖</span>
                                 <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
@@ -417,7 +417,7 @@
             </div>
             
             <div id="user-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-2 mb-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
-                <!-- 對話泡泡將透過 JS 動態生成 -->
+                <!-- 對話泡泡 -->
             </div>
             
             <div class="pt-2 border-t border-slate-100 flex gap-2">
@@ -465,7 +465,7 @@
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="window.closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wider">Cancel / 取消</button>
-                    <button type="button" id="modal-save-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存設定</button>
+                    <button type="button" id="modal-save-btn" onclick="window.saveProfileInfo()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存設定</button>
                 </div>
             </div>
         </div>
@@ -907,6 +907,7 @@
                     const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:text-blue-800";
                     const msgBtnText = hasUnread ? "新回覆" : "傳訊";
 
+                    // [PM] 修復點：捨棄 Event Delegation，直接綁定絕對 onclick，防範沙盒渲染阻擋
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -920,9 +921,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
-                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
-                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
+                                <button type="button" onclick="window.openAdminMsgModal('${emailId}')" class="font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
+                                <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
+                                <button type="button" onclick="window.deleteAdminMember('${emailId}', this)" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
                             </td>
                         </tr>
                     `;
@@ -932,19 +933,6 @@
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">目前尚無會員資料</td></tr>';
                 } else {
                     tbody.innerHTML = html;
-                }
-
-                if (!window.adminTableBound) {
-                    tbody.addEventListener('click', (e) => {
-                        const btn = e.target.closest('.admin-action-btn');
-                        if (!btn) return;
-                        const action = btn.getAttribute('data-action');
-                        const id = btn.getAttribute('data-id');
-                        if (action === 'admin-msg') window.openAdminMsgModal(id);
-                        if (action === 'admin-edit') window.openAdminModal(id);
-                        if (action === 'admin-delete') window.deleteAdminMember(id, btn);
-                    });
-                    window.adminTableBound = true;
                 }
             } catch(e) {
                 console.error(e);
@@ -1388,7 +1376,7 @@
             }
         });
 
-        document.getElementById('modal-save-btn')?.addEventListener('click', async () => {
+        window.saveProfileInfo = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
             const newPass = document.getElementById('profile-pass').value.trim();
@@ -1404,7 +1392,7 @@
                 window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
-        });
+        };
 
         window.firebaseApp = { db, appId };
     </script>
@@ -1624,34 +1612,23 @@
                 if (!word) return;
                 document.getElementById('translate-loader').classList.remove('hidden');
                 try {
-                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
                     const d = await res.json();
-                    let trans = "";
-                    if (d && d[0]) {
-                        trans = d[0].map(item => item[0]).join('');
-                    }
-                    document.getElementById('zh-input').value = trans.trim();
-                    
+                    const trans = (d.responseData.translatedText || "").replace(/[^\u4e00-\u9fa5]/g, '');
+                    document.getElementById('zh-input').value = trans;
                     if (!window.isVIP) { 
                         window.freeUsageCount++; 
                         localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                         if(window.updateGlobalUI) window.updateGlobalUI(); 
                     }
                     document.getElementById('split-btn').click();
-                } catch(e) {
-                    window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
-                } finally { 
-                    document.getElementById('translate-loader').classList.add('hidden'); 
-                }
+                } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
             });
             
-            // [PM] 修復點：加入 (e) 事件參數，攔截自動觸發與手動點擊
             safeBind('split-btn', 'click', (e) => {
                 const text = document.getElementById('zh-input').value.trim();
                 if (!text) return;
                 
-                // [PM] 精準防護：利用 e.isTrusted 判斷是否為「人類真實點擊」
-                // 若為 Translate 自動觸發的程式點擊 (e.isTrusted = false)，則跳過扣款與阻擋
                 if (e && e.isTrusted) {
                     if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
                         window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 

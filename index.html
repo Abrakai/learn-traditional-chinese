@@ -64,20 +64,20 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- [PM] Domain Sentinel: 網域鎖定遮罩 (支援開發預覽與本地檔案白名單) -->
+    <!-- [PM] Domain Sentinel: 網域鎖定遮罩 (優化空 hostname 辨識) -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
         </div>
-        <h2 class="text-2xl font-black text-white mb-4">Unauthorized Domain / 未經授權之副本</h2>
+        <h2 class="text-2xl font-black text-white mb-4">Unauthorized Access / 網域授權失敗</h2>
         <p class="text-slate-400 max-w-md leading-relaxed">
-            偵測到本網頁被部署於未經授權的網域。為保護智慧財產權與個資安全，系統已自動鎖定核心功能。<br><br>
-            請前往官方站點：<br>
+            系統偵測到非法網域部署。為保護工作室資產與個資安全，功能已鎖定。<br><br>
+            請回官方正版站點：<br>
             <a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-bold underline">abrakai.github.io/learn-traditional-chinese/</a>
         </p>
     </div>
 
-    <!-- Honey-pot Fields: 誘捕瀏覽器自動填入 -->
+    <!-- Honey-pot Fields -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1">
         <input type="password" name="fake_password" tabindex="-1">
@@ -101,8 +101,7 @@
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
 
-                <!-- 會員效期燈號 -->
-                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/10">
+                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/10 transition-all">
                     <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
                     <span class="text-[10px] font-black tracking-tight uppercase"><span id="vip-days-left">--</span> Days</span>
                 </div>
@@ -123,12 +122,12 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 會員登入註冊區 -->
+        <!-- 會員區 (防自動填入) -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
                     <i class="ph ph-user-circle text-2xl text-yellow-400"></i>
-                    <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Access / 會員中心</h3>
+                    <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3>
                 </div>
                 <span id="auth-status-msg" class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Initializing...</span>
             </div>
@@ -151,16 +150,12 @@
                                     <p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便執行長快速核對匯款開通。</p>
                                 </div>
                             </div>
-
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                                 <div class="flex items-start gap-2">
                                     <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
-                                    <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer">
-                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明 (Privacy Policy & Disclaimer)</button>。
-                                    </label>
+                                    <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明 (Privacy Policy & Disclaimer)</button>。</label>
                                 </div>
                             </div>
-
                             <button id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase">Create Account 建立帳號</button>
                         </div>
                     </div>
@@ -181,10 +176,6 @@
                                 <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
                         </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2 mt-4 shadow-inner">
-                            <i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i>
-                            <p class="text-[11px] text-slate-500 leading-snug"><strong>系統說明：</strong> 需以 Email 與密碼雙重登入。VIP 到期後功能將自動限制。 / Subscription based.</p>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -197,15 +188,15 @@
                 <div class="flex-1 text-center md:text-left space-y-4">
                     <div>
                         <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">AI Engine Ready / 啟動 AI 深度解析</h3>
-                        <p class="text-sm text-slate-600 font-medium mt-1 leading-relaxed">解鎖：<span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋</span>。</p>
+                        <p class="text-sm text-slate-600 font-medium mt-1">解鎖：<span class="text-indigo-700 font-bold">注音、破音字、常用造詞、成語解釋</span>。</p>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 border-t border-slate-100 pt-4">
                         <div class="space-y-1">
                             <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 text-[10px] font-bold flex items-center gap-1 w-fit"><i class="ph ph-lock-key"></i> 雲端同步安全 / Cloud Sync</span>
-                            <p class="text-[9px] text-slate-400">金鑰加密同步至您的帳戶，登入即自動掛載。<br>Synced to your account upon login.</p>
+                            <p class="text-[9px] text-slate-400">金鑰同步至您的帳戶，登入即自動掛載。</p>
                         </div>
                         <div class="space-y-1">
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline text-[10px] font-black hover:text-indigo-800 flex items-center gap-1"><i class="ph ph-arrow-square-out"></i> 前往 Google AI Studio 申請金鑰 / Get Free Key</a>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline text-[10px] font-black hover:text-indigo-800 flex items-center gap-1"><i class="ph ph-arrow-square-out"></i> 前往 Google AI Studio 申請金鑰</a>
                         </div>
                     </div>
                 </div>
@@ -218,7 +209,7 @@
             </div>
         </div>
 
-        <!-- 翻譯與書寫功能 -->
+        <!-- 翻譯與漢字學習區 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -249,7 +240,7 @@
             </div>
         </section>
 
-        <!-- 學習中心面板 -->
+        <!-- 學習中心面板 (模型顯示) -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
@@ -289,7 +280,7 @@
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm flex items-start gap-2">
                             <i class="ph-fill ph-check-circle text-amber-500 mt-0.5"></i>
-                            <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">VIP 解析引擎運作中。資料已透過雲端文件自動掛載載入。 / Engine Active.</p>
+                            <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">VIP 解析引擎運作中。資料已透過雲端文件自動掛載載入。</p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 shadow-sm relative overflow-hidden">
@@ -358,7 +349,7 @@
                         <input type="password" id="profile-api-key" placeholder="AIzaSy..." readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm font-mono bg-white">
                         <button type="button" onclick="togglePassVisibility('profile-api-key', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                     </div>
-                    <p class="text-[9px] text-slate-400 mt-2 leading-relaxed"><i class="ph ph-shield-check"></i> 此金鑰將同步至雲端，更換設備登入後亦可自動載入。</p>
+                    <p class="text-[9px] text-slate-400 mt-2 leading-relaxed"><i class="ph ph-shield-check"></i> 金鑰將同步至雲端，更換設備登入後亦可自動載入。</p>
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button onclick="window.closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm">Cancel</button>
@@ -368,49 +359,36 @@
         </div>
     </div>
 
-    <!-- [PM] 法律聲明 Modal (中英句對照版) -->
+    <!-- 法律聲明 Modal (中英對照) -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
-            <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2">
-                <i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer
-            </h3>
+            <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2"><i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer</h3>
             <div class="space-y-6 text-sm text-slate-600 leading-relaxed font-medium">
                 <section>
                     <h4 class="font-black text-slate-800 mb-2">1. 個人資料保護聲明 (Privacy Policy)</h4>
                     <p>Abrakai Studio (以下簡稱本站) 為提供會員服務，將收集您的電子郵件、姓名與密碼。</p>
                     <p class="italic text-slate-400 mb-2">Abrakai Studio collects your email, name, and password to provide member services.</p>
-                    <p>您的 API Key 將同步儲存於雲端資料庫中，僅供您個人調用 AI 功能使用。</p>
+                    <p>您的 API Key 將同步加密儲存於雲端資料庫中，僅供您個人調用 AI 功能使用。</p>
                     <p class="italic text-slate-400 mb-2">Your API Key is stored in the cloud for your personal AI requests only.</p>
-                    <p>本站承諾絕不將您的個人資料洩漏或提供予第三方進行商業行為。</p>
-                    <p class="italic text-slate-400">We promise never to share your personal data with third parties.</p>
                 </section>
                 <section>
                     <h4 class="font-black text-slate-800 mb-2">2. 免責聲明 (Disclaimer)</h4>
                     <p>本站提供之漢字解析、翻譯內容，部分由第三方 AI 引擎 (Google Gemini) 動態生成。</p>
-                    <p class="italic text-slate-400 mb-2">Parts of the Chinese character analysis and translations are dynamically generated by third-party AI.</p>
-                    <p>內容僅供學術輔助參考，無法保證 100% 正確性。</p>
-                    <p class="italic text-slate-400 mb-2">Content is for academic reference only; 100% accuracy is not guaranteed.</p>
-                    <p>若因採用本站內容造成任何損失或誤解，本站不承擔任何法律責任。</p>
-                    <p class="italic text-slate-400">Abrakai Studio is not liable for any losses or misunderstandings resulting from the use of this content.</p>
+                    <p class="italic text-slate-400 mb-2">Chinese character analysis and translations are dynamically generated by third-party AI.</p>
+                    <p>內容僅供學術輔助參考，無法保證 100% 正確性。若因採用本站內容造成任何損害，本站不承擔法律責任。</p>
+                    <p class="italic text-slate-400">Content is for academic reference only; 100% accuracy is not guaranteed. We are not liable for any losses.</p>
                 </section>
                 <section>
                     <h4 class="font-black text-slate-800 mb-2">3. 會員資格與配額 (Subscription & Quota)</h4>
                     <p>VIP 效期以匯款開通日起算。過期後系統將自動降級為每日 20 次之免費試用模式。</p>
-                    <p class="italic text-slate-400">Subscription starts upon activation. After expiry, access reverts to a 20-use daily trial limit.</p>
+                    <p class="italic text-slate-400">Subscription starts upon activation. Access reverts to a daily trial limit after expiry.</p>
                 </section>
             </div>
-            <div class="mt-10">
-                <button onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">Close / 我已了解</button>
-            </div>
+            <div class="mt-10"><button onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">Close / 我已了解</button></div>
         </div>
     </div>
 
-    <footer class="bg-slate-100 border-t border-slate-200 py-12 mt-12 text-center text-slate-400 text-[9px] italic px-4">
-        &copy; 2026 Abrakai Studio | Taiwan Chinese Hub<br>
-        免責聲明：VIP 授權針對平台次數解除。AI 屬第三方服務，穩定性由 API 供應商負責。
-    </footer>
-
-    <!-- Firebase SDK & VIP Logic -->
+    <!-- Firebase & Core VIP Engine -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -430,14 +408,16 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
 
-        // [PM] Domain Sentinel (擴充白名單以包含本地與開發預覽環境)
-        const VALID_DOMAINS = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev", ""];
+        // [PM] Domain Sentinel (支持 file 協議與開發環境)
+        const VALID_DOMAINS = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"];
         const sentinelCheck = () => {
             const host = window.location.hostname;
-            const isAllowed = VALID_DOMAINS.some(d => d === "" ? host === "" : (host === d || host.endsWith('.' + d)));
+            const proto = window.location.protocol;
+            // 允許官方網域、本地開發、預覽環境、或直接打開 HTML 檔案 (file:)
+            const isAllowed = VALID_DOMAINS.some(d => host === d || host.endsWith('.' + d)) || proto === 'file:';
             if (!isAllowed) {
                 document.getElementById('domain-lock-overlay').classList.remove('hidden');
-                console.error("Access Denied on domain:", host || "local-file");
+                console.error("Access Denied on domain:", host || "external-host");
                 return false;
             }
             return true;
@@ -453,7 +433,7 @@
             }
         });
 
-        // 效期同步與 API Key 自動擷取
+        // 效期同步與自動掛載 API Key
         window.syncVipStatus = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) return;
@@ -592,8 +572,8 @@
                 try {
                     const res = await fetch(url, options);
                     if (res.status === 429 && i < maxRetries) {
-                        document.getElementById('ai-error-title').textContent = "AI 引擎休息中";
-                        document.getElementById('ai-error-debug').textContent = `觸發頻率限制。系統將於 ${delays[i]/1000} 秒後自動重試...`;
+                        document.getElementById('ai-error-title').textContent = "AI 引擎冷卻中";
+                        document.getElementById('ai-error-debug').textContent = `點擊過快。系統將於 ${delays[i]/1000} 秒後自動重試...`;
                         document.getElementById('ai-error-panel').classList.remove('hidden');
                         await new Promise(r => setTimeout(r, delays[i]));
                         continue;

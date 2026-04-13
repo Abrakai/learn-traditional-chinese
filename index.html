@@ -208,7 +208,7 @@
                 <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-magic-wand"></i></div>
                 <div class="flex-1 text-center md:text-left space-y-4">
                     <div>
-                        <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟弱 AI 深度解析</h3>
+                        <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟動 AI 深度解析</h3>
                         <p class="text-sm text-slate-600 font-medium mt-1 leading-relaxed">解鎖：<span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋及英文翻譯說明</span>。<br>
                         <span class="text-[11px] italic text-slate-400">Unlock advanced features: Zhuyin, Polyphonic analysis, Vocabulary, Idiom definitions, and English translations.</span></p>
                     </div>
@@ -247,18 +247,25 @@
             </div>
         </section>
 
+        <!-- [PM] 優化點：改寫輸入框提示、按鈕文字，並增加隱藏的引導文字區塊 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl shadow-sm">2</div>
                 <h2 class="text-lg font-semibold tracking-tight">Learn Writing / 漢字書寫學習</h2>
             </div>
-            <div class="flex flex-col md:flex-row gap-4 mb-6">
-                <input type="text" id="zh-input" placeholder="Enter Chinese text here... / 輸入繁體中文" class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm bg-white">
-                <button type="button" id="split-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 uppercase tracking-wider transition-all whitespace-nowrap">Reload / 重新載入</button>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <input type="text" id="zh-input" placeholder="貼上繁體中文，或由上方翻譯自動帶入 / Paste Chinese text here..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm bg-white">
+                <button type="button" id="split-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 uppercase tracking-wider transition-all whitespace-nowrap">Split / 進行中文拆字</button>
             </div>
+            
+            <!-- 動態引導提示，拆字後才會顯示 -->
+            <div id="click-char-guide" class="hidden mb-3 text-center text-[12px] font-black text-indigo-600 animate-pulse flex items-center justify-center gap-1">
+                <i class="ph-fill ph-hand-pointing text-lg"></i> 請點選下方單字，進行書寫教學與專屬深度解析 / Click a character below to analyze
+            </div>
+
             <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner">
-                <span class="text-slate-400 text-xs italic">Characters will appear here...</span>
+                <span class="text-slate-400 text-xs italic font-bold">請先輸入或翻譯文字，拆字後「點擊單字」即可開始學習 / Split characters will appear here. Click to learn.</span>
             </div>
         </section>
 
@@ -702,10 +709,12 @@
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         });
 
+        // [PM] 修復點 2：登出後，將使用次數歸零，重新計算 20 次
         window.handleLogout = function() {
             if(confirm('確定要登出嗎？ / Confirm Logout?')) { 
                 localStorage.removeItem('abra_vip_status');
                 localStorage.removeItem('abra_vip_code');
+                localStorage.removeItem('abra_usage_count'); 
                 location.reload(); 
             }
         };
@@ -713,7 +722,7 @@
         window.firebaseApp = { db, appId };
     </script>
 
-    <!-- AI 解析與防呆邏輯 (僅微創修復 Prompt) -->
+    <!-- AI 解析與防呆邏輯 -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
@@ -809,8 +818,8 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    // [PM] 微創修復：針對 AI 發明注音 (如 T-ㄥˋ) 進行最嚴格的 Prompt 防堵。
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音發音」，【絕對不可】混入其他發音的詞彙！(僅限2~4字詞彙，勿造句)。4. idioms: 必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    // [PM] 修復點 1：加上反面教材舉例，徹底鎖定破音字的正確詞彙對應。
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音的注音發音」，【絕對不可】混入主要注音或其他發音的詞彙！例如「行」唸「ㄒㄧㄥˋ」只能造「德行」，絕不可造「行為」。(僅限2~4字詞彙，絕勿造句)。4. idioms: 必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -922,11 +931,16 @@
                 } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
             });
             
+            // [PM] 修復點 3：點擊拆字後，動態顯示下方的點擊引導文字
             safeBind('split-btn', 'click', () => {
                 const container = document.getElementById('char-container'); container.innerHTML = '';
+                const guide = document.getElementById('click-char-guide');
                 const chars = document.getElementById('zh-input').value.split('');
+                let hasChar = false;
+                
                 chars.forEach(char => {
                     if (!/[\u4e00-\u9fa5]/.test(char)) return;
+                    hasChar = true;
                     const btn = document.createElement('button');
                     btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
                     btn.textContent = char;
@@ -947,6 +961,11 @@
                     };
                     container.appendChild(btn);
                 });
+                
+                // 動態顯示操作提示
+                if (hasChar && guide) guide.classList.remove('hidden');
+                if (!hasChar && guide) guide.classList.add('hidden');
+                if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">未偵測到繁體中文字 / No Chinese characters detected.</span>';
             });
             
             safeBind('animate-stroke-btn', 'click', () => {

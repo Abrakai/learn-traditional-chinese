@@ -85,7 +85,7 @@
     <!-- 雲端異常橫幅 -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
-        <span id="error-banner-text">雲端連線異常：請確認已在 Firebase Console 設定授權網域並發佈 Rules。</span>
+        <span id="error-banner-text">雲端連線異常：請確保已在 Firebase Console 設定授權網域並發佈 Rules。</span>
     </div>
 
     <!-- Header (PLG 導航整合) -->
@@ -124,7 +124,7 @@
                     <i class="ph-fill ph-user-circle text-base"></i> Profile
                 </button>
                 
-                <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700/80 hover:bg-red-800 border border-red-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold" onclick="window.executeLogout()">
+                <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700/80 hover:bg-red-800 border border-red-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.executeLogout()">
                     <i class="ph-bold ph-sign-out text-base"></i> Logout
                 </button>
             </div>
@@ -157,7 +157,7 @@
                     <h2 class="text-xl font-black text-slate-800 tracking-tight text-left">Learn Writing / 漢字書寫學習</h2>
                 </div>
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <!-- 針對 36.jpg 修正：清空欄位 -->
+                    <!-- 針對 36.jpg 修正：初始化不自動填入 Email -->
                     <input type="text" id="zh-input" placeholder="Enter Chinese text here..." class="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-100 text-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-inner text-center md:text-left">
                     <button id="split-btn" onclick="window.executeSplit()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-emerald-600/20 active:scale-90 transition-all">Reload 重新載入</button>
                 </div>
@@ -178,7 +178,6 @@
             </div>
 
             <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 左側：筆畫區 -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center relative min-h-[480px]">
                     <div class="absolute top-3 left-4 flex items-center gap-1.5 text-slate-400">
                         <i class="ph-fill ph-scribble-loop text-lg"></i>
@@ -192,19 +191,14 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6 text-center"></p>
                 </div>
 
-                <!-- 右側：AI 解析區 (VIP 轉化關鍵) -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4">
                         <div class="ai-inner-loader"></div>
                         <p class="text-slate-400 text-xs animate-pulse font-medium uppercase tracking-widest">AI Analyzing...</p>
                     </div>
 
-                    <!-- 故障診斷 -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-300">
-                        <div class="relative">
-                            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner relative z-10"><i class="ph-fill ph-warning-circle"></i></div>
-                            <div class="absolute inset-0 bg-red-200 rounded-full animate-ping opacity-30"></div>
-                        </div>
+                        <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner"><i class="ph-fill ph-warning-circle"></i></div>
                         <div>
                             <h3 class="text-xl font-black text-slate-800 tracking-tight">連線受到阻礙</h3>
                             <p id="ai-error-debug" class="text-slate-500 text-[11px] px-8 mt-2 leading-relaxed bg-slate-100 p-2 rounded-lg border border-slate-200 font-mono break-all max-w-[300px] mx-auto"></p>
@@ -219,11 +213,11 @@
                         <button onclick="window.scrollToApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl active:scale-95 text-sm uppercase tracking-wider transition-all flex items-center gap-2 mx-auto"><i class="ph-bold ph-plug"></i> 前往綁定金鑰</button>
                     </div>
 
-                    <!-- VIP 解析數據 (去拼音、現英譯) -->
+                    <!-- VIP 解析數據 -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left animate-in slide-in-from-right-4 duration-300">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm flex items-start gap-2">
                             <i class="ph-fill ph-check-circle text-amber-500 mt-0.5"></i>
-                            <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">VIP 解析引擎運作中。資料已透過您個人金鑰載入。 / Personal Key Active.</p>
+                            <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">VIP 解析引擎運作中。資料已透過您個人專屬之 API 金鑰載入。</p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 shadow-sm relative overflow-hidden">
@@ -248,9 +242,9 @@
                         </div>
                     </div>
 
-                    <!-- 降級提示 (引導註冊 VIP) -->
+                    <!-- 試用引導 -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
-                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner relative mx-auto"><i class="ph-fill ph-crown text-yellow-500"></i></div>
+                        <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl shadow-inner mx-auto"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <div>
                             <h3 class="text-xl font-black text-slate-800 tracking-tight">解鎖 VIP 深度教學權限</h3>
                             <div id="expiry-notice-box" class="bg-red-50 p-4 rounded-xl border border-red-100 text-xs text-red-700 font-bold mb-4 hidden">您的 VIP 授權已到期，功能已降級。</div>
@@ -265,17 +259,17 @@
 
         <!-- 管理員儀表板 (CEO Management Hub) -->
         <section id="admin-panel" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden p-6 md:p-10 space-y-6 mx-auto max-w-5xl animate-in fade-in duration-500">
-            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-4">
-                <div class="text-left">
-                    <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic flex items-center gap-2"><i class="ph-fill ph-shield-check text-2xl text-yellow-400"></i> CEO Management Hub</h3>
+            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-4 text-left">
+                <div>
+                    <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic flex items-center gap-2"><i class="ph-fill ph-shield-check text-2xl text-yellow-500"></i> CEO Management Hub</h3>
                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">Intelligent Database Control Center</p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <button onclick="window.openAdminAddModal()" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-[10px] font-black border border-blue-200 hover:bg-blue-100 transition-all flex items-center gap-1 shadow-sm"><i class="ph-bold ph-plus"></i> Add Member</button>
+                    <button onclick="window.openAdminAddModal()" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-[10px] font-black border border-blue-200 hover:bg-blue-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-plus"></i> Add Member</button>
                     <input type="file" id="import-file" accept=".csv" class="hidden">
                     <button id="import-btn" onclick="document.getElementById('import-file').click()" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl text-[10px] font-black border border-indigo-200 hover:bg-indigo-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-upload-simple"></i> Import</button>
                     <button id="export-btn" class="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-black border border-emerald-200 hover:bg-emerald-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-download-simple"></i> Export</button>
-                    <button onclick="window.executeLogout()" class="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black border border-slate-200 hover:bg-slate-200 transition-all uppercase text-slate-600 shadow-sm">Exit Manager</button>
+                    <button onclick="window.executeLogout()" class="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black border border-slate-200 hover:bg-slate-200 transition-all uppercase text-slate-600 shadow-sm font-bold">Exit Manager</button>
                 </div>
             </div>
             <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-inner bg-slate-50/50">
@@ -297,30 +291,29 @@
         <!-- API 配置區 -->
         <div id="api-key-setup" class="hidden bg-gradient-to-r from-indigo-600 to-indigo-900 rounded-3xl p-[2px] shadow-2xl relative overflow-hidden animate-in slide-in-from-top-4 duration-500 mx-auto max-w-5xl">
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 blur-3xl"></div>
-            <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 text-left">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner relative flex-shrink-0">
                     <i class="ph-fill ph-magic-wand z-10"></i>
                 </div>
-                <div class="flex-1 text-center md:text-left space-y-4">
+                <div class="flex-1 space-y-4">
                     <div>
                         <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight uppercase">Activate AI Engine / 啟動 AI 深度解析</h3>
                         <p class="text-sm text-slate-600 font-medium leading-relaxed mt-1">綁定金鑰後可啟動：注音輔助、破音字分析、常用造詞、成語深度解釋及英文翻譯說明。</p>
-                        <p class="text-xs text-slate-500 italic font-medium">Unlock VIP features: <span class="font-bold">Zhuyin, Polyphonic Analysis, Vocabulary, Idiom Context, and English Translations.</span></p>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 border-t border-slate-100 pt-4 text-[10px]">
-                        <div class="space-y-1 text-left mx-auto md:mx-0">
+                        <div class="space-y-1">
                             <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 font-bold flex items-center gap-1 w-fit"><i class="ph ph-lock-key"></i> 本地安全 / Local Security</span>
                             <p class="text-slate-400">金鑰僅存於瀏覽器，本站伺服器絕不記錄。</p>
                         </div>
-                        <div class="space-y-1 text-left mx-auto md:mx-0">
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-black hover:text-indigo-800 flex items-center gap-1 justify-center md:justify-start">
-                                <i class="ph ph-arrow-square-out text-base"></i> 免費申請金鑰 / Get a free API Key
+                        <div class="space-y-1">
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-black hover:text-indigo-800 flex items-center gap-1">
+                                <i class="ph ph-arrow-square-out text-base"></i> 免費申請金鑰 / Get Key
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="flex w-full md:w-auto flex-col sm:flex-row gap-3 self-center mt-2 md:mt-0">
-                    <input type="password" id="custom-api-key" placeholder="Paste API Key (AIza...)" class="w-full md:w-64 px-4 py-3.5 rounded-xl border-2 border-indigo-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none text-sm font-mono shadow-sm transition-all bg-white text-slate-700 text-center md:text-left">
+                    <input type="password" id="custom-api-key" placeholder="Paste API Key (AIza...)" class="w-full md:w-64 px-4 py-3.5 rounded-xl border-2 border-indigo-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none text-sm font-mono shadow-sm transition-all bg-white text-slate-700">
                     <button id="save-key-btn" onclick="window.saveApiKey()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-indigo-600/30 active:scale-95 text-sm transition-all whitespace-nowrap flex items-center justify-center gap-2">
                         <i class="ph-bold ph-rocket-launch text-lg"></i> 啟動連線 / Start
                     </button>
@@ -330,9 +323,87 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- 核心工具腳本 (打破模組牆) -->
+    <!-- 模態框 (Modals) 區 -->
+    <!-- ========================================== -->
+
+    <!-- 會員登入註冊 Modal (針對 34.jpg 優化) -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-opacity p-4 overflow-y-auto">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row overflow-hidden border border-white/20">
+            <div class="hidden md:flex md:w-1/3 bg-red-600 p-10 flex-col justify-between text-white relative">
+                <div class="absolute bottom-0 right-0 opacity-10"><i class="ph-fill ph-translate text-[120px]"></i></div>
+                <div><h3 class="text-2xl font-black leading-tight">Welcome to Abrakai Studio</h3><p class="text-red-100 text-sm mt-4 leading-relaxed font-medium">加入 VIP 會員，開啟無限次數學習旅程。</p></div>
+                <div class="text-[10px] font-bold uppercase tracking-widest opacity-60">Taiwan Edition</div>
+            </div>
+            <div class="flex-1 p-8 md:p-12 relative bg-white text-left">
+                <button onclick="window.closeAuthModal()" class="absolute top-6 right-6 text-slate-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-2xl"></i></button>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- 註冊區 -->
+                    <div class="space-y-6 lg:border-r lg:border-slate-100 lg:pr-10">
+                        <h4 class="text-[10px] font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500"></i> STEP 1: SIGN UP / 註冊</h4>
+                        <div class="space-y-4">
+                            <input type="text" id="reg-name" placeholder="Full Name / 姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm">
+                            <input type="email" id="reg-email" placeholder="Email / 電子信箱" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold text-indigo-900 shadow-sm">
+                            <div class="relative"><input type="password" id="reg-pass" placeholder="Set Password / 設定密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm"><button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button></div>
+                            <button id="signup-btn" onclick="window.executeSignUp()" class="w-full bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black shadow-lg shadow-red-600/20 active:scale-95 text-xs uppercase tracking-widest btn-line-break">
+                                <span>CREATE ACCOUNT</span>
+                                <span class="text-[10px] opacity-80 font-bold">建立帳號</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 登入區 -->
+                    <div class="space-y-6">
+                        <h4 class="text-[10px] font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500"></i> STEP 2: LOGIN / 登入</h4>
+                        <div class="space-y-4">
+                            <input type="email" id="login-email" placeholder="Enter Email / 輸入信箱" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm">
+                            <div class="relative"><input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase"><button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button></div>
+                            <button id="login-btn" onclick="window.executeLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 rounded-2xl font-black shadow-lg active:scale-95 text-xs uppercase tracking-widest flex items-center justify-center btn-line-break">
+                                <span id="login-btn-text">LOGIN 登入解鎖</span>
+                                <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 個人設定 Modal -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-md">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6"><h3 class="text-lg font-black text-slate-800 tracking-tight">My Profile / 個人設定</h3><button onclick="window.closeProfileModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-xl"></i></button></div>
+            <div class="space-y-4 text-left">
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Registered Email</label><input type="email" id="profile-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm"></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Display Name</label><input type="text" id="profile-name" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-sm"></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">New Password</label><div class="relative"><input type="password" id="profile-pass" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 outline-none text-sm"><button type="button" onclick="window.togglePassVisibility('profile-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button></div></div>
+                <div><div class="flex justify-between items-center mb-1"><label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest">AI Engine API Key</label><a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold">申請金鑰</a></div><div class="relative"><input type="password" id="profile-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-200 outline-none text-sm font-mono"><button type="button" onclick="window.togglePassVisibility('profile-api-key', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button></div></div>
+                <div class="pt-4 flex gap-3"><button onclick="window.closeProfileModal()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-sm">Cancel</button><button onclick="window.updateProfile()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md text-sm active:scale-95">Save Update</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理員新增 Modal -->
+    <div id="admin-add-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-md border-2 border-indigo-100">
+            <h3 class="text-lg font-black text-indigo-900 mb-6">Add Member / 手動新增</h3>
+            <div class="space-y-4"><input type="email" id="admin-add-email" placeholder="Email" class="w-full px-4 py-3 rounded-xl border text-sm"><input type="text" id="admin-add-name" placeholder="Name" class="w-full px-4 py-3 rounded-xl border text-sm"><div class="relative"><input type="password" id="admin-add-pass" placeholder="Password" class="w-full px-4 py-3 pr-12 rounded-xl border text-sm"><button type="button" onclick="window.togglePassVisibility('admin-add-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button></div><div class="pt-4 flex gap-3"><button onclick="window.closeAdminAddModal()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-sm">Cancel</button><button onclick="window.adminForceAddUser()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-md text-sm">Create Now</button></div></div>
+        </div>
+    </div>
+
+    <!-- 刪除確認 Modal -->
+    <div id="confirm-delete-modal" class="hidden fixed inset-0 z-[140] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-sm text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="ph-fill ph-trash"></i></div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">Delete Member?</h3>
+            <p class="text-sm text-slate-500 mb-6">永久抹除此資料？動作無法復原。</p>
+            <div class="flex gap-3"><button onclick="window.closeDeleteModal()" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-sm">Cancel</button><button id="confirm-delete-btn" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-md text-sm">Delete Now</button></div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 工具腳本 (最高全域化) -->
     <!-- ========================================== -->
     <script>
+        // 核心 UI 全域宣告，確保 onclick 100% 可用
         window.showToast = function(msg, isError = false) {
             const toast = document.getElementById('system-toast');
             const icon = document.getElementById('toast-icon');
@@ -347,21 +418,23 @@
 
         window.openAuthModal = () => document.getElementById('auth-modal')?.classList.remove('hidden');
         window.closeAuthModal = () => document.getElementById('auth-modal')?.classList.add('hidden');
-        window.closeQuotaModal = () => document.getElementById('quota-limit-modal')?.classList.add('hidden');
         window.openAdminAddModal = () => document.getElementById('admin-add-modal')?.classList.remove('hidden');
         window.closeAdminAddModal = () => document.getElementById('admin-add-modal')?.classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
         window.closeDeleteModal = () => document.getElementById('confirm-delete-modal')?.classList.add('hidden');
+        window.closeQuotaModal = () => document.getElementById('quota-limit-modal')?.classList.add('hidden');
 
         window.togglePassVisibility = (id, btn) => {
-            const input = document.getElementById(id); const icon = btn?.querySelector('i');
+            const input = document.getElementById(id);
+            const icon = btn?.querySelector('i');
             if (input && input.type === 'password') { input.type = 'text'; if(icon) icon.className = 'ph ph-eye-slash text-xl'; }
             else if(input) { input.type = 'password'; if(icon) icon.className = 'ph ph-eye text-xl'; }
         };
 
         window.executeLogout = function() {
-            if(confirm('確定要登出系統嗎？ / Logout?')) {
-                localStorage.clear(); location.reload();
+            if(confirm('確定要登出並清除快取嗎？')) {
+                localStorage.clear();
+                location.reload();
             }
         };
 
@@ -370,11 +443,12 @@
             if(b) { b.classList.remove('hidden'); window.scrollTo({ top: b.offsetTop - 20, behavior: 'smooth' }); document.getElementById('custom-api-key')?.focus(); }
         };
 
+        // 初期狀態
         window.isAdmin = localStorage.getItem('abra_admin_status') === 'active';
         window.isVIP = localStorage.getItem('abra_vip_status') === 'active' || window.isAdmin;
     </script>
 
-    <!-- Firebase SDK & 業務邏輯 (最高權限校準) -->
+    <!-- Firebase SDK & 核心邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -402,27 +476,30 @@
             if(loader) loader.classList.add('hidden'); if(btnText) btnText.textContent = "LOGIN 登入解鎖";
         };
 
-        // 登入邏輯
-        document.getElementById('login-btn')?.addEventListener('click', async () => {
+        // 登入邏輯修復
+        window.executeLogin = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const code = document.getElementById('login-vip-code').value.trim();
             if (!code) { window.showToast("請輸入密碼。", true); return; }
-            const loader = document.getElementById('login-loader'); const btnText = document.getElementById('login-btn-text');
-            if(loader) loader.classList.remove('hidden'); if(btnText) btnText.textContent = "Verifying...";
+            
+            const loader = document.getElementById('login-loader');
+            const btnText = document.getElementById('login-btn-text');
+            if(loader) loader.classList.remove('hidden');
+            if(btnText) btnText.textContent = "Verifying...";
 
             try {
-                let isAdminAuth = (btoa(code) === ADM_H);
-                if (!isAdminAuth) {
+                let isRoot = (btoa(code) === ADM_H);
+                if (!isRoot) {
                     try {
                         const adminSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY"));
-                        if (adminSnap.exists() && adminSnap.data().pass === code) isAdminAuth = true;
+                        if (adminSnap.exists() && adminSnap.data().pass === code) isRoot = true;
                     } catch(e) {}
                 }
                 
-                if (isAdminAuth) { 
+                if (isRoot) { 
                     localStorage.setItem('abra_admin_status', 'active');
                     localStorage.setItem('abra_vip_status', 'active');
-                    window.showToast("管理者認證成功！即將進入管理模式...");
+                    window.showToast("管理者認證成功！");
                     setTimeout(() => location.reload(), 800); return; 
                 }
                 
@@ -433,7 +510,7 @@
                 if (docSnap.exists() && docSnap.data().password === code) {
                     const u = docSnap.data();
                     if (u.expiryDate && new Date(u.expiryDate).getTime() < Date.now()) {
-                        window.showToast("會員授權已過期，請聯繫續約。", true); resetLoginState();
+                        window.showToast("授權已過期，請聯繫續約。", true); resetLoginState();
                     } else {
                         localStorage.setItem('abra_vip_code', id);
                         localStorage.setItem('abra_vip_status', 'active');
@@ -441,10 +518,10 @@
                     }
                 } else { window.showToast("帳號或密碼錯誤。", true); resetLoginState(); }
             } catch (err) { window.showToast("連線失敗。", true); resetLoginState(); }
-        });
+        };
 
         // 註冊邏輯
-        document.getElementById('signup-btn')?.addEventListener('click', async () => {
+        window.executeSignUp = async function() {
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
@@ -454,15 +531,16 @@
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", id);
                 if ((await getDoc(docRef)).exists()) { window.showToast("信箱已被註冊。", true); return; }
                 await setDoc(docRef, { name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", signupDate: new Date().toISOString(), status: "pending" });
-                window.showToast("註冊成功！待核對對帳完成。"); window.closeAuthModal();
+                window.showToast("註冊成功！待對帳完成。"); window.closeAuthModal();
             } catch (e) { window.showToast("連線失敗。", true); }
-        });
+        };
 
+        // 權限校準修復 (解決「被跳出」)
         async function syncVipStatus() {
-            const isAdminToken = localStorage.getItem('abra_admin_status') === 'active';
-            const emailIdToken = localStorage.getItem('abra_vip_code'); 
+            const adm = localStorage.getItem('abra_admin_status') === 'active';
+            const uid = localStorage.getItem('abra_vip_code'); 
 
-            if (isAdminToken) {
+            if (adm) {
                 window.isAdmin = true; window.isVIP = true;
                 document.getElementById('user-feature-zones')?.classList.add('hidden');
                 document.getElementById('admin-panel')?.classList.remove('hidden');
@@ -472,12 +550,13 @@
                 enterAdminMode(); window.updateGlobalUI(); return;
             }
 
-            if (!emailIdToken) return;
+            if (!uid) return;
             try {
-                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailIdToken));
+                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", uid));
                 if (docSnap.exists()) {
                     const u = docSnap.data();
-                    if (u.expiryDate && new Date(u.expiryDate).getTime() < Date.now()) { 
+                    // 修復點：只有在日期存在且確定過期時才清除。若為空值（新註冊）則允許停留。
+                    if (u.expiryDate && !isNaN(new Date(u.expiryDate).getTime()) && new Date(u.expiryDate).getTime() < Date.now()) { 
                         localStorage.clear(); window.isVIP = false; location.reload(); return; 
                     }
                     window.isVIP = true;
@@ -485,8 +564,10 @@
                     document.getElementById('profile-btn')?.classList.remove('hidden');
                     document.getElementById('remove-key-btn')?.classList.remove('hidden');
                     document.getElementById('nav-login-btn')?.classList.add('hidden');
-                    if(u.expiryDate) { const diff = new Date(u.expiryDate).getTime() - Date.now(); updateExpiryUI(Math.ceil(diff / 86400000)); }
-                    else { updateExpiryUI("Infinity"); }
+                    if(u.expiryDate) { 
+                        const d = new Date(u.expiryDate).getTime() - Date.now(); 
+                        updateExpiryUI(Math.ceil(d / 86400000)); 
+                    } else { updateExpiryUI("Pending"); }
                     window.updateGlobalUI();
                 }
             } catch(e) { console.error("Sync error."); }
@@ -494,53 +575,26 @@
 
         function updateExpiryUI(days) {
             const d = document.getElementById('vip-expiry-display'); const c = document.getElementById('vip-days-left');
-            if (d && c) { d.classList.remove('hidden'); c.textContent = days; if (days !== "Infinity" && days < 7) d.className = "bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black animate-pulse border border-red-300"; }
+            if (d && c) { d.classList.remove('hidden'); c.textContent = days; }
         }
 
+        // 管理控制台
         async function enterAdminMode() {
             const coll = collection(db, "artifacts", appId, "public", "data", "vip_codes");
-            document.getElementById('export-btn').onclick = async () => {
-                const snap = await getDocs(coll);
-                let csv = "\ufeffEmail,Name,Password,Account5,Plan,Remit,Expiry,Notes\n";
-                snap.forEach(d => { const v = d.data(); csv += `"${v.email}","${v.name}","${v.password}","${v.account5||''}","${v.plan||''}","${v.remittance||''}","${v.expiryDate||''}","${(v.notes||'').replace(/"/g,'""')}"\n`; });
-                const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-                link.download = `Abrakai_Members_Backup.csv`; link.click();
-            };
             onSnapshot(coll, (snap) => {
                 const list = document.getElementById('admin-user-list'); if(!list) return;
                 list.innerHTML = '';
                 snap.forEach(d => {
                     const u = d.data(); const id = d.id;
-                    let light = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto" title="Pending"></div>';
-                    if (u.expiryDate) {
-                        const days = (new Date(u.expiryDate).getTime() - Date.now()) / 86400000;
-                        if (days < 0) light = '<div class="w-3 h-3 rounded-full bg-red-500 mx-auto animate-pulse"></div>';
-                        else if (days <= 7) light = '<div class="w-3 h-3 rounded-full bg-orange-500 mx-auto animate-pulse"></div>';
+                    let light = '<div class="w-3 h-3 rounded-full bg-slate-300 mx-auto"></div>';
+                    if (u.expiryDate && !isNaN(new Date(u.expiryDate).getTime())) {
+                        const diff = (new Date(u.expiryDate).getTime() - Date.now()) / 86400000;
+                        if (diff < 0) light = '<div class="w-3 h-3 rounded-full bg-red-500 mx-auto animate-pulse"></div>';
+                        else if (diff <= 7) light = '<div class="w-3 h-3 rounded-full bg-orange-500 mx-auto animate-pulse"></div>';
                         else light = '<div class="w-3 h-3 rounded-full bg-emerald-500 mx-auto"></div>';
                     }
                     const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 transition-colors text-center md:text-left";
-                    tr.innerHTML = `
-                        <td class="px-2 py-3 align-middle">${light}</td>
-                        <td class="px-2 py-3 text-left">
-                            <div class="font-bold text-slate-700 text-sm">${u.name || 'N/A'}</div>
-                            <div class="text-[10px] text-slate-400 break-all">${u.email}</div>
-                            <div class="text-[10px] text-red-500 font-bold mt-1 bg-red-50 px-1 rounded inline-block">${u.password}</div>
-                        </td>
-                        <td class="px-2 py-3">
-                            <input id="a5-${id}" value="${u.account5||''}" placeholder="末五碼" class="w-full border rounded p-1 text-[10px] mb-1">
-                            <div class="flex gap-1">
-                                <input id="p-${id}" value="${u.plan||''}" placeholder="月" class="w-8 border rounded p-1 text-[10px] text-center" oninput="window.calcExpiry('${id}')">
-                                <input id="r-${id}" value="${u.remittance||''}" placeholder="匯款日" class="w-full border rounded p-1 text-[10px]" oninput="window.calcExpiry('${id}')">
-                            </div>
-                        </td>
-                        <td class="px-2 py-3">
-                            <input id="ex-${id}" value="${u.expiryDate||''}" class="w-full border-2 border-indigo-100 rounded p-1 font-bold text-indigo-700 text-[10px] bg-indigo-50/20">
-                            <input id="n-${id}" value="${u.notes||''}" placeholder="備註..." class="w-full border rounded p-1 text-[10px] mt-1">
-                        </td>
-                        <td class="px-2 py-3 text-center align-middle whitespace-nowrap">
-                            <button onclick="window.adminSaveUser('${id}')" class="bg-red-600 text-white p-2 rounded-lg shadow active:scale-90 hover:bg-red-700"><i class="ph-bold ph-floppy-disk"></i></button>
-                            <button onclick="window.confirmDeleteUser('${id}')" class="bg-slate-200 text-slate-600 p-2 rounded-lg ml-1 hover:bg-slate-300"><i class="ph-bold ph-trash"></i></button>
-                        </td>`;
+                    tr.innerHTML = `<td class="px-2 py-3 align-middle">${light}</td><td class="px-2 py-3 text-left"><b>${u.name||'N/A'}</b><br><small>${u.email}</small><br><span class="text-red-500 font-bold bg-red-50 px-1 rounded inline-block mt-1">${u.password}</span></td><td class="px-2 py-3"><input id="a5-${id}" value="${u.account5||''}" placeholder="末五碼" class="w-full border rounded p-1 text-[10px] mb-1"><div class="flex gap-1"><input id="p-${id}" value="${u.plan||''}" class="w-8 border rounded p-1 text-[10px]" oninput="window.calcExpiry('${id}')"><input id="r-${id}" value="${u.remittance||''}" class="w-full border rounded p-1 text-[10px]" oninput="window.calcExpiry('${id}')"></div></td><td class="px-2 py-3"><input id="ex-${id}" value="${u.expiryDate||''}" class="w-full border-2 border-indigo-100 rounded p-1 font-bold text-[10px] bg-indigo-50/20 text-indigo-700"><input id="n-${id}" value="${u.notes||''}" placeholder="備註" class="w-full border rounded p-1 text-[10px] mt-1"></td><td class="px-2 py-3 text-center align-middle"><button onclick="window.adminSaveUser('${id}')" class="bg-red-600 text-white p-2 rounded shadow hover:bg-red-700"><i class="ph-bold ph-floppy-disk"></i></button><button onclick="window.confirmDeleteUser('${id}')" class="bg-slate-200 text-slate-600 p-2 rounded ml-1 hover:bg-slate-300"><i class="ph-bold ph-trash"></i></button></td>`;
                     list.appendChild(tr);
                 });
             });
@@ -548,7 +602,7 @@
 
         window.adminSaveUser = async function(id) {
             const updates = { plan: document.getElementById(`p-${id}`)?.value||'', remittance: document.getElementById(`r-${id}`)?.value||'', account5: document.getElementById(`a5-${id}`)?.value||'', expiryDate: document.getElementById(`ex-${id}`)?.value||'', notes: document.getElementById(`n-${id}`)?.value||'' };
-            try { await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), updates); window.showToast("資料已存儲！"); } catch(e) { window.showToast("失敗", true); }
+            try { await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), updates); window.showToast("資料已同步！"); } catch(e) { window.showToast("失敗", true); }
         };
 
         window.calcExpiry = (id) => {
@@ -568,7 +622,7 @@
             if(!em || !nm || !ps) return;
             const id = em.replace(/[.#$[\]]/g, "_");
             await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { name: nm, email: em, password: ps, status: "active", signupDate: new Date().toISOString() });
-            window.showToast("新增成功！"); window.closeAdminAddModal();
+            window.showToast("手動新增成功！"); window.closeAdminAddModal();
         };
 
         window.updateProfile = async function() {
@@ -582,9 +636,11 @@
                 window.showToast("設定已更新！"); location.reload();
             } catch(e) { window.showToast("更新失敗。", true); }
         };
+
+        document.getElementById('confirm-delete-btn')?.addEventListener('click', async () => { if(window.currentDeleteId) await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", window.currentDeleteId)); window.closeDeleteModal(); });
     </script>
 
-    <!-- 業務邏輯 & AI 引擎 -->
+    <!-- 業務功能與 AI 引擎 (修正 36.jpg) -->
     <script>
         window.doTranslate = async function() {
             if (!checkQuota()) return;
@@ -613,7 +669,7 @@
             });
         };
 
-        let writerInstance = null;
+        let writerInst = null;
         window.loadTeaching = async function(char, btn) {
             if (!checkQuota()) return;
             window.currentTargetChar = char;
@@ -624,7 +680,7 @@
             const target = document.getElementById('hanzi-target');
             if(target) {
                 target.innerHTML = '';
-                writerInstance = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6' });
+                writerInst = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6' });
             }
             ['vip-only-content', 'free-promo-content', 'ai-inner-loader', 'ai-error-panel', 'api-key-missing-content'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
             if (!window.isVIP) { document.getElementById('free-promo-content')?.classList.remove('hidden'); return; }
@@ -647,7 +703,7 @@
         };
 
         function renderResult(char, data) {
-            const zd = document.getElementById('zhuyin-display'); if(zd) zd.textContent = data.zhuyin || "";
+            if(document.getElementById('zhuyin-display')) document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn'); if(pb) { pb.classList.toggle('hidden', !data.zhuyin); pb.onclick = () => speak(char); }
             const poly = document.getElementById('polyphonic-display'); if(poly) {
                 poly.innerHTML = '';
@@ -665,8 +721,8 @@
             const idioms = document.getElementById('idioms-container'); if(idioms) {
                 idioms.innerHTML = '';
                 if (data.idioms) data.idioms.forEach(i => {
-                    const div = document.createElement('div'); div.className = 'p-6 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-start text-left shadow-sm hover:bg-white transition-all';
-                    div.innerHTML = `<div class="flex-1 pr-6"><div class="text-slate-800 text-lg font-black tracking-tight">${i.idiom}</div><div class="text-[12px] text-slate-500 mt-1">${i.meaning}</div><div class="text-[10px] text-indigo-500 font-bold mt-3 border-t border-slate-200 pt-3 block bg-indigo-50/30 p-2 rounded-lg"><i class="ph-fill ph-translate"></i> ${i.english}</div></div><button class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-all" onclick="speak('${i.idiom}')"><i class="ph-fill ph-speaker-high text-2xl"></i></button>`;
+                    const div = document.createElement('div'); div.className = 'p-5 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-start text-left shadow-sm hover:bg-white transition-all';
+                    div.innerHTML = `<div class="flex-1 pr-6"><div class="text-slate-800 text-lg font-black">${i.idiom}</div><div class="text-xs text-slate-500 mt-1">${i.meaning}</div><div class="text-[10px] text-indigo-500 font-bold mt-3 border-t border-slate-200 pt-3 block bg-indigo-50/30 p-2 rounded-lg"><i class="ph-fill ph-translate"></i> ${i.english}</div></div><button class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-all" onclick="speak('${i.idiom}')"><i class="ph-fill ph-speaker-high text-2xl"></i></button>`;
                     idioms.appendChild(div);
                 });
             }
@@ -687,11 +743,6 @@
             window.updateGlobalUI(); return true;
         }
 
-        window.saveApiKey = function() {
-            const k = document.getElementById('custom-api-key')?.value.trim();
-            if (k) { localStorage.setItem('gemini_api_key', k); location.reload(); }
-        };
-
         function speak(text) {
             if (!text || !window.speechSynthesis || !localStorage.getItem('gemini_api_key')) return;
             window.speechSynthesis.cancel();
@@ -699,13 +750,13 @@
             ut.lang = 'zh-TW'; ut.rate = 0.85; window.speechSynthesis.speak(ut);
         }
 
-        window.animateStroke = () => writerInstance && writerInstance.animateCharacter();
-        window.quizStroke = () => writerInstance && writerInstance.quiz({ onComplete: () => { const s = document.getElementById('quiz-status'); if(s) s.textContent = 'Perfect! / 書寫正確！'; } });
+        window.animateStroke = () => writerInst && writerInst.animateCharacter();
+        window.quizStroke = () => writerInst && writerInst.quiz({ onComplete: () => { const s = document.getElementById('quiz-status'); if(s) s.textContent = 'Perfect! / 書寫正確！'; } });
         window.retryAIFetch = () => window.currentTargetChar && window.executeAIFetch(window.currentTargetChar);
 
         window.addEventListener('DOMContentLoaded', () => {
             const ye = document.getElementById('current-year'); if(ye) ye.textContent = new Date().getFullYear();
-            const zhIn = document.getElementById('zh-input'); if(zhIn) zhIn.value = ''; 
+            const zhIn = document.getElementById('zh-input'); if(zhIn) zhIn.value = ''; // 修正 36.jpg
             window.updateGlobalUI();
         });
     </script>

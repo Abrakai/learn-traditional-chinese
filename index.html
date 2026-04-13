@@ -61,7 +61,7 @@
         }
         .toast-animate { animation: slideUpFade 3s ease-in-out forwards; }
         
-        /* 針對 34.jpg 的按鈕文字微調：確保文字與圖示在不同寬度下皆能排版精美 */
+        /* 針對 34.jpg 的按鈕文字微調 */
         .btn-line-break { 
             line-height: 1.2; 
             padding: 0.85rem 1rem; 
@@ -76,7 +76,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- 系統全域 Toast 提示框 (已修復 Scope 問題) -->
+    <!-- 系統全域 Toast 提示框 -->
     <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[250] px-6 py-4 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-3 transition-all min-w-[280px] justify-center">
         <i id="toast-icon" class="ph-fill text-xl"></i>
         <span id="toast-msg"></span>
@@ -96,23 +96,35 @@
                 <p class="text-red-100 text-[10px] md:text-xs mt-0.5 font-medium italic uppercase tracking-widest text-center md:text-left">Abrakai Studio | Taiwan Edition</p>
             </div>
             <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-end">
+                <!-- 次數顯示 (管理者與 VIP 皆隱藏) -->
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all">
                     <i class="ph-fill ph-lightning"></i> 今日試用: <span id="quota-count">20/20</span>
                 </div>
                 
+                <!-- 未登入顯示：註冊/登入按鈕 -->
                 <button id="nav-login-btn" class="text-[10px] md:text-xs bg-white text-red-600 border border-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-md font-bold hover:bg-red-50" onclick="window.openAuthModal()">
                     <i class="ph-bold ph-user-plus text-base"></i> 註冊 / 登入
                 </button>
 
+                <!-- 管理員專屬勳章 -->
+                <div id="admin-badge" class="hidden bg-red-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-black border-2 border-red-700 shadow-lg flex items-center gap-1.5 animate-pulse">
+                    <i class="ph-fill ph-shield-check text-base text-yellow-400"></i> <span class="tracking-tighter uppercase">ADMIN ROOT</span>
+                </div>
+
+                <!-- VIP 標章 -->
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border-2 border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in">
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP MEMBER</span>
                 </div>
+                
                 <div id="vip-expiry-display" class="hidden bg-white/10 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/20 flex items-center gap-1.5 transition-all">
                     <i class="ph ph-calendar"></i> <span id="vip-days-left">--</span> Days
                 </div>
+                
                 <button id="profile-btn" class="hidden text-[10px] md:text-xs bg-red-700/80 hover:bg-red-800 border border-red-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> Profile
                 </button>
+                
+                <!-- 退出/登出按鈕 (已修復管理者登出功能) -->
                 <button id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700/80 hover:bg-red-800 border border-red-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
                     <i class="ph-bold ph-sign-out text-base"></i> Logout
                 </button>
@@ -122,7 +134,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 第 1 層：主要功能前置 (PLG 策略：讓使用者先體感功能的價值) -->
+        <!-- 第 1 層：主要功能前置 (PLG 策略) -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-slate-200 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">Experience Now</div>
             <div class="flex items-center gap-3 mb-6">
@@ -198,7 +210,6 @@
                         </button>
                     </div>
 
-                    <!-- 未綁定金鑰之引導畫面 -->
                     <div id="api-key-missing-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6 animate-in fade-in zoom-in duration-500">
                         <div class="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center text-4xl shadow-inner relative z-10"><i class="ph-fill ph-key"></i></div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight">AI 引擎等待點火</h3>
@@ -256,7 +267,7 @@
             </div>
         </section>
 
-        <!-- API 燃料配置區 (VIP 專屬) -->
+        <!-- API 燃料配置區 (VIP/Admin 專屬) -->
         <div id="api-key-setup" class="hidden bg-gradient-to-r from-indigo-600 to-indigo-900 rounded-3xl p-[2px] shadow-2xl relative overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -291,25 +302,27 @@
             </div>
         </div>
 
-        <!-- 管理員儀表板 (CRUD 完全體) -->
+        <!-- 管理員儀表板 (已修復權限與自動化對帳) -->
         <section id="admin-panel" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden p-6 md:p-10 space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-4">
                 <div>
-                    <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic flex items-center gap-2"><i class="ph-fill ph-shield-check"></i> CEO Management Hub</h3>
+                    <h3 class="text-lg font-black text-red-600 uppercase tracking-tighter italic flex items-center gap-2"><i class="ph-fill ph-shield-check text-2xl text-yellow-500"></i> CEO Management Hub</h3>
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">Full CRUD Authority Enabled</p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <button onclick="window.openAdminAddModal()" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-[10px] font-black border border-blue-200 hover:bg-blue-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-plus"></i> Add Member</button>
                     <input type="file" id="import-file" accept=".csv" class="hidden">
                     <button id="import-btn" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl text-[10px] font-black border border-indigo-200 hover:bg-indigo-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-upload-simple"></i> Import</button>
                     <button id="export-btn" class="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-black border border-emerald-200 hover:bg-emerald-100 transition-all uppercase flex items-center gap-1 shadow-sm"><i class="ph-bold ph-download-simple"></i> Export</button>
-                    <button onclick="location.reload()" class="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black border border-slate-200 hover:bg-slate-200 transition-all uppercase text-slate-600 shadow-sm">Exit</button>
+                    <!-- 修改為更明確的按鈕 -->
+                    <button onclick="location.reload()" class="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black border border-slate-200 hover:bg-slate-200 transition-all uppercase text-slate-600 shadow-sm">Exit Manager</button>
                 </div>
             </div>
             <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-inner bg-slate-50/50">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-100 text-slate-500 uppercase text-[9px] font-black tracking-widest border-b whitespace-nowrap">
                         <tr>
-                            <th class="px-3 py-3 text-center">燈號</th>
+                            <th class="px-3 py-3 text-center">狀態</th>
                             <th class="px-3 py-3">User Details (Email/Pass)</th>
                             <th class="px-3 py-3">Remittance (Acc5/Plan/Date)</th>
                             <th class="px-3 py-3">Expiry Date / Notes</th>
@@ -322,31 +335,27 @@
         </section>
     </main>
 
-    <!-- ========================================== -->
-    <!-- 工具腳本 (修復 ReferenceError) -->
-    <!-- ========================================== -->
+    <!-- 工具腳本 (已修復全域作用域與管理者狀態持久化) -->
     <script>
-        // 確保 showToast 在最上層定義並綁定至 window
+        // 狀態管理：管理者權限將同時標註為無限 VIP
+        window.isAdmin = localStorage.getItem('abra_admin_status') === 'active';
+        window.isVIP = localStorage.getItem('abra_vip_status') === 'active' || window.isAdmin;
+
         window.showToast = function(msg, isError = false) {
             const toast = document.getElementById('system-toast');
             const icon = document.getElementById('toast-icon');
             const msgEl = document.getElementById('toast-msg');
             if (!toast || !icon || !msgEl) return;
-            
             msgEl.textContent = msg;
             toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 z-[250] px-6 py-4 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-3 transition-all toast-animate min-w-[280px] justify-center ${isError ? 'bg-red-600 text-white' : 'bg-slate-800 text-emerald-400'}`;
             icon.className = `ph-fill text-xl ${isError ? 'ph-warning-circle' : 'ph-check-circle'}`;
-            
             toast.classList.remove('hidden');
-            setTimeout(() => { 
-                toast.classList.add('hidden'); 
-                toast.classList.remove('toast-animate'); 
-            }, 3000);
+            setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('toast-animate'); }, 3000);
         };
 
         window.togglePassVisibility = (id, btn) => {
             const input = document.getElementById(id);
-            const icon = btn.querySelector('i');
+            const icon = btn?.querySelector('i');
             if (input && input.type === 'password') {
                 input.type = 'text';
                 if(icon) icon.className = 'ph ph-eye-slash text-xl';
@@ -363,13 +372,17 @@
         window.closeAdminAddModal = () => document.getElementById('admin-add-modal')?.classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
         window.closeDeleteModal = () => document.getElementById('confirm-delete-modal')?.classList.add('hidden');
+
+        // 登出函式 (修復管理者登出)
+        window.executeLogout = function() {
+            if(confirm('確定要登出系統並清除暫存嗎？ / Logout and clear cache?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        };
     </script>
 
-    <!-- ========================================== -->
-    <!-- 模態框 (Modals) -->
-    <!-- ========================================== -->
-
-    <!-- 會員中心 Modal (針對 34.jpg 修復按鈕文字與質感) -->
+    <!-- 會員中心 Modal (修復按鈕排版與質感) -->
     <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-opacity p-4 overflow-y-auto">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row overflow-hidden border border-white/20">
             <div class="hidden md:flex md:w-1/3 bg-red-600 p-10 flex-col justify-between text-white relative">
@@ -383,7 +396,6 @@
             <div class="flex-1 p-8 md:p-12 relative bg-white">
                 <button onclick="window.closeAuthModal()" class="absolute top-6 right-6 text-slate-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-2xl"></i></button>
                 <div id="auth-forms-container" class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <!-- 註冊區 -->
                     <div class="space-y-6 lg:border-r lg:border-slate-100 lg:pr-10 text-left">
                         <h4 class="text-[10px] font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500"></i> STEP 1: SIGN UP / 註冊</h4>
                         <div class="space-y-4">
@@ -393,14 +405,12 @@
                                 <input type="password" id="reg-pass" placeholder="Set Password / 設定密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm transition-all shadow-sm">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
-                            <!-- 針對 34.jpg 修復：排版精美的按鈕 -->
                             <button id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black shadow-lg shadow-red-600/20 active:scale-95 text-xs uppercase tracking-widest btn-line-break">
                                 <span>CREATE ACCOUNT</span>
-                                <span class="text-[10px] opacity-80">建立帳號</span>
+                                <span class="text-[10px] opacity-80 font-bold">建立帳號</span>
                             </button>
                         </div>
                     </div>
-                    <!-- 登入區 -->
                     <div class="space-y-6 text-left">
                         <h4 class="text-[10px] font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500"></i> STEP 2: LOGIN / 登入</h4>
                         <div class="space-y-4">
@@ -420,7 +430,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK & 業務邏輯 (Module 版) -->
+    <!-- Firebase SDK (Module 版) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -460,23 +470,7 @@
             if(btnText) btnText.textContent = "LOGIN 登入解鎖";
         };
 
-        // 註冊邏輯
-        document.getElementById('signup-btn')?.addEventListener('click', async () => {
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim().toLowerCase();
-            const pass = document.getElementById('reg-pass').value.trim();
-            if (!name || !email || !pass) { window.showToast("請完整填寫註冊資料。", true); return; }
-            try {
-                const id = email.replace(/[.#$[\]]/g, "_");
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", id);
-                if ((await getDoc(docRef)).exists()) { window.showToast("此信箱已被註冊。", true); return; }
-                await setDoc(docRef, { name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", signupDate: new Date().toISOString(), status: "pending" });
-                window.showToast("註冊成功！待執行長核對開通。");
-                window.closeAuthModal();
-            } catch (e) { window.showToast("連線失敗。", true); }
-        });
-
-        // 登入邏輯 (修復一直轉不停的 Bug)
+        // 登入邏輯 (修復管理員無限權限設定)
         document.getElementById('login-btn')?.addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const code = document.getElementById('login-vip-code').value.trim();
@@ -488,20 +482,20 @@
             if(btnText) btnText.textContent = "Verifying...";
 
             try {
-                // 1. 管理員優先
-                let isAdmin = (btoa(code) === ADM_H);
-                if (!isAdmin) {
+                // 1. 管理員優先檢查
+                let isAdminMode = (btoa(code) === ADM_H);
+                if (!isAdminMode) {
                     try {
                         const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
                         const adminSnap = await getDoc(adminRef);
-                        if (adminSnap.exists() && adminSnap.data().pass === code) isAdmin = true;
-                    } catch(e) { console.warn("Admin check fallback."); }
+                        if (adminSnap.exists() && adminSnap.data().pass === code) isAdminMode = true;
+                    } catch(e) { console.warn("Admin fetch fallback."); }
                 }
                 
-                if (isAdmin) { 
-                    enterAdminMode(); 
-                    window.closeAuthModal(); 
-                    resetLogin(); 
+                if (isAdminMode) { 
+                    localStorage.setItem('abra_admin_status', 'active'); // 管理員持久化
+                    localStorage.setItem('abra_vip_status', 'active');  // 管理員繼承 VIP
+                    location.reload(); // 重新整理以啟用全權限
                     return; 
                 }
                 
@@ -513,7 +507,7 @@
                 if (docSnap.exists() && docSnap.data().password === code) {
                     const u = docSnap.data();
                     if (u.expiryDate && new Date(u.expiryDate).getTime() < Date.now()) {
-                        window.showToast("授權已過期。", true);
+                        window.showToast("會員授權已過期。", true);
                         resetLogin();
                     } else {
                         localStorage.setItem('abra_vip_code', id);
@@ -530,45 +524,71 @@
             }
         });
 
-        // 個人中心與同步
-        async function syncVipStatus() {
-            const id = localStorage.getItem('abra_vip_code'); if (!id) return;
+        // 註冊邏輯
+        document.getElementById('signup-btn')?.addEventListener('click', async () => {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value.trim();
+            if (!name || !email || !pass) { window.showToast("請完整填寫註冊資料。", true); return; }
             try {
-                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id));
+                const id = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", id);
+                if ((await getDoc(docRef)).exists()) { window.showToast("此信箱已被註冊。", true); return; }
+                await setDoc(docRef, { name, email, password: pass, account5: "", plan: "", remittance: "", expiryDate: "", signupDate: new Date().toISOString(), status: "pending" });
+                window.showToast("註冊成功！待對帳完成後開啟。");
+                window.closeAuthModal();
+            } catch (e) { window.showToast("連線失敗。", true); }
+        });
+
+        // 狀態與權限同步引擎
+        async function syncVipStatus() {
+            const isAdmin = localStorage.getItem('abra_admin_status') === 'active';
+            const emailId = localStorage.getItem('abra_vip_code'); 
+
+            if (isAdmin) {
+                // 最高權限：管理員繼承所有無限功能
+                window.isAdmin = true;
+                window.isVIP = true;
+                document.getElementById('admin-badge')?.classList.remove('hidden');
+                document.getElementById('remove-key-btn')?.classList.remove('hidden');
+                document.getElementById('nav-login-btn')?.classList.add('hidden');
+                enterAdminMode(); // 自動開啟後端介面
+                window.updateGlobalUI();
+                return;
+            }
+
+            if (!emailId) return;
+            try {
+                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
                 if (docSnap.exists()) {
                     const u = docSnap.data();
                     if (u.expiryDate) {
                         const diff = new Date(u.expiryDate).getTime() - Date.now();
                         if (diff <= 0) { localStorage.clear(); location.reload(); return; }
                         updateExpiryUI(Math.ceil(diff / 86400000));
-                        document.getElementById('profile-btn')?.classList.remove('hidden');
-                        document.getElementById('remove-key-btn')?.classList.remove('hidden');
-                        document.getElementById('nav-login-btn')?.classList.add('hidden');
-                        window.isVIP = true; 
-                        window.updateGlobalUI();
                     } else {
                         updateExpiryUI("Infinity");
-                        document.getElementById('profile-btn')?.classList.remove('hidden');
-                        document.getElementById('remove-key-btn')?.classList.remove('hidden');
-                        document.getElementById('nav-login-btn')?.classList.add('hidden');
                     }
+                    window.isVIP = true;
+                    document.getElementById('vip-status-badge')?.classList.remove('hidden');
+                    document.getElementById('profile-btn')?.classList.remove('hidden');
+                    document.getElementById('remove-key-btn')?.classList.remove('hidden');
+                    document.getElementById('nav-login-btn')?.classList.add('hidden');
+                    window.updateGlobalUI();
                 } else { localStorage.clear(); }
-            } catch(e) { console.error("Sync failed."); }
+            } catch(e) { console.error("Sync error."); }
         }
 
         function updateExpiryUI(days) {
             const d = document.getElementById('vip-expiry-display');
             const c = document.getElementById('vip-days-left');
             if (d && c) {
-                d.classList.remove('hidden'); 
-                c.textContent = days;
-                if (days !== "Infinity" && days < 7) {
-                    d.className = "bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black animate-pulse border border-red-300 shadow-md";
-                }
+                d.classList.remove('hidden'); c.textContent = days;
+                if (days !== "Infinity" && days < 7) d.className = "bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black animate-pulse border border-red-300 shadow-md";
             }
         }
 
-        // 管理員引擎 (修復 28, 29.jpg)
+        // 管理員 CRUD 功能連動
         async function enterAdminMode() {
             const panel = document.getElementById('admin-panel'); if(panel) panel.classList.remove('hidden');
             const coll = collection(db, "artifacts", appId, "public", "data", "vip_codes");
@@ -594,7 +614,7 @@
                             <div class="text-[10px] text-red-500 font-bold bg-red-50 px-1 rounded inline-block mt-1">${u.password}</div>
                         </td>
                         <td class="px-2 py-3">
-                            <input id="a5-${id}" value="${u.account5||''}" placeholder="末五碼" class="w-full border rounded p-1 text-[10px] mb-1 outline-none focus:ring-1 focus:ring-indigo-400">
+                            <input id="a5-${id}" value="${u.account5||''}" placeholder="末五碼" class="w-full border rounded p-1 text-[10px] mb-1 focus:ring-1 focus:ring-indigo-400 outline-none">
                             <div class="flex gap-1">
                                 <input id="p-${id}" value="${u.plan||''}" placeholder="月" class="w-8 border rounded p-1 text-[10px] text-center" oninput="window.calcExpiry('${id}')">
                                 <input id="r-${id}" value="${u.remittance||''}" placeholder="匯款日" class="w-full border rounded p-1 text-[10px]" oninput="window.calcExpiry('${id}')">
@@ -605,7 +625,7 @@
                             <input id="n-${id}" value="${u.notes||''}" placeholder="備註..." class="w-full border rounded p-1 text-[10px] mt-1">
                         </td>
                         <td class="px-2 py-3 text-center whitespace-nowrap align-middle">
-                            <button onclick="window.adminSaveUser('${id}')" class="bg-red-600 text-white p-2 rounded-lg shadow hover:bg-red-700"><i class="ph-bold ph-floppy-disk"></i></button>
+                            <button onclick="window.adminSaveUser('${id}')" class="bg-red-600 text-white p-2 rounded-lg shadow active:scale-90 hover:bg-red-700"><i class="ph-bold ph-floppy-disk"></i></button>
                             <button onclick="window.confirmDeleteUser('${id}')" class="bg-slate-200 text-slate-600 p-2 rounded-lg ml-1 hover:bg-slate-300"><i class="ph-bold ph-trash"></i></button>
                         </td>`;
                     list.appendChild(tr);
@@ -613,51 +633,37 @@
             });
         }
 
-        // 管理員操作
         window.adminSaveUser = async function(id) {
-            const updates = { 
-                plan: document.getElementById(`p-${id}`)?.value || '', 
-                remittance: document.getElementById(`r-${id}`)?.value || '', 
-                account5: document.getElementById(`a5-${id}`)?.value || '', 
-                expiryDate: document.getElementById(`ex-${id}`)?.value || '', 
-                notes: document.getElementById(`n-${id}`)?.value || '' 
-            };
-            try { 
-                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), updates); 
-                window.showToast("資料已同步至雲端！"); 
-            } catch(e) { window.showToast("儲存失敗。", true); }
+            const updates = { plan: document.getElementById(`p-${id}`)?.value||'', remittance: document.getElementById(`r-${id}`)?.value||'', account5: document.getElementById(`a5-${id}`)?.value||'', expiryDate: document.getElementById(`ex-${id}`)?.value||'', notes: document.getElementById(`n-${id}`)?.value||'' };
+            try { await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), updates); window.showToast("對帳資料已同步！"); } catch(e) { window.showToast("儲存失敗。", true); }
         };
 
-        window.confirmDeleteUser = (id) => { 
-            window.currentDeleteId = id; 
-            document.getElementById('confirm-delete-modal')?.classList.remove('hidden'); 
-        };
-
-        document.getElementById('confirm-delete-btn')?.addEventListener('click', async () => { 
-            if(window.currentDeleteId) {
-                try {
-                    await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", window.currentDeleteId)); 
-                    window.showToast("會員資料已抹除。");
-                    window.closeDeleteModal();
-                } catch(e) { window.showToast("刪除失敗。", true); }
+        window.calcExpiry = function(id) {
+            const pVal = document.getElementById(`p-${id}`)?.value; const months = pVal ? parseInt(pVal) : 0;
+            const rEl = document.getElementById(`r-${id}`); let r = rEl?.value.trim() || '';
+            if (r.length === 8 && /^\d{8}$/.test(r)) { r = r.substring(0,4)+'-'+r.substring(4,6)+'-'+r.substring(6,8); if(rEl) rEl.value = r; }
+            if (months > 0 && r.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const d = new Date(r); d.setMonth(d.getMonth() + months);
+                const ex = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const exEl = document.getElementById(`ex-${id}`); if(exEl) exEl.value = ex;
             }
-        });
+        };
 
         window.adminForceAddUser = async () => {
             const em = document.getElementById('admin-add-email')?.value.trim();
             const nm = document.getElementById('admin-add-name')?.value.trim();
             const ps = document.getElementById('admin-add-pass')?.value.trim();
-            if(!em || !nm || !ps) { window.showToast("請填寫必填欄位", true); return; }
+            if(!em || !nm || !ps) return;
             const id = em.replace(/[.#$[\]]/g, "_");
-            try {
-                await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { name: nm, email: em, password: ps, status: "active", signupDate: new Date().toISOString() });
-                window.showToast("手動新增成功！");
-                window.closeAdminAddModal();
-            } catch(e) { window.showToast("新增失敗。", true); }
+            await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), { name: nm, email: em, password: ps, status: "active", signupDate: new Date().toISOString() });
+            window.showToast("手動新增成功！"); window.closeAdminAddModal();
         };
+
+        window.confirmDeleteUser = (id) => { window.currentDeleteId = id; document.getElementById('confirm-delete-modal')?.classList.remove('hidden'); };
+        document.getElementById('confirm-delete-btn')?.addEventListener('click', async () => { if(window.currentDeleteId) await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", window.currentDeleteId)); window.closeDeleteModal(); });
     </script>
 
-    <!-- UI & AI Engine -->
+    <!-- UI & AI Engine (PLG 整合) -->
     <script>
         let charCache = {};
         let currentTargetChar = "";
@@ -666,15 +672,16 @@
 
         window.updateGlobalUI = function() {
             const isVIP = localStorage.getItem('abra_vip_status') === 'active';
+            const isAdmin = localStorage.getItem('abra_admin_status') === 'active';
             const count = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
+            
             const qd = document.getElementById('quota-display');
             const qc = document.getElementById('quota-count');
-            const vb = document.getElementById('vip-status-badge');
             const ak = document.getElementById('api-key-setup');
 
-            if (isVIP) {
+            // 管理員或 VIP 直接隱藏試用次數
+            if (isVIP || isAdmin) {
                 if(qd) qd.classList.add('hidden');
-                if(vb) vb.classList.remove('hidden');
                 if(ak) {
                     if (!localStorage.getItem('gemini_api_key')) ak.classList.remove('hidden');
                     else ak.classList.add('hidden');
@@ -685,7 +692,7 @@
         };
 
         function checkQuota() {
-            if (localStorage.getItem('abra_vip_status') === 'active') return true;
+            if (localStorage.getItem('abra_vip_status') === 'active' || localStorage.getItem('abra_admin_status') === 'active') return true;
             let count = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
             if (count >= 20) {
                 document.getElementById('quota-limit-modal')?.classList.remove('hidden');
@@ -696,7 +703,6 @@
             return true;
         }
 
-        // 語音：排除拼音 (32.jpg)
         function speak(text) {
             const now = Date.now();
             if (now - lastSpeakTime < 600) return; lastSpeakTime = now;
@@ -732,8 +738,7 @@
                 if (!/[\u4e00-\u9fa5]/.test(char)) return;
                 const btn = document.createElement('button');
                 btn.className = 'char-btn w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl shadow-md border-2 border-slate-100 text-2xl font-black flex items-center justify-center transition-all hover:border-emerald-500 hover:shadow-lg active:scale-90';
-                btn.textContent = char; 
-                btn.onclick = () => loadTeaching(char, btn);
+                btn.textContent = char; btn.onclick = () => loadTeaching(char, btn);
                 container.appendChild(btn);
             });
         }
@@ -745,26 +750,15 @@
             btn.classList.add('active', 'ring-4', 'ring-red-400');
             document.getElementById('learning-dashboard')?.classList.remove('hidden');
             const cEl = document.getElementById('current-learning-char'); if(cEl) cEl.textContent = char;
-            
             const target = document.getElementById('hanzi-target');
             if(target) {
                 target.innerHTML = '';
                 writer = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444', showOutline: true, drawingColor: '#3b82f6' });
             }
-
             const pns = ['vip-only-content', 'free-promo-content', 'ai-inner-loader', 'ai-error-panel', 'api-key-missing-content'];
             pns.forEach(id => document.getElementById(id)?.classList.add('hidden'));
-
-            if (localStorage.getItem('abra_vip_status') !== 'active') { 
-                document.getElementById('free-promo-content')?.classList.remove('hidden'); 
-                return; 
-            }
-            if (!localStorage.getItem('gemini_api_key')) { 
-                document.getElementById('api-key-setup')?.classList.remove('hidden');
-                document.getElementById('api-key-missing-content')?.classList.remove('hidden'); 
-                return; 
-            }
-
+            if (localStorage.getItem('abra_vip_status') !== 'active' && localStorage.getItem('abra_admin_status') !== 'active') { document.getElementById('free-promo-content')?.classList.remove('hidden'); return; }
+            if (!localStorage.getItem('gemini_api_key')) { document.getElementById('api-key-setup')?.classList.remove('hidden'); document.getElementById('api-key-missing-content')?.classList.remove('hidden'); return; }
             if (charCache[char]) { renderResult(char, charCache[char]); document.getElementById('vip-only-content')?.classList.remove('hidden'); return; }
             executeAIFetch(char);
         }
@@ -778,20 +772,15 @@
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, { method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
                 const result = await res.json();
                 const data = JSON.parse(result.candidates[0].content.parts[0].text.match(/\{[\s\S]*\}/)[0]);
-                charCache[char] = data; 
-                renderResult(char, data); 
-                success = true;
+                charCache[char] = data; renderResult(char, data); success = true;
             } catch (err) { console.warn("AI fetch failed"); }
-            
             if(loader) loader.classList.add('hidden');
-            if (success) document.getElementById('vip-only-content')?.classList.remove('hidden'); 
-            else document.getElementById('ai-error-panel')?.classList.remove('hidden');
+            if (success) document.getElementById('vip-only-content')?.classList.remove('hidden'); else document.getElementById('ai-error-panel')?.classList.remove('hidden');
         }
 
         function renderResult(char, data) {
             const zd = document.getElementById('zhuyin-display'); if(zd) zd.textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn'); if(pb) { pb.classList.toggle('hidden', !data.zhuyin); pb.onclick = () => speak(char); }
-            
             const poly = document.getElementById('polyphonic-display'); if(poly) {
                 poly.innerHTML = '';
                 if (data.polyphonic) data.polyphonic.forEach(p => {
@@ -832,7 +821,7 @@
             document.getElementById('animate-stroke-btn')?.addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn')?.addEventListener('click', () => writer && writer.quiz({ onComplete: () => { const qs = document.getElementById('quiz-status'); if(qs) qs.textContent = 'Perfect! / 書寫正確！'; } }));
             document.getElementById('ai-retry-btn')?.addEventListener('click', () => executeAIFetch(currentTargetChar));
-            document.getElementById('remove-key-btn')?.addEventListener('click', () => { if(confirm('確定要登出嗎？')) { localStorage.clear(); location.reload(); } });
+            document.getElementById('remove-key-btn')?.addEventListener('click', window.executeLogout);
             document.getElementById('save-key-btn')?.addEventListener('click', () => {
                 const k = document.getElementById('custom-api-key')?.value.trim();
                 if (k) { localStorage.setItem('gemini_api_key', k); location.reload(); }

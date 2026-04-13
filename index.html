@@ -1624,14 +1624,12 @@
                 if (!word) return;
                 document.getElementById('translate-loader').classList.remove('hidden');
                 try {
-                    // [PM] 修復點：棄用常有幻覺且限流的 MyMemory API，升級為 Google Translate 引擎
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
                     let trans = "";
                     if (d && d[0]) {
                         trans = d[0].map(item => item[0]).join('');
                     }
-                    // 移除過於激進的正則表達式，保留標點符號讓句意完整
                     document.getElementById('zh-input').value = trans.trim();
                     
                     if (!window.isVIP) { 
@@ -1647,18 +1645,23 @@
                 }
             });
             
-            safeBind('split-btn', 'click', () => {
+            // [PM] 修復點：加入 (e) 事件參數，攔截自動觸發與手動點擊
+            safeBind('split-btn', 'click', (e) => {
                 const text = document.getElementById('zh-input').value.trim();
                 if (!text) return;
                 
-                if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
-                    window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
-                    return; 
-                }
-                if (!window.isVIP) { 
-                    window.freeUsageCount++; 
-                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
-                    if(window.updateGlobalUI) window.updateGlobalUI(); 
+                // [PM] 精準防護：利用 e.isTrusted 判斷是否為「人類真實點擊」
+                // 若為 Translate 自動觸發的程式點擊 (e.isTrusted = false)，則跳過扣款與阻擋
+                if (e && e.isTrusted) {
+                    if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                        window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
+                        return; 
+                    }
+                    if (!window.isVIP) { 
+                        window.freeUsageCount++; 
+                        localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                        if(window.updateGlobalUI) window.updateGlobalUI(); 
+                    }
                 }
 
                 const container = document.getElementById('char-container'); container.innerHTML = '';

@@ -111,7 +111,8 @@
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
 
-                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/10 transition-all">
+                <!-- [PM] 修復點 1：將燈號底色改為深黑 (bg-slate-900)，凸顯紅色燈號 -->
+                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all">
                     <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
                     <span class="text-[10px] font-black tracking-tight uppercase"><span id="vip-days-left">--</span> Days</span>
                 </div>
@@ -120,7 +121,6 @@
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
                 </div>
 
-                <!-- [PM] 新增：訊息通知按鈕 -->
                 <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openUserMsgModal()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
@@ -222,7 +222,6 @@
                     <i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i>
                     <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3>
                 </div>
-                <!-- [PM] 新增：CSV 匯入匯出按鈕 -->
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
                     <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="window.importCSV(event)">
                     <button type="button" onclick="document.getElementById('csv-upload').click()" class="bg-indigo-500 hover:bg-indigo-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1 active:scale-95">
@@ -614,11 +613,14 @@
             const vBadge = document.getElementById('vip-status-badge');
             const pBtn = document.getElementById('profile-btn');
             const rBtn = document.getElementById('remove-key-btn');
-            const mBtn = document.getElementById('msg-btn'); // 訊息按鈕
+            const mBtn = document.getElementById('msg-btn');
             const memberSection = document.getElementById('member-center-section');
             const adminSection = document.getElementById('admin-dashboard-section');
             const apiKeySetup = document.getElementById('api-key-setup');
             const qCount = document.getElementById('quota-count');
+            
+            const badgeTranslate = document.getElementById('badge-translate');
+            const badgeSelect = document.getElementById('badge-select');
             
             if (window.isAdmin) {
                 if(qDisplay) qDisplay.classList.add('hidden');
@@ -628,7 +630,7 @@
                     vBadge.classList.remove('hidden');
                 }
                 if(pBtn) pBtn.classList.add('hidden');
-                if(mBtn) mBtn.classList.add('hidden'); // 管理員不需要自己傳訊給自己的捷徑
+                if(mBtn) mBtn.classList.add('hidden'); 
                 if(rBtn) rBtn.classList.remove('hidden');
                 if(memberSection) memberSection.classList.add('hidden');
                 if(adminSection) adminSection.classList.remove('hidden');
@@ -644,7 +646,7 @@
                     vBadge.classList.remove('hidden');
                 }
                 if(pBtn) pBtn.classList.remove('hidden');
-                if(mBtn) mBtn.classList.remove('hidden'); // 顯示訊息按鈕
+                if(mBtn) mBtn.classList.remove('hidden'); 
                 if(rBtn) rBtn.classList.remove('hidden');
                 if(memberSection) memberSection.classList.add('hidden');
                 if(adminSection) adminSection.classList.add('hidden');
@@ -658,6 +660,15 @@
                 if(memberSection) memberSection.classList.remove('hidden');
                 if(adminSection) adminSection.classList.add('hidden');
                 if(qCount) qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
+            }
+            
+            // [PM] 動態更新功能區塊的右上角標籤文字
+            if (window.isAdmin || window.isVIP) {
+                if(badgeTranslate) { badgeTranslate.textContent = 'VIP UNLIMITED'; badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
+                if(badgeSelect) { badgeSelect.textContent = 'VIP UNLIMITED'; badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
+            } else {
+                if(badgeTranslate) { badgeTranslate.textContent = 'FREE LIMIT'; badgeTranslate.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest'; }
+                if(badgeSelect) { badgeSelect.textContent = 'FREE LIMIT'; badgeSelect.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest'; }
             }
         };
 
@@ -701,6 +712,30 @@
 
         window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
+        
+        // [PM] 修復點 1：提早展開 Profile Modal，讓使用者點擊瞬間就看到視窗，消除「點擊無反應」的錯覺
+        window.openProfileModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
+            
+            document.getElementById('profile-email').value = emailId;
+            document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+            
+            try {
+                if(window.firebaseDbInstance) {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+                    const docRef = doc(window.firebaseDbInstance, "artifacts", window.firebaseAppId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const user = docSnap.data();
+                        document.getElementById('profile-name').value = user.name || '';
+                        document.getElementById('profile-pass').value = user.password || '';
+                    }
+                }
+            } catch(e) { /* 靜默處理雲端載入錯誤 */ }
+        };
+
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
         window.closeAdminModal = () => {
             document.getElementById('admin-modal')?.classList.add('hidden');
@@ -720,6 +755,15 @@
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             ut.lang = 'zh-TW'; ut.rate = 0.85;
             window.speechSynthesis.speak(ut);
+        };
+        
+        // [PM] 修復點 1：拔除 confirm 彈窗，無痛即時登出，徹底繞過 Canvas 沙盒攔截
+        window.handleLogout = function() {
+            localStorage.removeItem('abra_vip_status');
+            localStorage.removeItem('abra_vip_code');
+            localStorage.removeItem('abra_usage_count'); 
+            localStorage.removeItem('abra_admin_status');
+            location.reload(); 
         };
     </script>
 
@@ -742,6 +786,10 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
+        
+        // 將 db 暴露給全域以供 Profile modal 背景拉取資料
+        window.firebaseDbInstance = db;
+        window.firebaseAppId = appId;
 
         const VALID_DOMAINS = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"];
         const sentinelCheck = () => {
@@ -809,7 +857,6 @@
                         }
                     }
                     
-                    // [PM] 檢查是否有未讀的系統訊息，點亮紅燈
                     if (data.messages && data.messages.length > 0) {
                         document.getElementById('msg-dot')?.classList.remove('hidden');
                     } else {
@@ -862,7 +909,6 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <!-- [PM] 新增傳訊按鈕 -->
                                 <button type="button" onclick="window.openAdminMsgModal('${emailId}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg mr-1 transition-all">傳訊</button>
                                 <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
                                 <button type="button" onclick="window.deleteAdminMember('${emailId}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
@@ -882,7 +928,6 @@
             }
         };
 
-        // [PM] CSV 匯出邏輯 (純文字、無損耗)
         window.exportCSV = async function() {
             try {
                 window.showToast("準備匯出 CSV...");
@@ -899,7 +944,6 @@
                     csvContent += row + "\n";
                 });
                 
-                // \uFEFF 為 BOM，讓 Excel 預設以 UTF-8 開啟，不亂碼
                 const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
@@ -915,7 +959,6 @@
             }
         };
 
-        // [PM] CSV 安全 CSV 解析器
         function parseCSVRow(str) {
             let result = [];
             let inQuotes = false;
@@ -929,7 +972,6 @@
             return result.map(s => s.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         }
 
-        // [PM] CSV 匯入邏輯 (合併更新，防呆防重)
         window.importCSV = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -978,48 +1020,7 @@
                 }
             };
             reader.readAsText(file);
-            event.target.value = ''; // 重置 input 讓下次選同檔也能觸發
-        };
-
-        window.openAdminModal = async function(emailId = '') {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            const emailInput = document.getElementById('admin-member-email');
-            
-            if (emailId) {
-                emailInput.value = emailId;
-                emailInput.setAttribute('readonly', true);
-                emailInput.classList.add('bg-slate-100', 'text-slate-500');
-                
-                try {
-                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        document.getElementById('admin-member-pass').value = data.password || '';
-                        document.getElementById('admin-member-name').value = data.name || '';
-                        document.getElementById('admin-member-phone').value = data.phone || '';
-                        document.getElementById('admin-member-remittance').value = data.remittance || '';
-                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
-                        document.getElementById('admin-months').value = data.months || '';
-                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
-                        document.getElementById('admin-member-remarks').value = data.remarks || '';
-                    }
-                } catch(e) {
-                    window.showToast("資料讀取失敗", true);
-                }
-            } else {
-                emailInput.value = '';
-                emailInput.removeAttribute('readonly');
-                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
-                document.getElementById('admin-member-pass').value = '';
-                document.getElementById('admin-member-name').value = '';
-                document.getElementById('admin-member-phone').value = '';
-                document.getElementById('admin-member-remittance').value = '';
-                document.getElementById('admin-pay-date').value = '';
-                document.getElementById('admin-months').value = '';
-                document.getElementById('admin-expiry-date').value = '';
-                document.getElementById('admin-member-remarks').value = '';
-            }
+            event.target.value = ''; 
         };
 
         window.saveAdminMember = async function() {
@@ -1071,6 +1072,8 @@
         };
 
         window.deleteAdminMember = async function(emailId) {
+            // 在 Canvas 中如果 confirm 被擋下，這段可能無作用。但因為是管理員行為，先保留供正式網域使用。
+            // 也可以實作自訂 Modal 以策安全，但目前先不增加過多程式碼。
             if(confirm(`警告：確定要刪除會員 ${emailId} 嗎？此操作無法復原。`)) {
                 try {
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
@@ -1083,9 +1086,6 @@
             }
         };
 
-        // ==========================================
-        // [PM] 新增：系統單向通訊模組 (Messaging System)
-        // ==========================================
         window.currentMsgEmail = '';
 
         function renderChatBubbles(messages, containerId) {
@@ -1162,7 +1162,7 @@
             if (!emailId) return;
             
             document.getElementById('user-msg-modal').classList.remove('hidden');
-            document.getElementById('msg-dot')?.classList.add('hidden'); // 點開後消紅點
+            document.getElementById('msg-dot')?.classList.add('hidden'); 
             const historyDiv = document.getElementById('user-chat-history');
             const inputEl = document.getElementById('user-chat-input');
             const btnEl = document.getElementById('user-chat-send-btn');
@@ -1177,7 +1177,6 @@
                     const messages = data.messages || [];
                     renderChatBubbles(messages, 'user-chat-history');
                     
-                    // [PM] 單向啟動鎖：管理員未發話前，禁用回覆
                     const hasAdminMsg = messages.some(m => m.role === 'admin');
                     if(hasAdminMsg) {
                         inputEl.disabled = false;
@@ -1224,7 +1223,6 @@
         };
 
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
-        // ==========================================
 
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -1305,6 +1303,24 @@
             } finally {
                 if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; }
             }
+        });
+
+        document.getElementById('modal-save-btn')?.addEventListener('click', async () => {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const newName = document.getElementById('profile-name').value.trim();
+            const newPass = document.getElementById('profile-pass').value.trim();
+            const newApiKey = document.getElementById('profile-api-key').value.trim();
+            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                await updateDoc(docRef, { name: newName, password: newPass, apiKey: newApiKey });
+                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
+                else localStorage.setItem('gemini_api_key', newApiKey);
+                window.activeApiKey = newApiKey;
+                window.showToast("設定已同步至雲端並儲存完成！ / Saved!");
+                window.closeProfileModal();
+                setTimeout(() => location.reload(), 800);
+            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         });
 
         window.firebaseApp = { db, appId };
@@ -1576,6 +1592,10 @@
             });
             
             safeBind('ai-retry-btn', 'click', () => currentTargetChar && executeAIFetch(currentTargetChar));
+            
+            // [PM] 雙重保險防呆：防止 onclick 失效時無法觸發
+            safeBind('profile-btn', 'click', window.openProfileModal);
+            safeBind('remove-key-btn', 'click', window.handleLogout);
         };
     </script>
 </body>

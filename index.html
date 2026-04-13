@@ -205,7 +205,6 @@
             </div>
         </section>
 
-        <!-- 管理員專屬介面 (Admin Console) -->
         <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start">
@@ -321,7 +320,6 @@
             </div>
         </section>
 
-        <!-- 學習中心面板 -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2">
@@ -371,7 +369,7 @@
                                 <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-1 font-bold">Zhuyin / 注音</div>
                                 <div class="flex items-center gap-3">
                                     <div id="zhuyin-display" class="text-3xl font-bold text-slate-800 tracking-tighter"></div>
-                                    <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg"></i></button>
+                                    <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
@@ -593,7 +591,7 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 全域輔助變數與 UI -->
+    <!-- 第一模塊：全域 UI 與基礎功能腳本 (唯一純淨版) -->
     <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
@@ -730,15 +728,59 @@
                         document.getElementById('profile-pass').value = user.password || '';
                     }
                 }
-            } catch(e) {}
+            } catch(e) { }
         };
 
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
+        
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            
+            if (emailId && typeof emailId === 'string') {
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                try {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+                    const docRef = doc(window.firebaseDbInstance, "artifacts", window.firebaseAppId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-member-phone').value = data.phone || '';
+                        document.getElementById('admin-member-remittance').value = data.remittance || '';
+                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
+                        document.getElementById('admin-months').value = data.months || '';
+                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
+                        document.getElementById('admin-member-remarks').value = data.remarks || '';
+                    }
+                } catch(e) {
+                    window.showToast("資料讀取失敗", true);
+                }
+            } else {
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                document.getElementById('admin-member-pass').value = '';
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+            }
+        };
+
         window.closeAdminModal = () => {
             document.getElementById('admin-modal')?.classList.add('hidden');
             document.getElementById('admin-member-email').removeAttribute('readonly');
             document.getElementById('admin-member-email').classList.remove('bg-slate-100', 'text-slate-500');
         };
+        
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
         const getStr = (val) => (val === null || val === undefined) ? "" : String(val);
@@ -780,20 +822,27 @@
             }
         };
 
-        // [PM] 全域事件委派：確保 Admin 按鈕永遠可被點擊
+        // 全域委派綁定：解決沙盒與動態 DOM 下按鈕失效的問題
         document.addEventListener('click', (e) => {
-            const adminBtn = e.target.closest('.admin-action-btn');
-            if (adminBtn) {
-                const action = adminBtn.getAttribute('data-action');
-                const id = adminBtn.getAttribute('data-id');
-                if (action === 'admin-msg') window.openAdminMsgModal(id);
-                if (action === 'admin-edit') window.openAdminModal(id);
-                if (action === 'admin-delete') window.deleteAdminMember(id, adminBtn);
+            const actionEl = e.target.closest('[data-action]');
+            if (!actionEl) return;
+            
+            const action = actionEl.getAttribute('data-action');
+            if (action === 'admin-edit') {
+                if (window.openAdminModal) window.openAdminModal(actionEl.getAttribute('data-id'));
+            } else if (action === 'admin-delete') {
+                if (window.deleteAdminMember) window.deleteAdminMember(actionEl.getAttribute('data-id'), actionEl);
+            } else if (action === 'admin-msg') {
+                if (window.openAdminMsgModal) window.openAdminMsgModal(actionEl.getAttribute('data-id'));
+            } else if (action === 'chat-del') {
+                if (window.deleteMsg) window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
+            } else if (action === 'speak') {
+                if (window.speak) window.speak(actionEl.getAttribute('data-text'));
             }
         });
     </script>
 
-    <!-- Firebase 模組 -->
+    <!-- 第二模塊：Firebase 與後台通訊邏輯 (唯一純淨版) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -949,9 +998,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
-                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
-                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
+                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
+                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
+                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
                             </td>
                         </tr>
                     `;
@@ -1193,7 +1242,7 @@
                 const senderName = isUser ? userName : 'Admin';
                 
                 const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
-                const delBtn = isOld ? `<button type="button" data-email="${emailId}" data-index="${index}" class="chat-del-btn text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
+                const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
                 
                 return `
                     <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
@@ -1428,7 +1477,7 @@
             }
         });
 
-        document.getElementById('modal-save-btn')?.addEventListener('click', async () => {
+        window.saveProfileInfo = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
             const newPass = document.getElementById('profile-pass').value.trim();
@@ -1444,31 +1493,13 @@
                 window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
-        });
-
-        window.firebaseApp = { db, appId };
+        };
     </script>
 
-    <!-- AI 解析與防呆邏輯 -->
+    <!-- 第三模塊：AI 解析與前端事件綁定 (唯一純淨版) -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
-
-        const safeBind = (id, event, handler) => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener(event, handler);
-        };
-
-        const bindChatDel = (containerId) => {
-            const el = document.getElementById(containerId);
-            if(el && !el.dataset.bound) {
-                el.addEventListener('click', (e) => {
-                    const btn = e.target.closest('.chat-del-btn');
-                    if(btn) window.deleteMsg(btn.getAttribute('data-email'), parseInt(btn.getAttribute('data-index')), btn);
-                });
-                el.dataset.bound = 'true';
-            }
-        };
 
         async function fetchWithRetry(url, options, maxRetries = 5) {
             const delays = [1000, 2000, 4000, 8000, 16000];
@@ -1527,7 +1558,7 @@
                             <div class="text-[11px] text-slate-600 mt-1 leading-relaxed">${getStr(data.meaning)}</div>
                             <div class="text-[10px] text-indigo-600 font-bold mt-2"><i class="ph ph-translate"></i> ${getStr(data.english)}</div>
                         </div>
-                        <button type="button" onclick="window.speak('${getStr(data.idiom)}')" class="text-indigo-600 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl"></i></button>
+                        <button type="button" data-action="speak" data-text="${getStr(data.idiom)}" class="text-indigo-600 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
                     </div>
                 `;
                 inputEl.value = '';
@@ -1579,7 +1610,7 @@
         function renderResult(char, data) {
             document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
-            pb.classList.remove('hidden'); pb.onclick = () => window.speak(char);
+            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char);
             
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
@@ -1596,7 +1627,7 @@
                         .filter(ex => ex.length <= 6)
                         .map(ex => {
                             const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
-                            return `<button type="button" onclick="window.speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
+                            return `<button type="button" data-action="speak" data-text="${pureEx}" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
                         }).join('');
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
                     
@@ -1613,7 +1644,7 @@
                 .slice(0, 6)
                 .map(w => {
                     const pureWord = getStr(w).replace(/\([^)]*\)/g, '').trim();
-                    return `<span onclick="window.speak('${pureWord}')" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
+                    return `<span data-action="speak" data-text="${pureWord}" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
@@ -1629,7 +1660,7 @@
                             <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${getStr(i.meaning)}</div>
                             <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${getStr(i.english) || "Translation loading..."}</div>
                         </div>
-                        <button type="button" onclick="window.speak('${getStr(i.idiom)}')" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
+                        <button type="button" data-action="speak" data-text="${getStr(i.idiom)}" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
                     </div>
                 `).join('');
             } else {
@@ -1650,100 +1681,107 @@
         window.onload = function() {
             if (window.updateGlobalUI) window.updateGlobalUI();
             
-            bindChatDel('admin-chat-history');
-            bindChatDel('user-chat-history');
-            
-            safeBind('save-key-btn', 'click', () => {
-                const key = document.getElementById('custom-api-key').value.trim();
-                if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
-            });
-            
-            safeBind('translate-btn', 'click', async () => {
-                if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
-                const word = document.getElementById('eng-input').value.trim();
-                if (!word) return;
-                document.getElementById('translate-loader').classList.remove('hidden');
-                try {
-                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
-                    const d = await res.json();
-                    const trans = (d.responseData.translatedText || "").replace(/[^\u4e00-\u9fa5]/g, '');
-                    document.getElementById('zh-input').value = trans;
-                    if (!window.isVIP) { 
-                        window.freeUsageCount++; 
-                        localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
-                        if(window.updateGlobalUI) window.updateGlobalUI(); 
-                    }
-                    document.getElementById('split-btn').click();
-                } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
-            });
-            
-            safeBind('split-btn', 'click', (e) => {
-                const text = document.getElementById('zh-input').value.trim();
-                if (!text) return;
-                
-                if (e && e.isTrusted) {
-                    if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
-                        window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
-                        return; 
-                    }
-                    if (!window.isVIP) { 
-                        window.freeUsageCount++; 
-                        localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
-                        if(window.updateGlobalUI) window.updateGlobalUI(); 
-                    }
-                }
-
-                const container = document.getElementById('char-container'); container.innerHTML = '';
-                const guide = document.getElementById('click-char-guide');
-                const chars = text.split('');
-                let hasChar = false;
-                
-                chars.forEach(char => {
-                    if (!/[\u4e00-\u9fa5]/.test(char)) return;
-                    hasChar = true;
-                    const btn = document.createElement('button');
-                    btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
-                    btn.textContent = char;
-                    btn.onclick = () => {
-                        currentTargetChar = char;
-                        document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        document.getElementById('learning-dashboard').classList.remove('hidden');
-                        document.getElementById('current-learning-char').textContent = char;
-                        document.getElementById('hanzi-target').innerHTML = '';
-                        HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
-                        if (localStorage.getItem('abra_vip_status') === 'active' && window.activeApiKey) {
-                            executeAIFetch(char);
-                        } else { 
-                            document.getElementById('vip-only-content').classList.add('hidden'); 
-                            document.getElementById('free-promo-content').classList.remove('hidden'); 
+            const translateBtn = document.getElementById('translate-btn');
+            if (translateBtn) {
+                translateBtn.addEventListener('click', async () => {
+                    if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
+                    const word = document.getElementById('eng-input').value.trim();
+                    if (!word) return;
+                    document.getElementById('translate-loader').classList.remove('hidden');
+                    try {
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                        const d = await res.json();
+                        const trans = (d.responseData.translatedText || "").replace(/[^\u4e00-\u9fa5]/g, '');
+                        document.getElementById('zh-input').value = trans;
+                        if (!window.isVIP) { 
+                            window.freeUsageCount++; 
+                            localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                            if(window.updateGlobalUI) window.updateGlobalUI(); 
                         }
-                    };
-                    container.appendChild(btn);
+                        document.getElementById('split-btn').click();
+                    } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
                 });
-                
-                if (hasChar && guide) guide.classList.remove('hidden');
-                if (!hasChar && guide) guide.classList.add('hidden');
-                if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">未偵測到繁體中文字 / No Chinese characters detected.</span>';
-            });
+            }
             
-            safeBind('animate-stroke-btn', 'click', () => {
-                const svg = document.querySelector('#hanzi-target');
-                if (svg && currentTargetChar) {
-                    svg.innerHTML = '';
-                    HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).animateCharacter();
-                }
-            });
+            const splitBtn = document.getElementById('split-btn');
+            if (splitBtn) {
+                splitBtn.addEventListener('click', (e) => {
+                    const text = document.getElementById('zh-input').value.trim();
+                    if (!text) return;
+                    
+                    if (e && e.isTrusted) {
+                        if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                            window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
+                            return; 
+                        }
+                        if (!window.isVIP) { 
+                            window.freeUsageCount++; 
+                            localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                            if(window.updateGlobalUI) window.updateGlobalUI(); 
+                        }
+                    }
+
+                    const container = document.getElementById('char-container'); container.innerHTML = '';
+                    const guide = document.getElementById('click-char-guide');
+                    const chars = text.split('');
+                    let hasChar = false;
+                    
+                    chars.forEach(char => {
+                        if (!/[\u4e00-\u9fa5]/.test(char)) return;
+                        hasChar = true;
+                        const btn = document.createElement('button');
+                        btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
+                        btn.textContent = char;
+                        btn.onclick = () => {
+                            currentTargetChar = char;
+                            document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            document.getElementById('learning-dashboard').classList.remove('hidden');
+                            document.getElementById('current-learning-char').textContent = char;
+                            document.getElementById('hanzi-target').innerHTML = '';
+                            HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
+                            if (localStorage.getItem('abra_vip_status') === 'active' && window.activeApiKey) {
+                                executeAIFetch(char);
+                            } else { 
+                                document.getElementById('vip-only-content').classList.add('hidden'); 
+                                document.getElementById('free-promo-content').classList.remove('hidden'); 
+                            }
+                        };
+                        container.appendChild(btn);
+                    });
+                    
+                    if (hasChar && guide) guide.classList.remove('hidden');
+                    if (!hasChar && guide) guide.classList.add('hidden');
+                    if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">未偵測到繁體中文字 / No Chinese characters detected.</span>';
+                });
+            }
             
-            safeBind('quiz-stroke-btn', 'click', () => {
-                const svg = document.querySelector('#hanzi-target');
-                if (svg && currentTargetChar) {
-                    svg.innerHTML = '';
-                    HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
-                }
-            });
+            const animateBtn = document.getElementById('animate-stroke-btn');
+            if (animateBtn) {
+                animateBtn.addEventListener('click', () => {
+                    const svg = document.querySelector('#hanzi-target');
+                    if (svg && currentTargetChar) {
+                        svg.innerHTML = '';
+                        HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).animateCharacter();
+                    }
+                });
+            }
             
-            safeBind('ai-retry-btn', 'click', () => currentTargetChar && executeAIFetch(currentTargetChar));
+            const quizBtn = document.getElementById('quiz-stroke-btn');
+            if (quizBtn) {
+                quizBtn.addEventListener('click', () => {
+                    const svg = document.querySelector('#hanzi-target');
+                    if (svg && currentTargetChar) {
+                        svg.innerHTML = '';
+                        HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
+                    }
+                });
+            }
+            
+            const retryBtn = document.getElementById('ai-retry-btn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => currentTargetChar && executeAIFetch(currentTargetChar));
+            }
         };
     </script>
 </body>

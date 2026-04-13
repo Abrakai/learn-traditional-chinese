@@ -281,7 +281,6 @@
             </div>
         </div>
 
-        <!-- [PM] 翻譯功能 (增加零成本發音按鈕) -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -300,7 +299,6 @@
             </div>
         </section>
 
-        <!-- [PM] 學習書寫 (增加零成本發音按鈕與嚴格次數管制) -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -753,7 +751,6 @@
             window.speechSynthesis.speak(ut);
         };
 
-        // [PM] 英文專用語音發音
         window.speakEng = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
@@ -861,8 +858,12 @@
                         }
                     }
                     
-                    // 偵測未讀訊息
-                    if (data.messages && data.messages.length > 0) {
+                    // [PM] 偵測未讀訊息：加入本機已讀數量比對，避免重複亮燈
+                    const messages = data.messages || [];
+                    const lastReadCount = parseInt(localStorage.getItem(`abra_msg_read_${emailId}`) || '0', 10);
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+
+                    if (lastMsg && lastMsg.role === 'admin' && messages.length > lastReadCount) {
                         document.getElementById('msg-dot')?.classList.remove('hidden');
                     } else {
                         document.getElementById('msg-dot')?.classList.add('hidden');
@@ -1259,6 +1260,9 @@
                     window.currentUserMsgName = data.name || '我';
                     renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName, emailId);
                     
+                    // [PM] 標記為已讀
+                    localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                    
                     const hasAdminMsg = messages.some(m => m.role === 'admin');
                     if(hasAdminMsg) {
                         inputEl.disabled = false;
@@ -1292,6 +1296,9 @@
                 
                 messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
                 await setDoc(docRef, { messages: messages }, { merge: true });
+                
+                // [PM] 更新已讀數量，避免自己發完訊息後紅點錯亂
+                localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
                 
                 inputEl.value = '';
                 renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName || '我', emailId);
@@ -1636,12 +1643,10 @@
                 } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
             });
             
-            // [PM] 修復點 2：加入中文拆字按鈕的限額鎖定防護
             safeBind('split-btn', 'click', () => {
                 const text = document.getElementById('zh-input').value.trim();
                 if (!text) return;
                 
-                // 執行額度扣除邏輯
                 if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
                     window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
                     return; 

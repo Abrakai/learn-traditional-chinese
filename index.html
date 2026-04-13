@@ -164,8 +164,7 @@
                                 <div class="flex items-start gap-2">
                                     <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
                                     <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer">
-                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明</button>。<br>
-                                        I have read and agree to the <span class="font-bold">Privacy Policy & Disclaimer</span>.
+                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明 (Privacy Policy & Disclaimer)</button>。
                                     </label>
                                 </div>
                             </div>
@@ -391,7 +390,7 @@
         </div>
     </div>
 
-    <!-- 法律聲明 Modal -->
+    <!-- 法律聲明 Modal (中英對照) -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
             <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2">
@@ -714,7 +713,7 @@
         window.firebaseApp = { db, appId };
     </script>
 
-    <!-- AI 解析與過濾防呆邏輯 -->
+    <!-- AI 解析與防呆邏輯 -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
@@ -744,47 +743,6 @@
             }
         }
 
-        async function executeAIFetch(char) {
-            if (window.syncVipStatus) await window.syncVipStatus();
-            if (localStorage.getItem('abra_vip_status') !== 'active') {
-                document.getElementById('vip-only-content').classList.add('hidden');
-                document.getElementById('free-promo-content').classList.remove('hidden');
-                document.getElementById('expiry-notice-box').classList.remove('hidden');
-                return;
-            }
-
-            const loader = document.getElementById('ai-inner-loader');
-            const vipPanel = document.getElementById('vip-only-content');
-            const errorPanel = document.getElementById('ai-error-panel');
-            loader.classList.remove('hidden');
-            vipPanel.classList.add('hidden');
-            errorPanel.classList.add('hidden');
-
-            const modelNames = ["gemini-3.1-flash-lite", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
-            let success = false;
-            for (const model of modelNames) {
-                try {
-                    // [PM] 修復點 1：嚴格定義 Prompt，強制破音字不得造句，強制成語必須包含目標字
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. examples僅限2~4字詞彙，絕勿造句。2. idioms必須包含「${char}」字，若無常見成語請回傳空陣列[]。格式：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["破音詞彙"]}], "words": ["造詞"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
-                    const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const result = await res.json();
-                    if (result.error) throw new Error(result.error.message);
-                    const rawText = result.candidates[0].content.parts[0].text;
-                    const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
-                    charCache[char] = data; renderResult(char, data);
-                    document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
-                    document.getElementById('active-engine-badge').classList.remove('hidden');
-                    success = true; break;
-                } catch (e) { document.getElementById('ai-error-debug').textContent = e.message; }
-            }
-            loader.classList.add('hidden');
-            if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
-        }
-
-        // [PM] 全新功能：使用者自訂成語解析
         window.searchCustomIdiom = async function() {
             const inputEl = document.getElementById('custom-idiom-input');
             const resultDiv = document.getElementById('custom-idiom-result');
@@ -831,8 +789,50 @@
             }
         };
 
+        async function executeAIFetch(char) {
+            if (window.syncVipStatus) await window.syncVipStatus();
+            if (localStorage.getItem('abra_vip_status') !== 'active') {
+                document.getElementById('vip-only-content').classList.add('hidden');
+                document.getElementById('free-promo-content').classList.remove('hidden');
+                document.getElementById('expiry-notice-box').classList.remove('hidden');
+                return;
+            }
+
+            const loader = document.getElementById('ai-inner-loader');
+            const vipPanel = document.getElementById('vip-only-content');
+            const errorPanel = document.getElementById('ai-error-panel');
+            loader.classList.remove('hidden');
+            vipPanel.classList.add('hidden');
+            errorPanel.classList.add('hidden');
+
+            const modelNames = ["gemini-3.1-flash-lite", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+            let success = false;
+            for (const model of modelNames) {
+                try {
+                    // [PM] 修復點 1：嚴格約束 AI 的 Prompt，強制作出發音對應與禁止空格。
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. polyphonic陣列中的examples「必須100%符合該破音字的發音」，切勿將不同發音的詞彙混入。2. zhuyin(注音)字串中請勿包含半形空格，讓聲調緊貼注音符號。3. examples僅限2~4字詞彙，絕勿造句。4. idioms必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["讀此破音的詞彙"]}], "words": ["造詞"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    
+                    const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const result = await res.json();
+                    if (result.error) throw new Error(result.error.message);
+                    const rawText = result.candidates[0].content.parts[0].text;
+                    const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
+                    charCache[char] = data; renderResult(char, data);
+                    document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
+                    document.getElementById('active-engine-badge').classList.remove('hidden');
+                    success = true; break;
+                } catch (e) { document.getElementById('ai-error-debug').textContent = e.message; }
+            }
+            loader.classList.add('hidden');
+            if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
+        }
+
         function renderResult(char, data) {
-            document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin);
+            // [PM] 靜默去空白：確保主要注音的聲調不分離
+            document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
             pb.classList.remove('hidden'); pb.onclick = () => window.speak(char);
             
@@ -846,13 +846,16 @@
                     const wrap = document.createElement('div');
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
                     let exHTML = (p.examples || [])
-                        .filter(ex => ex.length <= 6) // 防呆過濾長句
+                        .filter(ex => ex.length <= 6) // 防呆：過濾長句
                         .map(ex => {
                             const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
                             return `<button type="button" onclick="window.speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
                         }).join('');
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
-                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${getStr(p.zhuyin)}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
+                    
+                    // [PM] 靜默去空白 + whitespace-nowrap：確保破音字的聲調不分離
+                    const pureZhuyin = getStr(p.zhuyin).replace(/\s+/g, '');
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
                     polyDisp.appendChild(wrap);
                 });
             } else {
@@ -866,7 +869,6 @@
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
-            // [PM] 修復點 2：強制過濾成語長度與是否包含該字
             const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3);
             
             if (validIdioms.length > 0) {
@@ -881,7 +883,7 @@
                     </div>
                 `).join('');
             } else {
-                // [PM] 全新功能：自訂成語解析 UI
+                // 自訂成語區塊
                 idiomsCont.innerHTML = `
                     <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center shadow-sm">
                         <p class="text-xs text-slate-600 mb-2 font-bold">目前無包含「${char}」的常見成語。</p>

@@ -412,7 +412,70 @@
         </section>
     </main>
 
-    <!-- [PM] 修改：管理員專屬傳訊 Modal (新增會員姓名顯示) -->
+    <!-- 系統訊息 Modal -->
+    <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-envelope-open text-blue-500"></i> System Messages / 系統訊息</h3>
+                <button type="button" onclick="window.closeUserMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            
+            <div id="user-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-2 mb-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
+                <!-- 對話泡泡將透過 JS 動態生成 -->
+            </div>
+            
+            <div class="pt-2 border-t border-slate-100 flex gap-2">
+                <textarea id="user-chat-input" rows="2" placeholder="目前無客服訊息，待管理員發送後即可回覆..." disabled class="flex-1 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"></textarea>
+                <button type="button" id="user-chat-send-btn" disabled onclick="window.sendUserMsg()" class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 rounded-xl font-bold shadow-md transition-all active:scale-95 flex items-center justify-center">
+                    <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 個人設定 Modal -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-user-gear text-blue-500"></i> My Profile / 個人設定</h3>
+                <button type="button" onclick="window.closeProfileModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Registered Email / 註冊信箱 (Read-only)</label>
+                    <input type="email" id="profile-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed font-medium">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Display Name / 顯示名稱</label>
+                    <input type="text" id="profile-name" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">New Password / 修改密碼</label>
+                    <div class="relative">
+                        <input type="password" id="profile-pass" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
+                        <button type="button" onclick="window.togglePassVisibility('profile-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest">AI Engine API Key / AI 引擎金鑰</label>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold font-bold">申請 / Get Key</a>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="profile-api-key" placeholder="AIzaSy..." readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm font-mono bg-white">
+                        <button type="button" onclick="window.togglePassVisibility('profile-api-key', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-2 leading-relaxed"><i class="ph ph-shield-check"></i> 此金鑰將同步至雲端，更換設備登入後亦可自動載入。<br><span class="italic">Synced to your cloud account securely.</span></p>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="window.closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wider">Cancel / 取消</button>
+                    <button type="button" id="modal-save-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存設定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理員專屬傳訊 Modal -->
     <div id="admin-msg-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
@@ -790,6 +853,7 @@
                         }
                     }
                     
+                    // 偵測未讀訊息
                     if (data.messages && data.messages.length > 0) {
                         document.getElementById('msg-dot')?.classList.remove('hidden');
                     } else {
@@ -829,6 +893,13 @@
                         }
                     }
 
+                    // [PM] 判斷最後一則訊息是否為會員回覆，動態調整按鈕樣式
+                    const messages = data.messages || [];
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+                    const hasUnread = lastMsg && lastMsg.role === 'user';
+                    const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:text-blue-800";
+                    const msgBtnText = hasUnread ? "新回覆" : "傳訊";
+
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -842,7 +913,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg mr-1 transition-all">傳訊</button>
+                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
                                 <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
                                 <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
                             </td>
@@ -856,6 +927,7 @@
                     tbody.innerHTML = html;
                 }
 
+                // [PM] 解決 innerHTML 阻擋 onclick 的問題 (Event Delegation)
                 if (!window.adminTableBound) {
                     tbody.addEventListener('click', (e) => {
                         const btn = e.target.closest('.admin-action-btn');
@@ -1018,6 +1090,7 @@
         };
 
         window.deleteAdminMember = async function(emailId, btnElement) {
+            // [PM] 改採雙擊防呆機制取代 confirm()，繞過沙盒封鎖
             if (btnElement && btnElement.textContent !== '確認刪除') {
                 const originalText = btnElement.textContent;
                 btnElement.textContent = '確認刪除';
@@ -1043,23 +1116,62 @@
             }
         };
 
+        // [PM] 全域舊訊息刪除邏輯
+        window.deleteMsg = async function(emailId, index, btnElement) {
+            if (btnElement && btnElement.textContent !== '確認?') {
+                const orig = btnElement.textContent;
+                btnElement.textContent = '確認?';
+                btnElement.classList.add('font-black', 'text-red-600');
+                setTimeout(() => { 
+                    if(btnElement && btnElement.parentNode) { 
+                        btnElement.textContent = orig; 
+                        btnElement.classList.remove('font-black', 'text-red-600'); 
+                    } 
+                }, 3000);
+                return;
+            }
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    let messages = docSnap.data().messages || [];
+                    messages.splice(index, 1);
+                    await setDoc(docRef, { messages }, { merge: true });
+                    window.showToast("舊訊息已清除");
+                    
+                    if (window.isAdmin && !document.getElementById('admin-msg-modal').classList.contains('hidden')) {
+                        window.openAdminMsgModal(emailId);
+                    } else {
+                        window.openUserMsgModal();
+                    }
+                }
+            } catch(e) {
+                window.showToast("清除失敗", true);
+            }
+        };
+
         window.currentMsgEmail = '';
         window.currentMsgName = 'User';
 
-        function renderChatBubbles(messages, containerId, userName = 'User') {
+        function renderChatBubbles(messages, containerId, userName = 'User', emailId = '') {
             const container = document.getElementById(containerId);
             if(!messages || messages.length === 0) {
                 container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
                 return;
             }
-            container.innerHTML = messages.map(m => {
+            container.innerHTML = messages.map((m, index) => {
                 const isUser = m.role === 'user';
                 const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                 const senderName = isUser ? userName : 'Admin';
+                
+                // [PM] 判斷訊息是否超過 7 天，並產生刪除按鈕
+                const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
+                const delBtn = isOld ? `<button type="button" data-email="${emailId}" data-index="${index}" class="chat-del-btn text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
+                
                 return `
                     <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
                         <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${getStr(m.text)}</div>
-                        <span class="text-[9px] text-slate-400 mt-1">${senderName} • ${timeStr}</span>
+                        <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
                     </div>
                 `;
             }).join('');
@@ -1081,7 +1193,7 @@
                     const data = docSnap.data();
                     window.currentMsgName = data.name || '未命名會員';
                     document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
-                    renderChatBubbles(data.messages || [], 'admin-chat-history', window.currentMsgName);
+                    renderChatBubbles(data.messages || [], 'admin-chat-history', window.currentMsgName, emailId);
                 }
             } catch(e) {
                 window.showToast("訊息載入失敗", true);
@@ -1105,7 +1217,8 @@
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 
                 inputEl.value = '';
-                renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName);
+                renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName, emailId);
+                window.loadAdminMembers(); // 更新列表上的閃爍燈號
             } catch(e) {
                 window.showToast("傳送失敗", true);
             } finally {
@@ -1138,7 +1251,7 @@
                     const data = docSnap.data();
                     const messages = data.messages || [];
                     window.currentUserMsgName = data.name || '我';
-                    renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName);
+                    renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName, emailId);
                     
                     const hasAdminMsg = messages.some(m => m.role === 'admin');
                     if(hasAdminMsg) {
@@ -1175,7 +1288,7 @@
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 
                 inputEl.value = '';
-                renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName || '我');
+                renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName || '我', emailId);
             } catch(e) {
                 window.showToast("傳送失敗", true);
             } finally {
@@ -1299,6 +1412,18 @@
             if (el) el.addEventListener(event, handler);
         };
 
+        // [PM] 聊天紀錄專屬事件委派
+        const bindChatDel = (containerId) => {
+            const el = document.getElementById(containerId);
+            if(el && !el.dataset.bound) {
+                el.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.chat-del-btn');
+                    if(btn) window.deleteMsg(btn.getAttribute('data-email'), parseInt(btn.getAttribute('data-index')), btn);
+                });
+                el.dataset.bound = 'true';
+            }
+        };
+
         async function fetchWithRetry(url, options, maxRetries = 5) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i <= maxRetries; i++) {
@@ -1331,7 +1456,6 @@
             resultDiv.innerHTML = '<div class="loader mx-auto border-t-indigo-500"></div>';
             
             try {
-                // [PM] 修復點 1：將 searchCustomIdiom 的 API endpoint 修改為普遍支援且穩定的 gemini-2.0-flash
                 const prompt = `請嚴格解析成語「${input}」的繁體中文教學 JSON格式：{"idiom": "${input}", "meaning": "中文意思", "english": "English context translation"}。若「${input}」不是合理的成語或查無此詞，請務必回傳 {"error": "查無此成語解析"}`;
                 
                 const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
@@ -1382,7 +1506,6 @@
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
 
-            // [PM] 修復點 1：擴充「六層裝甲防護」的 AI 模型備援陣列，確保遇到 404 等問題時自動切換。
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.5-flash-lite"];
             let success = false;
             for (const model of modelNames) {
@@ -1480,6 +1603,10 @@
 
         window.onload = function() {
             if (window.updateGlobalUI) window.updateGlobalUI();
+            
+            // 綁定動態生成的刪除按鈕
+            bindChatDel('admin-chat-history');
+            bindChatDel('user-chat-history');
             
             safeBind('save-key-btn', 'click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();

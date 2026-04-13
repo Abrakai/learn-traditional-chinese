@@ -70,7 +70,7 @@
     <!-- 雲端異常橫幅 -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
-        <span id="error-banner-text">連線異常：請確認已在 Firebase Console 設定 Authorized domains。</span>
+        <span id="error-banner-text">連線異常：請確認 Authorized domains 設定正確。</span>
     </div>
 
     <!-- Header -->
@@ -122,7 +122,7 @@
                             <input type="text" id="reg-name" placeholder="Full Name / 姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm">
                             <input type="email" id="reg-email" placeholder="Email / 帳號" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold text-indigo-900">
                             <div class="relative">
-                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm">
+                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm">
                                 <button type="button" onclick="togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <button id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase">Create Account 建立帳號</button>
@@ -134,9 +134,9 @@
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
                         </h4>
                         <div class="space-y-3">
-                            <input type="email" id="login-email" placeholder="Enter Email" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm">
+                            <input type="email" id="login-email" placeholder="Enter Email" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm">
                             <div class="relative">
-                                <input type="password" id="login-vip-code" placeholder="Enter Password" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase">
+                                <input type="password" id="login-vip-code" placeholder="Enter Password" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase shadow-sm">
                                 <button type="button" onclick="togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <button id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase flex items-center justify-center gap-2">
@@ -159,21 +159,19 @@
                     <div>
                         <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟動 AI 深度解析</h3>
                         <p class="text-sm text-slate-600 font-medium mt-1">
-                            綁定金鑰後可啟動：<span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋</span>。
+                            解鎖：<span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語解釋</span>。
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 border-t border-slate-100 pt-4">
-                        <div class="space-y-1">
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline text-[10px] font-black hover:text-indigo-800 flex items-center gap-1">
-                                <i class="ph ph-arrow-square-out"></i> 前往 Google AI Studio 免費申請金鑰
-                            </a>
-                        </div>
+                    <div class="flex items-center gap-4 border-t border-slate-100 pt-4">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline text-[10px] font-black hover:text-indigo-800 flex items-center gap-1">
+                            <i class="ph ph-arrow-square-out"></i> 免費申請金鑰 / Get Free API Key
+                        </a>
                     </div>
                 </div>
                 <div class="flex w-full md:w-auto flex-col sm:flex-row gap-3 self-center">
                     <input type="password" id="custom-api-key" placeholder="Paste API Key (AIza...)" class="w-full md:w-64 px-4 py-3.5 rounded-xl border-2 border-indigo-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none text-sm font-mono shadow-sm bg-white text-slate-700">
                     <button id="save-key-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg active:scale-95 text-sm flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-rocket-launch text-lg"></i> 啟動 / Start
+                        <i class="ph-bold ph-rocket-launch text-lg"></i> Start 啟動
                     </button>
                 </div>
             </div>
@@ -216,7 +214,8 @@
                 <span id="current-learning-char" class="text-4xl font-bold text-yellow-400 drop-shadow-md"></span>
             </div>
 
-            <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-12 gap-0">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                <!-- 左側：筆畫 -->
                 <div class="md:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[400px]">
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3"></svg>
                     <div class="flex flex-col gap-2 mt-8 w-full max-w-[200px]">
@@ -225,6 +224,7 @@
                     </div>
                 </div>
 
+                <!-- 右側：AI 解析 -->
                 <div id="ai-data-panel" class="md:col-span-8 p-8 relative bg-white min-h-[400px]">
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4">
                         <div class="ai-inner-loader"></div>
@@ -244,10 +244,10 @@
                                 <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-1">Zhuyin / 注音</div>
                                 <div class="flex items-center gap-3">
                                     <div id="zhuyin-display" class="text-3xl font-bold text-slate-800"></div>
-                                    <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-transform active:scale-90"><i class="ph-fill ph-speaker-high"></i></button>
+                                    <button id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center"><i class="ph-fill ph-speaker-high"></i></button>
                                 </div>
                             </div>
-                            <div id="poly-container" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
                             </div>
@@ -265,8 +265,8 @@
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown"></i></div>
                         <h3 class="text-xl font-bold">Unlock VIP Access</h3>
-                        <p class="text-xs text-slate-500">升級 VIP 以解除限制。AI 解析服務需付費會員自行配置金鑰。</p>
-                        <button onclick="scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold text-sm">Join VIP / 登入</button>
+                        <p class="text-xs text-slate-500">升級 VIP 以解除限制。AI 深度解析需付費會員自行配置金鑰。</p>
+                        <button onclick="scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold text-sm">Join VIP / 會員登入</button>
                     </div>
                 </div>
             </div>
@@ -277,7 +277,7 @@
         <p class="text-slate-500 text-[10px] tracking-widest uppercase font-bold">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
     </footer>
 
-    <!-- Firebase & Core Logic -->
+    <!-- Firebase SDK (v11.0.0) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -306,12 +306,11 @@
         };
 
         onAuthStateChanged(auth, async (user) => {
-            const statusEl = document.getElementById('auth-status-msg');
             if (user) {
-                statusEl.textContent = "CLOUD ACTIVE";
+                document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
                 syncVipStatus();
             } else {
-                signInAnonymously(auth).catch(() => { statusEl.textContent = "AUTH ERROR"; });
+                signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
             }
         });
 
@@ -327,6 +326,7 @@
                 } else {
                     document.getElementById('profile-btn').classList.remove('hidden');
                     document.getElementById('remove-key-btn').classList.remove('hidden');
+                    window.updateGlobalUI();
                 }
             }
         }
@@ -350,6 +350,7 @@
         });
     </script>
 
+    <!-- Core Logic & AI Engine -->
     <script>
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
@@ -357,6 +358,9 @@
         let freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
         const charCache = {};
         let currentTargetChar = "";
+
+        // 安全字串檢查底層封裝
+        const getStr = (val) => (typeof val === 'string' ? val : (val ? String(val) : ""));
 
         window.updateGlobalUI = function() {
             if (isVIP) {
@@ -369,15 +373,15 @@
             }
         };
 
-        // PM 優化：語音播報排除符號並自然停頓
+        // 語音播報優化：排除符號採自然停頓
         function speak(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            // 強制過濾特殊符號採自然停頓
-            let cleanText = String(text).replace(/[\/\-_|]/g, '，').replace(/\([^)]*\)/g, '');
+            // 避開 / - _ | 等符號，改以中文逗號實現自然停頓
+            let cleanText = getStr(text).replace(/[\/\-_|]/g, '，').replace(/\([^)]*\)/g, '');
             const ut = new SpeechSynthesisUtterance(cleanText);
             ut.lang = 'zh-TW';
-            ut.rate = 0.8;
+            ut.rate = 0.85;
             window.speechSynthesis.speak(ut);
         }
 
@@ -390,7 +394,7 @@
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
 
-            // 修正模型名稱：改為實際存在的版本
+            // 模型調度邏輯：優先 2.0，備援 1.5
             const validModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
             let success = false;
 
@@ -409,12 +413,12 @@
                     
                     charCache[char] = data;
                     renderResult(char, data);
-                    document.getElementById('active-engine-badge').textContent = modelName;
+                    document.getElementById('active-engine-badge').textContent = `Powered by ${modelName}`;
                     document.getElementById('active-engine-badge').classList.remove('hidden');
                     success = true;
                     break;
                 } catch (err) {
-                    console.error(`${modelName} failed:`, err.message);
+                    console.warn(`${modelName} connection issues:`, err.message);
                     document.getElementById('ai-error-debug').textContent = err.message;
                 }
             }
@@ -425,9 +429,7 @@
         }
 
         function renderResult(char, data) {
-            // 安全字串檢查
-            const getStr = (val) => (typeof val === 'string' ? val : "");
-            
+            // 所有輸出強制執行靜默檢查
             document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin);
             const pb = document.getElementById('play-char-btn');
             pb.classList.remove('hidden');
@@ -438,25 +440,30 @@
             if (Array.isArray(data.polyphonic)) {
                 data.polyphonic.forEach(p => {
                     const wrap = document.createElement('div');
-                    wrap.className = 'bg-white p-2 rounded-xl border flex justify-between items-center';
-                    let exHTML = (p.examples || []).map(ex => `<button onclick="speak('${getStr(ex)}')" class="text-[10px] bg-purple-50 px-2 py-1 rounded">🔊 ${getStr(ex)}</button>`).join('');
-                    wrap.innerHTML = `<span class="text-sm font-bold">${getStr(p.zhuyin)}</span><div class="flex gap-1">${exHTML}</div>`;
+                    wrap.className = 'bg-white p-2.5 rounded-xl border flex justify-between items-center shadow-sm';
+                    let exHTML = (p.examples || []).map(ex => `<button onclick="speak('${getStr(ex)}')" class="text-[10px] bg-purple-50 text-purple-700 px-2.5 py-1 rounded-lg font-bold">🔊 ${getStr(ex)}</button>`).join('');
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-900">${getStr(p.zhuyin)}</span><div class="flex gap-1.5">${exHTML}</div>`;
                     polyDisp.appendChild(wrap);
                 });
             }
 
             const wordsCont = document.getElementById('words-container');
-            wordsCont.innerHTML = (data.words || []).map(w => `<span onclick="speak('${getStr(w)}')" class="px-3 py-1 bg-indigo-50 rounded-full text-xs cursor-pointer">${getStr(w)}</span>`).join('');
+            wordsCont.innerHTML = (data.words || []).map(w => `<span onclick="speak('${getStr(w)}')" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-all">${getStr(w)}</span>`).join('');
 
             const idiomsCont = document.getElementById('idioms-container');
             idiomsCont.innerHTML = (data.idioms || []).map(i => `
-                <div class="p-4 bg-slate-50 rounded-xl">
-                    <div class="font-bold text-slate-800">${getStr(i.idiom)}</div>
-                    <div class="text-[10px] text-slate-500 mt-1">${getStr(i.meaning)}</div>
-                    <div class="text-[9px] text-indigo-600 font-bold mt-2 bg-indigo-50 p-1.5 rounded">${getStr(i.english)}</div>
+                <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl shadow-sm">
+                    <div class="font-black text-slate-800 text-base tracking-tight">${getStr(i.idiom)}</div>
+                    <div class="text-[11px] text-slate-500 mt-1 font-medium">${getStr(i.meaning)}</div>
+                    <div class="text-[10px] text-indigo-600 font-black mt-3 bg-indigo-50/50 p-2 rounded-lg border border-indigo-100/50">${getStr(i.english)}</div>
                 </div>
             `).join('');
         }
+
+        window.scrollToAuth = function() {
+            document.getElementById('member-center-section').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
         window.onload = function() {
             window.updateGlobalUI();
@@ -465,6 +472,7 @@
                 if (key) {
                     window.activeApiKey = key;
                     localStorage.setItem('gemini_api_key', key);
+                    showToast("Key Binding Successful!");
                     location.reload();
                 }
             });
@@ -487,7 +495,7 @@
                 chars.forEach(char => {
                     if (!/[\u4e00-\u9fa5]/.test(char)) return;
                     const btn = document.createElement('button');
-                    btn.className = 'char-btn w-12 h-12 bg-white rounded-xl shadow-sm border text-xl font-bold flex items-center justify-center';
+                    btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
                     btn.textContent = char;
                     btn.onclick = () => {
                         currentTargetChar = char;
@@ -496,14 +504,30 @@
                         document.getElementById('learning-dashboard').classList.remove('hidden');
                         document.getElementById('current-learning-char').textContent = char;
                         document.getElementById('hanzi-target').innerHTML = '';
-                        HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b' });
+                        HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                         if (isVIP && window.activeApiKey) executeAIFetch(char);
                         else document.getElementById('free-promo-content').classList.remove('hidden');
                     };
                     container.appendChild(btn);
                 });
             });
-            document.getElementById('remove-key-btn').addEventListener('click', () => { localStorage.clear(); location.reload(); });
+            document.getElementById('animate-stroke-btn').addEventListener('click', () => {
+                const svg = document.querySelector('#hanzi-target');
+                if (svg && currentTargetChar) {
+                    svg.innerHTML = '';
+                    const w = HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b' });
+                    w.animateCharacter();
+                }
+            });
+            document.getElementById('quiz-stroke-btn').addEventListener('click', () => {
+                const svg = document.querySelector('#hanzi-target');
+                if (svg && currentTargetChar) {
+                    svg.innerHTML = '';
+                    const w = HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b' });
+                    w.quiz();
+                }
+            });
+            document.getElementById('remove-key-btn').addEventListener('click', () => { if(confirm('Logout?')) { localStorage.clear(); location.reload(); } });
         };
     </script>
 </body>

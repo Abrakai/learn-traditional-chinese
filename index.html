@@ -709,7 +709,6 @@
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         });
 
-        // [PM] 修復點 2：登出後，將使用次數歸零，重新計算 20 次
         window.handleLogout = function() {
             if(confirm('確定要登出嗎？ / Confirm Logout?')) { 
                 localStorage.removeItem('abra_vip_status');
@@ -818,8 +817,8 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    // [PM] 修復點 1：加上反面教材舉例，徹底鎖定破音字的正確詞彙對應。
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音的注音發音」，【絕對不可】混入主要注音或其他發音的詞彙！例如「行」唸「ㄒㄧㄥˋ」只能造「德行」，絕不可造「行為」。(僅限2~4字詞彙，絕勿造句)。4. idioms: 必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    // [PM] 修復點 1：強制加上 (最多6個) 指令，從源頭節省 Token 浪費
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙 (最多6個)。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音的注音發音」，【絕對不可】混入主要注音或其他發音的詞彙！例如「行」唸「ㄒㄧㄥˋ」只能造「德行」，絕不可造「行為」。(僅限2~4字詞彙，絕勿造句，最多6個)。4. idioms: 必須包含「${char}」字，若無則回傳[] (最多6個)。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -853,7 +852,9 @@
                 validPolyphonic.forEach(p => {
                     const wrap = document.createElement('div');
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
+                    // [PM] 修復點 2：加入 slice(0, 6) 終端保險絲，確保畫面排版永不冗長
                     let exHTML = (p.examples || [])
+                        .slice(0, 6)
                         .filter(ex => ex.length <= 6)
                         .map(ex => {
                             const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
@@ -870,13 +871,19 @@
             }
             
             const wordsCont = document.getElementById('words-container');
-            wordsCont.innerHTML = (data.words || []).map(w => {
-                const pureWord = getStr(w).replace(/\([^)]*\)/g, '').trim();
-                return `<span onclick="window.speak('${pureWord}')" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
+            // [PM] 修復點 2：加入 slice(0, 6) 終端保險絲
+            wordsCont.innerHTML = (data.words || [])
+                .slice(0, 6)
+                .map(w => {
+                    const pureWord = getStr(w).replace(/\([^)]*\)/g, '').trim();
+                    return `<span onclick="window.speak('${pureWord}')" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
-            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3);
+            // [PM] 修復點 2：加入 slice(0, 6) 終端保險絲
+            const validIdioms = (data.idioms || [])
+                .filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3)
+                .slice(0, 6);
             
             if (validIdioms.length > 0) {
                 idiomsCont.innerHTML = validIdioms.map(i => `
@@ -931,7 +938,6 @@
                 } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
             });
             
-            // [PM] 修復點 3：點擊拆字後，動態顯示下方的點擊引導文字
             safeBind('split-btn', 'click', () => {
                 const container = document.getElementById('char-container'); container.innerHTML = '';
                 const guide = document.getElementById('click-char-guide');
@@ -962,7 +968,6 @@
                     container.appendChild(btn);
                 });
                 
-                // 動態顯示操作提示
                 if (hasChar && guide) guide.classList.remove('hidden');
                 if (!hasChar && guide) guide.classList.add('hidden');
                 if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">未偵測到繁體中文字 / No Chinese characters detected.</span>';

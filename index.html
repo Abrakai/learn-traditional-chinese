@@ -390,7 +390,7 @@
         </div>
     </div>
 
-    <!-- 法律聲明 Modal (中英對照) -->
+    <!-- 法律聲明 Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
             <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2">
@@ -427,7 +427,6 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 全域輔助變數與 UI -->
     <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
@@ -713,7 +712,7 @@
         window.firebaseApp = { db, appId };
     </script>
 
-    <!-- AI 解析與防呆邏輯 -->
+    <!-- AI 解析與防呆邏輯 (微創修復區) -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
@@ -809,8 +808,8 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    // [PM] 修復點 1：嚴格約束 AI 的 Prompt，強制作出發音對應與禁止空格。
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. polyphonic陣列中的examples「必須100%符合該破音字的發音」，切勿將不同發音的詞彙混入。2. zhuyin(注音)字串中請勿包含半形空格，讓聲調緊貼注音符號。3. examples僅限2~4字詞彙，絕勿造句。4. idioms必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["讀此破音的詞彙"]}], "words": ["造詞"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    // [PM] 微創修復 1：修改 Prompt，絕對禁止 AI 將主要注音的詞彙塞入破音字區
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格)。2. words: 僅限發音為「主要注音」的詞彙。3. polyphonic: 破音字。examples「必須100%符合該破音發音」，【絕對不可】混入其他發音的詞彙！(僅限2~4字詞彙，勿造句)。4. idioms: 必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "破音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -831,7 +830,6 @@
         }
 
         function renderResult(char, data) {
-            // [PM] 靜默去空白：確保主要注音的聲調不分離
             document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
             pb.classList.remove('hidden'); pb.onclick = () => window.speak(char);
@@ -846,16 +844,16 @@
                     const wrap = document.createElement('div');
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
                     let exHTML = (p.examples || [])
-                        .filter(ex => ex.length <= 6) // 防呆：過濾長句
+                        .filter(ex => ex.length <= 6)
                         .map(ex => {
                             const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
                             return `<button type="button" onclick="window.speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
                         }).join('');
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
                     
-                    // [PM] 靜默去空白 + whitespace-nowrap：確保破音字的聲調不分離
                     const pureZhuyin = getStr(p.zhuyin).replace(/\s+/g, '');
-                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
+                    // [PM] 微創修復 2：加入 flex-shrink-0 w-12 text-center，保護注音不被擠壓斷行。
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 w-14 text-center border-r border-purple-100 pr-2 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
                     polyDisp.appendChild(wrap);
                 });
             } else {
@@ -883,7 +881,6 @@
                     </div>
                 `).join('');
             } else {
-                // 自訂成語區塊
                 idiomsCont.innerHTML = `
                     <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center shadow-sm">
                         <p class="text-xs text-slate-600 mb-2 font-bold">目前無包含「${char}」的常見成語。</p>

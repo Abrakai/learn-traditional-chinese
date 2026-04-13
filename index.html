@@ -169,7 +169,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
+                            <button type="button" id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
 
@@ -185,7 +185,7 @@
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             
-                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                            <button type="button" id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">UNLOCK FEATURES / 登入解鎖</span>
                                 <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
@@ -199,6 +199,29 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </section>
+
+        <!-- [PM] 新增：管理員專屬介面 (Admin Console) -->
+        <section id="admin-dashboard-section" class="hidden bg-slate-900 border border-slate-700 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
+            <div class="px-6 py-4 flex items-center justify-between text-white border-b border-slate-700">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i>
+                    <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 系統管理後台</h3>
+                </div>
+                <span class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Secured System</span>
+            </div>
+            <div class="p-6 md:p-10 text-center">
+                <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-4xl text-emerald-400 mx-auto mb-6 shadow-inner">
+                    <i class="ph-fill ph-database"></i>
+                </div>
+                <h4 class="text-xl font-black text-white mb-2">會員資料庫與發證系統</h4>
+                <p class="text-slate-400 text-sm leading-relaxed max-w-md mx-auto mb-8">
+                    執行長您好，本區塊為前端防護與展示介面。<br>為確保會員個資與系統安全，請直接前往 Firebase 官方控制台進行核對與 VIP 開通操作。
+                </p>
+                <a href="https://console.firebase.google.com/" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-8 py-3.5 rounded-xl font-black shadow-lg active:scale-95 transition-all text-sm uppercase tracking-wider">
+                    <i class="ph-bold ph-arrow-square-out text-lg"></i> 前往 Firebase Console
+                </a>
             </div>
         </section>
 
@@ -247,7 +270,6 @@
             </div>
         </section>
 
-        <!-- [PM] 優化點：改寫輸入框提示、按鈕文字，並增加隱藏的引導文字區塊 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -441,22 +463,43 @@
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
         window.isVIP = localStorage.getItem('abra_vip_status') === 'active';
 
+        // [PM] 修復點 2：加入 isAdmin 判定，解鎖 Admin Dashboard 的顯示
         window.updateGlobalUI = function() {
             window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
+            window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
+            
             const qDisplay = document.getElementById('quota-display');
             const vBadge = document.getElementById('vip-status-badge');
             const pBtn = document.getElementById('profile-btn');
             const rBtn = document.getElementById('remove-key-btn');
             const memberSection = document.getElementById('member-center-section');
+            const adminSection = document.getElementById('admin-dashboard-section');
             const apiKeySetup = document.getElementById('api-key-setup');
             const qCount = document.getElementById('quota-count');
             
-            if (window.isVIP) {
+            if (window.isAdmin) {
                 if(qDisplay) qDisplay.classList.add('hidden');
-                if(vBadge) vBadge.classList.remove('hidden');
+                if(vBadge) {
+                    vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="tracking-tighter uppercase">Admin</span>';
+                    vBadge.className = "hidden bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
+                    vBadge.classList.remove('hidden');
+                }
+                if(pBtn) pBtn.classList.add('hidden');
+                if(rBtn) rBtn.classList.remove('hidden');
+                if(memberSection) memberSection.classList.add('hidden');
+                if(adminSection) adminSection.classList.remove('hidden');
+                if(apiKeySetup) apiKeySetup.classList.add('hidden');
+            } else if (window.isVIP) {
+                if(qDisplay) qDisplay.classList.add('hidden');
+                if(vBadge) {
+                    vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>';
+                    vBadge.className = "hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
+                    vBadge.classList.remove('hidden');
+                }
                 if(pBtn) pBtn.classList.remove('hidden');
                 if(rBtn) rBtn.classList.remove('hidden');
                 if(memberSection) memberSection.classList.add('hidden');
+                if(adminSection) adminSection.classList.add('hidden');
                 if(apiKeySetup) apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
             } else {
                 if(qDisplay) qDisplay.classList.remove('hidden');
@@ -464,6 +507,7 @@
                 if(pBtn) pBtn.classList.add('hidden');
                 if(rBtn) rBtn.classList.add('hidden');
                 if(memberSection) memberSection.classList.remove('hidden');
+                if(adminSection) adminSection.classList.add('hidden');
                 if(qCount) qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
             }
         };
@@ -611,7 +655,10 @@
 
             try {
                 if (await verifyAdminCloud(code)) {
-                    window.showToast("Admin Verified. UI access only.");
+                    // [PM] 修復點 2：管理員驗證成功後，啟動 Dashboard
+                    localStorage.setItem('abra_admin_status', 'active');
+                    window.showToast("管理員身分確認 / Admin Verified.");
+                    setTimeout(() => location.reload(), 800);
                 } else if (!email) {
                     window.showToast("請輸入註冊信箱 / Enter Email", true);
                 } else {
@@ -714,6 +761,8 @@
                 localStorage.removeItem('abra_vip_status');
                 localStorage.removeItem('abra_vip_code');
                 localStorage.removeItem('abra_usage_count'); 
+                // [PM] 清除管理員狀態
+                localStorage.removeItem('abra_admin_status');
                 location.reload(); 
             }
         };
@@ -817,7 +866,6 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    // [PM] 修復點 1：強制加上 (最多6個) 指令，從源頭節省 Token 浪費
                     const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙 (最多6個)。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音的注音發音」，【絕對不可】混入主要注音或其他發音的詞彙！例如「行」唸「ㄒㄧㄥˋ」只能造「德行」，絕不可造「行為」。(僅限2~4字詞彙，絕勿造句，最多6個)。4. idioms: 必須包含「${char}」字，若無則回傳[] (最多6個)。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
@@ -852,7 +900,7 @@
                 validPolyphonic.forEach(p => {
                     const wrap = document.createElement('div');
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
-                    // [PM] 修復點 2：加入 slice(0, 6) 終端保險絲，確保畫面排版永不冗長
+                    
                     let exHTML = (p.examples || [])
                         .slice(0, 6)
                         .filter(ex => ex.length <= 6)
@@ -863,7 +911,8 @@
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
                     
                     const pureZhuyin = getStr(p.zhuyin).replace(/\s+/g, '');
-                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 w-14 text-center border-r border-purple-100 pr-2 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
+                    // [PM] 修復點 1：拔除 w-14 固定寬度，改用 min-w-[3.5rem] 與 px-2 彈性展開，徹底解決注音擠壓跑版。
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 min-w-[3.5rem] px-2 text-center border-r border-purple-100 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
                     polyDisp.appendChild(wrap);
                 });
             } else {
@@ -871,7 +920,6 @@
             }
             
             const wordsCont = document.getElementById('words-container');
-            // [PM] 修復點 2：加入 slice(0, 6) 終端保險絲
             wordsCont.innerHTML = (data.words || [])
                 .slice(0, 6)
                 .map(w => {
@@ -880,7 +928,6 @@
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
-            // [PM] 修復點 2：加入 slice(0, 6) 終端保險絲
             const validIdioms = (data.idioms || [])
                 .filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3)
                 .slice(0, 6);

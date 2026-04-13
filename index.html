@@ -31,6 +31,7 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
+        /* 美化滾動條 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -111,7 +112,6 @@
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
 
-                <!-- [PM] 修復點 1：將燈號底色改為深黑 (bg-slate-900)，凸顯紅色燈號 -->
                 <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all">
                     <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
                     <span class="text-[10px] font-black tracking-tight uppercase"><span id="vip-days-left">--</span> Days</span>
@@ -412,75 +412,12 @@
         </section>
     </main>
 
-    <!-- [PM] 新增：會員端專屬系統訊息 Modal -->
-    <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-envelope-open text-blue-500"></i> System Messages / 系統訊息</h3>
-                <button type="button" onclick="window.closeUserMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
-            </div>
-            
-            <div id="user-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-2 mb-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
-                <!-- 對話泡泡將透過 JS 動態生成 -->
-            </div>
-            
-            <div class="pt-2 border-t border-slate-100 flex gap-2">
-                <textarea id="user-chat-input" rows="2" placeholder="目前無客服訊息，待管理員發送後即可回覆..." disabled class="flex-1 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"></textarea>
-                <button type="button" id="user-chat-send-btn" disabled onclick="window.sendUserMsg()" class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 rounded-xl font-bold shadow-md transition-all active:scale-95 flex items-center justify-center">
-                    <i class="ph-bold ph-paper-plane-right text-lg"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 個人設定 Modal -->
-    <div id="profile-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-user-gear text-blue-500"></i> My Profile / 個人設定</h3>
-                <button type="button" onclick="window.closeProfileModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
-            </div>
-            <div class="space-y-4 text-left">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Registered Email / 註冊信箱 (Read-only)</label>
-                    <input type="email" id="profile-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed font-medium">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Display Name / 顯示名稱</label>
-                    <input type="text" id="profile-name" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">New Password / 修改密碼</label>
-                    <div class="relative">
-                        <input type="password" id="profile-pass" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
-                        <button type="button" onclick="window.togglePassVisibility('profile-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest">AI Engine API Key / AI 引擎金鑰</label>
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold font-bold">申請 / Get Key</a>
-                    </div>
-                    <div class="relative">
-                        <input type="password" id="profile-api-key" placeholder="AIzaSy..." readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm font-mono bg-white">
-                        <button type="button" onclick="window.togglePassVisibility('profile-api-key', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
-                    </div>
-                    <p class="text-[9px] text-slate-400 mt-2 leading-relaxed"><i class="ph ph-shield-check"></i> 此金鑰將同步至雲端，更換設備登入後亦可自動載入。<br><span class="italic">Synced to your cloud account securely.</span></p>
-                </div>
-                <div class="pt-4 flex gap-3">
-                    <button type="button" onclick="window.closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wider">Cancel / 取消</button>
-                    <button type="button" id="modal-save-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存設定</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- [PM] 新增：管理員專屬傳訊 Modal -->
+    <!-- [PM] 修改：管理員專屬傳訊 Modal (新增會員姓名顯示) -->
     <div id="admin-msg-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
                 <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold">
-                    <i class="ph-fill ph-chat-circle-dots text-emerald-500"></i> 與 <span id="admin-msg-target" class="text-emerald-600"></span> 傳訊
+                    <i class="ph-fill ph-chat-circle-dots text-emerald-500"></i> 與 <span id="admin-msg-target-name" class="text-emerald-700">載入中...</span><span id="admin-msg-target" class="text-slate-400 text-xs font-mono ml-1"></span> 傳訊
                 </h3>
                 <button type="button" onclick="window.closeAdminMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
@@ -1107,8 +1044,9 @@
         };
 
         window.currentMsgEmail = '';
+        window.currentMsgName = 'User';
 
-        function renderChatBubbles(messages, containerId) {
+        function renderChatBubbles(messages, containerId, userName = 'User') {
             const container = document.getElementById(containerId);
             if(!messages || messages.length === 0) {
                 container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
@@ -1117,10 +1055,11 @@
             container.innerHTML = messages.map(m => {
                 const isUser = m.role === 'user';
                 const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                const senderName = isUser ? userName : 'Admin';
                 return `
                     <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
                         <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${getStr(m.text)}</div>
-                        <span class="text-[9px] text-slate-400 mt-1">${isUser ? 'User' : 'Admin'} • ${timeStr}</span>
+                        <span class="text-[9px] text-slate-400 mt-1">${senderName} • ${timeStr}</span>
                     </div>
                 `;
             }).join('');
@@ -1129,7 +1068,8 @@
 
         window.openAdminMsgModal = async function(emailId) {
             window.currentMsgEmail = emailId;
-            document.getElementById('admin-msg-target').textContent = emailId;
+            document.getElementById('admin-msg-target').textContent = `(${emailId})`;
+            document.getElementById('admin-msg-target-name').textContent = "載入中...";
             document.getElementById('admin-msg-modal').classList.remove('hidden');
             const historyDiv = document.getElementById('admin-chat-history');
             historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
@@ -1139,7 +1079,9 @@
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    renderChatBubbles(data.messages || [], 'admin-chat-history');
+                    window.currentMsgName = data.name || '未命名會員';
+                    document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
+                    renderChatBubbles(data.messages || [], 'admin-chat-history', window.currentMsgName);
                 }
             } catch(e) {
                 window.showToast("訊息載入失敗", true);
@@ -1163,7 +1105,7 @@
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 
                 inputEl.value = '';
-                renderChatBubbles(messages, 'admin-chat-history');
+                renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName);
             } catch(e) {
                 window.showToast("傳送失敗", true);
             } finally {
@@ -1195,7 +1137,8 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     const messages = data.messages || [];
-                    renderChatBubbles(messages, 'user-chat-history');
+                    window.currentUserMsgName = data.name || '我';
+                    renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName);
                     
                     const hasAdminMsg = messages.some(m => m.role === 'admin');
                     if(hasAdminMsg) {
@@ -1232,7 +1175,7 @@
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 
                 inputEl.value = '';
-                renderChatBubbles(messages, 'user-chat-history');
+                renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName || '我');
             } catch(e) {
                 window.showToast("傳送失敗", true);
             } finally {
@@ -1388,9 +1331,10 @@
             resultDiv.innerHTML = '<div class="loader mx-auto border-t-indigo-500"></div>';
             
             try {
+                // [PM] 修復點 1：將 searchCustomIdiom 的 API endpoint 修改為普遍支援且穩定的 gemini-2.0-flash
                 const prompt = `請嚴格解析成語「${input}」的繁體中文教學 JSON格式：{"idiom": "${input}", "meaning": "中文意思", "english": "English context translation"}。若「${input}」不是合理的成語或查無此詞，請務必回傳 {"error": "查無此成語解析"}`;
                 
-                const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${window.activeApiKey}`, {
+                const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
@@ -1438,7 +1382,8 @@
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
 
-            const modelNames = ["gemini-2.0-flash", "gemini-1.5-flash"];
+            // [PM] 修復點 1：擴充「六層裝甲防護」的 AI 模型備援陣列，確保遇到 404 等問題時自動切換。
+            const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.5-flash-lite"];
             let success = false;
             for (const model of modelNames) {
                 try {
@@ -1579,7 +1524,6 @@
                         document.getElementById('learning-dashboard').classList.remove('hidden');
                         document.getElementById('current-learning-char').textContent = char;
                         document.getElementById('hanzi-target').innerHTML = '';
-                        // [PM] 修復點 1：將初次載入設定的 radicalColor: '#ef4444' 同步確保一致。
                         HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                         if (localStorage.getItem('abra_vip_status') === 'active' && window.activeApiKey) {
                             executeAIFetch(char);
@@ -1600,7 +1544,6 @@
                 const svg = document.querySelector('#hanzi-target');
                 if (svg && currentTargetChar) {
                     svg.innerHTML = '';
-                    // [PM] 修復點 2：補回遺漏的 radicalColor 屬性
                     HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).animateCharacter();
                 }
             });
@@ -1609,7 +1552,6 @@
                 const svg = document.querySelector('#hanzi-target');
                 if (svg && currentTargetChar) {
                     svg.innerHTML = '';
-                    // [PM] 修復點 2：補回遺漏的 radicalColor 屬性
                     HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
                 }
             });

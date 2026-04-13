@@ -31,7 +31,6 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
-        /* 美化滾動條 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -61,7 +60,6 @@
         }
         .toast-animate { animation: slideUpFade 3s ease-in-out forwards; }
         
-        /* 訊息對話框的滾動條美化 */
         .chat-scroll::-webkit-scrollbar { width: 4px; }
         .chat-scroll::-webkit-scrollbar-track { background: transparent; }
         .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -69,7 +67,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- Domain Sentinel: 網域鎖定遮罩 -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
@@ -82,25 +79,21 @@
         </p>
     </div>
 
-    <!-- Honey-pot Fields -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1">
         <input type="password" name="fake_password" tabindex="-1">
     </div>
 
-    <!-- 系統全域 Toast -->
     <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all">
         <i id="toast-icon" class="ph-fill text-lg"></i>
         <span id="toast-msg"></span>
     </div>
 
-    <!-- 雲端狀態橫幅 -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">系統連線狀態良好 / System Connection Stable</span>
     </div>
 
-    <!-- Header -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
@@ -141,7 +134,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 會員區 (防自動填入 + 雙語對照) -->
+        <!-- 會員區 -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
@@ -153,7 +146,6 @@
             
             <div class="p-6 md:p-10">
                 <form id="auth-forms-container" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-                    <!-- 註冊區 -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號
@@ -186,7 +178,6 @@
                         </div>
                     </div>
 
-                    <!-- 登入區 -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
@@ -290,7 +281,7 @@
             </div>
         </div>
 
-        <!-- 翻譯與書寫功能 -->
+        <!-- [PM] 翻譯功能 (增加零成本發音按鈕) -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -298,7 +289,10 @@
                 <h2 class="text-lg font-semibold tracking-tight">Translate / 英翻中</h2>
             </div>
             <div class="flex flex-col md:flex-row gap-4">
-                <input type="text" id="eng-input" placeholder="Enter English word... (e.g. Apple) / 輸入英文單字" class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm bg-white">
+                <div class="flex-1 relative flex items-center">
+                    <input type="text" id="eng-input" placeholder="Enter English word... (e.g. Apple) / 輸入英文單字" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white">
+                    <button type="button" onclick="window.speakEng(document.getElementById('eng-input').value)" class="absolute right-2 text-slate-400 hover:text-blue-600 transition-colors p-2 text-xl" title="Listen (English)"><i class="ph-fill ph-speaker-high"></i></button>
+                </div>
                 <button type="button" id="translate-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wider transition-all whitespace-nowrap">
                     <span>Translate / 翻譯</span>
                     <div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div>
@@ -306,6 +300,7 @@
             </div>
         </section>
 
+        <!-- [PM] 學習書寫 (增加零成本發音按鈕與嚴格次數管制) -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -313,7 +308,10 @@
                 <h2 class="text-lg font-semibold tracking-tight">Learn Writing / 漢字書寫學習</h2>
             </div>
             <div class="flex flex-col md:flex-row gap-4 mb-4">
-                <input type="text" id="zh-input" placeholder="貼上繁體中文，或由上方翻譯自動帶入 / Paste Chinese text here..." class="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm bg-white">
+                <div class="flex-1 relative flex items-center">
+                    <input type="text" id="zh-input" placeholder="貼上繁體中文，或由上方翻譯自動帶入 / Paste Chinese text here..." class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm bg-white">
+                    <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-2 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-xl" title="Listen (Chinese)"><i class="ph-fill ph-speaker-high"></i></button>
+                </div>
                 <button type="button" id="split-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 uppercase tracking-wider transition-all whitespace-nowrap">Split / 進行中文拆字</button>
             </div>
             
@@ -754,6 +752,16 @@
             ut.lang = 'zh-TW'; ut.rate = 0.85;
             window.speechSynthesis.speak(ut);
         };
+
+        // [PM] 英文專用語音發音
+        window.speakEng = function(text) {
+            if (!text || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const ut = new SpeechSynthesisUtterance(text.trim());
+            ut.lang = 'en-US';
+            ut.rate = 0.9;
+            window.speechSynthesis.speak(ut);
+        };
         
         window.handleLogout = function() {
             localStorage.removeItem('abra_vip_status');
@@ -893,7 +901,7 @@
                         }
                     }
 
-                    // [PM] 判斷最後一則訊息是否為會員回覆，動態調整按鈕樣式
+                    // 判斷最後一則訊息是否為會員回覆，動態調整按鈕樣式
                     const messages = data.messages || [];
                     const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
                     const hasUnread = lastMsg && lastMsg.role === 'user';
@@ -927,7 +935,7 @@
                     tbody.innerHTML = html;
                 }
 
-                // [PM] 解決 innerHTML 阻擋 onclick 的問題 (Event Delegation)
+                // 解決 innerHTML 阻擋 onclick 的問題 (Event Delegation)
                 if (!window.adminTableBound) {
                     tbody.addEventListener('click', (e) => {
                         const btn = e.target.closest('.admin-action-btn');
@@ -1090,7 +1098,7 @@
         };
 
         window.deleteAdminMember = async function(emailId, btnElement) {
-            // [PM] 改採雙擊防呆機制取代 confirm()，繞過沙盒封鎖
+            // 改採雙擊防呆機制取代 confirm()，繞過沙盒封鎖
             if (btnElement && btnElement.textContent !== '確認刪除') {
                 const originalText = btnElement.textContent;
                 btnElement.textContent = '確認刪除';
@@ -1116,7 +1124,6 @@
             }
         };
 
-        // [PM] 全域舊訊息刪除邏輯
         window.deleteMsg = async function(emailId, index, btnElement) {
             if (btnElement && btnElement.textContent !== '確認?') {
                 const orig = btnElement.textContent;
@@ -1164,7 +1171,6 @@
                 const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                 const senderName = isUser ? userName : 'Admin';
                 
-                // [PM] 判斷訊息是否超過 7 天，並產生刪除按鈕
                 const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
                 const delBtn = isOld ? `<button type="button" data-email="${emailId}" data-index="${index}" class="chat-del-btn text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
                 
@@ -1218,7 +1224,7 @@
                 
                 inputEl.value = '';
                 renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName, emailId);
-                window.loadAdminMembers(); // 更新列表上的閃爍燈號
+                window.loadAdminMembers(); 
             } catch(e) {
                 window.showToast("傳送失敗", true);
             } finally {
@@ -1412,7 +1418,6 @@
             if (el) el.addEventListener(event, handler);
         };
 
-        // [PM] 聊天紀錄專屬事件委派
         const bindChatDel = (containerId) => {
             const el = document.getElementById(containerId);
             if(el && !el.dataset.bound) {
@@ -1604,7 +1609,6 @@
         window.onload = function() {
             if (window.updateGlobalUI) window.updateGlobalUI();
             
-            // 綁定動態生成的刪除按鈕
             bindChatDel('admin-chat-history');
             bindChatDel('user-chat-history');
             
@@ -1632,10 +1636,25 @@
                 } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
             });
             
+            // [PM] 修復點 2：加入中文拆字按鈕的限額鎖定防護
             safeBind('split-btn', 'click', () => {
+                const text = document.getElementById('zh-input').value.trim();
+                if (!text) return;
+                
+                // 執行額度扣除邏輯
+                if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                    window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
+                    return; 
+                }
+                if (!window.isVIP) { 
+                    window.freeUsageCount++; 
+                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                    if(window.updateGlobalUI) window.updateGlobalUI(); 
+                }
+
                 const container = document.getElementById('char-container'); container.innerHTML = '';
                 const guide = document.getElementById('click-char-guide');
-                const chars = document.getElementById('zh-input').value.split('');
+                const chars = text.split('');
                 let hasChar = false;
                 
                 chars.forEach(char => {

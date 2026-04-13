@@ -164,8 +164,7 @@
                                 <div class="flex items-start gap-2">
                                     <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
                                     <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer">
-                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明</button>。<br>
-                                        I have read and agree to the <span class="font-bold">Privacy Policy & Disclaimer</span>.
+                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明 (Privacy Policy & Disclaimer)</button>。
                                     </label>
                                 </div>
                             </div>
@@ -385,7 +384,6 @@
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="window.closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wider">Cancel / 取消</button>
-                    <!-- 儲存按鈕綁定 -->
                     <button type="button" id="modal-save-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存設定</button>
                 </div>
             </div>
@@ -427,9 +425,6 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- ================================================== -->
-    <!-- 腳本 1：全域輔助變數與 UI 介面切換 -->
-    <!-- ================================================== -->
     <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
@@ -489,7 +484,6 @@
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        // 語音去注音化
         const getStr = (val) => (val === null || val === undefined) ? "" : String(val);
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -504,9 +498,6 @@
         };
     </script>
 
-    <!-- ================================================== -->
-    <!-- 腳本 2：Firebase 模組 (負責登入、註冊與資料庫安全綁定) -->
-    <!-- ================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -526,7 +517,6 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
 
-        // Domain Sentinel
         const VALID_DOMAINS = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"];
         const sentinelCheck = () => {
             const host = window.location.hostname;
@@ -597,7 +587,6 @@
             } catch(e) { console.error("Sync Error"); }
         };
         
-        // 登入事件 (加入雙語提示)
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -641,7 +630,6 @@
             }
         });
 
-        // 註冊事件 (加入雙語提示)
         document.getElementById('signup-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const agree = document.getElementById('legal-agree')?.checked;
@@ -678,7 +666,6 @@
             }
         });
 
-        // 開啟 Profile
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
@@ -696,7 +683,6 @@
             } catch(e) { window.showToast("載入失敗 / Load failed", true); }
         };
 
-        // 儲存 Profile
         document.getElementById('modal-save-btn')?.addEventListener('click', async () => {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
@@ -715,7 +701,6 @@
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         });
 
-        // 登出邏輯
         window.handleLogout = function() {
             if(confirm('確定要登出嗎？ / Confirm Logout?')) { 
                 localStorage.removeItem('abra_vip_status');
@@ -723,17 +708,13 @@
                 location.reload(); 
             }
         };
-
+        window.firebaseApp = { db, appId };
     </script>
 
-    <!-- ================================================== -->
-    <!-- 腳本 3：AI 解析與 Canvas 功能 (完全不依賴 onclick) -->
-    <!-- ================================================== -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
 
-        // 安全綁定器
         const safeBind = (id, event, handler) => {
             const el = document.getElementById(id);
             if (el) el.addEventListener(event, handler);
@@ -779,7 +760,8 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    const prompt = `針對繁體中文字「${char}」提供台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["代表語詞1"]}], "words": ["造詞1"], "idioms": [{"idiom": "成語", "meaning": "中文意思", "english": "Context translation"}]}`;
+                    // [PM] 修復點 1：嚴格定義 Prompt 杜絕假成語與字義解釋，強制給出「實際造詞」
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["破音字實際造詞(絕勿填解釋)"]}], "words": ["造詞1"], "idioms": [{"idiom": "四字成語(需包含此字，非四字成語勿填)", "meaning": "中文意思", "english": "Context"}]}`;
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -799,7 +781,7 @@
         }
 
         function renderResult(char, data) {
-            document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
+            document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin);
             const pb = document.getElementById('play-char-btn');
             pb.classList.remove('hidden'); pb.onclick = () => window.speak(char);
             
@@ -808,30 +790,32 @@
                 const wrap = document.createElement('div');
                 wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm';
                 let exHTML = (p.examples || []).map(ex => {
-                    const pureEx = (ex || "").replace(/\([^)]*\)/g, '').trim();
+                    const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
                     return `<button onclick="window.speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
                 }).join('');
-                wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${p.zhuyin || ""}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
+                wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${getStr(p.zhuyin)}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
                 polyDisp.appendChild(wrap);
             });
             
             const wordsCont = document.getElementById('words-container');
             wordsCont.innerHTML = (data.words || []).map(w => {
-                const pureWord = (w || "").replace(/\([^)]*\)/g, '').trim();
+                const pureWord = getStr(w).replace(/\([^)]*\)/g, '').trim();
                 return `<span onclick="window.speak('${pureWord}')" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
-            idiomsCont.innerHTML = (data.idioms || []).map(i => `
+            // [PM] 修復點 2：加入字數過濾器，杜絕非成語之兩字詞彙
+            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.length >= 3);
+            idiomsCont.innerHTML = validIdioms.length > 0 ? validIdioms.map(i => `
                 <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm text-left hover:bg-white transition-all">
                     <div class="flex-1 pr-6">
-                        <div class="text-slate-800 text-base font-black tracking-tight font-bold">${i.idiom || ""}</div>
-                        <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${i.meaning || ""}</div>
-                        <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${i.english || "Translation loading..."}</div>
+                        <div class="text-slate-800 text-base font-black tracking-tight font-bold">${getStr(i.idiom)}</div>
+                        <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${getStr(i.meaning)}</div>
+                        <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${getStr(i.english) || "Translation loading..."}</div>
                     </div>
-                    <button onclick="window.speak('${i.idiom || ""}')" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
+                    <button onclick="window.speak('${getStr(i.idiom)}')" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
                 </div>
-            `).join('');
+            `).join('') : '<p class="text-xs text-slate-400 italic">此字無常見成語 / No common idioms found.</p>';
         }
 
         window.onload = function() {

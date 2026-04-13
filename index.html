@@ -600,9 +600,7 @@
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
         window.isVIP = localStorage.getItem('abra_vip_status') === 'active';
 
-        // [PM] 修復點 2：精準重構 updateGlobalUI，徹底隔離 isLoggedIn 與 isVIP 的介面邏輯
         window.updateGlobalUI = function() {
-            const isLoggedIn = !!localStorage.getItem('abra_vip_code');
             window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
             window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
             
@@ -615,19 +613,16 @@
             const adminSection = document.getElementById('admin-dashboard-section');
             const apiKeySetup = document.getElementById('api-key-setup');
             const qCount = document.getElementById('quota-count');
-            const expiryDisplay = document.getElementById('vip-expiry-display');
             
             const badgeTranslate = document.getElementById('badge-translate');
             const badgeSelect = document.getElementById('badge-select');
             
-            // 基礎重置：全數隱藏，再依身分解鎖
             if(adminSection) adminSection.classList.add('hidden');
             if(memberSection) memberSection.classList.remove('hidden');
             if(pBtn) pBtn.classList.add('hidden');
             if(mBtn) mBtn.classList.add('hidden');
             if(rBtn) rBtn.classList.add('hidden');
             if(apiKeySetup) apiKeySetup.classList.add('hidden');
-            if(expiryDisplay) expiryDisplay.classList.add('hidden');
             
             if (window.isAdmin) {
                 if(qDisplay) qDisplay.classList.add('hidden');
@@ -641,8 +636,7 @@
                 if(adminSection) adminSection.classList.remove('hidden');
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
-            } else if (isLoggedIn) {
-                // 已登入會員（不論是否繳費過期）皆隱藏首頁註冊表單，顯示 Profile 按鈕
+            } else if (localStorage.getItem('abra_vip_code')) {
                 if(memberSection) memberSection.classList.add('hidden');
                 if(pBtn) pBtn.classList.remove('hidden');
                 if(mBtn) mBtn.classList.remove('hidden');
@@ -656,21 +650,17 @@
                         vBadge.classList.remove('hidden');
                     }
                     if(apiKeySetup) apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
-                    if(expiryDisplay) expiryDisplay.classList.remove('hidden');
                 } else {
-                    // 已登入，但未繳費或已過期：顯示扣打限制，隱藏 VIP 徽章
                     if(qDisplay) qDisplay.classList.remove('hidden');
                     if(vBadge) vBadge.classList.add('hidden');
                     if(qCount) qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 }
             } else {
-                // 完全未登入之訪客
                 if(qDisplay) qDisplay.classList.remove('hidden');
                 if(vBadge) vBadge.classList.add('hidden');
                 if(qCount) qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
             }
             
-            // 下方翻譯與拆字區塊的專屬徽章切換
             if (window.isAdmin || window.isVIP) {
                 if(badgeTranslate) { badgeTranslate.textContent = 'VIP UNLIMITED'; badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
                 if(badgeSelect) { badgeSelect.textContent = 'VIP UNLIMITED'; badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
@@ -740,7 +730,7 @@
                         document.getElementById('profile-pass').value = user.password || '';
                     }
                 }
-            } catch(e) { /* 靜默處理雲端載入錯誤 */ }
+            } catch(e) {}
         };
 
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
@@ -790,7 +780,7 @@
             }
         };
 
-        // [PM] 修復點 1：全域 Document 層級事件委派，徹底解決 Admin 按鈕在 GitHub Pages 上因重繪而失效的問題
+        // [PM] 全域事件委派：確保 Admin 按鈕永遠可被點擊
         document.addEventListener('click', (e) => {
             const adminBtn = e.target.closest('.admin-action-btn');
             if (adminBtn) {
@@ -868,7 +858,6 @@
                     const daysEl = document.getElementById('vip-days-left');
                     const lightEl = document.getElementById('vip-status-light');
 
-                    // [PM] 修復點 2：在背景同步時，精準判定是否過期，如果過期或無資料，強制降級。
                     if (data.expiryDate) {
                         const diff = new Date(data.expiryDate).getTime() - Date.now();
                         const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -1349,7 +1338,6 @@
 
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
 
-        // [PM] 登入邏輯重構：登入當下精準判定狀態，杜絕未開通卻取得 VIP 身分的漏洞
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -1756,10 +1744,6 @@
             });
             
             safeBind('ai-retry-btn', 'click', () => currentTargetChar && executeAIFetch(currentTargetChar));
-            
-            safeBind('msg-btn', 'click', window.handleMsgBtnClick);
-            safeBind('profile-btn', 'click', window.openProfileModal);
-            safeBind('remove-key-btn', 'click', window.handleLogout);
         };
     </script>
 </body>

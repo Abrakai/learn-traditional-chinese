@@ -115,7 +115,8 @@
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
                 </div>
 
-                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
+                <!-- [PM] 修改：讓信箱按鈕綁定 handleMsgBtnClick，支援 Admin 模式 -->
+                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
@@ -123,10 +124,10 @@
                     </span>
                 </button>
 
-                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
+                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Profile / 個人設定</span>
                 </button>
-                <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm">
+                <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleLogout()">
                     <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
                 </button>
             </div>
@@ -174,7 +175,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" id="signup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
+                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
 
@@ -189,7 +190,7 @@
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             
-                            <button type="button" id="login-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">UNLOCK FEATURES / 登入解鎖</span>
                                 <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
@@ -417,7 +418,7 @@
             </div>
             
             <div id="user-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-2 mb-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
-                <!-- 對話泡泡 -->
+                <!-- 對話泡泡將透過 JS 動態生成 -->
             </div>
             
             <div class="pt-2 border-t border-slate-100 flex gap-2">
@@ -626,7 +627,7 @@
                     vBadge.classList.remove('hidden');
                 }
                 if(pBtn) pBtn.classList.add('hidden');
-                if(mBtn) mBtn.classList.add('hidden'); 
+                if(mBtn) mBtn.classList.remove('hidden'); // [PM] 開放 Admin 全域信箱按鈕
                 if(rBtn) rBtn.classList.remove('hidden');
                 if(memberSection) memberSection.classList.add('hidden');
                 if(adminSection) adminSection.classList.remove('hidden');
@@ -767,6 +768,16 @@
             localStorage.removeItem('abra_admin_status');
             location.reload(); 
         };
+
+        // [PM] 新增：全域信箱按鈕共用處理函數
+        window.handleMsgBtnClick = function() {
+            if (window.isAdmin) {
+                window.showToast("請由下方會員列表點擊「新回覆」查看 / Scroll down to check replies", false);
+                document.getElementById('admin-dashboard-section')?.scrollIntoView({behavior: 'smooth'});
+            } else {
+                window.openUserMsgModal();
+            }
+        };
     </script>
 
     <!-- Firebase 模組 -->
@@ -880,6 +891,8 @@
             try {
                 const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
                 let html = '';
+                let globalUnread = false; // [PM] 全域未讀狀態指針
+
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const emailId = docSnap.id;
@@ -903,11 +916,16 @@
 
                     const messages = data.messages || [];
                     const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-                    const hasUnread = lastMsg && lastMsg.role === 'user';
+                    
+                    // [PM] 修復點 3：管理員已讀狀態同步驗證
+                    const adminReadCount = parseInt(localStorage.getItem(`admin_read_${emailId}`) || '0', 10);
+                    const hasUnread = lastMsg && lastMsg.role === 'user' && messages.length > adminReadCount;
+                    if (hasUnread) globalUnread = true; // 只要有一個會員有未讀，全域即亮燈
+
                     const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:text-blue-800";
                     const msgBtnText = hasUnread ? "新回覆" : "傳訊";
 
-                    // [PM] 修復點：捨棄 Event Delegation，直接綁定絕對 onclick，防範沙盒渲染阻擋
+                    // [PM] 補回 Event Delegation 必備的 data-action 與 class
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -921,9 +939,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <button type="button" onclick="window.openAdminMsgModal('${emailId}')" class="font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
-                                <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
-                                <button type="button" onclick="window.deleteAdminMember('${emailId}', this)" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
+                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
+                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
+                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
                             </td>
                         </tr>
                     `;
@@ -933,6 +951,29 @@
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">目前尚無會員資料</td></tr>';
                 } else {
                     tbody.innerHTML = html;
+                }
+
+                // [PM] 管理員全域信箱紅點設定
+                if (window.isAdmin) {
+                    const msgDot = document.getElementById('msg-dot');
+                    if (msgDot) {
+                        if (globalUnread) msgDot.classList.remove('hidden');
+                        else msgDot.classList.add('hidden');
+                    }
+                }
+
+                // 解決 innerHTML 阻擋 onclick 的問題 (Event Delegation)
+                if (!window.adminTableBound) {
+                    tbody.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.admin-action-btn');
+                        if (!btn) return;
+                        const action = btn.getAttribute('data-action');
+                        const id = btn.getAttribute('data-id');
+                        if (action === 'admin-msg') window.openAdminMsgModal(id);
+                        if (action === 'admin-edit') window.openAdminModal(id);
+                        if (action === 'admin-delete') window.deleteAdminMember(id, btn);
+                    });
+                    window.adminTableBound = true;
                 }
             } catch(e) {
                 console.error(e);
@@ -1084,6 +1125,7 @@
         };
 
         window.deleteAdminMember = async function(emailId, btnElement) {
+            // 雙擊防呆機制
             if (btnElement && btnElement.textContent !== '確認刪除') {
                 const originalText = btnElement.textContent;
                 btnElement.textContent = '確認刪除';
@@ -1184,7 +1226,13 @@
                     const data = docSnap.data();
                     window.currentMsgName = data.name || '未命名會員';
                     document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
-                    renderChatBubbles(data.messages || [], 'admin-chat-history', window.currentMsgName, emailId);
+                    
+                    const messages = data.messages || [];
+                    renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName, emailId);
+                    
+                    // [PM] 管理員已讀標記：開啟聊天視窗即將數量寫入本機
+                    localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                    window.loadAdminMembers(); // 重新整理表格與全域燈號
                 }
             } catch(e) {
                 window.showToast("訊息載入失敗", true);
@@ -1206,6 +1254,9 @@
                 
                 messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
                 await setDoc(docRef, { messages: messages }, { merge: true });
+                
+                // [PM] 發送後同時更新自己的已讀數量
+                localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
                 
                 inputEl.value = '';
                 renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName, emailId);
@@ -1376,7 +1427,7 @@
             }
         });
 
-        window.saveProfileInfo = async function() {
+        document.getElementById('modal-save-btn')?.addEventListener('click', async () => {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
             const newPass = document.getElementById('profile-pass').value.trim();
@@ -1392,7 +1443,7 @@
                 window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
-        };
+        });
 
         window.firebaseApp = { db, appId };
     </script>
@@ -1612,7 +1663,7 @@
                 if (!word) return;
                 document.getElementById('translate-loader').classList.remove('hidden');
                 try {
-                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
                     const trans = (d.responseData.translatedText || "").replace(/[^\u4e00-\u9fa5]/g, '');
                     document.getElementById('zh-input').value = trans;
@@ -1693,7 +1744,8 @@
             
             safeBind('ai-retry-btn', 'click', () => currentTargetChar && executeAIFetch(currentTargetChar));
             
-            safeBind('msg-btn', 'click', window.openUserMsgModal);
+            // [PM] 統一以 safeBind 綁定 onclick，包含全域訊息與設定按鈕
+            safeBind('msg-btn', 'click', window.handleMsgBtnClick);
             safeBind('profile-btn', 'click', window.openProfileModal);
             safeBind('remove-key-btn', 'click', window.handleLogout);
         };

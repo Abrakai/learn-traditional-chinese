@@ -662,7 +662,6 @@
                 if(qCount) qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
             }
             
-            // [PM] 動態更新功能區塊的右上角標籤文字
             if (window.isAdmin || window.isVIP) {
                 if(badgeTranslate) { badgeTranslate.textContent = 'VIP UNLIMITED'; badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
                 if(badgeSelect) { badgeSelect.textContent = 'VIP UNLIMITED'; badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
@@ -713,7 +712,6 @@
         window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
         
-        // [PM] 修復點 1：提早展開 Profile Modal，讓使用者點擊瞬間就看到視窗，消除「點擊無反應」的錯覺
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
@@ -757,7 +755,6 @@
             window.speechSynthesis.speak(ut);
         };
         
-        // [PM] 修復點 1：拔除 confirm 彈窗，無痛即時登出，徹底繞過 Canvas 沙盒攔截
         window.handleLogout = function() {
             localStorage.removeItem('abra_vip_status');
             localStorage.removeItem('abra_vip_code');
@@ -787,7 +784,6 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         
-        // 將 db 暴露給全域以供 Profile modal 背景拉取資料
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
 
@@ -909,9 +905,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <button type="button" onclick="window.openAdminMsgModal('${emailId}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg mr-1 transition-all">傳訊</button>
-                                <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
-                                <button type="button" onclick="window.deleteAdminMember('${emailId}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
+                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg mr-1 transition-all">傳訊</button>
+                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
+                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
                             </td>
                         </tr>
                     `;
@@ -921,6 +917,19 @@
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">目前尚無會員資料</td></tr>';
                 } else {
                     tbody.innerHTML = html;
+                }
+
+                if (!window.adminTableBound) {
+                    tbody.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.admin-action-btn');
+                        if (!btn) return;
+                        const action = btn.getAttribute('data-action');
+                        const id = btn.getAttribute('data-id');
+                        if (action === 'admin-msg') window.openAdminMsgModal(id);
+                        if (action === 'admin-edit') window.openAdminModal(id);
+                        if (action === 'admin-delete') window.deleteAdminMember(id, btn);
+                    });
+                    window.adminTableBound = true;
                 }
             } catch(e) {
                 console.error(e);
@@ -1071,18 +1080,29 @@
             }
         };
 
-        window.deleteAdminMember = async function(emailId) {
-            // 在 Canvas 中如果 confirm 被擋下，這段可能無作用。但因為是管理員行為，先保留供正式網域使用。
-            // 也可以實作自訂 Modal 以策安全，但目前先不增加過多程式碼。
-            if(confirm(`警告：確定要刪除會員 ${emailId} 嗎？此操作無法復原。`)) {
-                try {
-                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                    await deleteDoc(docRef);
-                    window.showToast("會員已成功刪除");
-                    window.loadAdminMembers();
-                } catch(e) {
-                    window.showToast("刪除失敗", true);
-                }
+        window.deleteAdminMember = async function(emailId, btnElement) {
+            if (btnElement && btnElement.textContent !== '確認刪除') {
+                const originalText = btnElement.textContent;
+                btnElement.textContent = '確認刪除';
+                btnElement.classList.replace('bg-red-50', 'bg-red-600');
+                btnElement.classList.replace('text-red-600', 'text-white');
+                setTimeout(() => {
+                    if (btnElement && btnElement.parentNode) {
+                        btnElement.textContent = originalText;
+                        btnElement.classList.replace('bg-red-600', 'bg-red-50');
+                        btnElement.classList.replace('text-white', 'text-red-600');
+                    }
+                }, 3000);
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                await deleteDoc(docRef);
+                window.showToast("會員已成功刪除");
+                window.loadAdminMembers();
+            } catch(e) {
+                window.showToast("刪除失敗", true);
             }
         };
 
@@ -1559,6 +1579,7 @@
                         document.getElementById('learning-dashboard').classList.remove('hidden');
                         document.getElementById('current-learning-char').textContent = char;
                         document.getElementById('hanzi-target').innerHTML = '';
+                        // [PM] 修復點 1：將初次載入設定的 radicalColor: '#ef4444' 同步確保一致。
                         HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                         if (localStorage.getItem('abra_vip_status') === 'active' && window.activeApiKey) {
                             executeAIFetch(char);
@@ -1579,7 +1600,8 @@
                 const svg = document.querySelector('#hanzi-target');
                 if (svg && currentTargetChar) {
                     svg.innerHTML = '';
-                    HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b' }).animateCharacter();
+                    // [PM] 修復點 2：補回遺漏的 radicalColor 屬性
+                    HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).animateCharacter();
                 }
             });
             
@@ -1587,13 +1609,14 @@
                 const svg = document.querySelector('#hanzi-target');
                 if (svg && currentTargetChar) {
                     svg.innerHTML = '';
-                    HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
+                    // [PM] 修復點 2：補回遺漏的 radicalColor 屬性
+                    HanziWriter.create('hanzi-target', currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
                 }
             });
             
             safeBind('ai-retry-btn', 'click', () => currentTargetChar && executeAIFetch(currentTargetChar));
             
-            // [PM] 雙重保險防呆：防止 onclick 失效時無法觸發
+            safeBind('msg-btn', 'click', window.openUserMsgModal);
             safeBind('profile-btn', 'click', window.openProfileModal);
             safeBind('remove-key-btn', 'click', window.handleLogout);
         };

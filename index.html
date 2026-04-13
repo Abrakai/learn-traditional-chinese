@@ -112,7 +112,6 @@
                 <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-red-700/80 hover:bg-red-800 border border-red-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Profile</span>
                 </button>
-                <!-- [PM] 整合執行長的自訂文字：登出？ -->
                 <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-red-700/80 hover:bg-red-800 border border-red-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleLogout()">
                     <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">登出？</span>
                 </button>
@@ -160,7 +159,6 @@
                                 </div>
                             </div>
 
-                            <!-- [PM] 強制指派 type="button" 與 onclick 絕對綁定 -->
                             <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase">Create Account 建立帳號</button>
                         </div>
                     </div>
@@ -176,7 +174,6 @@
                                 <input type="password" id="login-vip-code" placeholder="Enter Password" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase shadow-sm bg-white">
                                 <button type="button" onclick="togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
-                            <!-- [PM] 強制指派 type="button" 與 onclick 絕對綁定 -->
                             <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase flex items-center justify-center gap-2">
                                 <span id="login-btn-text">Unlock Features 登入解鎖</span>
                                 <div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
@@ -369,7 +366,7 @@
         </div>
     </div>
 
-    <!-- 法律聲明 Modal -->
+    <!-- 法律聲明 Modal (中英對照) -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
             <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2"><i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer</h3>
@@ -497,7 +494,7 @@
         };
 
         // ==========================================
-        // [PM] 登入與註冊之絕對綁定邏輯 (Absolute Binding)
+        // [PM] 補回遺失的絕對綁定登入與註冊邏輯
         // ==========================================
         window.handleLogin = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -571,6 +568,10 @@
             }
         };
 
+        window.handleLogout = function() {
+            if(confirm('確定要登出嗎？')) { localStorage.clear(); location.reload(); }
+        };
+
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("請先登入", true); return; }
@@ -606,19 +607,14 @@
             } catch(e) { window.showToast("更新失敗", true); }
         };
 
-        window.handleLogout = function() {
-            if(confirm('確定要登出嗎？')) { localStorage.clear(); location.reload(); }
-        };
-
         window.closeProfileModal = () => document.getElementById('profile-modal').classList.add('hidden');
         window.openLegalModal = () => document.getElementById('legal-modal').classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
-        window.scrollToAuth = () => { document.getElementById('member-center-section').classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
         window.firebaseApp = { db, appId };
     </script>
 
-    <!-- Core Logic: AI Engine & Safe Event Listeners -->
+    <!-- Core Logic: Voice, Retry & AI Dispatcher -->
     <script>
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
@@ -634,19 +630,22 @@
             isVIP = (status === 'active');
             const qDisplay = document.getElementById('quota-display');
             const vBadge = document.getElementById('vip-status-badge');
+            const pBtn = document.getElementById('profile-btn');
+            const rBtn = document.getElementById('remove-key-btn');
             
             if (isVIP) {
                 if(qDisplay) qDisplay.classList.add('hidden');
                 if(vBadge) vBadge.classList.remove('hidden');
-                const mcs = document.getElementById('member-center-section');
-                if(mcs) mcs.classList.add('hidden');
-                const aks = document.getElementById('api-key-setup');
-                if(aks) aks.classList.toggle('hidden', !!window.activeApiKey);
+                if(pBtn) pBtn.classList.remove('hidden');
+                if(rBtn) rBtn.classList.remove('hidden');
+                document.getElementById('member-center-section').classList.add('hidden');
+                document.getElementById('api-key-setup').classList.toggle('hidden', !!window.activeApiKey);
             } else {
                 if(qDisplay) qDisplay.classList.remove('hidden');
                 if(vBadge) vBadge.classList.add('hidden');
-                const qc = document.getElementById('quota-count');
-                if(qc) qc.textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`;
+                if(pBtn) pBtn.classList.add('hidden');
+                if(rBtn) rBtn.classList.add('hidden');
+                document.getElementById('quota-count').textContent = `${MAX_FREE_USES - freeUsageCount}/${MAX_FREE_USES}`;
             }
         };
 
@@ -677,7 +676,7 @@
                 try {
                     const res = await fetch(url, options);
                     if (res.status === 429 && i < maxRetries) {
-                        document.getElementById('ai-error-title').textContent = "AI 引擎冷卻中";
+                        document.getElementById('ai-error-title').textContent = "AI 引擎休息中";
                         document.getElementById('ai-error-debug').textContent = `觸發頻率限制。系統將於 ${delays[i]/1000} 秒後自動重試...`;
                         document.getElementById('ai-error-panel').classList.remove('hidden');
                         await new Promise(r => setTimeout(r, delays[i]));
@@ -763,15 +762,14 @@
             `).join('');
         }
 
-        // [PM] 防呆事件綁定機制
-        const safeBind = (id, event, handler) => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener(event, handler);
-        };
-
         window.onload = function() {
             window.updateGlobalUI();
             
+            const safeBind = (id, event, handler) => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener(event, handler);
+            };
+
             safeBind('save-key-btn', 'click', () => {
                 const key = document.getElementById('custom-api-key').value.trim();
                 if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }

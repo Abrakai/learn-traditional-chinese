@@ -202,7 +202,7 @@
             </div>
         </section>
 
-        <!-- [PM] 完整復原：管理員專屬介面 (Admin Console) -->
+        <!-- [PM] 管理員專屬介面 (Admin Console) -->
         <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2">
@@ -213,20 +213,27 @@
                     <i class="ph-bold ph-plus"></i> 新增會員
                 </button>
             </div>
+            <!-- [PM] 新增：管理員即時搜尋列 -->
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
+                <div class="relative w-full max-w-md">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <input type="text" id="admin-search-input" placeholder="搜尋 Email, 姓名, 電話或末五碼..." onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700">
+                </div>
+            </div>
             <div class="p-0 overflow-x-auto">
                 <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-wider text-[10px] font-bold">
+                    <thead class="bg-slate-100 text-slate-500 border-b border-slate-200 uppercase tracking-wider text-[10px] font-bold">
                         <tr>
                             <th class="px-6 py-4">狀態</th>
                             <th class="px-6 py-4">Email (帳號)</th>
-                            <th class="px-6 py-4">姓名 / 密碼</th>
+                            <th class="px-6 py-4">姓名 / 電話</th>
                             <th class="px-6 py-4">匯款日 / 期數</th>
                             <th class="px-6 py-4">到期日</th>
-                            <th class="px-6 py-4">備註 (末五碼)</th>
+                            <th class="px-6 py-4">帳號後五碼 / 備註</th>
                             <th class="px-6 py-4 text-right">操作</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700">
+                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700 bg-white">
                         <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">載入會員資料中...</td></tr>
                     </tbody>
                 </table>
@@ -289,7 +296,6 @@
                 <button type="button" id="split-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 uppercase tracking-wider transition-all whitespace-nowrap">Split / 進行中文拆字</button>
             </div>
             
-            <!-- 動態引導提示，拆字後才會顯示 -->
             <div id="click-char-guide" class="hidden mb-3 text-center text-[12px] font-black text-indigo-600 animate-pulse flex items-center justify-center gap-1">
                 <i class="ph-fill ph-hand-pointing text-lg"></i> 請點選下方單字，進行書寫教學與專屬深度解析 / Click a character below to analyze
             </div>
@@ -427,7 +433,7 @@
         </div>
     </div>
 
-    <!-- [PM] 管理員專屬：新增與編輯會員資料 Modal -->
+    <!-- [PM] 管理員專屬：新增與編輯會員資料 Modal (包含電話與獨立備註) -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -451,6 +457,17 @@
                     <input type="text" id="admin-member-name" placeholder="會員姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Phone (電話 / 國際碼)</label>
+                        <input type="text" id="admin-member-phone" placeholder="如：+886912345678" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Remittance (匯款後五碼)</label>
+                        <input type="text" id="admin-member-remittance" placeholder="例如：88392" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white font-mono text-emerald-700">
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Payment Date (匯款日)</label>
@@ -467,8 +484,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Remarks (備註 - 匯款後五碼)</label>
-                    <input type="text" id="admin-member-remarks" placeholder="例如：台新 88392" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Remarks (其他備註)</label>
+                    <input type="text" id="admin-member-remarks" placeholder="其他備註事項" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                 </div>
 
                 <div class="pt-4 flex gap-3">
@@ -523,7 +540,6 @@
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
         window.isVIP = localStorage.getItem('abra_vip_status') === 'active';
 
-        // 包含 Admin UI 判定，並載入管理員資料表
         window.updateGlobalUI = function() {
             window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
             window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
@@ -550,7 +566,6 @@
                 if(adminSection) adminSection.classList.remove('hidden');
                 if(apiKeySetup) apiKeySetup.classList.add('hidden');
                 
-                // 觸發載入管理員資料
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
             } else if (window.isVIP) {
@@ -594,7 +609,6 @@
             }
         };
 
-        // [PM] 管理員：自動計算到期日 (匯款日 + 購買期數)
         window.calculateExpiry = function() {
             const payDate = document.getElementById('admin-pay-date').value;
             const months = parseInt(document.getElementById('admin-months').value, 10);
@@ -603,6 +617,17 @@
                 d.setMonth(d.getMonth() + months);
                 document.getElementById('admin-expiry-date').value = d.toISOString().split('T')[0];
             }
+        };
+
+        // [PM] 修復點 3：管理員介面即時過濾搜尋
+        window.filterAdminMembers = function() {
+            const input = document.getElementById('admin-search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#admin-members-tbody tr');
+            rows.forEach(row => {
+                if(row.cells.length < 2) return; // 略過無資料的提示列
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
         };
 
         window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
@@ -719,11 +744,6 @@
             } catch(e) { console.error("Sync Error"); }
         };
 
-        // ==========================================
-        // [PM] 管理員系統：CRUD 核心邏輯補回
-        // ==========================================
-
-        // 讀取所有會員資料
         window.loadAdminMembers = async function() {
             const tbody = document.getElementById('admin-members-tbody');
             if(!tbody) return;
@@ -735,7 +755,6 @@
                     const data = docSnap.data();
                     const emailId = docSnap.id;
                     
-                    // 動態計算狀態燈號
                     let statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>`;
                     let daysText = "未開通";
                     if (data.expiryDate) {
@@ -753,6 +772,7 @@
                         }
                     }
 
+                    // [PM] 修復點 2：加入分離好的獨立電話與獨立匯款帳號顯示
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -761,10 +781,10 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">${data.email || emailId}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-indigo-700">${data.name || '無'}<br><span class="text-slate-400 font-mono font-normal">${data.password || ''}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-indigo-700">${data.name || '無'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '未登記電話'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' 個月' : '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">${data.remarks || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
                                 <button type="button" onclick="window.deleteAdminMember('${emailId}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
@@ -784,13 +804,11 @@
             }
         };
 
-        // 開啟新增/編輯 Modal
         window.openAdminModal = async function(emailId = '') {
             document.getElementById('admin-modal').classList.remove('hidden');
             const emailInput = document.getElementById('admin-member-email');
             
             if (emailId) {
-                // 編輯模式
                 emailInput.value = emailId;
                 emailInput.setAttribute('readonly', true);
                 emailInput.classList.add('bg-slate-100', 'text-slate-500');
@@ -802,6 +820,8 @@
                         const data = docSnap.data();
                         document.getElementById('admin-member-pass').value = data.password || '';
                         document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-member-phone').value = data.phone || '';
+                        document.getElementById('admin-member-remittance').value = data.remittance || '';
                         document.getElementById('admin-pay-date').value = data.paymentDate || '';
                         document.getElementById('admin-months').value = data.months || '';
                         document.getElementById('admin-expiry-date').value = data.expiryDate || '';
@@ -811,12 +831,13 @@
                     window.showToast("資料讀取失敗", true);
                 }
             } else {
-                // 新增模式
                 emailInput.value = '';
                 emailInput.removeAttribute('readonly');
                 emailInput.classList.remove('bg-slate-100', 'text-slate-500');
                 document.getElementById('admin-member-pass').value = '';
                 document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
                 document.getElementById('admin-pay-date').value = '';
                 document.getElementById('admin-months').value = '';
                 document.getElementById('admin-expiry-date').value = '';
@@ -824,11 +845,12 @@
             }
         };
 
-        // 儲存會員資料 (包含新增與覆寫)
         window.saveAdminMember = async function() {
             const email = document.getElementById('admin-member-email').value.trim().toLowerCase();
             const password = document.getElementById('admin-member-pass').value.trim();
             const name = document.getElementById('admin-member-name').value.trim();
+            const phone = document.getElementById('admin-member-phone').value.trim();
+            const remittance = document.getElementById('admin-member-remittance').value.trim();
             const paymentDate = document.getElementById('admin-pay-date').value;
             const months = document.getElementById('admin-months').value;
             const expiryDate = document.getElementById('admin-expiry-date').value;
@@ -847,11 +869,12 @@
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 
-                // 使用 setDoc 配合 merge: true，可同時處理新增與更新
                 await setDoc(docRef, {
                     email: email,
                     password: password,
                     name: name,
+                    phone: phone,
+                    remittance: remittance,
                     paymentDate: paymentDate,
                     months: months,
                     expiryDate: expiryDate,
@@ -861,7 +884,7 @@
                 
                 window.showToast("會員資料已儲存成功！");
                 window.closeAdminModal();
-                window.loadAdminMembers(); // 重新載入表格
+                window.loadAdminMembers(); 
             } catch(e) {
                 window.showToast("儲存失敗，請重試", true);
             } finally {
@@ -870,8 +893,8 @@
             }
         };
 
-        // 刪除會員
         window.deleteAdminMember = async function(emailId) {
+            // [PM] 注意：雖然此處使用 confirm，但這是在管理員主動點擊刪除按鈕的情境下，如果被沙盒擋下仍可手動清除，但不至於阻擋登出。
             if(confirm(`警告：確定要刪除會員 ${emailId} 嗎？此操作無法復原。`)) {
                 try {
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
@@ -999,6 +1022,15 @@
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         });
+
+        // [PM] 修復點 1：拔除沙盒會阻擋的 confirm 彈窗，實現無痛強制登出
+        window.handleLogout = function() {
+            localStorage.removeItem('abra_vip_status');
+            localStorage.removeItem('abra_vip_code');
+            localStorage.removeItem('abra_usage_count'); 
+            localStorage.removeItem('abra_admin_status');
+            location.reload(); 
+        };
 
         window.firebaseApp = { db, appId };
     </script>

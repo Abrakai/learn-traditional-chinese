@@ -31,7 +31,6 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
-        /* 美化滾動條 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -60,6 +59,11 @@
             100% { opacity: 0; transform: translate(-50%, -20px); }
         }
         .toast-animate { animation: slideUpFade 3s ease-in-out forwards; }
+        
+        /* 訊息對話框的滾動條美化 */
+        .chat-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
@@ -115,6 +119,15 @@
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in">
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
                 </div>
+
+                <!-- [PM] 新增：訊息通知按鈕 -->
+                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openUserMsgModal()">
+                    <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">訊息</span>
+                    <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span>
+                    </span>
+                </button>
 
                 <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Profile / 個人設定</span>
@@ -202,18 +215,27 @@
             </div>
         </section>
 
-        <!-- [PM] 管理員專屬介面 (Admin Console) -->
+        <!-- 管理員專屬介面 (Admin Console) -->
         <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
-            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
-                <div class="flex items-center gap-2">
+            <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start">
                     <i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i>
                     <h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3>
                 </div>
-                <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
-                    <i class="ph-bold ph-plus"></i> 新增會員
-                </button>
+                <!-- [PM] 新增：CSV 匯入匯出按鈕 -->
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
+                    <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="window.importCSV(event)">
+                    <button type="button" onclick="document.getElementById('csv-upload').click()" class="bg-indigo-500 hover:bg-indigo-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1 active:scale-95">
+                        <i class="ph-bold ph-upload-simple"></i> 匯入 CSV
+                    </button>
+                    <button type="button" onclick="window.exportCSV()" class="bg-indigo-500 hover:bg-indigo-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1 active:scale-95">
+                        <i class="ph-bold ph-download-simple"></i> 匯出 CSV
+                    </button>
+                    <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1 active:scale-95">
+                        <i class="ph-bold ph-plus"></i> 新增會員
+                    </button>
+                </div>
             </div>
-            <!-- [PM] 新增：管理員即時搜尋列 -->
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
                 <div class="relative w-full max-w-md">
                     <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
@@ -391,6 +413,27 @@
         </section>
     </main>
 
+    <!-- [PM] 新增：會員端專屬系統訊息 Modal -->
+    <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-envelope-open text-blue-500"></i> System Messages / 系統訊息</h3>
+                <button type="button" onclick="window.closeUserMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            
+            <div id="user-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-2 mb-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
+                <!-- 對話泡泡將透過 JS 動態生成 -->
+            </div>
+            
+            <div class="pt-2 border-t border-slate-100 flex gap-2">
+                <textarea id="user-chat-input" rows="2" placeholder="目前無客服訊息，待管理員發送後即可回覆..." disabled class="flex-1 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"></textarea>
+                <button type="button" id="user-chat-send-btn" disabled onclick="window.sendUserMsg()" class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 rounded-xl font-bold shadow-md transition-all active:scale-95 flex items-center justify-center">
+                    <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 個人設定 Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
@@ -433,7 +476,30 @@
         </div>
     </div>
 
-    <!-- [PM] 管理員專屬：新增與編輯會員資料 Modal (包含電話與獨立備註) -->
+    <!-- [PM] 新增：管理員專屬傳訊 Modal -->
+    <div id="admin-msg-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold">
+                    <i class="ph-fill ph-chat-circle-dots text-emerald-500"></i> 與 <span id="admin-msg-target" class="text-emerald-600"></span> 傳訊
+                </h3>
+                <button type="button" onclick="window.closeAdminMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            
+            <div id="admin-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-3 mb-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner h-64">
+                <!-- 對話泡泡 -->
+            </div>
+            
+            <div class="pt-2 border-t border-slate-100 flex gap-2">
+                <textarea id="admin-chat-input" rows="2" placeholder="輸入訊息發送給會員..." class="flex-1 px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white resize-none"></textarea>
+                <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 rounded-xl font-bold shadow-md transition-all active:scale-95 flex items-center justify-center">
+                    <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理員新增與編輯會員資料 Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -548,6 +614,7 @@
             const vBadge = document.getElementById('vip-status-badge');
             const pBtn = document.getElementById('profile-btn');
             const rBtn = document.getElementById('remove-key-btn');
+            const mBtn = document.getElementById('msg-btn'); // 訊息按鈕
             const memberSection = document.getElementById('member-center-section');
             const adminSection = document.getElementById('admin-dashboard-section');
             const apiKeySetup = document.getElementById('api-key-setup');
@@ -561,6 +628,7 @@
                     vBadge.classList.remove('hidden');
                 }
                 if(pBtn) pBtn.classList.add('hidden');
+                if(mBtn) mBtn.classList.add('hidden'); // 管理員不需要自己傳訊給自己的捷徑
                 if(rBtn) rBtn.classList.remove('hidden');
                 if(memberSection) memberSection.classList.add('hidden');
                 if(adminSection) adminSection.classList.remove('hidden');
@@ -576,6 +644,7 @@
                     vBadge.classList.remove('hidden');
                 }
                 if(pBtn) pBtn.classList.remove('hidden');
+                if(mBtn) mBtn.classList.remove('hidden'); // 顯示訊息按鈕
                 if(rBtn) rBtn.classList.remove('hidden');
                 if(memberSection) memberSection.classList.add('hidden');
                 if(adminSection) adminSection.classList.add('hidden');
@@ -584,6 +653,7 @@
                 if(qDisplay) qDisplay.classList.remove('hidden');
                 if(vBadge) vBadge.classList.add('hidden');
                 if(pBtn) pBtn.classList.add('hidden');
+                if(mBtn) mBtn.classList.add('hidden');
                 if(rBtn) rBtn.classList.add('hidden');
                 if(memberSection) memberSection.classList.remove('hidden');
                 if(adminSection) adminSection.classList.add('hidden');
@@ -619,12 +689,11 @@
             }
         };
 
-        // [PM] 修復點 3：管理員介面即時過濾搜尋
         window.filterAdminMembers = function() {
             const input = document.getElementById('admin-search-input').value.toLowerCase();
             const rows = document.querySelectorAll('#admin-members-tbody tr');
             rows.forEach(row => {
-                if(row.cells.length < 2) return; // 略過無資料的提示列
+                if(row.cells.length < 2) return; 
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(input) ? '' : 'none';
             });
@@ -739,6 +808,14 @@
                             localStorage.setItem('abra_vip_status', 'expired');
                         }
                     }
+                    
+                    // [PM] 檢查是否有未讀的系統訊息，點亮紅燈
+                    if (data.messages && data.messages.length > 0) {
+                        document.getElementById('msg-dot')?.classList.remove('hidden');
+                    } else {
+                        document.getElementById('msg-dot')?.classList.add('hidden');
+                    }
+
                     if (window.updateGlobalUI) window.updateGlobalUI();
                 }
             } catch(e) { console.error("Sync Error"); }
@@ -772,7 +849,6 @@
                         }
                     }
 
-                    // [PM] 修復點 2：加入分離好的獨立電話與獨立匯款帳號顯示
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -786,6 +862,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <!-- [PM] 新增傳訊按鈕 -->
+                                <button type="button" onclick="window.openAdminMsgModal('${emailId}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg mr-1 transition-all">傳訊</button>
                                 <button type="button" onclick="window.openAdminModal('${emailId}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
                                 <button type="button" onclick="window.deleteAdminMember('${emailId}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
                             </td>
@@ -802,6 +880,105 @@
                 console.error(e);
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500 font-bold">載入失敗，請檢查權限或網路。</td></tr>';
             }
+        };
+
+        // [PM] CSV 匯出邏輯 (純文字、無損耗)
+        window.exportCSV = async function() {
+            try {
+                window.showToast("準備匯出 CSV...");
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let csvContent = "Email,Password,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
+                
+                querySnapshot.forEach(doc => {
+                    const d = doc.data();
+                    const row = [
+                        d.email || doc.id, d.password || '', d.name || '', d.phone || '', 
+                        d.remittance || '', d.paymentDate || '', d.months || '', 
+                        d.expiryDate || '', d.remarks || '', d.status || ''
+                    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+                    csvContent += row + "\n";
+                });
+                
+                // \uFEFF 為 BOM，讓 Excel 預設以 UTF-8 開啟，不亂碼
+                const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                const dateStr = new Date().toISOString().split('T')[0];
+                link.setAttribute("download", `Abrakai_Members_${dateStr}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.showToast("匯出成功！");
+            } catch(e) {
+                window.showToast("匯出失敗", true);
+            }
+        };
+
+        // [PM] CSV 安全 CSV 解析器
+        function parseCSVRow(str) {
+            let result = [];
+            let inQuotes = false;
+            let current = "";
+            for(let i=0; i<str.length; i++) {
+                if(str[i] === '"') { inQuotes = !inQuotes; }
+                else if(str[i] === ',' && !inQuotes) { result.push(current); current = ""; }
+                else { current += str[i]; }
+            }
+            result.push(current);
+            return result.map(s => s.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+        }
+
+        // [PM] CSV 匯入邏輯 (合併更新，防呆防重)
+        window.importCSV = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    window.showToast("開始比對匯入資料...");
+                    const text = e.target.result;
+                    const rows = text.split('\n').filter(r => r.trim());
+                    if(rows.length < 2) { window.showToast("CSV 格式錯誤或無資料", true); return; }
+                    
+                    const headers = parseCSVRow(rows[0]).map(h => h.toLowerCase());
+                    const emailIdx = headers.indexOf('email');
+                    if(emailIdx === -1) { window.showToast("CSV 第一行必須包含 Email 欄位", true); return; }
+
+                    let successCount = 0;
+                    for(let i=1; i<rows.length; i++) {
+                        const cols = parseCSVRow(rows[i]);
+                        if(cols.length === 0) continue;
+                        const email = cols[emailIdx];
+                        if(!email) continue;
+                        
+                        const payload = {};
+                        headers.forEach((h, idx) => {
+                            if(h !== 'email' && cols[idx] !== undefined && cols[idx] !== '') {
+                                if(h==='name') payload.name = cols[idx];
+                                if(h==='password') payload.password = cols[idx];
+                                if(h==='phone') payload.phone = cols[idx];
+                                if(h==='remittance') payload.remittance = cols[idx];
+                                if(h==='paymentdate') payload.paymentDate = cols[idx];
+                                if(h==='months') payload.months = cols[idx];
+                                if(h==='expirydate') payload.expiryDate = cols[idx];
+                                if(h==='remarks') payload.remarks = cols[idx];
+                                if(h==='status') payload.status = cols[idx];
+                            }
+                        });
+                        const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                        const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                        await setDoc(docRef, { email: email, ...payload }, { merge: true });
+                        successCount++;
+                    }
+                    window.showToast(`匯入完成！共處理 ${successCount} 筆資料`);
+                    window.loadAdminMembers();
+                } catch(err) {
+                    window.showToast("匯入過程發生錯誤", true);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // 重置 input 讓下次選同檔也能觸發
         };
 
         window.openAdminModal = async function(emailId = '') {
@@ -894,7 +1071,6 @@
         };
 
         window.deleteAdminMember = async function(emailId) {
-            // [PM] 注意：雖然此處使用 confirm，但這是在管理員主動點擊刪除按鈕的情境下，如果被沙盒擋下仍可手動清除，但不至於阻擋登出。
             if(confirm(`警告：確定要刪除會員 ${emailId} 嗎？此操作無法復原。`)) {
                 try {
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
@@ -906,7 +1082,150 @@
                 }
             }
         };
-        
+
+        // ==========================================
+        // [PM] 新增：系統單向通訊模組 (Messaging System)
+        // ==========================================
+        window.currentMsgEmail = '';
+
+        function renderChatBubbles(messages, containerId) {
+            const container = document.getElementById(containerId);
+            if(!messages || messages.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
+                return;
+            }
+            container.innerHTML = messages.map(m => {
+                const isUser = m.role === 'user';
+                const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                return `
+                    <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                        <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${getStr(m.text)}</div>
+                        <span class="text-[9px] text-slate-400 mt-1">${isUser ? 'User' : 'Admin'} • ${timeStr}</span>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        window.openAdminMsgModal = async function(emailId) {
+            window.currentMsgEmail = emailId;
+            document.getElementById('admin-msg-target').textContent = emailId;
+            document.getElementById('admin-msg-modal').classList.remove('hidden');
+            const historyDiv = document.getElementById('admin-chat-history');
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    renderChatBubbles(data.messages || [], 'admin-chat-history');
+                }
+            } catch(e) {
+                window.showToast("訊息載入失敗", true);
+            }
+        };
+
+        window.sendAdminMsg = async function() {
+            const emailId = window.currentMsgEmail;
+            const inputEl = document.getElementById('admin-chat-input');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = [];
+                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
+                
+                messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                
+                inputEl.value = '';
+                renderChatBubbles(messages, 'admin-chat-history');
+            } catch(e) {
+                window.showToast("傳送失敗", true);
+            } finally {
+                inputEl.disabled = false;
+                inputEl.focus();
+            }
+        };
+
+        window.closeAdminMsgModal = () => {
+            document.getElementById('admin-msg-modal').classList.add('hidden');
+            window.currentMsgEmail = '';
+        };
+
+        window.openUserMsgModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) return;
+            
+            document.getElementById('user-msg-modal').classList.remove('hidden');
+            document.getElementById('msg-dot')?.classList.add('hidden'); // 點開後消紅點
+            const historyDiv = document.getElementById('user-chat-history');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-blue-500"></div>';
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const messages = data.messages || [];
+                    renderChatBubbles(messages, 'user-chat-history');
+                    
+                    // [PM] 單向啟動鎖：管理員未發話前，禁用回覆
+                    const hasAdminMsg = messages.some(m => m.role === 'admin');
+                    if(hasAdminMsg) {
+                        inputEl.disabled = false;
+                        btnEl.disabled = false;
+                        inputEl.placeholder = "輸入訊息回覆管理員... / Type your reply...";
+                    } else {
+                        inputEl.disabled = true;
+                        btnEl.disabled = true;
+                        inputEl.placeholder = "目前無客服訊息，待管理員發送後即可回覆...";
+                    }
+                }
+            } catch(e) {
+                window.showToast("訊息載入失敗", true);
+            }
+        };
+
+        window.sendUserMsg = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true;
+            btnEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = [];
+                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
+                
+                messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                
+                inputEl.value = '';
+                renderChatBubbles(messages, 'user-chat-history');
+            } catch(e) {
+                window.showToast("傳送失敗", true);
+            } finally {
+                inputEl.disabled = false;
+                btnEl.disabled = false;
+                inputEl.focus();
+            }
+        };
+
+        window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
+        // ==========================================
+
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -987,50 +1306,6 @@
                 if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; }
             }
         });
-
-        window.openProfileModal = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const user = docSnap.data();
-                    document.getElementById('profile-email').value = user.email || emailId;
-                    document.getElementById('profile-name').value = user.name || '';
-                    document.getElementById('profile-pass').value = user.password || '';
-                    document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
-                    document.getElementById('profile-modal').classList.remove('hidden');
-                }
-            } catch(e) { window.showToast("載入失敗 / Load failed", true); }
-        };
-
-        document.getElementById('modal-save-btn')?.addEventListener('click', async () => {
-            const emailId = localStorage.getItem('abra_vip_code');
-            const newName = document.getElementById('profile-name').value.trim();
-            const newPass = document.getElementById('profile-pass').value.trim();
-            const newApiKey = document.getElementById('profile-api-key').value.trim();
-            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                await updateDoc(docRef, { name: newName, password: newPass, apiKey: newApiKey });
-                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
-                else localStorage.setItem('gemini_api_key', newApiKey);
-                window.activeApiKey = newApiKey;
-                window.showToast("設定已同步至雲端並儲存完成！ / Saved!");
-                window.closeProfileModal();
-                setTimeout(() => location.reload(), 800);
-            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
-        });
-
-        // [PM] 修復點 1：拔除沙盒會阻擋的 confirm 彈窗，實現無痛強制登出
-        window.handleLogout = function() {
-            localStorage.removeItem('abra_vip_status');
-            localStorage.removeItem('abra_vip_code');
-            localStorage.removeItem('abra_usage_count'); 
-            localStorage.removeItem('abra_admin_status');
-            location.reload(); 
-        };
 
         window.firebaseApp = { db, appId };
     </script>

@@ -208,7 +208,7 @@
                 <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-magic-wand"></i></div>
                 <div class="flex-1 text-center md:text-left space-y-4">
                     <div>
-                        <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟動 AI 深度解析</h3>
+                        <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟弱 AI 深度解析</h3>
                         <p class="text-sm text-slate-600 font-medium mt-1 leading-relaxed">解鎖：<span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋及英文翻譯說明</span>。<br>
                         <span class="text-[11px] italic text-slate-400">Unlock advanced features: Zhuyin, Polyphonic analysis, Vocabulary, Idiom definitions, and English translations.</span></p>
                     </div>
@@ -427,6 +427,7 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
+    <!-- 全域輔助變數與 UI -->
     <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
@@ -712,7 +713,7 @@
         window.firebaseApp = { db, appId };
     </script>
 
-    <!-- AI 解析與防呆邏輯 (微創修復區) -->
+    <!-- AI 解析與防呆邏輯 (僅微創修復 Prompt) -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
@@ -808,8 +809,8 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    // [PM] 微創修復 1：修改 Prompt，絕對禁止 AI 將主要注音的詞彙塞入破音字區
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格)。2. words: 僅限發音為「主要注音」的詞彙。3. polyphonic: 破音字。examples「必須100%符合該破音發音」，【絕對不可】混入其他發音的詞彙！(僅限2~4字詞彙，勿造句)。4. idioms: 必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "破音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    // [PM] 微創修復：針對 AI 發明注音 (如 T-ㄥˋ) 進行最嚴格的 Prompt 防堵。
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音發音」，【絕對不可】混入其他發音的詞彙！(僅限2~4字詞彙，勿造句)。4. idioms: 必須包含「${char}」字，若無則回傳[]。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -852,7 +853,6 @@
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
                     
                     const pureZhuyin = getStr(p.zhuyin).replace(/\s+/g, '');
-                    // [PM] 微創修復 2：加入 flex-shrink-0 w-12 text-center，保護注音不被擠壓斷行。
                     wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 w-14 text-center border-r border-purple-100 pr-2 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
                     polyDisp.appendChild(wrap);
                 });

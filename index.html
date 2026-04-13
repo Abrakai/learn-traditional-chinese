@@ -205,7 +205,7 @@
             </div>
         </section>
 
-        <!-- 第 2 層：API 燃料配置區 -->
+        <!-- 第 2 層：API 燃料配置區 (針對 33.jpg 強化雙語說明) -->
         <div id="api-key-setup" class="hidden bg-gradient-to-r from-indigo-600 to-indigo-900 rounded-3xl p-[2px] shadow-2xl relative overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -214,21 +214,30 @@
                     <i class="ph-fill ph-magic-wand z-10"></i>
                     <div class="absolute inset-0 bg-indigo-200 rounded-2xl animate-ping opacity-40"></div>
                 </div>
-                <!-- 文案：告知 API Key 好處、安全說明與申請連結 (符合 31.jpg 需求) -->
-                <div class="flex-1 text-center md:text-left space-y-3">
-                    <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟動 AI 深度解析</h3>
-                    <div class="text-sm text-slate-600 font-medium leading-relaxed space-y-1.5">
-                        <p>
-                            尊貴的 VIP 會員，您已解鎖進階權限！綁定金鑰後可啟動：
-                            <span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋及英文翻譯說明</span>。
+                <!-- 雙語導引文案 -->
+                <div class="flex-1 text-center md:text-left space-y-4">
+                    <div>
+                        <h3 class="text-indigo-950 font-black text-lg md:text-xl tracking-tight">Activate AI Engine / 啟動 AI 深度解析</h3>
+                        <p class="text-sm text-slate-600 font-medium leading-relaxed mt-1">
+                            綁定金鑰後可啟動：<span class="text-indigo-700 font-bold">注音輔助、破音字分析、常用造詞、成語深度解釋及英文翻譯說明</span>。
                         </p>
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-[10px]">
-                            <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 font-bold flex items-center gap-1">
-                                <i class="ph ph-lock-key"></i> 本地安全：金鑰僅存於瀏覽器，本站伺服器絕不記錄。
+                        <p class="text-xs text-slate-500 italic mt-0.5">
+                            Unlock advanced features: <span class="font-bold">Zhuyin assistance, polyphonic analysis, vocabulary, idiom definitions, and contextual English translations.</span>
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 border-t border-slate-100 pt-4">
+                        <div class="space-y-1">
+                            <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 text-[10px] font-bold flex items-center gap-1 w-fit">
+                                <i class="ph ph-lock-key"></i> 本地安全 / Local Security
                             </span>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-bold hover:text-indigo-800 flex items-center gap-1">
+                            <p class="text-[9px] text-slate-400">金鑰僅存於瀏覽器，本站伺服器絕不記錄。<br>The key is stored only in your browser; our server never records it.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline text-[10px] font-black hover:text-indigo-800 flex items-center gap-1">
                                 <i class="ph ph-arrow-square-out"></i> 前往 Google AI Studio 免費申請金鑰
                             </a>
+                            <p class="text-[9px] text-slate-400">Get a free API Key from Google AI Studio.</p>
                         </div>
                     </div>
                 </div>
@@ -236,7 +245,7 @@
                 <div class="flex w-full md:w-auto flex-col sm:flex-row gap-3 self-center mt-2 md:mt-0">
                     <input type="password" id="custom-api-key" placeholder="Paste API Key (AIza...)" class="w-full md:w-64 px-4 py-3.5 rounded-xl border-2 border-indigo-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none text-sm font-mono shadow-sm transition-all bg-white text-slate-700">
                     <button id="save-key-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-indigo-600/30 active:scale-95 text-sm transition-all whitespace-nowrap flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-rocket-launch text-lg"></i> 啟動連線
+                        <i class="ph-bold ph-rocket-launch text-lg"></i> 啟動連線 / Start
                     </button>
                 </div>
             </div>
@@ -312,15 +321,15 @@
                             <div class="absolute inset-0 bg-red-200 rounded-full animate-ping opacity-30"></div>
                         </div>
                         <div>
-                            <h3 class="text-xl font-black text-slate-800 tracking-tight">連線受到阻礙</h3>
+                            <h3 class="text-xl font-black text-slate-800 tracking-tight">連線受到阻礙 / Issue</h3>
                             <p id="ai-error-debug" class="text-slate-500 text-[11px] px-8 mt-2 leading-relaxed bg-slate-100 p-2 rounded-lg border border-slate-200 font-mono break-all max-w-[300px] mx-auto"></p>
                         </div>
                         <button id="ai-retry-btn" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg active:scale-95 text-sm transition-all uppercase tracking-wider flex items-center gap-2">
-                            <i class="ph-bold ph-arrows-clockwise"></i> 重新嘗試
+                            <i class="ph-bold ph-arrows-clockwise"></i> 重新嘗試 / Retry
                         </button>
                     </div>
 
-                    <!-- 尚未綁定金鑰之引導畫面 (配合 31.jpg 強化文案) -->
+                    <!-- 尚未綁定金鑰之引導畫面 -->
                     <div id="api-key-missing-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6 animate-in fade-in zoom-in duration-500">
                         <div class="relative">
                             <div class="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center text-4xl shadow-inner relative z-10">
@@ -328,18 +337,20 @@
                             </div>
                             <div class="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-20"></div>
                         </div>
-                        <h3 class="text-2xl font-black text-slate-800 tracking-tight">AI 引擎等待點火</h3>
+                        <h3 class="text-2xl font-black text-slate-800 tracking-tight">AI 引擎等待點火 / Ready to Ignite</h3>
                         <div class="space-y-4 max-w-sm mx-auto">
-                            <p class="text-sm text-slate-500 leading-relaxed font-medium">
+                            <p class="text-sm text-slate-600 leading-relaxed font-bold">
                                 尊貴的 VIP 會員，綁定個人 API 金鑰後，即可解鎖注音、造詞與成語深度英譯解析。
                             </p>
-                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-400 flex flex-col gap-2 italic">
-                                <span><i class="ph ph-info"></i> 金鑰將僅存放於您的瀏覽器本地快取，隱私無虞。</span>
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-bold not-italic">點此申請 Google API Key</a>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-[11px] text-slate-500 flex flex-col gap-2 italic">
+                                <span><i class="ph ph-lock-key"></i> 本地安全：金鑰僅存放於瀏覽器，本站伺服器絕不記錄。 / Privacy: Key is stored locally in your browser.</span>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 underline font-bold not-italic flex items-center justify-center gap-1">
+                                    <i class="ph ph-plus-circle"></i> 免費申請金鑰 / Get a Free API Key
+                                </a>
                             </div>
                         </div>
                         <button onclick="scrollToApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3.5 rounded-2xl font-bold shadow-xl active:scale-95 text-sm uppercase tracking-wider transition-all flex items-center gap-2">
-                            <i class="ph-bold ph-plug"></i> 前往綁定金鑰
+                            <i class="ph-bold ph-plug"></i> 前往綁定金鑰 / Bind Key
                         </button>
                     </div>
 
@@ -348,7 +359,7 @@
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm flex items-start gap-2">
                             <i class="ph-fill ph-check-circle text-amber-500 mt-0.5"></i>
                             <p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">
-                                VIP 解析引擎運作中。資料已透過您個人專屬之 API 金鑰載入。
+                                VIP 解析引擎運作中。資料已透過您個人專屬之 API 金鑰載入。 / Engine active via your personal key.
                             </p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -402,16 +413,16 @@
     <!-- 模態框 (Modals) 區域 -->
     <!-- ========================================== -->
 
-    <!-- 會員個人設定 Modal -->
+    <!-- 會員個人設定 Modal (中英雙語說明整合) -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
                 <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2"><i class="ph-fill ph-user-gear text-blue-500"></i> My Profile / 個人設定</h3>
                 <button onclick="closeProfileModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-4 text-left">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Registered Email (帳號不可改)</label>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Registered Email (Read-only)</label>
                     <input type="email" id="profile-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed font-medium">
                 </div>
                 <div>
@@ -428,13 +439,15 @@
                 <div>
                     <div class="flex justify-between items-center mb-1.5">
                         <label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest">AI Engine API Key</label>
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold">申請金鑰</a>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold">申請 / Get Key</a>
                     </div>
                     <div class="relative">
                         <input type="password" id="profile-api-key" placeholder="AIzaSy..." class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all shadow-sm font-mono">
                         <button type="button" onclick="togglePassVisibility('profile-api-key', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                     </div>
-                    <p class="text-[9px] text-slate-400 mt-1.5 italic">此金鑰僅存放在您的瀏覽器，留空即代表清除綁定。</p>
+                    <p class="text-[9px] text-slate-400 mt-2 leading-relaxed">
+                        <i class="ph ph-shield-check"></i> 此金鑰僅存放在您的瀏覽器，留空即代表清除綁定。<br>Stored locally in browser only. Leave empty to clear.
+                    </p>
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button onclick="closeProfileModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm">Cancel</button>
@@ -451,9 +464,9 @@
                 <h3 class="text-lg font-black text-indigo-900 tracking-tight flex items-center gap-2"><i class="ph-fill ph-user-plus text-indigo-500"></i> Add Member / 強制新增會員</h3>
                 <button onclick="closeAdminAddModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-4 text-left">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">User Email (登入帳號)</label>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">User Email (Login ID)</label>
                     <input type="email" id="admin-add-email" placeholder="example@email.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all shadow-sm">
                 </div>
                 <div>
@@ -481,12 +494,12 @@
     <div id="confirm-delete-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-sm text-center animate-in zoom-in-95 duration-200">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner">
-                <i class="ph-fill ph-warning"></i>
+                <i class="ph-fill ph-trash"></i>
             </div>
             <h3 class="text-xl font-black text-slate-800 mb-2">Delete Member?</h3>
-            <p class="text-sm text-slate-500 mb-6">確定要刪除此會員嗎？資料將從雲端永久抹除無法復原。</p>
+            <p class="text-sm text-slate-500 mb-6">確定要刪除此會員嗎？資料將從雲端永久抹除無法復原。<br>Permanently delete this member?</p>
             <div class="flex gap-3">
-                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-bold transition-all text-sm">Cancel 取消</button>
+                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-bold transition-all text-sm">Cancel</button>
                 <button id="confirm-delete-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-md transition-all text-sm active:scale-95">Delete 刪除</button>
             </div>
         </div>
@@ -638,7 +651,7 @@
             document.getElementById('login-btn-text').textContent = "Unlock Features 登入解鎖";
         }
 
-        // 會員個人設定
+        // 會員個人設定 (含 API Key 整合與安全說明連結)
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) return;
@@ -667,9 +680,11 @@
             if (!newName || !newPass) { showToast("姓名與密碼不可為空！", true); return; }
 
             try {
+                // 更新雲端
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
                 await updateDoc(docRef, { name: newName, password: newPass });
                 
+                // 更新本地金鑰
                 if (newApiKey !== window.activeApiKey) {
                     if (newApiKey === '') {
                         localStorage.removeItem('gemini_api_key');
@@ -680,10 +695,10 @@
                     window.updateGlobalUI(); 
                 }
 
-                showToast("個人資料與設定已成功更新！");
+                showToast("個人設定已更新完成！");
                 closeProfileModal();
             } catch(e) {
-                showToast("儲存失敗，請重試。", true);
+                showToast("更新失敗，請檢查網路狀態。", true);
             }
         };
 
@@ -853,7 +868,7 @@
             };
             try {
                 await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", id), updates);
-                showToast(`會員 [${id}] 更新成功！`);
+                showToast(`資料更新完成！`);
             } catch (e) { showToast("儲存失敗。", true); }
         };
 
@@ -901,7 +916,7 @@
         };
     </script>
 
-    <!-- UI & AI Engine (Smart Cache & Word-based TTS) -->
+    <!-- UI & AI Engine (Smart Cache & Standard Pronunciation Fix) -->
     <script>
         let isVIP = localStorage.getItem('abra_vip_status') === 'active';
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
@@ -941,7 +956,7 @@
             window.updateGlobalUI(); return true;
         }
 
-        // 語音播報優化：過濾括號內容 (針對 32.jpg 指示：標準發音且不唸出拼音)
+        // 語音播報優化：針對 32.jpg 指示排除括號拼音並確保標準發音
         function speak(text) {
             const now = Date.now();
             if (now - lastSpeakTime < 600) return; 
@@ -949,10 +964,11 @@
             if (!text || !window.speechSynthesis || !isVIP || !window.activeApiKey) return;
             window.speechSynthesis.cancel(); 
             
-            // 語音脫水：移除括號及其內容，並避開特殊符號採自然停頓
+            // 語音脫水：完全移除括號拼音及其餘特殊符號
             let pureText = text.replace(/\([^)]*\)/g, ' ').replace(/[\/\-_|]/g, ' '); 
             const ut = new SpeechSynthesisUtterance(pureText);
-            ut.lang = 'zh-TW'; ut.rate = 0.8;
+            ut.lang = 'zh-TW'; 
+            ut.rate = 0.85; // 稍快一點點維持流暢度
             window.speechSynthesis.speak(ut);
         }
 
@@ -1009,6 +1025,7 @@
 
             if (!isVIP) { document.getElementById('free-promo-content').classList.remove('hidden'); return; }
             
+            // v4.3 修正：若無金鑰則顯示質感引導並終止，防止出錯
             if (!window.activeApiKey) { 
                 document.getElementById('api-key-setup').classList.remove('hidden');
                 document.getElementById('api-key-missing-content').classList.remove('hidden');
@@ -1056,7 +1073,7 @@
             if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
         }
 
-        // 渲染結果 (配合 32.jpg 指示：去拼音、現英譯)
+        // 渲染結果 (針對 32.jpg：純淨漢字，無拼音)
         function renderResult(char, data) {
             document.getElementById('zhuyin-display').textContent = data.zhuyin || "";
             const pb = document.getElementById('play-char-btn');
@@ -1069,7 +1086,7 @@
                 const wrap = document.createElement('div'); wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between w-full shadow-sm';
                 let exHTML = ''; 
                 if(p.examples) p.examples.forEach(ex => {
-                    // 去除拼音符號：僅保留漢字
+                    // 去除所有拼音括號內容
                     const pureEx = ex.replace(/\([^)]*\)/g, '').trim();
                     exHTML += `<button onclick="speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black hover:bg-purple-100 transition-all shadow-inner">🔊 ${pureEx}</button>`;
                 });
@@ -1079,7 +1096,6 @@
 
             const words = document.getElementById('words-container'); words.innerHTML = '';
             if (data.words) data.words.forEach(w => { 
-                // 去除拼音符號
                 const pureWord = w.replace(/\([^)]*\)/g, '').trim();
                 const s = document.createElement('span'); 
                 s.className = 'px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-all shadow-sm'; 
@@ -1096,9 +1112,9 @@
                         <div class="flex-1 pr-6">
                             <div class="text-slate-800 text-base font-black tracking-tight font-bold">${i.idiom}</div>
                             <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${i.meaning}</div>
-                            <!-- 針對 32.jpg 指示：英文翻譯直接呈現，不設隱藏 -->
-                            <div class="text-[10px] text-indigo-500 font-bold mt-2.5 italic border-t border-slate-200 pt-2.5 block">
-                                <i class="ph-fill ph-translate"></i> ${i.english || "Standard AI context analysis"}
+                            <!-- 針對 32.jpg：英譯直接大方呈現 -->
+                            <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t border-slate-200 pt-3 block bg-indigo-50/30 p-2 rounded-lg">
+                                <i class="ph-fill ph-translate text-sm"></i> ${i.english || "Professional context translation available for VIP."}
                             </div>
                         </div>
                         <button class="text-rose-400 p-2 hover:scale-110 transition-all bg-white rounded-full shadow-md"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
@@ -1115,7 +1131,7 @@
                 const key = document.getElementById('custom-api-key').value.trim();
                 if (key) { 
                     window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); 
-                    window.updateGlobalUI(); showToast("API 金鑰已綁定成功！");
+                    window.updateGlobalUI(); showToast("API 金鑰已綁定成功！ / Key Bind Success!");
                     if(currentTargetChar) loadTeaching(currentTargetChar, document.querySelector('.char-btn.active'));
                 }
             });
@@ -1124,7 +1140,7 @@
             document.getElementById('animate-stroke-btn').addEventListener('click', () => writer && writer.animateCharacter());
             document.getElementById('quiz-stroke-btn').addEventListener('click', () => writer && writer.quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect! / 書寫正確！' }));
             document.getElementById('ai-retry-btn').addEventListener('click', () => executeAIFetch(currentTargetChar));
-            document.getElementById('remove-key-btn').addEventListener('click', () => { if(confirm('Log out? / 確定要登出並清除暫存嗎？')) { localStorage.clear(); location.reload(); } });
+            document.getElementById('remove-key-btn').addEventListener('click', () => { if(confirm('Log out? / 確定要登出嗎？')) { localStorage.clear(); location.reload(); } });
         };
     </script>
 </body>

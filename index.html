@@ -164,7 +164,8 @@
                                 <div class="flex items-start gap-2">
                                     <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
                                     <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer">
-                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明 (Privacy Policy & Disclaimer)</button>。
+                                        我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明</button>。<br>
+                                        I have read and agree to the <span class="font-bold">Privacy Policy & Disclaimer</span>.
                                     </label>
                                 </div>
                             </div>
@@ -315,7 +316,7 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg"></i></button>
                                 </div>
                             </div>
-                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                            <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
                             </div>
@@ -393,7 +394,9 @@
     <!-- 法律聲明 Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
-            <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2"><i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer</h3>
+            <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2">
+                <i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer
+            </h3>
             <div class="space-y-6 text-sm text-slate-600 leading-relaxed font-medium">
                 <section>
                     <h4 class="font-black text-slate-800 mb-2">1. 個人資料保護聲明 (Privacy Policy)</h4>
@@ -425,6 +428,7 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
+    <!-- 全域輔助變數與 UI -->
     <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
@@ -433,7 +437,6 @@
 
         window.updateGlobalUI = function() {
             window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
-            
             const qDisplay = document.getElementById('quota-display');
             const vBadge = document.getElementById('vip-status-badge');
             const pBtn = document.getElementById('profile-btn');
@@ -447,7 +450,6 @@
                 if(vBadge) vBadge.classList.remove('hidden');
                 if(pBtn) pBtn.classList.remove('hidden');
                 if(rBtn) rBtn.classList.remove('hidden');
-                
                 if(memberSection) memberSection.classList.add('hidden');
                 if(apiKeySetup) apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
             } else {
@@ -455,7 +457,6 @@
                 if(vBadge) vBadge.classList.add('hidden');
                 if(pBtn) pBtn.classList.add('hidden');
                 if(rBtn) rBtn.classList.add('hidden');
-                
                 if(memberSection) memberSection.classList.remove('hidden');
                 if(qCount) qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
             }
@@ -498,6 +499,7 @@
         };
     </script>
 
+    <!-- Firebase 模組 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -708,9 +710,11 @@
                 location.reload(); 
             }
         };
+
         window.firebaseApp = { db, appId };
     </script>
 
+    <!-- AI 解析與過濾防呆邏輯 -->
     <script>
         const charCache = {};
         let currentTargetChar = "";
@@ -760,8 +764,8 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    // [PM] 修復點 1：嚴格定義 Prompt 杜絕假成語與字義解釋，強制給出「實際造詞」
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["破音字實際造詞(絕勿填解釋)"]}], "words": ["造詞1"], "idioms": [{"idiom": "四字成語(需包含此字，非四字成語勿填)", "meaning": "中文意思", "english": "Context"}]}`;
+                    // [PM] 修復點 1：嚴格定義 Prompt，強制破音字不得造句，強制成語必須包含目標字
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. examples僅限2~4字詞彙，絕勿造句。2. idioms必須包含「${char}」字，若無常見成語請回傳空陣列[]。格式：{"zhuyin": "注音", "polyphonic": [{"zhuyin": "破音", "examples": ["破音詞彙"]}], "words": ["造詞"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
                     const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -780,22 +784,80 @@
             if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
         }
 
+        // [PM] 全新功能：使用者自訂成語解析
+        window.searchCustomIdiom = async function() {
+            const inputEl = document.getElementById('custom-idiom-input');
+            const resultDiv = document.getElementById('custom-idiom-result');
+            if (!inputEl || !resultDiv) return;
+            
+            const input = inputEl.value.trim();
+            if (!input) { window.showToast("請輸入成語 / Enter idiom", true); return; }
+            if (!window.activeApiKey) { window.showToast("請先設定 API 金鑰", true); return; }
+            
+            resultDiv.innerHTML = '<div class="loader mx-auto border-t-indigo-500"></div>';
+            
+            try {
+                const prompt = `請嚴格解析成語「${input}」的繁體中文教學 JSON格式：{"idiom": "${input}", "meaning": "中文意思", "english": "English context translation"}。若「${input}」不是合理的成語或查無此詞，請務必回傳 {"error": "查無此成語解析"}`;
+                
+                const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${window.activeApiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                const result = await res.json();
+                if (result.error) throw new Error(result.error.message);
+                
+                const rawText = result.candidates[0].content.parts[0].text;
+                const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
+                
+                if (data.error || !data.meaning) {
+                    resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">${data.error || '查無此成語解析'}</div>`;
+                    return;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex justify-between items-start shadow-sm mt-4 animate-in fade-in">
+                        <div class="flex-1 pr-4">
+                            <div class="text-slate-800 text-sm font-black tracking-tight">${getStr(data.idiom)}</div>
+                            <div class="text-[11px] text-slate-600 mt-1 leading-relaxed">${getStr(data.meaning)}</div>
+                            <div class="text-[10px] text-indigo-600 font-bold mt-2"><i class="ph ph-translate"></i> ${getStr(data.english)}</div>
+                        </div>
+                        <button type="button" onclick="window.speak('${getStr(data.idiom)}')" class="text-indigo-600 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl"></i></button>
+                    </div>
+                `;
+                inputEl.value = '';
+            } catch (e) {
+                resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">查詢失敗，請重試 / Query failed</div>`;
+            }
+        };
+
         function renderResult(char, data) {
             document.getElementById('zhuyin-display').textContent = getStr(data.zhuyin);
             const pb = document.getElementById('play-char-btn');
             pb.classList.remove('hidden'); pb.onclick = () => window.speak(char);
             
-            const polyDisp = document.getElementById('polyphonic-display'); polyDisp.innerHTML = '';
-            (data.polyphonic || []).forEach(p => {
-                const wrap = document.createElement('div');
-                wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm';
-                let exHTML = (p.examples || []).map(ex => {
-                    const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
-                    return `<button onclick="window.speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
-                }).join('');
-                wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${getStr(p.zhuyin)}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
-                polyDisp.appendChild(wrap);
-            });
+            const polyDisp = document.getElementById('polyphonic-display'); 
+            polyDisp.innerHTML = '';
+            const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
+            
+            if (validPolyphonic.length > 0) {
+                document.getElementById('poly-section-wrap').style.display = 'block';
+                validPolyphonic.forEach(p => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
+                    let exHTML = (p.examples || [])
+                        .filter(ex => ex.length <= 6) // 防呆過濾長句
+                        .map(ex => {
+                            const pureEx = getStr(ex).replace(/\([^)]*\)/g, '').trim();
+                            return `<button type="button" onclick="window.speak('${pureEx}')" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
+                        }).join('');
+                    if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800">${getStr(p.zhuyin)}</span><div class="flex gap-1.5 flex-wrap justify-end">${exHTML}</div>`;
+                    polyDisp.appendChild(wrap);
+                });
+            } else {
+                document.getElementById('poly-section-wrap').style.display = 'none';
+            }
             
             const wordsCont = document.getElementById('words-container');
             wordsCont.innerHTML = (data.words || []).map(w => {
@@ -804,18 +866,34 @@
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
-            // [PM] 修復點 2：加入字數過濾器，杜絕非成語之兩字詞彙
-            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.length >= 3);
-            idiomsCont.innerHTML = validIdioms.length > 0 ? validIdioms.map(i => `
-                <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm text-left hover:bg-white transition-all">
-                    <div class="flex-1 pr-6">
-                        <div class="text-slate-800 text-base font-black tracking-tight font-bold">${getStr(i.idiom)}</div>
-                        <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${getStr(i.meaning)}</div>
-                        <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${getStr(i.english) || "Translation loading..."}</div>
+            // [PM] 修復點 2：強制過濾成語長度與是否包含該字
+            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3);
+            
+            if (validIdioms.length > 0) {
+                idiomsCont.innerHTML = validIdioms.map(i => `
+                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm text-left hover:bg-white transition-all">
+                        <div class="flex-1 pr-6">
+                            <div class="text-slate-800 text-base font-black tracking-tight font-bold">${getStr(i.idiom)}</div>
+                            <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${getStr(i.meaning)}</div>
+                            <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${getStr(i.english) || "Translation loading..."}</div>
+                        </div>
+                        <button type="button" onclick="window.speak('${getStr(i.idiom)}')" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
                     </div>
-                    <button onclick="window.speak('${getStr(i.idiom)}')" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
-                </div>
-            `).join('') : '<p class="text-xs text-slate-400 italic">此字無常見成語 / No common idioms found.</p>';
+                `).join('');
+            } else {
+                // [PM] 全新功能：自訂成語解析 UI
+                idiomsCont.innerHTML = `
+                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center shadow-sm">
+                        <p class="text-xs text-slate-600 mb-2 font-bold">目前無包含「${char}」的常見成語。</p>
+                        <p class="text-[10px] text-slate-400 mb-4">您可以自行填入成語，讓系統為您解析發音：</p>
+                        <div class="flex items-center gap-2 max-w-sm mx-auto">
+                            <input type="text" id="custom-idiom-input" placeholder="輸入成語..." class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 shadow-inner bg-white">
+                            <button type="button" onclick="window.searchCustomIdiom()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold active:scale-95 transition-all shadow-md uppercase tracking-wider">解析</button>
+                        </div>
+                        <div id="custom-idiom-result" class="mt-4 text-left"></div>
+                    </div>
+                `;
+            }
         }
 
         window.onload = function() {

@@ -6,14 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "2.2.0"
+    version: "2.3.0"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Session Isolation & API Key Validation"
+    description: "Taiwan Chinese Learning Hub - TTS Pronunciation Dictionary Fixes"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Implemented strict API Key validation (window.hasValidApiKey)"
-      - "Fixed Ghost API Key session leak across user accounts"
-      - "Updated Gemini model fallback array (removed deprecated 8b)"
+      - "Removed broken Zhuyin replacement logic causing robotic Bopomofo spelling"
+      - "Implemented Global TTS Dictionary in window.speak for idiom polyphonic fixes (e.g., 有的放矢 -> 有地放矢)"
     ---
     -->
     <!-- Tailwind CSS -->
@@ -1258,8 +1257,25 @@
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
+            
             // 已遵照規範：避開 / - _ | () 等符號，改用全形逗號產生自然停頓
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
+            
+            // PM 修復：建立底層語音校正字典，解決 Web Speech API 原生引擎對破音字與成語的誤讀問題
+            const ttsDictionary = {
+                "有的放矢": "有地放矢",
+                "無的放矢": "無地放矢",
+                "眾矢之的": "眾矢之地",
+                "目的": "目地",
+                "標的": "標地",
+                "的確": "迪確",
+                "的士": "迪士"
+            };
+            
+            for (const [wrong, right] of Object.entries(ttsDictionary)) {
+                cleanText = cleanText.replace(new RegExp(wrong, 'g'), right);
+            }
+
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             ut.lang = 'zh-TW'; ut.rate = 0.85;
             window.speechSynthesis.speak(ut);
@@ -1295,7 +1311,6 @@
             finally { document.getElementById('translate-loader').classList.add('hidden'); }
         };
 
-        // PM 修改：加入嚴格空值校驗 window.hasValidApiKey() 以防禦殘留金鑰
         window.handleSplit = function(e) {
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
@@ -1440,7 +1455,6 @@
             // 清除上次殘留的成功徽章
             document.getElementById('active-engine-badge').classList.add('hidden');
 
-            // PM 修復：移除已被 Google 官方廢棄的 8b 版本，僅保留官方穩定維護模型
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
             let success = false;
             for (const model of modelNames) {
@@ -1488,8 +1502,8 @@
                     
                     let exHTML = (p.examples || []).slice(0, 6).filter(ex => ex.length <= 6).map(ex => {
                             const pureEx = window.getStr(ex).replace(/\([^)]*\)/g, '').trim();
-                            // 注音替換欺騙法，確保持續符合規範
-                            const speakText = pureEx.replace(new RegExp(char, 'g'), pureZhuyin);
+                            // PM 修復：移除舊版的注音替換欺騙法，改用原字串傳遞給全域 speak 函式，由底層語音字典處理
+                            const speakText = pureEx;
                             return `<button type="button" data-action="speak" data-text="${speakText}" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
                         }).join('');
                     if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙 / No words</span>';

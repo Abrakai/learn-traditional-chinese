@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Hanzi Writer for Stroke Order -->
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
@@ -29,24 +32,36 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
+    <!-- 網域鎖定防護 -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
-        <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce"><i class="ph-fill ph-shield-warning"></i></div>
+        <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
+            <i class="ph-fill ph-shield-warning"></i>
+        </div>
         <h2 class="text-2xl font-black text-white mb-4">Unauthorized Access / 網域授權失敗</h2>
-        <p class="text-slate-400 max-w-md leading-relaxed">系統偵測到非法網域部署。為保護工作室資產與個資安全，功能已鎖定。<br><br>請回官方正版站點：<br><a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-bold underline">abrakai.github.io/learn-traditional-chinese/</a></p>
+        <p class="text-slate-400 max-w-md leading-relaxed">
+            系統偵測到非法網域部署。為保護工作室資產與個資安全，功能已鎖定。<br><br>
+            請回官方正版站點：<br>
+            <a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-bold underline">abrakai.github.io/learn-traditional-chinese/</a>
+        </p>
     </div>
 
+    <!-- 蜜罐防護 (防機器人自動填表) -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
+    <!-- 全域 Toast 通知 -->
     <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
 
+    <!-- 雲端狀態橫幅 -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
-        <i class="ph-fill ph-warning-circle text-lg"></i> <span id="error-banner-text">系統連線狀態良好 / System Connection Stable</span>
+        <i class="ph-fill ph-warning-circle text-lg"></i> 
+        <span id="error-banner-text">系統連線狀態良好 / System Connection Stable</span>
     </div>
 
+    <!-- 頂部導航列 Header -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
@@ -57,17 +72,24 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all">
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
+
                 <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all">
                     <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
                     <span class="text-[10px] font-black tracking-tight uppercase"><span id="vip-days-left">--</span> Days</span>
                 </div>
+
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in">
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
                 </div>
+
                 <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">訊息</span>
-                    <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
+                    <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span>
+                    </span>
                 </button>
+
                 <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Profile / 個人設定</span>
                 </button>
@@ -88,6 +110,7 @@
             </div>
             <div class="p-6 md:p-10">
                 <form id="auth-forms-container" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+                    <!-- Sign Up -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號</h4>
                         <div class="space-y-3">
@@ -107,6 +130,7 @@
                             <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
+                    <!-- Login -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入</h4>
                         <div class="space-y-3">
@@ -208,7 +232,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 畫布區 -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-3 left-4 flex flex-col items-start gap-0.5 text-slate-400"><div class="flex items-center gap-1.5"><i class="ph-fill ph-scribble-loop text-lg"></i><span class="text-[10px] font-black uppercase tracking-widest font-bold text-slate-500">Writing Mechanics</span></div><span class="text-[9px] italic ml-5">筆畫順序機械原理</span></div>
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 mt-8"></svg>
@@ -243,7 +266,7 @@
                         <div id="idioms-section"><h3 class="text-xs font-bold uppercase tracking-widest mb-3 text-slate-400 border-b pb-2">Idioms / 成語解析</h3><div id="idioms-container" class="space-y-4"></div></div>
                     </div>
 
-                    <!-- [PM] NEW: VIP 無 API Key 引導區 -->
+                    <!-- VIP 無 API Key 引導區 -->
                     <div id="vip-no-key-promo" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-magic-wand text-indigo-500"></i></div>
                         <h3 class="text-xl font-bold text-slate-800">API Key Required / 需要魔法金鑰</h3>
@@ -258,6 +281,10 @@
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 id="promo-title" class="text-xl font-bold text-slate-800">Unlock VIP Access / 解鎖 VIP 權限</h3>
+                        <div id="expiry-notice-box" class="bg-red-50 p-4 rounded-xl border border-red-100 text-[11px] text-red-700 font-bold mb-2 hidden text-center flex flex-col gap-1">
+                            <p>您的 VIP 授權已到期，功能已自動降級。</p>
+                            <p class="text-[9px] italic font-normal">Subscription expired. Access downgraded.</p>
+                        </div>
                         <div id="promo-desc" class="w-full max-w-lg mx-auto"></div>
                         <button type="button" id="promo-action-btn" onclick="window.scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Join VIP / 登入或升級</button>
                     </div>
@@ -267,6 +294,7 @@
     </main>
 
     <!-- 區塊 6：全域系統彈出視窗 (Modals) -->
+    
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
@@ -422,8 +450,29 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 第一核心腳本：全域狀態與 UI 事件中心 -->
-    <script>
+    <!-- 【唯一核心模組】一體化整合 Firebase, AI 與 UI 邏輯，徹底消滅作用域與多重綁定崩潰 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+        // Firebase 初始化
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
+            authDomain: "abra-learn-zh-vip.firebaseapp.com",
+            projectId: "abra-learn-zh-vip",
+            storageBucket: "abra-learn-zh-vip.firebasestorage.app",
+            messagingSenderId: "968781909500",
+            appId: "1:968781909500:web:0457924ec29644ea6a7679"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = "abra-learn-zh-vip";
+        
+        // 全域變數掛載
+        window.firebaseDbInstance = db;
+        window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
@@ -433,160 +482,19 @@
         window.currentMsgName = 'User';
         window.charCache = {};
         window.currentTargetChar = "";
+        window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
 
-        window.updateGlobalUI = function() {
-            const emailCode = localStorage.getItem('abra_vip_code');
-            if (!emailCode) {
-                localStorage.removeItem('abra_vip_status');
-                localStorage.removeItem('abra_admin_status');
-                window.isVIP = false;
-                window.isAdmin = false;
-            } else {
-                window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
-                window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
-            }
-            
-            const elements = {
-                qDisplay: document.getElementById('quota-display'),
-                vBadge: document.getElementById('vip-status-badge'),
-                pBtn: document.getElementById('profile-btn'),
-                rBtn: document.getElementById('remove-key-btn'),
-                mBtn: document.getElementById('msg-btn'),
-                memberSection: document.getElementById('member-center-section'),
-                adminSection: document.getElementById('admin-dashboard-section'),
-                apiKeySetup: document.getElementById('api-key-setup'),
-                qCount: document.getElementById('quota-count'),
-                expiryDisplay: document.getElementById('vip-expiry-display'),
-                badgeTranslate: document.getElementById('badge-translate'),
-                badgeSelect: document.getElementById('badge-select'),
-                promoTitle: document.getElementById('promo-title'),
-                promoDesc: document.getElementById('promo-desc'),
-                promoBtn: document.getElementById('promo-action-btn')
-            };
-
-            // Reset all panels
-            if(elements.adminSection) elements.adminSection.classList.add('hidden');
-            if(elements.memberSection) elements.memberSection.classList.remove('hidden');
-            if(elements.pBtn) elements.pBtn.classList.add('hidden');
-            if(elements.mBtn) elements.mBtn.classList.add('hidden');
-            if(elements.rBtn) elements.rBtn.classList.add('hidden');
-            if(elements.apiKeySetup) elements.apiKeySetup.classList.add('hidden');
-            if(elements.expiryDisplay) elements.expiryDisplay.classList.add('hidden');
-            
-            if (window.isAdmin) {
-                if(elements.qDisplay) elements.qDisplay.classList.add('hidden');
-                if(elements.vBadge) {
-                    elements.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="tracking-tighter uppercase">Admin</span>';
-                    elements.vBadge.className = "hidden bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
-                    elements.vBadge.classList.remove('hidden');
-                }
-                if(elements.rBtn) elements.rBtn.classList.remove('hidden');
-                if(elements.memberSection) elements.memberSection.classList.add('hidden');
-                if(elements.adminSection) elements.adminSection.classList.remove('hidden');
-                if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
-
-            } else if (emailCode) {
-                if(elements.memberSection) elements.memberSection.classList.add('hidden');
-                if(elements.pBtn) elements.pBtn.classList.remove('hidden');
-                if(elements.mBtn) elements.mBtn.classList.remove('hidden');
-                if(elements.rBtn) elements.rBtn.classList.remove('hidden');
-                
-                if (window.isVIP) {
-                    if(elements.qDisplay) elements.qDisplay.classList.add('hidden');
-                    if(elements.vBadge) {
-                        elements.vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>';
-                        elements.vBadge.className = "hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
-                        elements.vBadge.classList.remove('hidden');
-                    }
-                    if(elements.apiKeySetup) elements.apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
-                    if(elements.expiryDisplay) elements.expiryDisplay.classList.remove('hidden');
-                } else {
-                    // 已註冊但非 VIP (過期或未繳費)
-                    if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
-                    if(elements.vBadge) elements.vBadge.classList.add('hidden');
-                    if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                    
-                    const pricingHTML = `
-                        <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
-                            <div class="border-b border-slate-100 pb-3">
-                                <h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free Plan)</h4>
-                                <p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic translations and character splits per day.</span></p>
-                            </div>
-                            <div class="border-b border-slate-100 pb-3">
-                                <h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4>
-                                <p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
-                                <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl">
-                                    <p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 備妥 API KEY，開啟魔法之門 (Unlock magic with API KEY):</p>
-                                    <p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p>
-                                </div>
-                            </div>
-                            <div class="pt-1">
-                                <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4>
-                                <ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                                    <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
-                                    <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125 or $4 USD/mo)</span></span></li>
-                                    <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100 or $3 USD/mo) 推薦!</span></span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    `;
-
-                    if(elements.promoTitle) elements.promoTitle.textContent = 'Upgrade Required / 需繳費升級';
-                    if(elements.promoDesc) elements.promoDesc.innerHTML = `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您目前為未繳費或已過期會員，無法使用魔法功能。<br>請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通 VIP 權限。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Please complete payment to unlock VIP. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
-                    if(elements.promoBtn) {
-                        elements.promoBtn.textContent = 'Contact Studio / 聯絡工作室';
-                        elements.promoBtn.onclick = function() { window.open('https://abrakai.github.io/learn-traditional-chinese/', '_blank'); };
-                    }
-                }
-            } else {
-                // 完全未登入訪客
-                if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
-                if(elements.vBadge) elements.vBadge.classList.add('hidden');
-                if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                
-                const pricingHTML = `
-                    <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
-                        <div class="border-b border-slate-100 pb-3">
-                            <h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free Plan)</h4>
-                            <p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic translations and character splits per day.</span></p>
-                        </div>
-                        <div class="border-b border-slate-100 pb-3">
-                            <h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4>
-                            <p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
-                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl">
-                                <p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 備妥 API KEY，開啟魔法之門 (Unlock magic with API KEY):</p>
-                                <p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p>
-                            </div>
-                        </div>
-                        <div class="pt-1">
-                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4>
-                            <ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
-                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125 or $4 USD/mo)</span></span></li>
-                                <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100 or $3 USD/mo) 推薦!</span></span></li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-
-                if(elements.promoTitle) elements.promoTitle.textContent = 'Unlock VIP Access / 解鎖 VIP 權限';
-                if(elements.promoDesc) elements.promoDesc.innerHTML = `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫升級 VIP。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP to unlock features. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
-                if(elements.promoBtn) {
-                    elements.promoBtn.textContent = 'Join VIP / 登入或升級';
-                    elements.promoBtn.onclick = window.scrollToAuth;
-                }
-            }
-            
-            // 標籤裝飾
-            if (window.isAdmin || window.isVIP) {
-                if(elements.badgeTranslate) { elements.badgeTranslate.textContent = 'VIP UNLIMITED'; elements.badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
-                if(elements.badgeSelect) { elements.badgeSelect.textContent = 'VIP UNLIMITED'; elements.badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
-            } else {
-                if(elements.badgeTranslate) { elements.badgeTranslate.textContent = 'FREE LIMIT'; elements.badgeTranslate.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest'; }
-                if(elements.badgeSelect) { elements.badgeSelect.textContent = 'FREE LIMIT'; elements.badgeSelect.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest'; }
-            }
+        // 網域防護
+        const sentinelCheck = () => {
+            const host = window.location.hostname;
+            const proto = window.location.protocol;
+            const isLocal = host === "" || host === "localhost" || host === "127.0.0.1" || proto === 'file:';
+            const isAllowedDomain = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"].some(d => host === d || host.endsWith('.' + d));
+            if (!isLocal && !isAllowedDomain) { document.getElementById('domain-lock-overlay')?.classList.remove('hidden'); return false; }
+            return true;
         };
 
+        // UI 共用函數
         window.showToast = function(msg, isError = false) {
             const toast = document.getElementById('system-toast');
             if(!toast) return;
@@ -603,6 +511,493 @@
                 if (input.type === 'password') { input.type = 'text'; icon.className = 'ph ph-eye-slash text-xl'; } 
                 else { input.type = 'password'; icon.className = 'ph ph-eye text-xl'; }
             }
+        };
+
+        window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+        // 彈窗控制 (確保所有 X 皆可關閉)
+        window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
+        window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
+        window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
+        window.closeUserMsgModal = () => document.getElementById('user-msg-modal')?.classList.add('hidden');
+        window.closeAdminMsgModal = () => { document.getElementById('admin-msg-modal')?.classList.add('hidden'); window.currentMsgEmail = ''; };
+        window.closeAdminModal = () => {
+            document.getElementById('admin-modal')?.classList.add('hidden');
+            document.getElementById('admin-member-email')?.removeAttribute('readonly');
+            document.getElementById('admin-member-email')?.classList.remove('bg-slate-100', 'text-slate-500');
+        };
+
+        // UI 狀態機引擎
+        window.updateGlobalUI = function() {
+            const emailCode = localStorage.getItem('abra_vip_code');
+            const adminStatus = localStorage.getItem('abra_admin_status');
+            
+            // 系統管理員特權：不被 email 限制踢出
+            if (!emailCode && adminStatus !== 'active') {
+                localStorage.removeItem('abra_vip_status');
+                localStorage.removeItem('abra_admin_status');
+                window.isVIP = false;
+                window.isAdmin = false;
+            } else {
+                window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
+                window.isAdmin = (adminStatus === 'active');
+            }
+            
+            const els = {
+                qDisplay: document.getElementById('quota-display'), vBadge: document.getElementById('vip-status-badge'),
+                pBtn: document.getElementById('profile-btn'), rBtn: document.getElementById('remove-key-btn'), mBtn: document.getElementById('msg-btn'),
+                memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
+                apiKeySetup: document.getElementById('api-key-setup'), qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
+                badgeTranslate: document.getElementById('badge-translate'), badgeSelect: document.getElementById('badge-select'),
+                promoTitle: document.getElementById('promo-title'), promoDesc: document.getElementById('promo-desc'), promoBtn: document.getElementById('promo-action-btn')
+            };
+
+            if(els.adminSection) els.adminSection.classList.add('hidden');
+            if(els.memberSection) els.memberSection.classList.remove('hidden');
+            if(els.pBtn) els.pBtn.classList.add('hidden');
+            if(els.mBtn) els.mBtn.classList.add('hidden');
+            if(els.rBtn) els.rBtn.classList.add('hidden');
+            if(els.apiKeySetup) els.apiKeySetup.classList.add('hidden');
+            if(els.expiryDisplay) els.expiryDisplay.classList.add('hidden');
+            
+            if (window.isAdmin) {
+                if(els.qDisplay) els.qDisplay.classList.add('hidden');
+                if(els.vBadge) {
+                    els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="tracking-tighter uppercase">Admin</span>';
+                    els.vBadge.className = "hidden bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
+                    els.vBadge.classList.remove('hidden');
+                }
+                if(els.rBtn) els.rBtn.classList.remove('hidden');
+                if(els.memberSection) els.memberSection.classList.add('hidden');
+                if(els.adminSection) els.adminSection.classList.remove('hidden');
+                if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
+
+            } else if (emailCode) {
+                if(els.memberSection) els.memberSection.classList.add('hidden');
+                if(els.pBtn) els.pBtn.classList.remove('hidden');
+                if(els.mBtn) els.mBtn.classList.remove('hidden');
+                if(els.rBtn) els.rBtn.classList.remove('hidden');
+                
+                if (window.isVIP) {
+                    if(els.qDisplay) els.qDisplay.classList.add('hidden');
+                    if(els.vBadge) {
+                        els.vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>';
+                        els.vBadge.className = "hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
+                        els.vBadge.classList.remove('hidden');
+                    }
+                    if(els.apiKeySetup) els.apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
+                    if(els.expiryDisplay) els.expiryDisplay.classList.remove('hidden');
+                } else {
+                    if(els.qDisplay) els.qDisplay.classList.remove('hidden');
+                    if(els.vBadge) els.vBadge.classList.add('hidden');
+                    if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
+                    
+                    const pricingHTML = `
+                        <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
+                            <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free)</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic character splits and translations per day.</span></p></div>
+                            <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
+                                <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 如果您自備 API KEY，還可以開啟另一道魔法之門 (Unlock magic with API KEY):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p></div>
+                            </div>
+                            <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4><ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
+                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 / 月 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
+                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 / 6個月 <span class="text-[9px] text-slate-400">(每月僅125元 / $4 USD/mo)</span></span></li>
+                                <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">👑 NT$ 1,200 / 12個月 <span class="text-[9px] text-yellow-700">(每月僅100元，推薦！/ $3 USD/mo)</span></span></li>
+                            </ul></div>
+                        </div>`;
+                    if(els.promoTitle) els.promoTitle.textContent = 'Upgrade Required / 需繳費升級';
+                    if(els.promoDesc) els.promoDesc.innerHTML = `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您目前為未繳費或已過期會員，無法使用魔法功能。<br>請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通 VIP 權限。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Please complete payment to unlock VIP. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
+                    if(els.promoBtn) { els.promoBtn.textContent = 'Contact Studio / 聯絡工作室'; els.promoBtn.onclick = function() { window.open('https://abrakai.github.io/learn-traditional-chinese/', '_blank'); }; }
+                }
+            } else {
+                if(els.qDisplay) els.qDisplay.classList.remove('hidden');
+                if(els.vBadge) els.vBadge.classList.add('hidden');
+                if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
+                const pricingHTML = `
+                    <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
+                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free Plan)</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic translations and character splits per day.</span></p></div>
+                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
+                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 備妥 API KEY，開啟魔法之門 (Unlock magic with API KEY):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p></div>
+                        </div>
+                        <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4><ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
+                            <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
+                            <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125 or $4 USD/mo)</span></span></li>
+                            <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100 or $3 USD/mo) 推薦!</span></span></li>
+                        </ul></div>
+                    </div>`;
+                if(els.promoTitle) els.promoTitle.textContent = 'Unlock VIP Access / 解鎖 VIP 權限';
+                if(els.promoDesc) els.promoDesc.innerHTML = `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫升級 VIP。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP to unlock features. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
+                if(els.promoBtn) { els.promoBtn.textContent = 'Join VIP / 登入或升級'; els.promoBtn.onclick = window.scrollToAuth; }
+            }
+            
+            if (window.isAdmin || window.isVIP) {
+                if(els.badgeTranslate) { els.badgeTranslate.textContent = 'VIP UNLIMITED'; els.badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
+                if(els.badgeSelect) { els.badgeSelect.textContent = 'VIP UNLIMITED'; els.badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
+            } else {
+                if(els.badgeTranslate) { els.badgeTranslate.textContent = 'FREE LIMIT'; els.badgeTranslate.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest'; }
+                if(els.badgeSelect) { els.badgeSelect.textContent = 'FREE LIMIT'; els.badgeSelect.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest'; }
+            }
+        };
+
+        // 後端與 Auth 邏輯
+        onAuthStateChanged(auth, async (user) => {
+            if (!sentinelCheck()) return;
+            if (user) {
+                document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
+                if (window.syncVipStatus) window.syncVipStatus();
+            } else {
+                signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
+            }
+        });
+
+        window.verifyAdminCloud = async function(code) {
+            try {
+                const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
+                const adminSnap = await getDoc(adminRef);
+                return adminSnap.exists() && adminSnap.data().pass === code;
+            } catch(e) { return false; }
+        };
+
+        window.syncVipStatus = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) return;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const daysEl = document.getElementById('vip-days-left');
+                    const lightEl = document.getElementById('vip-status-light');
+
+                    if (data.expiryDate) {
+                        const diff = new Date(data.expiryDate).getTime() - Date.now();
+                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        if(daysEl) daysEl.textContent = Math.max(0, daysLeft);
+                        if (daysLeft > 7) {
+                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400";
+                            localStorage.setItem('abra_vip_status', 'active');
+                        } else if (daysLeft > 0) {
+                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-orange-400 animate-pulse";
+                            localStorage.setItem('abra_vip_status', 'active');
+                        } else {
+                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse";
+                            localStorage.setItem('abra_vip_status', 'expired');
+                        }
+                    } else {
+                        localStorage.setItem('abra_vip_status', 'pending');
+                    }
+
+                    if (data.apiKey && localStorage.getItem('abra_vip_status') === 'active') {
+                        localStorage.setItem('gemini_api_key', data.apiKey);
+                        window.activeApiKey = data.apiKey;
+                    }
+                    
+                    const messages = data.messages || [];
+                    const lastReadCount = parseInt(localStorage.getItem(`abra_msg_read_${emailId}`) || '0', 10);
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+
+                    if (lastMsg && lastMsg.role === 'admin' && messages.length > lastReadCount) {
+                        document.getElementById('msg-dot')?.classList.remove('hidden');
+                    } else {
+                        document.getElementById('msg-dot')?.classList.add('hidden');
+                    }
+
+                    if (window.updateGlobalUI) window.updateGlobalUI();
+                }
+            } catch(e) {}
+        };
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const code = document.getElementById('login-vip-code').value.trim();
+            if (!code) { window.showToast("請輸入密碼 / Enter Password", true); return; }
+
+            const loginBtn = document.getElementById('login-btn');
+            const loader = document.getElementById('login-loader');
+            const btnText = document.getElementById('login-btn-text');
+
+            if(loader) loader.classList.remove('hidden');
+            if(btnText) btnText.textContent = "Verifying... / 驗證中...";
+            if(loginBtn) loginBtn.disabled = true;
+
+            try {
+                if (await window.verifyAdminCloud(code)) {
+                    localStorage.setItem('abra_admin_status', 'active');
+                    window.showToast("管理員身分確認 / Admin Verified.");
+                    setTimeout(() => location.reload(), 800);
+                } else if (!email) {
+                    window.showToast("請輸入註冊信箱 / Enter Email", true);
+                } else {
+                    const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists() && docSnap.data().password === code) {
+                        const data = docSnap.data();
+                        localStorage.setItem('abra_vip_code', sanitizedEmail);
+                        let status = 'pending';
+                        if (data.expiryDate) {
+                            const daysLeft = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                            if (daysLeft > 0) status = 'active';
+                            else status = 'expired';
+                        }
+                        localStorage.setItem('abra_vip_status', status);
+                        if (data.apiKey && status === 'active') localStorage.setItem('gemini_api_key', data.apiKey);
+                        window.showToast("登入成功！ / Login Success!");
+                        setTimeout(() => location.reload(), 800);
+                    } else {
+                        window.showToast("帳號或密碼錯誤 / Invalid Credentials", true);
+                    }
+                }
+            } catch(e) {
+                if(e.code === 'permission-denied') window.showToast("雲端連線權限不足，請重試", true);
+                else window.showToast("系統繁忙或密碼錯誤，請稍候", true);
+            } finally {
+                if(loader) loader.classList.add('hidden');
+                if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
+                if(loginBtn) loginBtn.disabled = false;
+            }
+        };
+
+        window.handleSignup = async function() {
+            const agree = document.getElementById('legal-agree')?.checked;
+            if (!agree) { window.showToast("請先同意免責聲明 / Agree to Terms", true); return; }
+            
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value.trim();
+            if (!name || !email || !pass) { window.showToast("請填寫完整註冊資料 / Fill all fields", true); return; }
+
+            const signupBtn = document.getElementById('signup-btn');
+            const originalText = signupBtn ? signupBtn.textContent : "Processing...";
+            if(signupBtn) { signupBtn.textContent = "Processing... / 處理中..."; signupBtn.disabled = true; }
+
+            try {
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) { 
+                    window.showToast("Email 已註冊 / Email registered", true); 
+                } else {
+                    await setDoc(docRef, { name, email, password: pass, signupDate: new Date().toISOString(), status: "pending" });
+                    window.showToast("註冊成功！請聯絡執行長。 / Success!");
+                    document.getElementById('reg-name').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-pass').value = '';
+                    document.getElementById('legal-agree').checked = false;
+                }
+            } catch(e) { window.showToast("註冊失敗，請檢查網路 / Network Error", true); } 
+            finally { if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } }
+        };
+
+        window.handleLogout = function() {
+            localStorage.removeItem('abra_vip_status');
+            localStorage.removeItem('abra_vip_code');
+            localStorage.removeItem('abra_admin_status');
+            // 嚴格保留 abra_usage_count 防止免費用戶洗次數
+            location.reload(); 
+        };
+
+        window.openProfileModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
+            
+            document.getElementById('profile-email').value = emailId;
+            document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const user = docSnap.data();
+                    document.getElementById('profile-name').value = user.name || '';
+                    document.getElementById('profile-pass').value = user.password || '';
+                }
+            } catch(e) { }
+        };
+
+        window.saveProfileInfo = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const newName = document.getElementById('profile-name').value.trim();
+            const newPass = document.getElementById('profile-pass').value.trim();
+            const newApiKey = document.getElementById('profile-api-key').value.trim();
+            
+            if (!window.isVIP && !window.isAdmin && newApiKey) {
+                window.showToast("未繳費開通，無法設定 API 金鑰", true);
+                return;
+            }
+            
+            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                await updateDoc(docRef, { name: newName, password: newPass, apiKey: newApiKey });
+                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
+                else localStorage.setItem('gemini_api_key', newApiKey);
+                window.activeApiKey = newApiKey;
+                window.showToast("設定已同步至雲端並儲存完成！ / Saved!");
+                if (window.closeProfileModal) window.closeProfileModal();
+                setTimeout(() => location.reload(), 800);
+            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
+        };
+
+        // Admin CRUD
+        window.loadAdminMembers = async function() {
+            const tbody = document.getElementById('admin-members-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">載入會員資料中...</td></tr>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let html = '';
+                let globalUnread = false; 
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const emailId = docSnap.id;
+                    
+                    let statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>`;
+                    let daysText = "未開通";
+                    if (data.expiryDate) {
+                        const diff = new Date(data.expiryDate).getTime() - Date.now();
+                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        if (daysLeft > 7) { statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-emerald-500 light-glow"></div>`; daysText = `剩餘 ${daysLeft} 天`; } 
+                        else if (daysLeft > 0) { statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-orange-500 light-glow animate-pulse"></div>`; daysText = `即將到期 (${daysLeft}天)`; } 
+                        else { statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-red-500 light-glow animate-pulse"></div>`; daysText = "已過期"; }
+                    }
+
+                    const messages = data.messages || [];
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+                    const adminReadCount = parseInt(localStorage.getItem(`admin_read_${emailId}`) || '0', 10);
+                    const hasUnread = lastMsg && lastMsg.role === 'user' && messages.length > adminReadCount;
+                    if (hasUnread) globalUnread = true; 
+
+                    const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:text-blue-800";
+                    const msgBtnText = hasUnread ? "新回覆" : "傳訊";
+
+                    html += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap"><div class="flex items-center gap-2">${statusHTML} <span class="text-xs font-bold">${daysText}</span></div></td>
+                            <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">${data.email || emailId}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-indigo-700">${data.name || '無'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '未登記電話'}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' 個月' : '-'}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
+                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
+                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.innerHTML = html === '' ? '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">目前尚無會員資料</td></tr>' : html;
+
+                if (window.isAdmin) {
+                    const msgDot = document.getElementById('msg-dot');
+                    if (msgDot) {
+                        if (globalUnread) msgDot.classList.remove('hidden');
+                        else msgDot.classList.add('hidden');
+                    }
+                }
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500 font-bold">載入失敗，請檢查權限或網路。</td></tr>';
+            }
+        };
+
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            
+            if (emailId && typeof emailId === 'string') {
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                try {
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-member-phone').value = data.phone || '';
+                        document.getElementById('admin-member-remittance').value = data.remittance || '';
+                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
+                        document.getElementById('admin-months').value = data.months || '';
+                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
+                        document.getElementById('admin-member-remarks').value = data.remarks || '';
+                    }
+                } catch(e) { window.showToast("資料讀取失敗", true); }
+            } else {
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                document.getElementById('admin-member-pass').value = '';
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+            }
+        };
+
+        window.saveAdminMember = async function() {
+            const email = document.getElementById('admin-member-email').value.trim().toLowerCase();
+            const password = document.getElementById('admin-member-pass').value.trim();
+            const name = document.getElementById('admin-member-name').value.trim();
+            const phone = document.getElementById('admin-member-phone').value.trim();
+            const remittance = document.getElementById('admin-member-remittance').value.trim();
+            const paymentDate = document.getElementById('admin-pay-date').value;
+            const months = document.getElementById('admin-months').value;
+            const expiryDate = document.getElementById('admin-expiry-date').value;
+            const remarks = document.getElementById('admin-member-remarks').value.trim();
+
+            if (!email || !password || !name) { window.showToast("Email、密碼與姓名為必填欄位", true); return; }
+
+            const saveBtn = document.getElementById('admin-save-btn');
+            saveBtn.textContent = "Saving...";
+            saveBtn.disabled = true;
+
+            try {
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                
+                await setDoc(docRef, {
+                    email: email, password: password, name: name, phone: phone,
+                    remittance: remittance, paymentDate: paymentDate, months: months,
+                    expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
+                }, { merge: true });
+                
+                window.showToast("會員資料已儲存成功！");
+                if (window.closeAdminModal) window.closeAdminModal();
+                window.loadAdminMembers(); 
+            } catch(e) { window.showToast("儲存失敗，請重試", true); } 
+            finally { saveBtn.textContent = "Save / 儲存會員"; saveBtn.disabled = false; }
+        };
+
+        window.deleteAdminMember = async function(emailId, actionEl) {
+            if (actionEl && actionEl.textContent !== '確認刪除') {
+                const originalText = actionEl.textContent;
+                actionEl.textContent = '確認刪除';
+                actionEl.classList.replace('bg-red-50', 'bg-red-600');
+                actionEl.classList.replace('text-red-600', 'text-white');
+                setTimeout(() => {
+                    if (actionEl && actionEl.parentNode) {
+                        actionEl.textContent = originalText;
+                        actionEl.classList.replace('bg-red-600', 'bg-red-50');
+                        actionEl.classList.replace('text-white', 'text-red-600');
+                    }
+                }, 3000);
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
+                window.showToast("會員已成功刪除");
+                window.loadAdminMembers();
+            } catch(e) { window.showToast("刪除失敗", true); }
         };
 
         window.calculateExpiry = function() {
@@ -625,32 +1020,225 @@
             });
         };
 
-        // --- 視窗開關控制 ---
-        window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
-        window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
-        
-        window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
-        
-        window.closeAdminModal = () => {
-            document.getElementById('admin-modal')?.classList.add('hidden');
-            document.getElementById('admin-member-email')?.removeAttribute('readonly');
-            document.getElementById('admin-member-email')?.classList.remove('bg-slate-100', 'text-slate-500');
+        window.exportCSV = async function() {
+            try {
+                window.showToast("準備匯出 CSV...");
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let csvContent = "Email,Password,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
+                querySnapshot.forEach(doc => {
+                    const d = doc.data();
+                    const row = [ d.email || doc.id, d.password || '', d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
+                    csvContent += row + "\n";
+                });
+                const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Abrakai_Members_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.showToast("匯出成功！");
+            } catch(e) { window.showToast("匯出失敗", true); }
         };
-        
-        window.closeAdminMsgModal = () => {
-            document.getElementById('admin-msg-modal')?.classList.add('hidden');
-            window.currentMsgEmail = '';
-        };
-        
-        window.closeUserMsgModal = () => document.getElementById('user-msg-modal')?.classList.add('hidden');
-        
-        window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        window.handleLogout = function() {
-            localStorage.removeItem('abra_vip_status');
-            localStorage.removeItem('abra_vip_code');
-            localStorage.removeItem('abra_admin_status');
-            location.reload(); 
+        window.importCSV = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    window.showToast("開始比對匯入資料...");
+                    const rows = e.target.result.split('\n').filter(r => r.trim());
+                    if(rows.length < 2) { window.showToast("CSV 格式錯誤或無資料", true); return; }
+                    const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').toLowerCase().trim());
+                    const emailIdx = headers.indexOf('email');
+                    if(emailIdx === -1) { window.showToast("CSV 第一行必須包含 Email 欄位", true); return; }
+                    let successCount = 0;
+                    for(let i=1; i<rows.length; i++) {
+                        const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        if(cols.length === 0 || !cols[emailIdx]) continue;
+                        const payload = {};
+                        headers.forEach((h, idx) => {
+                            if(h !== 'email' && cols[idx]) { payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; }
+                        });
+                        const sanitizedEmail = cols[emailIdx].replace(/[.#$[\]]/g, "_");
+                        await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: cols[emailIdx], ...payload }, { merge: true });
+                        successCount++;
+                    }
+                    window.showToast(`匯入完成！共處理 ${successCount} 筆資料`);
+                    window.loadAdminMembers();
+                } catch(err) { window.showToast("匯入過程發生錯誤", true); }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
+        };
+
+        // Chat System
+        window.openAdminMsgModal = async function(emailId) {
+            window.currentMsgEmail = emailId;
+            document.getElementById('admin-msg-target').textContent = `(${emailId})`;
+            document.getElementById('admin-msg-target-name').textContent = "載入中...";
+            document.getElementById('admin-msg-modal').classList.remove('hidden');
+            const historyDiv = document.getElementById('admin-chat-history');
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
+            
+            try {
+                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.currentMsgName = data.name || '未命名會員';
+                    document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
+                    
+                    const messages = data.messages || [];
+                    if(!messages || messages.length === 0) {
+                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
+                    } else {
+                        historyDiv.innerHTML = messages.map((m, index) => {
+                            const isUser = m.role === 'user';
+                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                            const senderName = isUser ? window.currentMsgName : 'Admin';
+                            const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
+                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
+                            return `
+                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
+                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
+                                </div>
+                            `;
+                        }).join('');
+                        historyDiv.scrollTop = historyDiv.scrollHeight;
+                    }
+                    localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                    window.loadAdminMembers(); 
+                }
+            } catch(e) { window.showToast("訊息載入失敗", true); }
+        };
+
+        window.sendAdminMsg = async function() {
+            const emailId = window.currentMsgEmail;
+            const inputEl = document.getElementById('admin-chat-input');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = [];
+                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
+                
+                messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                inputEl.value = '';
+                if(window.openAdminMsgModal) window.openAdminMsgModal(emailId); 
+                window.loadAdminMembers(); 
+            } catch(e) { window.showToast("傳送失敗", true); } 
+            finally { inputEl.disabled = false; inputEl.focus(); }
+        };
+
+        window.openUserMsgModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) return;
+            
+            document.getElementById('user-msg-modal').classList.remove('hidden');
+            document.getElementById('msg-dot')?.classList.add('hidden'); 
+            const historyDiv = document.getElementById('user-chat-history');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-blue-500"></div>';
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const messages = data.messages || [];
+                    window.currentUserMsgName = data.name || '我';
+                    
+                    if(!messages || messages.length === 0) {
+                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
+                    } else {
+                        historyDiv.innerHTML = messages.map((m, index) => {
+                            const isUser = m.role === 'user';
+                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                            const senderName = isUser ? window.currentUserMsgName : 'Admin';
+                            const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
+                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
+                            
+                            return `
+                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
+                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
+                                </div>
+                            `;
+                        }).join('');
+                        historyDiv.scrollTop = historyDiv.scrollHeight;
+                    }
+                    
+                    localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                    const hasAdminMsg = messages.some(m => m.role === 'admin');
+                    if(hasAdminMsg) {
+                        inputEl.disabled = false; btnEl.disabled = false;
+                        inputEl.placeholder = "輸入訊息回覆管理員... / Type your reply...";
+                    } else {
+                        inputEl.disabled = true; btnEl.disabled = true;
+                        inputEl.placeholder = "目前無客服訊息，待管理員發送後即可回覆...";
+                    }
+                }
+            } catch(e) { window.showToast("訊息載入失敗", true); }
+        };
+
+        window.sendUserMsg = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true; btnEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = [];
+                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
+                
+                messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                inputEl.value = '';
+                if(window.openUserMsgModal) window.openUserMsgModal();
+            } catch(e) { window.showToast("傳送失敗", true); } 
+            finally { inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); }
+        };
+
+        window.deleteMsg = async function(emailId, index, actionEl) {
+            if (actionEl && actionEl.textContent !== '確認?') {
+                const orig = actionEl.textContent;
+                actionEl.textContent = '確認?';
+                actionEl.classList.add('font-black', 'text-red-600');
+                setTimeout(() => { 
+                    if(actionEl && actionEl.parentNode) { actionEl.textContent = orig; actionEl.classList.remove('font-black', 'text-red-600'); } 
+                }, 3000);
+                return;
+            }
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    let messages = docSnap.data().messages || [];
+                    messages.splice(index, 1);
+                    await setDoc(docRef, { messages }, { merge: true });
+                    window.showToast("舊訊息已清除");
+                    if (window.isAdmin && !document.getElementById('admin-msg-modal').classList.contains('hidden')) {
+                        if (window.openAdminMsgModal) window.openAdminMsgModal(emailId);
+                    } else {
+                        if (window.openUserMsgModal) window.openUserMsgModal();
+                    }
+                }
+            } catch(e) { window.showToast("清除失敗", true); }
         };
 
         window.handleMsgBtnClick = function() {
@@ -662,31 +1250,12 @@
             }
         };
 
+        // --- 翻譯與學習核心 ---
         window.saveApiKey = function() {
             const key = document.getElementById('custom-api-key').value.trim();
             if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
         };
 
-        // --- 語音發音 ---
-        window.speak = function(text) {
-            if (!text || !window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            let cleanText = window.getStr(text).replace(/[\/\-_|]/g, '，').replace(/\([^)]*\)/g, '').replace(/[\u3105-\u3129\u02CA\u02C7\u02CB\u02D9]/g, ''); 
-            const ut = new SpeechSynthesisUtterance(cleanText.trim());
-            ut.lang = 'zh-TW'; ut.rate = 0.85;
-            window.speechSynthesis.speak(ut);
-        };
-
-        window.speakEng = function(text) {
-            if (!text || !window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const ut = new SpeechSynthesisUtterance(text.trim());
-            ut.lang = 'en-US';
-            ut.rate = 0.9;
-            window.speechSynthesis.speak(ut);
-        };
-
-        // --- 翻譯與拆字 ---
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -705,22 +1274,17 @@
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
                 document.getElementById('split-btn').click();
-            } catch(e) {
-                window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
-            } finally { 
-                document.getElementById('translate-loader').classList.add('hidden'); 
-            }
+            } catch(e) { window.showToast("翻譯伺服器連線失敗，請稍後再試", true); } 
+            finally { document.getElementById('translate-loader').classList.add('hidden'); }
         };
 
         window.handleSplit = function(e) {
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
             
-            // 雙重計費防護
             if (e && e.isTrusted) {
                 if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
-                    window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
-                    return; 
+                    window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; 
                 }
                 if (!window.isVIP) { 
                     window.freeUsageCount++; 
@@ -749,7 +1313,6 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
-                    // [PM] 精準分流：VIP且有Key -> 魔法 ; VIP但無Key -> 引導裝Key ; 非VIP -> 擋下
                     if (window.isVIP) {
                         if (window.activeApiKey) {
                             if(window.executeAIFetch) window.executeAIFetch(char);
@@ -798,7 +1361,174 @@
             if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
         };
 
-        // --- 全域事件委派 (單一無重複入口) ---
+        window.fetchWithRetry = async function(url, options, maxRetries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i <= maxRetries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (res.status === 429 && i < maxRetries) {
+                        document.getElementById('ai-error-title').textContent = "AI 引擎休息中";
+                        document.getElementById('ai-error-debug').textContent = `觸發頻率限制。系統將於 ${delays[i]/1000} 秒後重試...`;
+                        document.getElementById('ai-error-panel').classList.remove('hidden');
+                        await new Promise(r => setTimeout(r, delays[i]));
+                        continue;
+                    }
+                    return res;
+                } catch (err) {
+                    if (i === maxRetries) throw err;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        };
+
+        window.searchCustomIdiom = async function() {
+            const inputEl = document.getElementById('custom-idiom-input');
+            const resultDiv = document.getElementById('custom-idiom-result');
+            if (!inputEl || !resultDiv) return;
+            const input = inputEl.value.trim();
+            if (!input) { window.showToast("請輸入成語 / Enter idiom", true); return; }
+            if (!window.activeApiKey) { window.showToast("請先設定 API 金鑰", true); return; }
+            resultDiv.innerHTML = '<div class="loader mx-auto border-t-indigo-500"></div>';
+            try {
+                const prompt = `請嚴格解析成語「${input}」的繁體中文教學 JSON格式：{"idiom": "${input}", "meaning": "中文意思", "english": "English context translation"}。若「${input}」不是合理的成語或查無此詞，請務必回傳 {"error": "查無此成語解析"}`;
+                const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const result = await res.json();
+                if (result.error) throw new Error(result.error.message);
+                const rawText = result.candidates[0].content.parts[0].text;
+                const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
+                if (data.error || !data.meaning) {
+                    resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">${data.error || '查無此成語解析'}</div>`;
+                    return;
+                }
+                resultDiv.innerHTML = `
+                    <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex justify-between items-start shadow-sm mt-4 animate-in fade-in">
+                        <div class="flex-1 pr-4">
+                            <div class="text-slate-800 text-sm font-black tracking-tight">${window.getStr(data.idiom)}</div>
+                            <div class="text-[11px] text-slate-600 mt-1 leading-relaxed">${window.getStr(data.meaning)}</div>
+                            <div class="text-[10px] text-indigo-600 font-bold mt-2"><i class="ph ph-translate"></i> ${window.getStr(data.english)}</div>
+                        </div>
+                        <button type="button" data-action="speak" data-text="${window.getStr(data.idiom)}" class="text-indigo-600 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
+                    </div>
+                `;
+                inputEl.value = '';
+            } catch (e) {
+                resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">查詢失敗，請重試 / Query failed</div>`;
+            }
+        };
+
+        window.executeAIFetch = async function(char) {
+            if (!localStorage.getItem('abra_vip_code')) return;
+            if (window.syncVipStatus) await window.syncVipStatus();
+            
+            if (!window.isVIP) {
+                document.getElementById('vip-only-content').classList.add('hidden');
+                document.getElementById('free-promo-content').classList.remove('hidden');
+                document.getElementById('expiry-notice-box').classList.remove('hidden');
+                document.getElementById('ai-inner-loader').classList.add('hidden');
+                document.getElementById('ai-error-panel').classList.add('hidden');
+                return;
+            }
+
+            const loader = document.getElementById('ai-inner-loader');
+            const vipPanel = document.getElementById('vip-only-content');
+            const errorPanel = document.getElementById('ai-error-panel');
+            const promoPanel = document.getElementById('free-promo-content');
+
+            loader.classList.remove('hidden');
+            vipPanel.classList.add('hidden');
+            errorPanel.classList.add('hidden');
+            if (promoPanel) promoPanel.classList.add('hidden');
+
+            const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.5-flash-lite"];
+            let success = false;
+            for (const model of modelNames) {
+                try {
+                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙 (最多6個)。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音的注音發音」，【絕對不可】混入主要注音或其他發音的詞彙！例如「行」唸「ㄒㄧㄥˋ」只能造「德行」，絕不可造「行為」。(僅限2~4字詞彙，絕勿造句，最多6個)。4. idioms: 必須包含「${char}」字，若無則回傳[] (最多6個)。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    
+                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const result = await res.json();
+                    if (result.error) throw new Error(result.error.message);
+                    const rawText = result.candidates[0].content.parts[0].text;
+                    const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
+                    window.charCache[char] = data; window.renderResult(char, data);
+                    document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
+                    document.getElementById('active-engine-badge').classList.remove('hidden');
+                    success = true; break;
+                } catch (e) { document.getElementById('ai-error-debug').textContent = e.message; }
+            }
+            loader.classList.add('hidden');
+            if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
+        };
+
+        window.renderResult = function(char, data) {
+            document.getElementById('zhuyin-display').textContent = window.getStr(data.zhuyin).replace(/\s+/g, '');
+            const pb = document.getElementById('play-char-btn');
+            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char);
+            
+            const polyDisp = document.getElementById('polyphonic-display'); 
+            polyDisp.innerHTML = '';
+            const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
+            
+            if (validPolyphonic.length > 0) {
+                document.getElementById('poly-section-wrap').style.display = 'block';
+                validPolyphonic.forEach(p => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
+                    let exHTML = (p.examples || []).slice(0, 6).filter(ex => ex.length <= 6).map(ex => {
+                            const pureEx = window.getStr(ex).replace(/\([^)]*\)/g, '').trim();
+                            return `<button type="button" data-action="speak" data-text="${pureEx}" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
+                        }).join('');
+                    if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙</span>';
+                    const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 min-w-[3.5rem] px-2 text-center border-r border-purple-100 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
+                    polyDisp.appendChild(wrap);
+                });
+            } else {
+                document.getElementById('poly-section-wrap').style.display = 'none';
+            }
+            
+            const wordsCont = document.getElementById('words-container');
+            wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
+                    const pureWord = window.getStr(w).replace(/\([^)]*\)/g, '').trim();
+                    return `<span data-action="speak" data-text="${pureWord}" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
+            }).join('');
+            
+            const idiomsCont = document.getElementById('idioms-container');
+            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
+            
+            if (validIdioms.length > 0) {
+                idiomsCont.innerHTML = validIdioms.map(i => `
+                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm text-left hover:bg-white transition-all">
+                        <div class="flex-1 pr-6">
+                            <div class="text-slate-800 text-base font-black tracking-tight font-bold">${window.getStr(i.idiom)}</div>
+                            <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${window.getStr(i.meaning)}</div>
+                            <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${window.getStr(i.english) || "Translation loading..."}</div>
+                        </div>
+                        <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
+                    </div>
+                `).join('');
+            } else {
+                idiomsCont.innerHTML = `
+                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center shadow-sm">
+                        <p class="text-xs text-slate-600 mb-2 font-bold">目前無包含「${char}」的常見成語。</p>
+                        <p class="text-[10px] text-slate-400 mb-4">您可以自行填入成語，讓系統為您解析發音：</p>
+                        <div class="flex items-center gap-2 max-w-sm mx-auto">
+                            <input type="text" id="custom-idiom-input" placeholder="輸入成語..." class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 shadow-inner bg-white">
+                            <button type="button" onclick="window.searchCustomIdiom()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold active:scale-95 transition-all shadow-md uppercase tracking-wider">解析</button>
+                        </div>
+                        <div id="custom-idiom-result" class="mt-4 text-left"></div>
+                    </div>
+                `;
+            }
+        };
+
+        // 全網單一事件委派，徹底解決沙盒攔截與動態綁定失效問題
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
@@ -817,676 +1547,9 @@
             }
         });
 
-        // --- Firebase 後端驗證與管理邏輯 ---
-        window.verifyAdminCloud = async function(code) {
-            try {
-                const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
-                const adminSnap = await getDoc(adminRef);
-                return adminSnap.exists() && adminSnap.data().pass === code;
-            } catch(e) { return false; }
-        };
-
-        window.openProfileModal = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
-            
-            document.getElementById('profile-email').value = emailId;
-            document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
-            document.getElementById('profile-modal').classList.remove('hidden');
-            
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const user = docSnap.data();
-                    document.getElementById('profile-name').value = user.name || '';
-                    document.getElementById('profile-pass').value = user.password || '';
-                }
-            } catch(e) { }
-        };
-
-        window.openAdminModal = async function(emailId = '') {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            const emailInput = document.getElementById('admin-member-email');
-            
-            if (emailId && typeof emailId === 'string') {
-                emailInput.value = emailId;
-                emailInput.setAttribute('readonly', true);
-                emailInput.classList.add('bg-slate-100', 'text-slate-500');
-                
-                try {
-                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        document.getElementById('admin-member-pass').value = data.password || '';
-                        document.getElementById('admin-member-name').value = data.name || '';
-                        document.getElementById('admin-member-phone').value = data.phone || '';
-                        document.getElementById('admin-member-remittance').value = data.remittance || '';
-                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
-                        document.getElementById('admin-months').value = data.months || '';
-                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
-                        document.getElementById('admin-member-remarks').value = data.remarks || '';
-                    }
-                } catch(e) {
-                    window.showToast("資料讀取失敗", true);
-                }
-            } else {
-                emailInput.value = '';
-                emailInput.removeAttribute('readonly');
-                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
-                document.getElementById('admin-member-pass').value = '';
-                document.getElementById('admin-member-name').value = '';
-                document.getElementById('admin-member-phone').value = '';
-                document.getElementById('admin-member-remittance').value = '';
-                document.getElementById('admin-pay-date').value = '';
-                document.getElementById('admin-months').value = '';
-                document.getElementById('admin-expiry-date').value = '';
-                document.getElementById('admin-member-remarks').value = '';
-            }
-        };
-
-        window.syncVipStatus = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) return;
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const daysEl = document.getElementById('vip-days-left');
-                    const lightEl = document.getElementById('vip-status-light');
-
-                    if (data.expiryDate) {
-                        const diff = new Date(data.expiryDate).getTime() - Date.now();
-                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                        if(daysEl) daysEl.textContent = Math.max(0, daysLeft);
-                        
-                        if (daysLeft > 7) {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400";
-                            localStorage.setItem('abra_vip_status', 'active');
-                        } else if (daysLeft > 0) {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-orange-400 animate-pulse";
-                            localStorage.setItem('abra_vip_status', 'active');
-                        } else {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse";
-                            localStorage.setItem('abra_vip_status', 'expired');
-                        }
-                    } else {
-                        localStorage.setItem('abra_vip_status', 'pending');
-                    }
-
-                    if (data.apiKey && localStorage.getItem('abra_vip_status') === 'active') {
-                        localStorage.setItem('gemini_api_key', data.apiKey);
-                        window.activeApiKey = data.apiKey;
-                    }
-                    
-                    const messages = data.messages || [];
-                    const lastReadCount = parseInt(localStorage.getItem(`abra_msg_read_${emailId}`) || '0', 10);
-                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-
-                    if (lastMsg && lastMsg.role === 'admin' && messages.length > lastReadCount) {
-                        document.getElementById('msg-dot')?.classList.remove('hidden');
-                    } else {
-                        document.getElementById('msg-dot')?.classList.add('hidden');
-                    }
-
-                    if (window.updateGlobalUI) window.updateGlobalUI();
-                }
-            } catch(e) { console.error("Sync Error"); }
-        };
-
-        window.loadAdminMembers = async function() {
-            const tbody = document.getElementById('admin-members-tbody');
-            if(!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">載入會員資料中...</td></tr>';
-            try {
-                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
-                let html = '';
-                let globalUnread = false; 
-
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const emailId = docSnap.id;
-                    
-                    let statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>`;
-                    let daysText = "未開通";
-                    if (data.expiryDate) {
-                        const diff = new Date(data.expiryDate).getTime() - Date.now();
-                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                        if (daysLeft > 7) {
-                            statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-emerald-500 light-glow"></div>`;
-                            daysText = `剩餘 ${daysLeft} 天`;
-                        } else if (daysLeft > 0) {
-                            statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-orange-500 light-glow animate-pulse"></div>`;
-                            daysText = `即將到期 (${daysLeft}天)`;
-                        } else {
-                            statusHTML = `<div class="w-2.5 h-2.5 rounded-full bg-red-500 light-glow animate-pulse"></div>`;
-                            daysText = "已過期";
-                        }
-                    }
-
-                    const messages = data.messages || [];
-                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-                    const adminReadCount = parseInt(localStorage.getItem(`admin_read_${emailId}`) || '0', 10);
-                    const hasUnread = lastMsg && lastMsg.role === 'user' && messages.length > adminReadCount;
-                    if (hasUnread) globalUnread = true; 
-
-                    const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:text-blue-800";
-                    const msgBtnText = hasUnread ? "新回覆" : "傳訊";
-
-                    html += `
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center gap-2">
-                                    ${statusHTML} <span class="text-xs font-bold">${daysText}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">${data.email || emailId}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-indigo-700">${data.name || '無'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '未登記電話'}</span></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' 個月' : '-'}</span></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px]">${data.remarks || '-'}</span></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
-                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
-                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg transition-all">刪除</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                if(html === '') {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 italic">目前尚無會員資料</td></tr>';
-                } else {
-                    tbody.innerHTML = html;
-                }
-
-                if (window.isAdmin) {
-                    const msgDot = document.getElementById('msg-dot');
-                    if (msgDot) {
-                        if (globalUnread) msgDot.classList.remove('hidden');
-                        else msgDot.classList.add('hidden');
-                    }
-                }
-            } catch(e) {
-                console.error(e);
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500 font-bold">載入失敗，請檢查權限或網路。</td></tr>';
-            }
-        };
-
-        window.exportCSV = async function() {
-            try {
-                window.showToast("準備匯出 CSV...");
-                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
-                let csvContent = "Email,Password,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
-                
-                querySnapshot.forEach(doc => {
-                    const d = doc.data();
-                    const row = [
-                        d.email || doc.id, d.password || '', d.name || '', d.phone || '', 
-                        d.remittance || '', d.paymentDate || '', d.months || '', 
-                        d.expiryDate || '', d.remarks || '', d.status || ''
-                    ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
-                    csvContent += row + "\n";
-                });
-                
-                const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.setAttribute("href", url);
-                const dateStr = new Date().toISOString().split('T')[0];
-                link.setAttribute("download", `Abrakai_Members_${dateStr}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.showToast("匯出成功！");
-            } catch(e) {
-                window.showToast("匯出失敗", true);
-            }
-        };
-
-        window.importCSV = async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    window.showToast("開始比對匯入資料...");
-                    const text = e.target.result;
-                    const rows = text.split('\n').filter(r => r.trim());
-                    if(rows.length < 2) { window.showToast("CSV 格式錯誤或無資料", true); return; }
-                    
-                    const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').toLowerCase().trim());
-                    const emailIdx = headers.indexOf('email');
-                    if(emailIdx === -1) { window.showToast("CSV 第一行必須包含 Email 欄位", true); return; }
-
-                    let successCount = 0;
-                    for(let i=1; i<rows.length; i++) {
-                        const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
-                        if(cols.length === 0) continue;
-                        const email = cols[emailIdx];
-                        if(!email) continue;
-                        
-                        const payload = {};
-                        headers.forEach((h, idx) => {
-                            if(h !== 'email' && cols[idx] !== undefined && cols[idx] !== '') {
-                                if(h==='name') payload.name = cols[idx];
-                                if(h==='password') payload.password = cols[idx];
-                                if(h==='phone') payload.phone = cols[idx];
-                                if(h==='remittance') payload.remittance = cols[idx];
-                                if(h==='paymentdate') payload.paymentDate = cols[idx];
-                                if(h==='months') payload.months = cols[idx];
-                                if(h==='expirydate') payload.expiryDate = cols[idx];
-                                if(h==='remarks') payload.remarks = cols[idx];
-                                if(h==='status') payload.status = cols[idx];
-                            }
-                        });
-                        const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
-                        const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                        await setDoc(docRef, { email: email, ...payload }, { merge: true });
-                        successCount++;
-                    }
-                    window.showToast(`匯入完成！共處理 ${successCount} 筆資料`);
-                    window.loadAdminMembers();
-                } catch(err) {
-                    window.showToast("匯入過程發生錯誤", true);
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; 
-        };
-
-        window.saveAdminMember = async function() {
-            const email = document.getElementById('admin-member-email').value.trim().toLowerCase();
-            const password = document.getElementById('admin-member-pass').value.trim();
-            const name = document.getElementById('admin-member-name').value.trim();
-            const phone = document.getElementById('admin-member-phone').value.trim();
-            const remittance = document.getElementById('admin-member-remittance').value.trim();
-            const paymentDate = document.getElementById('admin-pay-date').value;
-            const months = document.getElementById('admin-months').value;
-            const expiryDate = document.getElementById('admin-expiry-date').value;
-            const remarks = document.getElementById('admin-member-remarks').value.trim();
-
-            if (!email || !password || !name) {
-                window.showToast("Email、密碼與姓名為必填欄位", true);
-                return;
-            }
-
-            const saveBtn = document.getElementById('admin-save-btn');
-            saveBtn.textContent = "Saving...";
-            saveBtn.disabled = true;
-
-            try {
-                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                
-                await setDoc(docRef, {
-                    email: email,
-                    password: password,
-                    name: name,
-                    phone: phone,
-                    remittance: remittance,
-                    paymentDate: paymentDate,
-                    months: months,
-                    expiryDate: expiryDate,
-                    remarks: remarks,
-                    status: expiryDate ? "active" : "pending"
-                }, { merge: true });
-                
-                window.showToast("會員資料已儲存成功！");
-                if (window.closeAdminModal) window.closeAdminModal();
-                window.loadAdminMembers(); 
-            } catch(e) {
-                window.showToast("儲存失敗，請重試", true);
-            } finally {
-                saveBtn.textContent = "Save / 儲存會員";
-                saveBtn.disabled = false;
-            }
-        };
-
-        window.deleteAdminMember = async function(emailId, actionEl) {
-            if (actionEl && actionEl.textContent !== '確認刪除') {
-                const originalText = actionEl.textContent;
-                actionEl.textContent = '確認刪除';
-                actionEl.classList.replace('bg-red-50', 'bg-red-600');
-                actionEl.classList.replace('text-red-600', 'text-white');
-                setTimeout(() => {
-                    if (actionEl && actionEl.parentNode) {
-                        actionEl.textContent = originalText;
-                        actionEl.classList.replace('bg-red-600', 'bg-red-50');
-                        actionEl.classList.replace('text-white', 'text-red-600');
-                    }
-                }, 3000);
-                return;
-            }
-
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                await deleteDoc(docRef);
-                window.showToast("會員已成功刪除");
-                window.loadAdminMembers();
-            } catch(e) {
-                window.showToast("刪除失敗", true);
-            }
-        };
-
-        window.deleteMsg = async function(emailId, index, actionEl) {
-            if (actionEl && actionEl.textContent !== '確認?') {
-                const orig = actionEl.textContent;
-                actionEl.textContent = '確認?';
-                actionEl.classList.add('font-black', 'text-red-600');
-                setTimeout(() => { 
-                    if(actionEl && actionEl.parentNode) { 
-                        actionEl.textContent = orig; 
-                        actionEl.classList.remove('font-black', 'text-red-600'); 
-                    } 
-                }, 3000);
-                return;
-            }
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    let messages = docSnap.data().messages || [];
-                    messages.splice(index, 1);
-                    await setDoc(docRef, { messages }, { merge: true });
-                    window.showToast("舊訊息已清除");
-                    
-                    if (window.isAdmin && !document.getElementById('admin-msg-modal').classList.contains('hidden')) {
-                        if (window.openAdminMsgModal) window.openAdminMsgModal(emailId);
-                    } else {
-                        if (window.openUserMsgModal) window.openUserMsgModal();
-                    }
-                }
-            } catch(e) {
-                window.showToast("清除失敗", true);
-            }
-        };
-
-        window.openAdminMsgModal = async function(emailId) {
-            window.currentMsgEmail = emailId;
-            document.getElementById('admin-msg-target').textContent = `(${emailId})`;
-            document.getElementById('admin-msg-target-name').textContent = "載入中...";
-            document.getElementById('admin-msg-modal').classList.remove('hidden');
-            const historyDiv = document.getElementById('admin-chat-history');
-            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
-            
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    window.currentMsgName = data.name || '未命名會員';
-                    document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
-                    
-                    const messages = data.messages || [];
-                    
-                    const container = document.getElementById('admin-chat-history');
-                    if(!messages || messages.length === 0) {
-                        container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
-                    } else {
-                        container.innerHTML = messages.map((m, index) => {
-                            const isUser = m.role === 'user';
-                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                            const senderName = isUser ? window.currentMsgName : 'Admin';
-                            
-                            const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
-                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
-                            
-                            return `
-                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
-                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
-                                </div>
-                            `;
-                        }).join('');
-                        container.scrollTop = container.scrollHeight;
-                    }
-                    
-                    localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
-                    window.loadAdminMembers(); 
-                }
-            } catch(e) {
-                window.showToast("訊息載入失敗", true);
-            }
-        };
-
-        window.sendAdminMsg = async function() {
-            const emailId = window.currentMsgEmail;
-            const inputEl = document.getElementById('admin-chat-input');
-            const text = inputEl.value.trim();
-            if(!text || !emailId) return;
-
-            inputEl.disabled = true;
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                let messages = [];
-                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
-                
-                messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
-                await setDoc(docRef, { messages: messages }, { merge: true });
-                
-                localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
-                
-                inputEl.value = '';
-                if(window.openAdminMsgModal) window.openAdminMsgModal(emailId); 
-                window.loadAdminMembers(); 
-            } catch(e) {
-                window.showToast("傳送失敗", true);
-            } finally {
-                inputEl.disabled = false;
-                inputEl.focus();
-            }
-        };
-
-        window.openUserMsgModal = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) return;
-            
-            document.getElementById('user-msg-modal').classList.remove('hidden');
-            document.getElementById('msg-dot')?.classList.add('hidden'); 
-            const historyDiv = document.getElementById('user-chat-history');
-            const inputEl = document.getElementById('user-chat-input');
-            const btnEl = document.getElementById('user-chat-send-btn');
-            
-            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-blue-500"></div>';
-            
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const messages = data.messages || [];
-                    window.currentUserMsgName = data.name || '我';
-                    
-                    if(!messages || messages.length === 0) {
-                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
-                    } else {
-                        historyDiv.innerHTML = messages.map((m, index) => {
-                            const isUser = m.role === 'user';
-                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                            const senderName = isUser ? window.currentUserMsgName : 'Admin';
-                            
-                            const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
-                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
-                            
-                            return `
-                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
-                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
-                                </div>
-                            `;
-                        }).join('');
-                        historyDiv.scrollTop = historyDiv.scrollHeight;
-                    }
-                    
-                    localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
-                    
-                    const hasAdminMsg = messages.some(m => m.role === 'admin');
-                    if(hasAdminMsg) {
-                        inputEl.disabled = false;
-                        btnEl.disabled = false;
-                        inputEl.placeholder = "輸入訊息回覆管理員... / Type your reply...";
-                    } else {
-                        inputEl.disabled = true;
-                        btnEl.disabled = true;
-                        inputEl.placeholder = "目前無客服訊息，待管理員發送後即可回覆...";
-                    }
-                }
-            } catch(e) {
-                window.showToast("訊息載入失敗", true);
-            }
-        };
-
-        window.sendUserMsg = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            const inputEl = document.getElementById('user-chat-input');
-            const btnEl = document.getElementById('user-chat-send-btn');
-            const text = inputEl.value.trim();
-            if(!text || !emailId) return;
-
-            inputEl.disabled = true;
-            btnEl.disabled = true;
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                let messages = [];
-                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
-                
-                messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
-                await setDoc(docRef, { messages: messages }, { merge: true });
-                
-                localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
-                
-                inputEl.value = '';
-                if(window.openUserMsgModal) window.openUserMsgModal();
-            } catch(e) {
-                window.showToast("傳送失敗", true);
-            } finally {
-                inputEl.disabled = false;
-                btnEl.disabled = false;
-                inputEl.focus();
-            }
-        };
-
-        window.handleLogin = async function() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const code = document.getElementById('login-vip-code').value.trim();
-            if (!code) { window.showToast("請輸入密碼 / Enter Password", true); return; }
-
-            const loginBtn = document.getElementById('login-btn');
-            const loader = document.getElementById('login-loader');
-            const btnText = document.getElementById('login-btn-text');
-
-            if(loader) loader.classList.remove('hidden');
-            if(btnText) btnText.textContent = "Verifying... / 驗證中...";
-            if(loginBtn) loginBtn.disabled = true;
-
-            try {
-                if (await window.verifyAdminCloud(code)) {
-                    localStorage.setItem('abra_admin_status', 'active');
-                    window.showToast("管理員身分確認 / Admin Verified.");
-                    setTimeout(() => location.reload(), 800);
-                } else if (!email) {
-                    window.showToast("請輸入註冊信箱 / Enter Email", true);
-                } else {
-                    const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
-                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                    const docSnap = await getDoc(docRef);
-
-                    if (docSnap.exists() && docSnap.data().password === code) {
-                        const data = docSnap.data();
-                        localStorage.setItem('abra_vip_code', sanitizedEmail);
-                        
-                        let status = 'pending';
-                        if (data.expiryDate) {
-                            const daysLeft = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                            if (daysLeft > 0) status = 'active';
-                            else status = 'expired';
-                        }
-                        localStorage.setItem('abra_vip_status', status);
-                        
-                        if (data.apiKey && status === 'active') localStorage.setItem('gemini_api_key', data.apiKey);
-                        window.showToast("登入成功！ / Login Success!");
-                        setTimeout(() => location.reload(), 800);
-                    } else {
-                        window.showToast("帳號或密碼錯誤 / Invalid Credentials", true);
-                    }
-                }
-            } catch(e) {
-                console.error("Login Error: ", e);
-                if(e.code === 'permission-denied') {
-                    window.showToast("雲端連線權限不足，請重試", true);
-                } else {
-                    window.showToast("系統繁忙或密碼錯誤，請稍候", true);
-                }
-            } finally {
-                if(loader) loader.classList.add('hidden');
-                if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
-                if(loginBtn) loginBtn.disabled = false;
-            }
-        };
-
-        window.handleSignup = async function() {
-            const agree = document.getElementById('legal-agree')?.checked;
-            if (!agree) { window.showToast("請先同意免責聲明 / Agree to Terms", true); return; }
-            
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim().toLowerCase();
-            const pass = document.getElementById('reg-pass').value.trim();
-            if (!name || !email || !pass) { window.showToast("請填寫完整註冊資料 / Fill all fields", true); return; }
-
-            const signupBtn = document.getElementById('signup-btn');
-            const originalText = signupBtn ? signupBtn.textContent : "Processing...";
-            if(signupBtn) { signupBtn.textContent = "Processing... / 處理中..."; signupBtn.disabled = true; }
-
-            try {
-                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) { 
-                    window.showToast("Email 已註冊 / Email registered", true); 
-                } else {
-                    await setDoc(docRef, { name, email, password: pass, signupDate: new Date().toISOString(), status: "pending" });
-                    window.showToast("註冊成功！請聯絡執行長。 / Success!");
-                    document.getElementById('reg-name').value = '';
-                    document.getElementById('reg-email').value = '';
-                    document.getElementById('reg-pass').value = '';
-                    document.getElementById('legal-agree').checked = false;
-                }
-            } catch(e) { 
-                console.error("Signup Error: ", e);
-                window.showToast("註冊失敗，請檢查網路 / Network Error", true); 
-            } finally {
-                if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; }
-            }
-        };
-
-        window.saveProfileInfo = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            const newName = document.getElementById('profile-name').value.trim();
-            const newPass = document.getElementById('profile-pass').value.trim();
-            const newApiKey = document.getElementById('profile-api-key').value.trim();
-            
-            if (!window.isVIP && !window.isAdmin && newApiKey) {
-                window.showToast("未繳費開通，無法設定 API 金鑰", true);
-                return;
-            }
-            
-            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                await updateDoc(docRef, { name: newName, password: newPass, apiKey: newApiKey });
-                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
-                else localStorage.setItem('gemini_api_key', newApiKey);
-                window.activeApiKey = newApiKey;
-                window.showToast("設定已同步至雲端並儲存完成！ / Saved!");
-                if (window.closeProfileModal) window.closeProfileModal();
-                setTimeout(() => location.reload(), 800);
-            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
+        // 確保初始載入
+        window.onload = function() {
+            if (window.updateGlobalUI) window.updateGlobalUI();
         };
     </script>
 </body>

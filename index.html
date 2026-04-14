@@ -188,7 +188,7 @@
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 self-center mt-4">
                         <input type="password" id="custom-api-key" placeholder="Paste API Key / 貼上金鑰" readonly onfocus="this.removeAttribute('readonly');" class="w-full md:w-64 px-4 py-3 rounded-xl border-2 border-indigo-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none text-sm font-mono shadow-sm bg-white text-slate-700">
-                        <button type="button" onclick="window.saveApiKey()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all">Start / 啟動</button>
+                        <button type="button" onclick="window.saveApiKey()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all">Start / 啟弱</button>
                     </div>
                 </div>
             </div>
@@ -290,7 +290,7 @@
         </section>
     </main>
 
-    <!-- 【全宇宙唯一的 Modal 彈窗區塊】 (絕對不允許重複) -->
+    <!-- 區塊 6：全域系統彈出視窗 (Modals) (絕對不允許重複) -->
     
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
@@ -793,7 +793,6 @@
             localStorage.removeItem('abra_vip_status');
             localStorage.removeItem('abra_vip_code');
             localStorage.removeItem('abra_admin_status');
-            // 保留 usage_count 防止免費仔洗次數
             location.reload(); 
         };
 
@@ -859,101 +858,6 @@
             } catch(e) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500 font-bold">載入失敗，請檢查權限或網路。</td></tr>';
             }
-        };
-
-        window.openAdminModal = async function(emailId = '') {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            const emailInput = document.getElementById('admin-member-email');
-            
-            if (emailId && typeof emailId === 'string') {
-                emailInput.value = emailId;
-                emailInput.setAttribute('readonly', true);
-                emailInput.classList.add('bg-slate-100', 'text-slate-500');
-                
-                try {
-                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        document.getElementById('admin-member-pass').value = data.password || '';
-                        document.getElementById('admin-member-name').value = data.name || '';
-                        document.getElementById('admin-member-phone').value = data.phone || '';
-                        document.getElementById('admin-member-remittance').value = data.remittance || '';
-                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
-                        document.getElementById('admin-months').value = data.months || '';
-                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
-                        document.getElementById('admin-member-remarks').value = data.remarks || '';
-                    }
-                } catch(e) { window.showToast("資料讀取失敗", true); }
-            } else {
-                emailInput.value = '';
-                emailInput.removeAttribute('readonly');
-                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
-                document.getElementById('admin-member-pass').value = '';
-                document.getElementById('admin-member-name').value = '';
-                document.getElementById('admin-member-phone').value = '';
-                document.getElementById('admin-member-remittance').value = '';
-                document.getElementById('admin-pay-date').value = '';
-                document.getElementById('admin-months').value = '';
-                document.getElementById('admin-expiry-date').value = '';
-                document.getElementById('admin-member-remarks').value = '';
-            }
-        };
-
-        window.saveAdminMember = async function() {
-            const email = document.getElementById('admin-member-email').value.trim().toLowerCase();
-            const password = document.getElementById('admin-member-pass').value.trim();
-            const name = document.getElementById('admin-member-name').value.trim();
-            const phone = document.getElementById('admin-member-phone').value.trim();
-            const remittance = document.getElementById('admin-member-remittance').value.trim();
-            const paymentDate = document.getElementById('admin-pay-date').value;
-            const months = document.getElementById('admin-months').value;
-            const expiryDate = document.getElementById('admin-expiry-date').value;
-            const remarks = document.getElementById('admin-member-remarks').value.trim();
-
-            if (!email || !password || !name) { window.showToast("Email、密碼與姓名為必填欄位", true); return; }
-
-            const saveBtn = document.getElementById('admin-save-btn');
-            saveBtn.textContent = "Saving...";
-            saveBtn.disabled = true;
-
-            try {
-                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                
-                await setDoc(docRef, {
-                    email: email, password: password, name: name, phone: phone,
-                    remittance: remittance, paymentDate: paymentDate, months: months,
-                    expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
-                }, { merge: true });
-                
-                window.showToast("會員資料已儲存成功！");
-                if (window.closeAdminModal) window.closeAdminModal();
-                window.loadAdminMembers(); 
-            } catch(e) { window.showToast("儲存失敗，請重試", true); } 
-            finally { saveBtn.textContent = "Save / 儲存會員"; saveBtn.disabled = false; }
-        };
-
-        window.deleteAdminMember = async function(emailId, actionEl) {
-            if (actionEl && actionEl.textContent !== '確認刪除') {
-                const originalText = actionEl.textContent;
-                actionEl.textContent = '確認刪除';
-                actionEl.classList.replace('bg-red-50', 'bg-red-600');
-                actionEl.classList.replace('text-red-600', 'text-white');
-                setTimeout(() => {
-                    if (actionEl && actionEl.parentNode) {
-                        actionEl.textContent = originalText;
-                        actionEl.classList.replace('bg-red-600', 'bg-red-50');
-                        actionEl.classList.replace('text-white', 'text-red-600');
-                    }
-                }, 3000);
-                return;
-            }
-            try {
-                await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
-                window.showToast("會員已成功刪除");
-                window.loadAdminMembers();
-            } catch(e) { window.showToast("刪除失敗", true); }
         };
 
         window.exportCSV = async function() {
@@ -1227,8 +1131,7 @@
             }
         };
 
-        // --- 8. AI 翻譯與拆字引擎 (包含過濾優化發音) ---
-        // [PM] 修正：移除注音過濾器，確保所有的中文、英文與注音皆能順利發聲，只過濾會發音錯誤的符號
+        // --- 8. AI 翻譯與拆字引擎 ---
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
@@ -1309,15 +1212,24 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
-                    if (window.isVIP && window.activeApiKey) {
-                        if(window.executeAIFetch) window.executeAIFetch(char);
+                    if (window.isVIP) {
+                        if (window.activeApiKey) {
+                            if(window.executeAIFetch) window.executeAIFetch(char);
+                        } else {
+                            document.getElementById('vip-only-content').classList.add('hidden'); 
+                            document.getElementById('free-promo-content').classList.add('hidden'); 
+                            document.getElementById('ai-inner-loader').classList.add('hidden');
+                            document.getElementById('ai-error-panel').classList.add('hidden');
+                            const noKeyPromo = document.getElementById('vip-no-key-promo');
+                            if(noKeyPromo) noKeyPromo.classList.remove('hidden');
+                        }
                     } else { 
                         document.getElementById('vip-only-content').classList.add('hidden'); 
-                        document.getElementById('free-promo-content').classList.add('hidden'); 
+                        const noKeyPromo = document.getElementById('vip-no-key-promo');
+                        if(noKeyPromo) noKeyPromo.classList.add('hidden');
                         document.getElementById('ai-inner-loader').classList.add('hidden');
                         document.getElementById('ai-error-panel').classList.add('hidden');
-                        const noKeyPromo = document.getElementById('vip-no-key-promo');
-                        if(noKeyPromo) noKeyPromo.classList.remove('hidden');
+                        document.getElementById('free-promo-content').classList.remove('hidden'); 
                     }
                 };
                 container.appendChild(btn);
@@ -1368,44 +1280,7 @@
             }
         };
 
-        window.searchCustomIdiom = async function() {
-            const inputEl = document.getElementById('custom-idiom-input');
-            const resultDiv = document.getElementById('custom-idiom-result');
-            if (!inputEl || !resultDiv) return;
-            const input = inputEl.value.trim();
-            if (!input) { window.showToast("請輸入成語 / Enter idiom", true); return; }
-            if (!window.activeApiKey) { window.showToast("請先設定 API 金鑰", true); return; }
-            resultDiv.innerHTML = '<div class="loader mx-auto border-t-indigo-500"></div>';
-            try {
-                const prompt = `請嚴格解析成語「${input}」的繁體中文教學 JSON格式：{"idiom": "${input}", "meaning": "中文意思", "english": "English context translation"}。若「${input}」不是合理的成語或查無此詞，請務必回傳 {"error": "查無此成語解析"}`;
-                const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const result = await res.json();
-                if (result.error) throw new Error(result.error.message);
-                const rawText = result.candidates[0].content.parts[0].text;
-                const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
-                if (data.error || !data.meaning) {
-                    resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">${data.error || '查無此成語解析'}</div>`;
-                    return;
-                }
-                resultDiv.innerHTML = `
-                    <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex justify-between items-start shadow-sm mt-4 animate-in fade-in">
-                        <div class="flex-1 pr-4">
-                            <div class="text-slate-800 text-sm font-black tracking-tight">${window.getStr(data.idiom)}</div>
-                            <div class="text-[11px] text-slate-600 mt-1 leading-relaxed">${window.getStr(data.meaning)}</div>
-                            <div class="text-[10px] text-indigo-600 font-bold mt-2"><i class="ph ph-translate"></i> ${window.getStr(data.english)}</div>
-                        </div>
-                        <button type="button" data-action="speak" data-text="${window.getStr(data.idiom)}" class="text-indigo-600 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
-                    </div>
-                `;
-                inputEl.value = '';
-            } catch (e) {
-                resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">查詢失敗，請重試 / Query failed</div>`;
-            }
-        };
-
+        // [PM] 修復點：AI Prompt 升級，強制嚴格比對發音與詞彙，解決「有的放矢」被錯放的問題
         window.executeAIFetch = async function(char) {
             if (!localStorage.getItem('abra_vip_code')) return;
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1435,7 +1310,12 @@
             let success = false;
             for (const model of modelNames) {
                 try {
-                    const prompt = `針對繁體中文字「${char}」嚴格輸出台灣教學 JSON。1. zhuyin: 填寫「主要注音」(勿含空格，必須使用標準台灣注音符號，絕對禁止出現英文字母，如「ㄒㄧㄥˋ」不可寫成「T-ㄥˋ」)。2. words: 僅限發音為「主要注音」的詞彙 (最多6個)。3. polyphonic: 破音字。zhuyin 必須標準正確。examples「必須100%符合該破音的注音發音」，【絕對不可】混入主要注音或其他發音的詞彙！例如「行」唸「ㄒㄧㄥˋ」只能造「德行」，絕不可造「行為」。(僅限2~4字詞彙，絕勿造句，最多6個)。4. idioms: 必須包含「${char}」字，若無則回傳[] (最多6個)。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "標準破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["符合主要注音的詞彙"], "idioms": [{"idiom": "含此字的成語", "meaning": "解釋", "english": "English"}]}`;
+                    const prompt = `請以台灣教育部辭典標準，嚴格解析繁體中文字「${char}」並輸出 JSON。
+1. zhuyin: 主要注音符號 (含聲調)。
+2. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
+3. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️ 極度嚴格要求：examples 內的詞彙發音【必須 100% 吻合】該破音字！例如「的」唸「ㄉㄧˊ」可造「的確」，唸「ㄉㄧˋ」可造「目的、有的放矢」，絕不可錯置！若無對應常見詞彙，請留空 []。寧缺勿濫，寧可少放絕對不可放錯！
+4. idioms: 包含「${char}」的成語 (最多4個)。
+格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1517,7 +1397,7 @@
             }
         };
 
-        // 全網按鈕委派，消除雙重點擊與沙盒錯誤
+        // 全網單一事件委派，消除雙重點擊與沙盒錯誤
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;

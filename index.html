@@ -205,6 +205,7 @@
             </div>
         </section>
 
+        <!-- 管理員專屬介面 (Admin Console) -->
         <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start">
@@ -279,7 +280,6 @@
             </div>
         </div>
 
-        <!-- 翻譯區塊 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -291,7 +291,6 @@
                     <input type="text" id="eng-input" placeholder="Enter English word... (e.g. Apple) / 輸入英文單字" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white">
                     <button type="button" onclick="window.speakEng(document.getElementById('eng-input').value)" class="absolute right-2 text-slate-400 hover:text-blue-600 transition-colors p-2 text-xl" title="Listen (English)"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
-                <!-- [PM] 按鈕改為全域呼叫，免除尋找 ID 失敗問題 -->
                 <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wider transition-all whitespace-nowrap">
                     <span>Translate / 翻譯</span>
                     <div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div>
@@ -299,7 +298,6 @@
             </div>
         </section>
 
-        <!-- 拆字區塊 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4">
@@ -311,7 +309,6 @@
                     <input type="text" id="zh-input" placeholder="貼上繁體中文，或由上方翻譯自動帶入 / Paste Chinese text here..." class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm bg-white">
                     <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-2 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-xl" title="Listen (Chinese)"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
-                <!-- [PM] 按鈕改為全域呼叫 -->
                 <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 uppercase tracking-wider transition-all whitespace-nowrap">Split / 進行中文拆字</button>
             </div>
             
@@ -791,7 +788,6 @@
             if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
         };
 
-        // 全域按鈕安全綁定
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -800,8 +796,11 @@
             try {
                 const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                 const d = await res.json();
-                const trans = (d.responseData.translatedText || "").replace(/[^\u4e00-\u9fa5]/g, '');
-                document.getElementById('zh-input').value = trans;
+                let trans = "";
+                if (d && d[0]) {
+                    trans = d[0].map(item => item[0]).join('');
+                }
+                document.getElementById('zh-input').value = trans.trim();
                 
                 if (!window.isVIP) { 
                     window.freeUsageCount++; 
@@ -809,7 +808,11 @@
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
                 document.getElementById('split-btn').click();
-            } catch(e) {} finally { document.getElementById('translate-loader').classList.add('hidden'); }
+            } catch(e) {
+                window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
+            } finally { 
+                document.getElementById('translate-loader').classList.add('hidden'); 
+            }
         };
 
         window.handleSplit = function(e) {
@@ -848,7 +851,7 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     if (localStorage.getItem('abra_vip_status') === 'active' && window.activeApiKey) {
-                        window.executeAIFetch(char);
+                        if(window.executeAIFetch) window.executeAIFetch(char);
                     } else { 
                         document.getElementById('vip-only-content').classList.add('hidden'); 
                         document.getElementById('free-promo-content').classList.remove('hidden'); 
@@ -879,7 +882,7 @@
         };
 
         window.handleAIRetry = function() {
-            if (window.currentTargetChar) window.executeAIFetch(window.currentTargetChar);
+            if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
         };
 
         // 全域委派綁定 (單一入口，無重複)
@@ -906,7 +909,7 @@
         };
     </script>
 
-    <!-- 第二模塊：Firebase 核心 -->
+    <!-- 第二模塊：Firebase 與後台通訊邏輯 (唯一純淨版) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -946,7 +949,7 @@
             if (!sentinelCheck()) return;
             if (user) {
                 document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
-                syncVipStatus();
+                if (window.syncVipStatus) window.syncVipStatus();
             } else {
                 signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
             }
@@ -1222,7 +1225,7 @@
                 }, { merge: true });
                 
                 window.showToast("會員資料已儲存成功！");
-                window.closeAdminModal();
+                if (window.closeAdminModal) window.closeAdminModal();
                 window.loadAdminMembers(); 
             } catch(e) {
                 window.showToast("儲存失敗，請重試", true);
@@ -1281,189 +1284,15 @@
                     window.showToast("舊訊息已清除");
                     
                     if (window.isAdmin && !document.getElementById('admin-msg-modal').classList.contains('hidden')) {
-                        window.openAdminMsgModal(emailId);
+                        if (window.openAdminMsgModal) window.openAdminMsgModal(emailId);
                     } else {
-                        window.openUserMsgModal();
+                        if (window.openUserMsgModal) window.openUserMsgModal();
                     }
                 }
             } catch(e) {
                 window.showToast("清除失敗", true);
             }
         };
-
-        window.openAdminMsgModal = async function(emailId) {
-            window.currentMsgEmail = emailId;
-            document.getElementById('admin-msg-target').textContent = `(${emailId})`;
-            document.getElementById('admin-msg-target-name').textContent = "載入中...";
-            document.getElementById('admin-msg-modal').classList.remove('hidden');
-            const historyDiv = document.getElementById('admin-chat-history');
-            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
-            
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    window.currentMsgName = data.name || '未命名會員';
-                    document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
-                    
-                    const messages = data.messages || [];
-                    
-                    const container = document.getElementById('admin-chat-history');
-                    if(!messages || messages.length === 0) {
-                        container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
-                    } else {
-                        container.innerHTML = messages.map((m, index) => {
-                            const isUser = m.role === 'user';
-                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                            const senderName = isUser ? window.currentMsgName : 'Admin';
-                            
-                            const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
-                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
-                            
-                            return `
-                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
-                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
-                                </div>
-                            `;
-                        }).join('');
-                        container.scrollTop = container.scrollHeight;
-                    }
-                    
-                    localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
-                    window.loadAdminMembers(); 
-                }
-            } catch(e) {
-                window.showToast("訊息載入失敗", true);
-            }
-        };
-
-        window.sendAdminMsg = async function() {
-            const emailId = window.currentMsgEmail;
-            const inputEl = document.getElementById('admin-chat-input');
-            const text = inputEl.value.trim();
-            if(!text || !emailId) return;
-
-            inputEl.disabled = true;
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                let messages = [];
-                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
-                
-                messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
-                await setDoc(docRef, { messages: messages }, { merge: true });
-                
-                localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
-                
-                inputEl.value = '';
-                window.openAdminMsgModal(emailId); 
-                window.loadAdminMembers(); 
-            } catch(e) {
-                window.showToast("傳送失敗", true);
-            } finally {
-                inputEl.disabled = false;
-                inputEl.focus();
-            }
-        };
-
-        window.closeAdminMsgModal = () => {
-            document.getElementById('admin-msg-modal').classList.add('hidden');
-            window.currentMsgEmail = '';
-        };
-
-        window.openUserMsgModal = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) return;
-            
-            document.getElementById('user-msg-modal').classList.remove('hidden');
-            document.getElementById('msg-dot')?.classList.add('hidden'); 
-            const historyDiv = document.getElementById('user-chat-history');
-            const inputEl = document.getElementById('user-chat-input');
-            const btnEl = document.getElementById('user-chat-send-btn');
-            
-            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-blue-500"></div>';
-            
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const messages = data.messages || [];
-                    window.currentUserMsgName = data.name || '我';
-                    
-                    if(!messages || messages.length === 0) {
-                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
-                    } else {
-                        historyDiv.innerHTML = messages.map((m, index) => {
-                            const isUser = m.role === 'user';
-                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                            const senderName = isUser ? window.currentUserMsgName : 'Admin';
-                            
-                            const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
-                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
-                            
-                            return `
-                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
-                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
-                                </div>
-                            `;
-                        }).join('');
-                        historyDiv.scrollTop = historyDiv.scrollHeight;
-                    }
-                    
-                    localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
-                    
-                    const hasAdminMsg = messages.some(m => m.role === 'admin');
-                    if(hasAdminMsg) {
-                        inputEl.disabled = false;
-                        btnEl.disabled = false;
-                        inputEl.placeholder = "輸入訊息回覆管理員... / Type your reply...";
-                    } else {
-                        inputEl.disabled = true;
-                        btnEl.disabled = true;
-                        inputEl.placeholder = "目前無客服訊息，待管理員發送後即可回覆...";
-                    }
-                }
-            } catch(e) {
-                window.showToast("訊息載入失敗", true);
-            }
-        };
-
-        window.sendUserMsg = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            const inputEl = document.getElementById('user-chat-input');
-            const btnEl = document.getElementById('user-chat-send-btn');
-            const text = inputEl.value.trim();
-            if(!text || !emailId) return;
-
-            inputEl.disabled = true;
-            btnEl.disabled = true;
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                let messages = [];
-                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
-                
-                messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
-                await setDoc(docRef, { messages: messages }, { merge: true });
-                
-                localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
-                
-                inputEl.value = '';
-                window.openUserMsgModal();
-            } catch(e) {
-                window.showToast("傳送失敗", true);
-            } finally {
-                inputEl.disabled = false;
-                btnEl.disabled = false;
-                inputEl.focus();
-            }
-        };
-
-        window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
 
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -1554,6 +1383,78 @@
                 if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; }
             }
         });
+    </script>
+
+    <!-- 第三模塊：AI 解析與前端狀態綁定 (唯一純淨版) -->
+    <script>
+        window.charCache = {};
+        window.currentTargetChar = "";
+
+        window.fetchWithRetry = async function(url, options, maxRetries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i <= maxRetries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (res.status === 429 && i < maxRetries) {
+                        document.getElementById('ai-error-title').textContent = "AI 引擎休息中";
+                        document.getElementById('ai-error-debug').textContent = `觸發頻率限制。系統將於 ${delays[i]/1000} 秒後重試...`;
+                        document.getElementById('ai-error-panel').classList.remove('hidden');
+                        await new Promise(r => setTimeout(r, delays[i]));
+                        continue;
+                    }
+                    return res;
+                } catch (err) {
+                    if (i === maxRetries) throw err;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        };
+
+        window.searchCustomIdiom = async function() {
+            const inputEl = document.getElementById('custom-idiom-input');
+            const resultDiv = document.getElementById('custom-idiom-result');
+            if (!inputEl || !resultDiv) return;
+            
+            const input = inputEl.value.trim();
+            if (!input) { window.showToast("請輸入成語 / Enter idiom", true); return; }
+            if (!window.activeApiKey) { window.showToast("請先設定 API 金鑰", true); return; }
+            
+            resultDiv.innerHTML = '<div class="loader mx-auto border-t-indigo-500"></div>';
+            
+            try {
+                const prompt = `請嚴格解析成語「${input}」的繁體中文教學 JSON格式：{"idiom": "${input}", "meaning": "中文意思", "english": "English context translation"}。若「${input}」不是合理的成語或查無此詞，請務必回傳 {"error": "查無此成語解析"}`;
+                
+                const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                const result = await res.json();
+                if (result.error) throw new Error(result.error.message);
+                
+                const rawText = result.candidates[0].content.parts[0].text;
+                const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
+                
+                if (data.error || !data.meaning) {
+                    resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">${data.error || '查無此成語解析'}</div>`;
+                    return;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex justify-between items-start shadow-sm mt-4 animate-in fade-in">
+                        <div class="flex-1 pr-4">
+                            <div class="text-slate-800 text-sm font-black tracking-tight">${window.getStr(data.idiom)}</div>
+                            <div class="text-[11px] text-slate-600 mt-1 leading-relaxed">${window.getStr(data.meaning)}</div>
+                            <div class="text-[10px] text-indigo-600 font-bold mt-2"><i class="ph ph-translate"></i> ${window.getStr(data.english)}</div>
+                        </div>
+                        <button type="button" data-action="speak" data-text="${window.getStr(data.idiom)}" class="text-indigo-600 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
+                    </div>
+                `;
+                inputEl.value = '';
+            } catch (e) {
+                resultDiv.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100 text-center">查詢失敗，請重試 / Query failed</div>`;
+            }
+        };
 
         window.executeAIFetch = async function(char) {
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1585,7 +1486,7 @@
                     if (result.error) throw new Error(result.error.message);
                     const rawText = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
-                    charCache[char] = data; window.renderResult(char, data);
+                    window.charCache[char] = data; window.renderResult(char, data);
                     document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
                     document.getElementById('active-engine-badge').classList.remove('hidden');
                     success = true; break;
@@ -1593,26 +1494,6 @@
             }
             loader.classList.add('hidden');
             if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
-        };
-
-        window.fetchWithRetry = async function(url, options, maxRetries = 5) {
-            const delays = [1000, 2000, 4000, 8000, 16000];
-            for (let i = 0; i <= maxRetries; i++) {
-                try {
-                    const res = await fetch(url, options);
-                    if (res.status === 429 && i < maxRetries) {
-                        document.getElementById('ai-error-title').textContent = "AI 引擎休息中";
-                        document.getElementById('ai-error-debug').textContent = `觸發頻率限制。系統將於 ${delays[i]/1000} 秒後重試...`;
-                        document.getElementById('ai-error-panel').classList.remove('hidden');
-                        await new Promise(r => setTimeout(r, delays[i]));
-                        continue;
-                    }
-                    return res;
-                } catch (err) {
-                    if (i === maxRetries) throw err;
-                    await new Promise(r => setTimeout(r, delays[i]));
-                }
-            }
         };
 
         window.renderResult = function(char, data) {
@@ -1685,7 +1566,6 @@
                 `;
             }
         };
-
     </script>
 </body>
 </html>

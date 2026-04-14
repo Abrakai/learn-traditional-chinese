@@ -6,13 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "2.3.0"
+    version: "2.4.0"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - TTS Pronunciation Dictionary Fixes"
+    description: "Taiwan Chinese Learning Hub - Fluid TTS & Polyphonic UI Update"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Removed broken Zhuyin replacement logic causing robotic Bopomofo spelling"
-      - "Implemented Global TTS Dictionary in window.speak for idiom polyphonic fixes (e.g., 有的放矢 -> 有地放矢)"
+      - "Fixed robotic Bopomofo reading by passing Chinese characters to TTS"
+      - "Redesigned Polyphonic section: Removed example lists, added direct Bopomofo play button"
+      - "Increased font size for Idiom English translations"
     ---
     -->
     <!-- Tailwind CSS -->
@@ -1487,7 +1488,7 @@
         window.renderResult = function(char, data) {
             document.getElementById('zhuyin-display').textContent = window.getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
-            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', data.zhuyin || char);
+            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char); // PM 修改：傳入純中文字而非注音符號，解決機器人拼字問題
             
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
@@ -1497,18 +1498,19 @@
                 document.getElementById('poly-section-wrap').style.display = 'block';
                 validPolyphonic.forEach(p => {
                     const wrap = document.createElement('div');
-                    wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center justify-between shadow-sm mt-2';
+                    wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center shadow-sm mt-2 gap-3';
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
                     
-                    let exHTML = (p.examples || []).slice(0, 6).filter(ex => ex.length <= 6).map(ex => {
-                            const pureEx = window.getStr(ex).replace(/\([^)]*\)/g, '').trim();
-                            // PM 修復：移除舊版的注音替換欺騙法，改用原字串傳遞給全域 speak 函式，由底層語音字典處理
-                            const speakText = pureEx;
-                            return `<button type="button" data-action="speak" data-text="${speakText}" class="text-[11px] bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-black shadow-inner transition-all hover:bg-purple-100">🔊 ${pureEx}</button>`;
-                        }).join('');
-                    if(!exHTML) exHTML = '<span class="text-[10px] text-slate-400">無常見詞彙 / No words</span>';
+                    // PM 修改：隱藏破音字詞彙 UI，並將第一個隱藏的詞彙傳給語音引擎，藉由真實詞彙騙過引擎達到"流暢的破音發音"
+                    let ttsText = char;
+                    if (p.examples && p.examples.length > 0) {
+                        ttsText = window.getStr(p.examples[0]).replace(/\([^)]*\)/g, '').trim();
+                    }
                     
-                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 min-w-[3.5rem] px-2 text-center border-r border-purple-100 mr-2">${pureZhuyin}</span><div class="flex gap-1.5 flex-wrap justify-end flex-1">${exHTML}</div>`;
+                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-2 border-r border-purple-100">${pureZhuyin}</span>
+                                      <button type="button" data-action="speak" data-text="${ttsText}" class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 shadow-sm flex items-center justify-center transition-all hover:scale-105 hover:bg-purple-200">
+                                          <i class="ph-fill ph-speaker-high text-base pointer-events-none"></i>
+                                      </button>`;
                     polyDisp.appendChild(wrap);
                 });
             } else {
@@ -1530,7 +1532,7 @@
                         <div class="flex-1 pr-6">
                             <div class="text-slate-800 text-base font-black tracking-tight font-bold">${window.getStr(i.idiom)}</div>
                             <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${window.getStr(i.meaning)}</div>
-                            <div class="text-[10px] text-indigo-500 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${window.getStr(i.english) || "Translation loading..."}</div>
+                            <div class="text-xs text-indigo-600 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${window.getStr(i.english) || "Translation loading..."}</div>
                         </div>
                         <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
                     </div>

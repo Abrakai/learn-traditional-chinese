@@ -72,16 +72,13 @@
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all">
                     <i class="ph-fill ph-lightning"></i> Free Uses: <span id="quota-count">20/20</span>
                 </div>
-
                 <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all">
                     <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
                     <span class="text-[10px] font-black tracking-tight uppercase"><span id="vip-days-left">--</span> Days</span>
                 </div>
-
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in">
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
                 </div>
-
                 <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
@@ -89,7 +86,6 @@
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span>
                     </span>
                 </button>
-
                 <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Profile / 個人設定</span>
                 </button>
@@ -100,9 +96,10 @@
         </div>
     </header>
 
+    <!-- 【全宇宙唯一的 Main 區塊】 -->
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- 登入與註冊 -->
+        <!-- 區塊 1：登入與註冊 -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
@@ -151,7 +148,7 @@
             </div>
         </section>
 
-        <!-- 管理員專屬介面 (Admin Console) -->
+        <!-- 區塊 2：管理員專屬介面 (Admin Console) -->
         <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
@@ -180,7 +177,7 @@
             </div>
         </section>
 
-        <!-- API 綁定設定 -->
+        <!-- 區塊 3：API 綁定設定 -->
         <div id="api-key-setup" class="hidden bg-gradient-to-r from-indigo-600 to-indigo-900 rounded-3xl p-[2px] shadow-2xl relative overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-white/95 backdrop-blur-md rounded-[1.35rem] p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-magic-wand"></i></div>
@@ -197,7 +194,7 @@
             </div>
         </div>
 
-        <!-- 翻譯與拆字模組 -->
+        <!-- 區塊 4：翻譯與拆字模組 -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm">1</div><h2 class="text-lg font-semibold tracking-tight">Translate / 英翻中</h2></div>
@@ -224,7 +221,7 @@
             <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner"><span class="text-slate-400 text-xs italic font-bold">請輸入文字後點擊拆字 / Split characters will appear here.</span></div>
         </section>
 
-        <!-- 學習中心面板 (動畫與 AI 分析) -->
+        <!-- 區塊 5：學習中心面板 (動畫與 AI 分析) -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2"><h2 class="text-base font-semibold flex items-center gap-2 font-bold"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2><span id="active-engine-badge" class="hidden text-[9px] bg-slate-700 text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter"></span></div>
@@ -293,7 +290,8 @@
         </section>
     </main>
 
-    <!-- 全域系統彈出視窗 (Modals) -->
+    <!-- 【全宇宙唯一的 Modal 彈窗區塊】 (絕對不允許重複) -->
+    
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
@@ -363,6 +361,7 @@
         </div>
     </div>
 
+    <!-- 管理員新增/編輯 Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -449,12 +448,13 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 【唯一核心模組】一體化整合 Firebase, AI 與 UI 邏輯 -->
+    <!-- 【全宇宙唯一的終極模組】一體化整合 Firebase, AI 與 UI 邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
+        // Firebase 基礎設定
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
             authDomain: "abra-learn-zh-vip.firebaseapp.com",
@@ -468,6 +468,7 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         
+        // --- 1. 全域變數與系統狀態掛載 ---
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
@@ -480,9 +481,10 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // 字串防呆處理 (解決聊天室無限轉圈圈)
+        // 核心防呆：解決未定義字串導致的讀取圈圈空轉問題
         window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
 
+        // 網域防護鎖
         const sentinelCheck = () => {
             const host = window.location.hostname;
             const proto = window.location.protocol;
@@ -492,6 +494,19 @@
             return true;
         };
 
+        // --- 2. 視窗開關控制器 (保證所有的 X 按鈕與取消按鈕絕對有效) ---
+        window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
+        window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
+        window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
+        window.closeUserMsgModal = () => document.getElementById('user-msg-modal')?.classList.add('hidden');
+        window.closeAdminMsgModal = () => { document.getElementById('admin-msg-modal')?.classList.add('hidden'); window.currentMsgEmail = ''; };
+        window.closeAdminModal = () => {
+            document.getElementById('admin-modal')?.classList.add('hidden');
+            document.getElementById('admin-member-email')?.removeAttribute('readonly');
+            document.getElementById('admin-member-email')?.classList.remove('bg-slate-100', 'text-slate-500');
+        };
+
+        // --- 3. UI 輔助控制 ---
         window.showToast = function(msg, isError = false) {
             const toast = document.getElementById('system-toast');
             if(!toast) return;
@@ -512,22 +527,12 @@
 
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        // 彈窗開關控制器 (保證 X 按鈕絕對有效)
-        window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
-        window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
-        window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
-        window.closeUserMsgModal = () => document.getElementById('user-msg-modal')?.classList.add('hidden');
-        window.closeAdminMsgModal = () => { document.getElementById('admin-msg-modal')?.classList.add('hidden'); window.currentMsgEmail = ''; };
-        window.closeAdminModal = () => {
-            document.getElementById('admin-modal')?.classList.add('hidden');
-            document.getElementById('admin-member-email')?.removeAttribute('readonly');
-            document.getElementById('admin-member-email')?.classList.remove('bg-slate-100', 'text-slate-500');
-        };
-
+        // --- 4. 營運漏斗與全域畫面狀態機 ---
         window.updateGlobalUI = function() {
             const emailCode = localStorage.getItem('abra_vip_code');
             const adminStatus = localStorage.getItem('abra_admin_status');
             
+            // 防白嫖：訪客若無 Email 且非管理員，強制清除身分快取
             if (!emailCode && adminStatus !== 'active') {
                 localStorage.removeItem('abra_vip_status');
                 localStorage.removeItem('abra_admin_status');
@@ -547,6 +552,7 @@
                 promoTitle: document.getElementById('promo-title'), promoDesc: document.getElementById('promo-desc'), promoBtn: document.getElementById('promo-action-btn')
             };
 
+            // 預設全隱藏
             if(els.adminSection) els.adminSection.classList.add('hidden');
             if(els.memberSection) els.memberSection.classList.remove('hidden');
             if(els.pBtn) els.pBtn.classList.add('hidden');
@@ -586,42 +592,13 @@
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                    
-                    const pricingHTML = `
-                        <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
-                            <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free)</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic character splits and translations per day.</span></p></div>
-                            <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
-                                <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 如果您自備 API KEY，還可以開啟另一道魔法之門 (Unlock magic with API KEY):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p></div>
-                            </div>
-                            <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4><ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 / 月 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
-                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 / 6個月 <span class="text-[9px] text-slate-400">(每月僅125元 / $4 USD/mo)</span></span></li>
-                                <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">👑 NT$ 1,200 / 12個月 <span class="text-[9px] text-yellow-700">(每月僅100元，推薦！/ $3 USD/mo)</span></span></li>
-                            </ul></div>
-                        </div>`;
-                    if(els.promoTitle) els.promoTitle.textContent = 'Upgrade Required / 需繳費升級';
-                    if(els.promoDesc) els.promoDesc.innerHTML = `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您目前為未繳費或已過期會員，無法使用魔法功能。<br>請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通 VIP 權限。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Please complete payment to unlock VIP. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
-                    if(els.promoBtn) { els.promoBtn.textContent = 'Contact Studio / 聯絡工作室'; els.promoBtn.onclick = function() { window.open('https://abrakai.github.io/learn-traditional-chinese/', '_blank'); }; }
+                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通權限。<br><span class="text-[10px] italic font-normal text-slate-500">Please complete payment and contact Abrakai Studio to unlock VIP permissions.</span></p>`);
                 }
             } else {
                 if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                const pricingHTML = `
-                    <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
-                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free Plan)</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic translations and character splits per day.</span></p></div>
-                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
-                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 備妥 API KEY，開啟魔法之門 (Unlock magic with API KEY):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p></div>
-                        </div>
-                        <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4><ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                            <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
-                            <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125 or $4 USD/mo)</span></span></li>
-                            <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100 or $3 USD/mo) 推薦!</span></span></li>
-                        </ul></div>
-                    </div>`;
-                if(els.promoTitle) els.promoTitle.textContent = 'Unlock VIP Access / 解鎖 VIP 權限';
-                if(els.promoDesc) els.promoDesc.innerHTML = `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫升級 VIP。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP to unlock features. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
-                if(els.promoBtn) { els.promoBtn.textContent = 'Join VIP / 登入或升級'; els.promoBtn.onclick = window.scrollToAuth; }
+                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫升級 VIP。<br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP to unlock features.</span></p>`);
             }
             
             if (window.isAdmin || window.isVIP) {
@@ -633,6 +610,33 @@
             }
         };
 
+        function setupPricingTable(els, title, prefixDesc) {
+            const pricingHTML = `
+                <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
+                    <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free)</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic character splits and translations per day.</span></p></div>
+                    <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
+                        <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 如果您自備 API KEY，開啟魔法之門:</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</p></div>
+                    </div>
+                    <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4><ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
+                        <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 / 月</span></li>
+                        <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 / 6個月</span></li>
+                        <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">👑 NT$ 1,200 / 12個月</span></li>
+                    </ul></div>
+                </div>`;
+            if(els.promoTitle) els.promoTitle.textContent = title;
+            if(els.promoDesc) els.promoDesc.innerHTML = prefixDesc + pricingHTML;
+            if(els.promoBtn) {
+                if (title.includes('Upgrade Required')) {
+                    els.promoBtn.textContent = 'Contact Studio / 聯絡工作室';
+                    els.promoBtn.onclick = function() { window.open('https://abrakai.github.io/learn-traditional-chinese/', '_blank'); };
+                } else {
+                    els.promoBtn.textContent = 'Join VIP / 登入或升級';
+                    els.promoBtn.onclick = window.scrollToAuth;
+                }
+            }
+        }
+
+        // --- 5. Firebase 後台邏輯與 Auth ---
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
             if (user) {
@@ -666,6 +670,7 @@
                         const diff = new Date(data.expiryDate).getTime() - Date.now();
                         const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
                         if(daysEl) daysEl.textContent = Math.max(0, daysLeft);
+                        
                         if (daysLeft > 7) {
                             if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400";
                             localStorage.setItem('abra_vip_status', 'active');
@@ -710,7 +715,7 @@
             const btnText = document.getElementById('login-btn-text');
 
             if(loader) loader.classList.remove('hidden');
-            if(btnText) btnText.textContent = "Verifying... / 驗證中...";
+            if(btnText) btnText.textContent = "Verifying...";
             if(loginBtn) loginBtn.disabled = true;
 
             try {
@@ -763,7 +768,7 @@
 
             const signupBtn = document.getElementById('signup-btn');
             const originalText = signupBtn ? signupBtn.textContent : "Processing...";
-            if(signupBtn) { signupBtn.textContent = "Processing... / 處理中..."; signupBtn.disabled = true; }
+            if(signupBtn) { signupBtn.textContent = "Processing..."; signupBtn.disabled = true; }
 
             try {
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
@@ -780,7 +785,7 @@
                     document.getElementById('reg-pass').value = '';
                     document.getElementById('legal-agree').checked = false;
                 }
-            } catch(e) { window.showToast("註冊失敗，請檢查網路 / Network Error", true); } 
+            } catch(e) { window.showToast("註冊失敗，請檢查網路", true); } 
             finally { if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } }
         };
 
@@ -788,53 +793,11 @@
             localStorage.removeItem('abra_vip_status');
             localStorage.removeItem('abra_vip_code');
             localStorage.removeItem('abra_admin_status');
+            // 保留 usage_count 防止免費仔洗次數
             location.reload(); 
         };
 
-        window.openProfileModal = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
-            
-            document.getElementById('profile-email').value = emailId;
-            document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
-            document.getElementById('profile-modal').classList.remove('hidden');
-            
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const user = docSnap.data();
-                    document.getElementById('profile-name').value = user.name || '';
-                    document.getElementById('profile-pass').value = user.password || '';
-                }
-            } catch(e) { }
-        };
-
-        window.saveProfileInfo = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            const newName = document.getElementById('profile-name').value.trim();
-            const newPass = document.getElementById('profile-pass').value.trim();
-            const newApiKey = document.getElementById('profile-api-key').value.trim();
-            
-            if (!window.isVIP && !window.isAdmin && newApiKey) {
-                window.showToast("未繳費開通，無法設定 API 金鑰", true);
-                return;
-            }
-            
-            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                await updateDoc(docRef, { name: newName, password: newPass, apiKey: newApiKey });
-                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
-                else localStorage.setItem('gemini_api_key', newApiKey);
-                window.activeApiKey = newApiKey;
-                window.showToast("設定已同步至雲端並儲存完成！ / Saved!");
-                if (window.closeProfileModal) window.closeProfileModal();
-                setTimeout(() => location.reload(), 800);
-            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
-        };
-
-        // Admin CRUD
+        // --- 6. Admin CRUD 與報表匯入匯出 ---
         window.loadAdminMembers = async function() {
             const tbody = document.getElementById('admin-members-tbody');
             if(!tbody) return;
@@ -898,58 +861,43 @@
             }
         };
 
-        window.exportCSV = async function() {
-            try {
-                window.showToast("準備匯出 CSV...");
-                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
-                let csvContent = "Email,Password,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
-                querySnapshot.forEach(doc => {
-                    const d = doc.data();
-                    const row = [ d.email || doc.id, d.password || '', d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
-                    csvContent += row + "\n";
-                });
-                const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.setAttribute("href", url);
-                link.setAttribute("download", `Abrakai_Members_${new Date().toISOString().split('T')[0]}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.showToast("匯出成功！");
-            } catch(e) { window.showToast("匯出失敗", true); }
-        };
-
-        window.importCSV = async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            
+            if (emailId && typeof emailId === 'string') {
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
                 try {
-                    window.showToast("開始比對匯入資料...");
-                    const rows = e.target.result.split('\n').filter(r => r.trim());
-                    if(rows.length < 2) { window.showToast("CSV 格式錯誤或無資料", true); return; }
-                    const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').toLowerCase().trim());
-                    const emailIdx = headers.indexOf('email');
-                    if(emailIdx === -1) { window.showToast("CSV 第一行必須包含 Email 欄位", true); return; }
-                    let successCount = 0;
-                    for(let i=1; i<rows.length; i++) {
-                        const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
-                        if(cols.length === 0 || !cols[emailIdx]) continue;
-                        const payload = {};
-                        headers.forEach((h, idx) => {
-                            if(h !== 'email' && cols[idx]) { payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; }
-                        });
-                        const sanitizedEmail = cols[emailIdx].replace(/[.#$[\]]/g, "_");
-                        await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: cols[emailIdx], ...payload }, { merge: true });
-                        successCount++;
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-member-phone').value = data.phone || '';
+                        document.getElementById('admin-member-remittance').value = data.remittance || '';
+                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
+                        document.getElementById('admin-months').value = data.months || '';
+                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
+                        document.getElementById('admin-member-remarks').value = data.remarks || '';
                     }
-                    window.showToast(`匯入完成！共處理 ${successCount} 筆資料`);
-                    window.loadAdminMembers();
-                } catch(err) { window.showToast("匯入過程發生錯誤", true); }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; 
+                } catch(e) { window.showToast("資料讀取失敗", true); }
+            } else {
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                document.getElementById('admin-member-pass').value = '';
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+            }
         };
 
         window.saveAdminMember = async function() {
@@ -1008,6 +956,118 @@
             } catch(e) { window.showToast("刪除失敗", true); }
         };
 
+        window.exportCSV = async function() {
+            try {
+                window.showToast("準備匯出 CSV...");
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let csvContent = "Email,Password,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
+                querySnapshot.forEach(doc => {
+                    const d = doc.data();
+                    const row = [ d.email || doc.id, d.password || '', d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
+                    csvContent += row + "\n";
+                });
+                const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Abrakai_Members_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.showToast("匯出成功！");
+            } catch(e) { window.showToast("匯出失敗", true); }
+        };
+
+        window.importCSV = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    window.showToast("開始比對匯入資料...");
+                    const rows = e.target.result.split('\n').filter(r => r.trim());
+                    if(rows.length < 2) { window.showToast("CSV 格式錯誤或無資料", true); return; }
+                    const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').toLowerCase().trim());
+                    const emailIdx = headers.indexOf('email');
+                    if(emailIdx === -1) { window.showToast("CSV 第一行必須包含 Email 欄位", true); return; }
+                    let successCount = 0;
+                    for(let i=1; i<rows.length; i++) {
+                        const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        if(cols.length === 0 || !cols[emailIdx]) continue;
+                        const payload = {};
+                        headers.forEach((h, idx) => {
+                            if(h !== 'email' && cols[idx]) { payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; }
+                        });
+                        const sanitizedEmail = cols[emailIdx].replace(/[.#$[\]]/g, "_");
+                        await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: cols[emailIdx], ...payload }, { merge: true });
+                        successCount++;
+                    }
+                    window.showToast(`匯入完成！共處理 ${successCount} 筆資料`);
+                    window.loadAdminMembers();
+                } catch(err) { window.showToast("匯入過程發生錯誤", true); }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
+        };
+
+        window.calculateExpiry = function() {
+            const payDate = document.getElementById('admin-pay-date').value;
+            const months = parseInt(document.getElementById('admin-months').value, 10);
+            if (payDate && !isNaN(months) && months > 0) {
+                const d = new Date(payDate);
+                d.setMonth(d.getMonth() + months);
+                document.getElementById('admin-expiry-date').value = d.toISOString().split('T')[0];
+            }
+        };
+
+        window.filterAdminMembers = function() {
+            const input = document.getElementById('admin-search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#admin-members-tbody tr');
+            rows.forEach(row => {
+                if(row.cells.length < 2) return; 
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        };
+
+        // --- 7. 個人設定與聊天室 (CRM) ---
+        window.openProfileModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
+            
+            document.getElementById('profile-email').value = emailId;
+            document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+            
+            try {
+                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
+                if (docSnap.exists()) {
+                    const user = docSnap.data();
+                    document.getElementById('profile-name').value = user.name || '';
+                    document.getElementById('profile-pass').value = user.password || '';
+                }
+            } catch(e) { }
+        };
+
+        window.saveProfileInfo = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const newName = document.getElementById('profile-name').value.trim();
+            const newPass = document.getElementById('profile-pass').value.trim();
+            const newApiKey = document.getElementById('profile-api-key').value.trim();
+            
+            if (!window.isVIP && !window.isAdmin && newApiKey) { window.showToast("未繳費開通，無法設定 API 金鑰", true); return; }
+            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
+            try {
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, password: newPass, apiKey: newApiKey });
+                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
+                else localStorage.setItem('gemini_api_key', newApiKey);
+                window.activeApiKey = newApiKey;
+                window.showToast("設定已同步至雲端並儲存完成！ / Saved!");
+                if (window.closeProfileModal) window.closeProfileModal();
+                setTimeout(() => location.reload(), 800);
+            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
+        };
+
         window.openAdminMsgModal = async function(emailId) {
             window.currentMsgEmail = emailId;
             document.getElementById('admin-msg-target').textContent = `(${emailId})`;
@@ -1033,12 +1093,7 @@
                             const senderName = isUser ? window.currentMsgName : 'Admin';
                             const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
                             const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
-                            return `
-                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
-                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
-                                </div>
-                            `;
+                            return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div><span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
                         }).join('');
                         historyDiv.scrollTop = historyDiv.scrollHeight;
                     }
@@ -1058,9 +1113,7 @@
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
                 const docSnap = await getDoc(docRef);
-                let messages = [];
-                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
-                
+                let messages = docSnap.exists() ? (docSnap.data().messages || []) : [];
                 messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
@@ -1099,12 +1152,7 @@
                             const senderName = isUser ? window.currentUserMsgName : 'Admin';
                             const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
                             const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
-                            return `
-                                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
-                                    <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
-                                    <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
-                                </div>
-                            `;
+                            return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div><span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
                         }).join('');
                         historyDiv.scrollTop = historyDiv.scrollHeight;
                     }
@@ -1133,9 +1181,7 @@
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
                 const docSnap = await getDoc(docRef);
-                let messages = [];
-                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
-                
+                let messages = docSnap.exists() ? (docSnap.data().messages || []) : [];
                 messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
                 await setDoc(docRef, { messages: messages }, { merge: true });
                 localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
@@ -1172,11 +1218,20 @@
             } catch(e) { window.showToast("清除失敗", true); }
         };
 
-        // 發音功能 (避免特殊符號錯誤，但保留中文字元發音能力)
+        window.handleMsgBtnClick = function() {
+            if (window.isAdmin) {
+                window.showToast("請由下方會員列表點擊「新回覆」查看 / Scroll down to check replies", false);
+                document.getElementById('admin-dashboard-section')?.scrollIntoView({behavior: 'smooth'});
+            } else {
+                if (window.openUserMsgModal) window.openUserMsgModal();
+            }
+        };
+
+        // --- 8. AI 翻譯與拆字引擎 (包含過濾優化發音) ---
+        // [PM] 修正：移除注音過濾器，確保所有的中文、英文與注音皆能順利發聲，只過濾會發音錯誤的符號
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            // [PM] 修正：移除對注音符號區塊 (\u3105-\u3129) 的激進過濾，以確保注音可正常發聲
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             ut.lang = 'zh-TW'; ut.rate = 0.85;
@@ -1196,7 +1251,6 @@
             if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
         };
 
-        // 翻譯與 AI 引擎邏輯
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -1223,6 +1277,7 @@
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
             
+            // 雙重計費防護
             if (e && e.isTrusted) {
                 if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
                     window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; 
@@ -1254,24 +1309,15 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
-                    if (window.isVIP) {
-                        if (window.activeApiKey) {
-                            if(window.executeAIFetch) window.executeAIFetch(char);
-                        } else {
-                            document.getElementById('vip-only-content').classList.add('hidden'); 
-                            document.getElementById('free-promo-content').classList.add('hidden'); 
-                            document.getElementById('ai-inner-loader').classList.add('hidden');
-                            document.getElementById('ai-error-panel').classList.add('hidden');
-                            const noKeyPromo = document.getElementById('vip-no-key-promo');
-                            if(noKeyPromo) noKeyPromo.classList.remove('hidden');
-                        }
+                    if (window.isVIP && window.activeApiKey) {
+                        if(window.executeAIFetch) window.executeAIFetch(char);
                     } else { 
                         document.getElementById('vip-only-content').classList.add('hidden'); 
-                        const noKeyPromo = document.getElementById('vip-no-key-promo');
-                        if(noKeyPromo) noKeyPromo.classList.add('hidden');
+                        document.getElementById('free-promo-content').classList.add('hidden'); 
                         document.getElementById('ai-inner-loader').classList.add('hidden');
                         document.getElementById('ai-error-panel').classList.add('hidden');
-                        document.getElementById('free-promo-content').classList.remove('hidden'); 
+                        const noKeyPromo = document.getElementById('vip-no-key-promo');
+                        if(noKeyPromo) noKeyPromo.classList.remove('hidden');
                     }
                 };
                 container.appendChild(btn);
@@ -1377,11 +1423,13 @@
             const vipPanel = document.getElementById('vip-only-content');
             const errorPanel = document.getElementById('ai-error-panel');
             const promoPanel = document.getElementById('free-promo-content');
+            const noKeyPromo = document.getElementById('vip-no-key-promo');
 
             loader.classList.remove('hidden');
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
             if (promoPanel) promoPanel.classList.add('hidden');
+            if (noKeyPromo) noKeyPromo.classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.5-flash-lite"];
             let success = false;
@@ -1469,7 +1517,7 @@
             }
         };
 
-        // 全網單一事件委派
+        // 全網按鈕委派，消除雙重點擊與沙盒錯誤
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
@@ -1488,7 +1536,7 @@
             }
         });
 
-        // 確保初始載入
+        // 確保網頁初始狀態
         window.onload = function() {
             if (window.updateGlobalUI) window.updateGlobalUI();
         };

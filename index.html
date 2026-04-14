@@ -6,13 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "2.5.0"
+    version: "2.6.0"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - LINE Contact & QRCode Integration"
+    description: "Taiwan Chinese Learning Hub - LINE Contact CTA Enhanced"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Integrated official LINE QRCode into the upgrade prompt box."
-      - "Updated Contact Studio button to redirect directly to LINE official account (https://lin.ee/9khpCfe)."
+      - "Removed broken QRCode image to clean up UI."
+      - "Enlarged LINE ID (@841bihdj) and Call-to-Action button for better visibility."
+      - "Globally replaced vague 'Contact Studio' texts with explicit LINE ID and hyperlinks."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -123,7 +124,7 @@
                                 <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                                 <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
-                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便執行長快速核對匯款開通。</p></div>
+                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。</p></div>
                                 </div>
                             </div>
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
@@ -608,13 +609,13 @@
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通權限。<br><span class="text-[10px] italic font-normal text-slate-500">Please complete payment and contact Abrakai Studio to unlock VIP permissions.</span></p>`);
+                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請繳費並加入官方 LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> 與工作室聯繫開通權限。<br><span class="text-[10px] italic font-normal text-slate-500">Please complete payment and contact Abrakai Studio via LINE to unlock VIP.</span></p>`);
                 }
             } else {
                 if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫升級 VIP。<br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP to unlock features.</span></p>`);
+                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並加入官方 LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> 聯繫升級 VIP。<br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP via official LINE to unlock features.</span></p>`);
             }
             
             if (window.isAdmin || window.isVIP) {
@@ -639,17 +640,12 @@
                         <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【6-Month / 半年方案】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125/月)</span> | $24 USD <span class="text-[9px] text-slate-400">($4/mo)</span></span></li>
                         <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【12-Month / 年度超值】</span> <span class="font-bold">👑 NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100/月)</span> | $36 USD <span class="text-[9px] text-yellow-700">($3/mo)</span> Recommended!</span></li>
                     </ul></div>
-                    <div class="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-2xl"></i></div>
-                            <div class="text-left leading-tight">
-                                <p class="text-[13px] font-black text-emerald-800 tracking-tight">加入官方 LINE <span class="text-emerald-600 font-bold">@841bihdj</span></p>
-                                <p class="text-[10px] font-bold text-emerald-600 mt-0.5">阿布拉.凱 工作室 | 學習繁體中文</p>
-                                <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-block mt-1.5 text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2.5 py-1 rounded-md font-bold transition-colors shadow-sm">點擊加入好友</a>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 bg-white p-1.5 rounded-lg shadow-sm border border-emerald-100 hover:scale-105 transition-transform cursor-crosshair">
-                            <img src="./M_gainfriends_2dbarcodes_GW.png" alt="LINE QRCode" class="w-16 h-16 object-cover rounded" onerror="this.onerror=null; this.src='https://via.placeholder.com/64?text=LINE+QR';">
+                    <div class="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
+                        <div class="w-14 h-14 bg-emerald-500 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
+                        <div class="leading-tight flex flex-col items-center sm:items-start">
+                            <p class="text-base font-black text-emerald-800 tracking-tight">加入官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
+                            <p class="text-xs font-bold text-emerald-600 mt-1">阿布拉.凱 工作室 | 學習繁體中文</p>
+                            <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> 點擊加入好友</a>
                         </div>
                     </div>
                 </div>`;
@@ -823,7 +819,7 @@
                     window.showToast("Email 已註冊 / Email registered", true); 
                 } else {
                     await setDoc(docRef, { name, email, password: pass, signupDate: new Date().toISOString(), status: "pending" });
-                    window.showToast("註冊成功！請聯絡執行長。 / Success!");
+                    window.showToast("註冊成功！請加官方 LINE @841bihdj 聯絡開通");
                     document.getElementById('reg-name').value = '';
                     document.getElementById('reg-email').value = '';
                     document.getElementById('reg-pass').value = '';

@@ -598,11 +598,21 @@
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
-        window.isVIP = localStorage.getItem('abra_vip_status') === 'active';
+        window.isVIP = false;
+        window.isAdmin = false;
 
         window.updateGlobalUI = function() {
-            window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
-            window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
+            // [PM] 深度快取清理：若無會員登入，強制清除所有殘留的 VIP 與 Admin 狀態，防止幽靈快取引發未註冊會員跑去呼叫 API
+            const emailCode = localStorage.getItem('abra_vip_code');
+            if (!emailCode) {
+                localStorage.removeItem('abra_vip_status');
+                localStorage.removeItem('abra_admin_status');
+                window.isVIP = false;
+                window.isAdmin = false;
+            } else {
+                window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
+                window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
+            }
             
             const qDisplay = document.getElementById('quota-display');
             const vBadge = document.getElementById('vip-status-badge');
@@ -638,7 +648,7 @@
                 if(adminSection) adminSection.classList.remove('hidden');
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
-            } else if (localStorage.getItem('abra_vip_code')) {
+            } else if (emailCode) {
                 if(memberSection) memberSection.classList.add('hidden');
                 if(pBtn) pBtn.classList.remove('hidden');
                 if(mBtn) mBtn.classList.remove('hidden');
@@ -737,11 +747,55 @@
         };
 
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
+        
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            
+            if (emailId && typeof emailId === 'string') {
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                try {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+                    const docRef = doc(window.firebaseDbInstance, "artifacts", window.firebaseAppId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-member-phone').value = data.phone || '';
+                        document.getElementById('admin-member-remittance').value = data.remittance || '';
+                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
+                        document.getElementById('admin-months').value = data.months || '';
+                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
+                        document.getElementById('admin-member-remarks').value = data.remarks || '';
+                    }
+                } catch(e) {
+                    window.showToast("資料讀取失敗", true);
+                }
+            } else {
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                document.getElementById('admin-member-pass').value = '';
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+            }
+        };
+
         window.closeAdminModal = () => {
             document.getElementById('admin-modal')?.classList.add('hidden');
             document.getElementById('admin-member-email').removeAttribute('readonly');
             document.getElementById('admin-member-email').classList.remove('bg-slate-100', 'text-slate-500');
         };
+        
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
         const getStr = (val) => (val === null || val === undefined) ? "" : String(val);
@@ -783,109 +837,7 @@
             }
         };
 
-        window.saveApiKey = function() {
-            const key = document.getElementById('custom-api-key').value.trim();
-            if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
-        };
-
-        window.handleTranslate = async function() {
-            if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
-            const word = document.getElementById('eng-input').value.trim();
-            if (!word) return;
-            document.getElementById('translate-loader').classList.remove('hidden');
-            try {
-                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
-                const d = await res.json();
-                let trans = "";
-                if (d && d[0]) {
-                    trans = d[0].map(item => item[0]).join('');
-                }
-                document.getElementById('zh-input').value = trans.trim();
-                
-                if (!window.isVIP) { 
-                    window.freeUsageCount++; 
-                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
-                    if(window.updateGlobalUI) window.updateGlobalUI(); 
-                }
-                document.getElementById('split-btn').click();
-            } catch(e) {
-                window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
-            } finally { 
-                document.getElementById('translate-loader').classList.add('hidden'); 
-            }
-        };
-
-        window.handleSplit = function(e) {
-            const text = document.getElementById('zh-input').value.trim();
-            if (!text) return;
-            
-            if (e && e.isTrusted) {
-                if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
-                    window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
-                    return; 
-                }
-                if (!window.isVIP) { 
-                    window.freeUsageCount++; 
-                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
-                    if(window.updateGlobalUI) window.updateGlobalUI(); 
-                }
-            }
-
-            const container = document.getElementById('char-container'); container.innerHTML = '';
-            const guide = document.getElementById('click-char-guide');
-            const chars = text.split('');
-            let hasChar = false;
-            
-            chars.forEach(char => {
-                if (!/[\u4e00-\u9fa5]/.test(char)) return;
-                hasChar = true;
-                const btn = document.createElement('button');
-                btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
-                btn.textContent = char;
-                btn.onclick = () => {
-                    window.currentTargetChar = char;
-                    document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    document.getElementById('learning-dashboard').classList.remove('hidden');
-                    document.getElementById('current-learning-char').textContent = char;
-                    document.getElementById('hanzi-target').innerHTML = '';
-                    HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
-                    if (localStorage.getItem('abra_vip_status') === 'active' && window.activeApiKey) {
-                        if(window.executeAIFetch) window.executeAIFetch(char);
-                    } else { 
-                        document.getElementById('vip-only-content').classList.add('hidden'); 
-                        document.getElementById('free-promo-content').classList.remove('hidden'); 
-                    }
-                };
-                container.appendChild(btn);
-            });
-            
-            if (hasChar && guide) guide.classList.remove('hidden');
-            if (!hasChar && guide) guide.classList.add('hidden');
-            if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">未偵測到繁體中文字 / No Chinese characters detected.</span>';
-        };
-
-        window.handleAnimate = function() {
-            const svg = document.querySelector('#hanzi-target');
-            if (svg && window.currentTargetChar) {
-                svg.innerHTML = '';
-                HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).animateCharacter();
-            }
-        };
-
-        window.handleQuiz = function() {
-            const svg = document.querySelector('#hanzi-target');
-            if (svg && window.currentTargetChar) {
-                svg.innerHTML = '';
-                HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
-            }
-        };
-
-        window.handleAIRetry = function() {
-            if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
-        };
-
-        // 全域委派綁定 (單一入口，無重複)
+        // [PM] 全域委派綁定：解決沙盒與動態 DOM 下按鈕失效的問題
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
@@ -903,13 +855,9 @@
                 if (window.speak) window.speak(actionEl.getAttribute('data-text'));
             }
         });
-        
-        window.onload = function() {
-            if (window.updateGlobalUI) window.updateGlobalUI();
-        };
     </script>
 
-    <!-- 第二模塊：Firebase 與後台通訊邏輯 (唯一純淨版) -->
+    <!-- 第二模塊：Firebase 與後台通訊邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -1294,6 +1242,166 @@
             }
         };
 
+        window.currentMsgEmail = '';
+        window.currentMsgName = 'User';
+
+        function renderChatBubbles(messages, containerId, userName = 'User', emailId = '') {
+            const container = document.getElementById(containerId);
+            if(!messages || messages.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
+                return;
+            }
+            container.innerHTML = messages.map((m, index) => {
+                const isUser = m.role === 'user';
+                const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                const senderName = isUser ? userName : 'Admin';
+                
+                const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
+                const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
+                
+                return `
+                    <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                        <div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div>
+                        <span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        window.openAdminMsgModal = async function(emailId) {
+            window.currentMsgEmail = emailId;
+            document.getElementById('admin-msg-target').textContent = `(${emailId})`;
+            document.getElementById('admin-msg-target-name').textContent = "載入中...";
+            document.getElementById('admin-msg-modal').classList.remove('hidden');
+            const historyDiv = document.getElementById('admin-chat-history');
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.currentMsgName = data.name || '未命名會員';
+                    document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
+                    
+                    const messages = data.messages || [];
+                    renderChatBubbles(messages, 'admin-chat-history', window.currentMsgName, emailId);
+                    
+                    localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                    window.loadAdminMembers(); 
+                }
+            } catch(e) {
+                window.showToast("訊息載入失敗", true);
+            }
+        };
+
+        window.sendAdminMsg = async function() {
+            const emailId = window.currentMsgEmail;
+            const inputEl = document.getElementById('admin-chat-input');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = [];
+                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
+                
+                messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                
+                localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                
+                inputEl.value = '';
+                window.openAdminMsgModal(emailId); 
+                window.loadAdminMembers(); 
+            } catch(e) {
+                window.showToast("傳送失敗", true);
+            } finally {
+                inputEl.disabled = false;
+                inputEl.focus();
+            }
+        };
+
+        window.closeAdminMsgModal = () => {
+            document.getElementById('admin-msg-modal').classList.add('hidden');
+            window.currentMsgEmail = '';
+        };
+
+        window.openUserMsgModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) return;
+            
+            document.getElementById('user-msg-modal').classList.remove('hidden');
+            document.getElementById('msg-dot')?.classList.add('hidden'); 
+            const historyDiv = document.getElementById('user-chat-history');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-blue-500"></div>';
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const messages = data.messages || [];
+                    window.currentUserMsgName = data.name || '我';
+                    renderChatBubbles(messages, 'user-chat-history', window.currentUserMsgName, emailId);
+                    
+                    localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                    
+                    const hasAdminMsg = messages.some(m => m.role === 'admin');
+                    if(hasAdminMsg) {
+                        inputEl.disabled = false;
+                        btnEl.disabled = false;
+                        inputEl.placeholder = "輸入訊息回覆管理員... / Type your reply...";
+                    } else {
+                        inputEl.disabled = true;
+                        btnEl.disabled = true;
+                        inputEl.placeholder = "目前無客服訊息，待管理員發送後即可回覆...";
+                    }
+                }
+            } catch(e) {
+                window.showToast("訊息載入失敗", true);
+            }
+        };
+
+        window.sendUserMsg = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true;
+            btnEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = [];
+                if (docSnap.exists()) { messages = docSnap.data().messages || []; }
+                
+                messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                
+                localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                
+                inputEl.value = '';
+                window.openUserMsgModal();
+            } catch(e) {
+                window.showToast("傳送失敗", true);
+            } finally {
+                inputEl.disabled = false;
+                btnEl.disabled = false;
+                inputEl.focus();
+            }
+        };
+
+        window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
+
         document.getElementById('login-btn')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -1385,7 +1493,7 @@
         });
     </script>
 
-    <!-- 第三模塊：AI 解析與前端狀態綁定 (唯一純淨版) -->
+    <!-- 第三模塊：AI 解析與前端事件綁定 (唯一純淨版) -->
     <script>
         window.charCache = {};
         window.currentTargetChar = "";
@@ -1457,20 +1565,30 @@
         };
 
         window.executeAIFetch = async function(char) {
+            // [PM] 防呆：未註冊者直接擋下，確保不呼叫 API 並顯示解鎖引導
+            if (!localStorage.getItem('abra_vip_code')) return;
+
             if (window.syncVipStatus) await window.syncVipStatus();
-            if (localStorage.getItem('abra_vip_status') !== 'active') {
+            
+            // [PM] 統一以 window.isVIP 判定身分，隔離幽靈快取
+            if (!window.isVIP) {
                 document.getElementById('vip-only-content').classList.add('hidden');
                 document.getElementById('free-promo-content').classList.remove('hidden');
                 document.getElementById('expiry-notice-box').classList.remove('hidden');
+                document.getElementById('ai-inner-loader').classList.add('hidden');
+                document.getElementById('ai-error-panel').classList.add('hidden');
                 return;
             }
 
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
             const errorPanel = document.getElementById('ai-error-panel');
+            const promoPanel = document.getElementById('free-promo-content');
+
             loader.classList.remove('hidden');
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
+            if (promoPanel) promoPanel.classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.5-flash-lite"];
             let success = false;
@@ -1565,6 +1683,111 @@
                     </div>
                 `;
             }
+        };
+
+        window.handleTranslate = async function() {
+            if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
+            const word = document.getElementById('eng-input').value.trim();
+            if (!word) return;
+            document.getElementById('translate-loader').classList.remove('hidden');
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                const d = await res.json();
+                let trans = "";
+                if (d && d[0]) {
+                    trans = d[0].map(item => item[0]).join('');
+                }
+                document.getElementById('zh-input').value = trans.trim();
+                
+                if (!window.isVIP) { 
+                    window.freeUsageCount++; 
+                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                    if(window.updateGlobalUI) window.updateGlobalUI(); 
+                }
+                document.getElementById('split-btn').click();
+            } catch(e) {
+                window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
+            } finally { 
+                document.getElementById('translate-loader').classList.add('hidden'); 
+            }
+        };
+
+        window.handleSplit = function(e) {
+            const text = document.getElementById('zh-input').value.trim();
+            if (!text) return;
+            
+            if (e && e.isTrusted) {
+                if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                    window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
+                    return; 
+                }
+                if (!window.isVIP) { 
+                    window.freeUsageCount++; 
+                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                    if(window.updateGlobalUI) window.updateGlobalUI(); 
+                }
+            }
+
+            const container = document.getElementById('char-container'); container.innerHTML = '';
+            const guide = document.getElementById('click-char-guide');
+            const chars = text.split('');
+            let hasChar = false;
+            
+            chars.forEach(char => {
+                if (!/[\u4e00-\u9fa5]/.test(char)) return;
+                hasChar = true;
+                const btn = document.createElement('button');
+                btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
+                btn.textContent = char;
+                btn.onclick = () => {
+                    window.currentTargetChar = char;
+                    document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('learning-dashboard').classList.remove('hidden');
+                    document.getElementById('current-learning-char').textContent = char;
+                    document.getElementById('hanzi-target').innerHTML = '';
+                    HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
+                    
+                    // [PM] 修復點：嚴格以 window.isVIP 取代有快取溢位風險的 localStorage 讀取
+                    if (window.isVIP && window.activeApiKey) {
+                        if(window.executeAIFetch) window.executeAIFetch(char);
+                    } else { 
+                        document.getElementById('vip-only-content').classList.add('hidden'); 
+                        document.getElementById('free-promo-content').classList.remove('hidden'); 
+                        document.getElementById('ai-inner-loader').classList.add('hidden');
+                        document.getElementById('ai-error-panel').classList.add('hidden');
+                    }
+                };
+                container.appendChild(btn);
+            });
+            
+            if (hasChar && guide) guide.classList.remove('hidden');
+            if (!hasChar && guide) guide.classList.add('hidden');
+            if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">未偵測到繁體中文字 / No Chinese characters detected.</span>';
+        };
+
+        window.handleAnimate = function() {
+            const svg = document.querySelector('#hanzi-target');
+            if (svg && window.currentTargetChar) {
+                svg.innerHTML = '';
+                HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).animateCharacter();
+            }
+        };
+
+        window.handleQuiz = function() {
+            const svg = document.querySelector('#hanzi-target');
+            if (svg && window.currentTargetChar) {
+                svg.innerHTML = '';
+                HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' }).quiz({ onComplete: () => document.getElementById('quiz-status').textContent = 'Perfect!' });
+            }
+        };
+
+        window.handleAIRetry = function() {
+            if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
+        };
+
+        window.onload = function() {
+            if (window.updateGlobalUI) window.updateGlobalUI();
         };
     </script>
 </body>

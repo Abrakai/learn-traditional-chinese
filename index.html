@@ -169,6 +169,7 @@
                                     <p class="text-[9px] text-red-500 italic pl-6">For verification, we recommend including the last 4 digits of your phone number in your password.</p>
                                 </div>
                             </div>
+
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                                 <div class="flex items-start gap-2">
                                     <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
@@ -177,6 +178,7 @@
                                     </label>
                                 </div>
                             </div>
+
                             <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
@@ -394,6 +396,7 @@
                         </div>
                     </div>
 
+                    <!-- Free Promo Content & Pricing -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 id="promo-title" class="text-xl font-bold text-slate-800">Unlock VIP Access / 解鎖 VIP 權限</h3>
@@ -401,7 +404,9 @@
                             <p>您的 VIP 授權已到期，功能已自動降級。</p>
                             <p class="text-[9px] italic font-normal">Subscription expired. Access downgraded.</p>
                         </div>
+                        
                         <div id="promo-desc" class="w-full max-w-lg mx-auto"></div>
+                        
                         <button type="button" id="promo-action-btn" onclick="window.scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Join VIP / 登入或升級</button>
                     </div>
                 </div>
@@ -576,8 +581,30 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 第一核心腳本：全域狀態與 UI 事件中心 (純淨封裝版) -->
-    <script>
+    <!-- 終極模組腳本：結合 Firebase、全域變數、UI 控制與 AI 分析 (不再有作用域報錯問題) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+        // Firebase Setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
+            authDomain: "abra-learn-zh-vip.firebaseapp.com",
+            projectId: "abra-learn-zh-vip",
+            storageBucket: "abra-learn-zh-vip.firebasestorage.app",
+            messagingSenderId: "968781909500",
+            appId: "1:968781909500:web:0457924ec29644ea6a7679"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = "abra-learn-zh-vip";
+        
+        // --- 變數與系統狀態全域掛載 ---
+        window.firebaseDbInstance = db;
+        window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
@@ -588,16 +615,43 @@
         window.charCache = {};
         window.currentTargetChar = "";
 
+        // 網域與防盜檢查
+        const sentinelCheck = () => {
+            const host = window.location.hostname;
+            const proto = window.location.protocol;
+            const isLocal = host === "" || host === "localhost" || host === "127.0.0.1" || proto === 'file:';
+            const isAllowedDomain = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"].some(d => host === d || host.endsWith('.' + d));
+            if (!isLocal && !isAllowedDomain) {
+                document.getElementById('domain-lock-overlay')?.classList.remove('hidden');
+                return false;
+            }
+            return true;
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!sentinelCheck()) return;
+            if (user) {
+                document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
+                if (window.syncVipStatus) window.syncVipStatus();
+            } else {
+                signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
+            }
+        });
+
+        // --- UI 控制與畫面更新 ---
         window.updateGlobalUI = function() {
             const emailCode = localStorage.getItem('abra_vip_code');
-            if (!emailCode) {
+            const adminStatus = localStorage.getItem('abra_admin_status');
+            
+            // [PM] 修正：如果沒有 Email，但擁有 admin 狀態，則保留 admin。確保管理員登入不被踢出
+            if (!emailCode && adminStatus !== 'active') {
                 localStorage.removeItem('abra_vip_status');
                 localStorage.removeItem('abra_admin_status');
                 window.isVIP = false;
                 window.isAdmin = false;
             } else {
                 window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
-                window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
+                window.isAdmin = (adminStatus === 'active');
             }
             
             const elements = {
@@ -618,6 +672,7 @@
                 promoBtn: document.getElementById('promo-action-btn')
             };
 
+            // 初始化：先全數隱藏
             if(elements.adminSection) elements.adminSection.classList.add('hidden');
             if(elements.memberSection) elements.memberSection.classList.remove('hidden');
             if(elements.pBtn) elements.pBtn.classList.add('hidden');
@@ -639,6 +694,7 @@
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
             } else if (emailCode) {
+                // 已登入會員邏輯
                 if(elements.memberSection) elements.memberSection.classList.add('hidden');
                 if(elements.pBtn) elements.pBtn.classList.remove('hidden');
                 if(elements.mBtn) elements.mBtn.classList.remove('hidden');
@@ -654,6 +710,7 @@
                     if(elements.apiKeySetup) elements.apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
                     if(elements.expiryDisplay) elements.expiryDisplay.classList.remove('hidden');
                 } else {
+                    // 已註冊但未繳費或過期
                     if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
                     if(elements.vBadge) elements.vBadge.classList.add('hidden');
                     if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -691,6 +748,7 @@
                     }
                 }
             } else {
+                // 完全未登入訪客
                 if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
                 if(elements.vBadge) elements.vBadge.classList.add('hidden');
                 if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -728,6 +786,7 @@
                 }
             }
             
+            // 標籤裝飾
             if (window.isAdmin || window.isVIP) {
                 if(elements.badgeTranslate) { elements.badgeTranslate.textContent = 'VIP UNLIMITED'; elements.badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
                 if(elements.badgeSelect) { elements.badgeSelect.textContent = 'VIP UNLIMITED'; elements.badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
@@ -737,6 +796,7 @@
             }
         };
 
+        // --- 全域輔助函數 ---
         window.showToast = function(msg, isError = false) {
             const toast = document.getElementById('system-toast');
             if(!toast) return;
@@ -775,23 +835,50 @@
             });
         };
 
-        // Modal 視窗開關
+        // --- 視窗開關控制 (全數掛載於 window 供 onclick 取用) ---
         window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
+        
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
+        
         window.closeAdminModal = () => {
             document.getElementById('admin-modal')?.classList.add('hidden');
             document.getElementById('admin-member-email')?.removeAttribute('readonly');
             document.getElementById('admin-member-email')?.classList.remove('bg-slate-100', 'text-slate-500');
         };
+        
         window.closeAdminMsgModal = () => {
             document.getElementById('admin-msg-modal')?.classList.add('hidden');
             window.currentMsgEmail = '';
         };
+        
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal')?.classList.add('hidden');
+        
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        // 語音播報優化 (去除標點)
+        window.handleLogout = function() {
+            localStorage.removeItem('abra_vip_status');
+            localStorage.removeItem('abra_vip_code');
+            localStorage.removeItem('abra_admin_status');
+            // 保留 usage_count 防止免費仔洗次數
+            location.reload(); 
+        };
+
+        window.handleMsgBtnClick = function() {
+            if (window.isAdmin) {
+                window.showToast("請由下方會員列表點擊「新回覆」查看 / Scroll down to check replies", false);
+                document.getElementById('admin-dashboard-section')?.scrollIntoView({behavior: 'smooth'});
+            } else {
+                if (window.openUserMsgModal) window.openUserMsgModal();
+            }
+        };
+
+        window.saveApiKey = function() {
+            const key = document.getElementById('custom-api-key').value.trim();
+            if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
+        };
+
+        // --- 語音模組 ---
         const getStr = (val) => (val === null || val === undefined) ? "" : String(val);
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -813,28 +900,8 @@
             ut.rate = 0.9;
             window.speechSynthesis.speak(ut);
         };
-        
-        window.handleLogout = function() {
-            localStorage.removeItem('abra_vip_status');
-            localStorage.removeItem('abra_vip_code');
-            localStorage.removeItem('abra_admin_status');
-            location.reload(); 
-        };
 
-        window.handleMsgBtnClick = function() {
-            if (window.isAdmin) {
-                window.showToast("請由下方會員列表點擊「新回覆」查看 / Scroll down to check replies", false);
-                document.getElementById('admin-dashboard-section')?.scrollIntoView({behavior: 'smooth'});
-            } else {
-                if (window.openUserMsgModal) window.openUserMsgModal();
-            }
-        };
-
-        window.saveApiKey = function() {
-            const key = document.getElementById('custom-api-key').value.trim();
-            if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
-        };
-
+        // --- 翻譯與拆字引擎 ---
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -934,6 +1001,7 @@
             if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
         };
 
+        // --- AI API 呼叫 ---
         window.fetchWithRetry = async function(url, options, maxRetries = 5) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i <= maxRetries; i++) {
@@ -1118,7 +1186,7 @@
             }
         };
 
-        // 全網單一事件委派，絕不重複，解決沙盒攔截與效能卡頓
+        // 全域按鈕委派，解決動態按鈕失效問題
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
@@ -1136,64 +1204,74 @@
                 if (window.speak) window.speak(actionEl.getAttribute('data-text'));
             }
         });
-        
-        window.onload = function() {
-            if (window.updateGlobalUI) window.updateGlobalUI();
-        };
-    </script>
 
-    <!-- 第二核心模塊：Firebase 與後台通訊邏輯 (純淨封裝版) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
-            authDomain: "abra-learn-zh-vip.firebaseapp.com",
-            projectId: "abra-learn-zh-vip",
-            storageBucket: "abra-learn-zh-vip.firebasestorage.app",
-            messagingSenderId: "968781909500",
-            appId: "1:968781909500:web:0457924ec29644ea6a7679"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = "abra-learn-zh-vip";
-        
-        window.firebaseDbInstance = db;
-        window.firebaseAppId = appId;
-
-        const VALID_DOMAINS = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"];
-        const sentinelCheck = () => {
-            const host = window.location.hostname;
-            const proto = window.location.protocol;
-            const isLocal = host === "" || host === "localhost" || host === "127.0.0.1" || proto === 'file:';
-            const isAllowedDomain = VALID_DOMAINS.some(d => host === d || host.endsWith('.' + d));
-            if (!isLocal && !isAllowedDomain) {
-                document.getElementById('domain-lock-overlay')?.classList.remove('hidden');
-                return false;
-            }
-            return true;
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (!sentinelCheck()) return;
-            if (user) {
-                document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
-                if (window.syncVipStatus) window.syncVipStatus();
-            } else {
-                signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
-            }
-        });
-
+        // 驗證 Firebase 連線與綁定
         window.verifyAdminCloud = async function(code) {
             try {
                 const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
                 const adminSnap = await getDoc(adminRef);
                 return adminSnap.exists() && adminSnap.data().pass === code;
             } catch(e) { return false; }
+        };
+
+        window.openProfileModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
+            
+            document.getElementById('profile-email').value = emailId;
+            document.getElementById('profile-api-key').value = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const user = docSnap.data();
+                    document.getElementById('profile-name').value = user.name || '';
+                    document.getElementById('profile-pass').value = user.password || '';
+                }
+            } catch(e) { }
+        };
+
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            
+            if (emailId && typeof emailId === 'string') {
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                try {
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-name').value = data.name || '';
+                        document.getElementById('admin-member-phone').value = data.phone || '';
+                        document.getElementById('admin-member-remittance').value = data.remittance || '';
+                        document.getElementById('admin-pay-date').value = data.paymentDate || '';
+                        document.getElementById('admin-months').value = data.months || '';
+                        document.getElementById('admin-expiry-date').value = data.expiryDate || '';
+                        document.getElementById('admin-member-remarks').value = data.remarks || '';
+                    }
+                } catch(e) {
+                    window.showToast("資料讀取失敗", true);
+                }
+            } else {
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                document.getElementById('admin-member-pass').value = '';
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+            }
         };
 
         window.syncVipStatus = async function() {
@@ -1796,6 +1874,10 @@
                 if (window.closeProfileModal) window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
+        };
+        
+        window.onload = function() {
+            if (window.updateGlobalUI) window.updateGlobalUI();
         };
     </script>
 </body>

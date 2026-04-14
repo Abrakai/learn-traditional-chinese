@@ -6,14 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "2.1.0"
+    version: "2.2.0"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - VIP Dashboard Fixes"
+    description: "Taiwan Chinese Learning Hub - Session Isolation & API Key Validation"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Modal binding functions injected"
-      - "Pricing table dual-currency logic applied"
-      - "Admin remarks & remittance fields physically separated"
+      - "Implemented strict API Key validation (window.hasValidApiKey)"
+      - "Fixed Ghost API Key session leak across user accounts"
+      - "Updated Gemini model fallback array (removed deprecated 8b)"
     ---
     -->
     <!-- Tailwind CSS -->
@@ -484,8 +484,11 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // 防呆
+        // 防呆：純文字渲染確保，以及強制金鑰檢驗 (修復幽靈金鑰外洩問題)
         window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
+        window.hasValidApiKey = function() {
+            return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
+        };
 
         const sentinelCheck = () => {
             const host = window.location.hostname;
@@ -600,7 +603,7 @@
                         els.vBadge.className = "hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
                         els.vBadge.classList.remove('hidden');
                     }
-                    if(els.apiKeySetup) els.apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
+                    if(els.apiKeySetup) els.apiKeySetup.classList.toggle('hidden', window.hasValidApiKey());
                     if(els.expiryDisplay) els.expiryDisplay.classList.remove('hidden');
                 } else {
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
@@ -677,6 +680,7 @@
             } catch(e) { return false; }
         };
 
+        // PM 修改：同步 VIP 狀態時，強制檢驗並隔離/清空幽靈金鑰
         window.syncVipStatus = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) return;
@@ -707,9 +711,13 @@
                         localStorage.setItem('abra_vip_status', 'pending');
                     }
 
+                    // 強制清空無效的殘留金鑰
                     if (data.apiKey && localStorage.getItem('abra_vip_status') === 'active') {
-                        localStorage.setItem('gemini_api_key', data.apiKey);
-                        window.activeApiKey = data.apiKey;
+                        localStorage.setItem('gemini_api_key', data.apiKey.trim());
+                        window.activeApiKey = data.apiKey.trim();
+                    } else {
+                        localStorage.removeItem('gemini_api_key');
+                        window.activeApiKey = "";
                     }
                     
                     const messages = data.messages || [];
@@ -762,7 +770,16 @@
                             else status = 'expired';
                         }
                         localStorage.setItem('abra_vip_status', status);
-                        if (data.apiKey && status === 'active') localStorage.setItem('gemini_api_key', data.apiKey);
+                        
+                        // 登入時也進行金鑰同步與清理
+                        if (data.apiKey && status === 'active') {
+                            localStorage.setItem('gemini_api_key', data.apiKey.trim());
+                            window.activeApiKey = data.apiKey.trim();
+                        } else {
+                            localStorage.removeItem('gemini_api_key');
+                            window.activeApiKey = "";
+                        }
+                        
                         window.showToast("登入成功！ / Login Success!");
                         setTimeout(() => location.reload(), 800);
                     } else {
@@ -811,6 +828,7 @@
             finally { if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } }
         };
 
+        // PM 修改：確保登出時，金鑰一併在生命週期內徹底殲滅，阻斷跨帳戶外洩
         window.handleLogout = function() {
             if (window.isAdmin || localStorage.getItem('abra_admin_status') === 'active') {
                 localStorage.setItem('abra_usage_count', '0');
@@ -819,6 +837,8 @@
             localStorage.removeItem('abra_vip_status');
             localStorage.removeItem('abra_vip_code');
             localStorage.removeItem('abra_admin_status');
+            localStorage.removeItem('gemini_api_key');
+            window.activeApiKey = "";
             location.reload(); 
         };
 
@@ -1067,8 +1087,8 @@
             try {
                 await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, password: newPass, apiKey: newApiKey });
                 if (newApiKey === '') localStorage.removeItem('gemini_api_key');
-                else localStorage.setItem('gemini_api_key', newApiKey);
-                window.activeApiKey = newApiKey;
+                else localStorage.setItem('gemini_api_key', newApiKey.trim());
+                window.activeApiKey = newApiKey.trim();
                 window.showToast("設定已同步至雲端並儲存完成！ / Settings Saved!");
                 if (window.closeProfileModal) window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
@@ -1253,11 +1273,6 @@
             window.speechSynthesis.speak(ut);
         };
 
-        window.saveApiKey = function() {
-            const key = document.getElementById('custom-api-key').value.trim();
-            if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
-        };
-
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -1280,6 +1295,7 @@
             finally { document.getElementById('translate-loader').classList.add('hidden'); }
         };
 
+        // PM 修改：加入嚴格空值校驗 window.hasValidApiKey() 以防禦殘留金鑰
         window.handleSplit = function(e) {
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
@@ -1317,7 +1333,8 @@
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
                     if (window.isVIP) {
-                        if (window.activeApiKey) {
+                        // 雙重防禦：確保存在有效金鑰才放行至解析引擎
+                        if (window.hasValidApiKey()) {
                             if(window.executeAIFetch) window.executeAIFetch(char);
                         } else {
                             document.getElementById('vip-only-content').classList.add('hidden'); 
@@ -1398,6 +1415,16 @@
                 return;
             }
 
+            // PM 新增：最終防線，若因任何情況遺失金鑰，強迫攔截避免撞牆
+            if (!window.hasValidApiKey()) {
+                document.getElementById('vip-only-content').classList.add('hidden');
+                document.getElementById('free-promo-content').classList.add('hidden');
+                document.getElementById('ai-inner-loader').classList.add('hidden');
+                document.getElementById('ai-error-panel').classList.add('hidden');
+                document.getElementById('vip-no-key-promo')?.classList.remove('hidden');
+                return;
+            }
+
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
             const errorPanel = document.getElementById('ai-error-panel');
@@ -1409,8 +1436,12 @@
             errorPanel.classList.add('hidden');
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
+            
+            // 清除上次殘留的成功徽章
+            document.getElementById('active-engine-badge').classList.add('hidden');
 
-            const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.5-flash-lite"];
+            // PM 修復：移除已被 Google 官方廢棄的 8b 版本，僅保留官方穩定維護模型
+            const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
             let success = false;
             for (const model of modelNames) {
                 try {

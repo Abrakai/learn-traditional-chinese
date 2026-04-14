@@ -29,19 +29,16 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- 網域鎖定防護 -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce"><i class="ph-fill ph-shield-warning"></i></div>
         <h2 class="text-2xl font-black text-white mb-4">Unauthorized Access / 網域授權失敗</h2>
         <p class="text-slate-400 max-w-md leading-relaxed">系統偵測到非法網域部署。為保護工作室資產與個資安全，功能已鎖定。<br><br>請回官方正版站點：<br><a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-bold underline">abrakai.github.io/learn-traditional-chinese/</a></p>
     </div>
 
-    <!-- 蜜罐防護 -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
-    <!-- Toast 通知 -->
     <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
@@ -50,7 +47,6 @@
         <i class="ph-fill ph-warning-circle text-lg"></i> <span id="error-banner-text">系統連線狀態良好 / System Connection Stable</span>
     </div>
 
-    <!-- 頂部導航列 -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
@@ -212,6 +208,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                <!-- 畫布區 -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-3 left-4 flex flex-col items-start gap-0.5 text-slate-400"><div class="flex items-center gap-1.5"><i class="ph-fill ph-scribble-loop text-lg"></i><span class="text-[10px] font-black uppercase tracking-widest font-bold text-slate-500">Writing Mechanics</span></div><span class="text-[9px] italic ml-5">筆畫順序機械原理</span></div>
                     <svg id="hanzi-target" width="200" height="200" class="bg-white rounded-2xl shadow-xl border border-slate-300 p-3 mt-8"></svg>
@@ -224,9 +221,10 @@
 
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4"><div class="ai-inner-loader"></div><p class="text-slate-400 text-xs animate-pulse uppercase tracking-widest">AI Analyzing...</p></div>
+                    
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4"><div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-warning-circle"></i></div><h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight">連線受到阻礙 / Issue</h3><p id="ai-error-debug" class="text-slate-500 text-[11px] font-mono break-all max-w-[320px] bg-slate-50 p-4 rounded-xl border border-slate-200"></p><button type="button" onclick="window.handleAIRetry()" class="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all uppercase tracking-wider">Retry / 重新嘗試</button></div>
 
-                    <!-- AI Data VIP Display -->
+                    <!-- AI 魔法結果 (VIP + KEY) -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 shadow-sm relative overflow-hidden">
@@ -245,7 +243,18 @@
                         <div id="idioms-section"><h3 class="text-xs font-bold uppercase tracking-widest mb-3 text-slate-400 border-b pb-2">Idioms / 成語解析</h3><div id="idioms-container" class="space-y-4"></div></div>
                     </div>
 
-                    <!-- Free Promo & Pricing Banner -->
+                    <!-- [PM] NEW: VIP 無 API Key 引導區 -->
+                    <div id="vip-no-key-promo" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
+                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-magic-wand text-indigo-500"></i></div>
+                        <h3 class="text-xl font-bold text-slate-800">API Key Required / 需要魔法金鑰</h3>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed px-6 font-bold">
+                            您已具備 VIP 資格！請至「個人設定」綁定您的專屬 API Key，即可解鎖進階注音、破音字、詞彙與成語解析。<br>
+                            <span class="text-[10px] italic font-normal mt-1 block">You are a VIP! Please bind your API Key in Profile to unlock advanced character analysis.</span>
+                        </p>
+                        <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Set API Key / 前往設定</button>
+                    </div>
+
+                    <!-- 免費會員升級引導 (無VIP) -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 id="promo-title" class="text-xl font-bold text-slate-800">Unlock VIP Access / 解鎖 VIP 權限</h3>
@@ -413,30 +422,8 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 終極模組腳本：結合 Firebase、全域變數、UI 控制與 AI 分析 (不再有作用域報錯問題) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-
-        // Firebase Setup
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
-            authDomain: "abra-learn-zh-vip.firebaseapp.com",
-            projectId: "abra-learn-zh-vip",
-            storageBucket: "abra-learn-zh-vip.firebasestorage.app",
-            messagingSenderId: "968781909500",
-            appId: "1:968781909500:web:0457924ec29644ea6a7679"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = "abra-learn-zh-vip";
-        
-        // --- 變數與系統狀態全域掛載 ---
-        window.firebaseDbInstance = db;
-        window.firebaseAppId = appId;
+    <!-- 第一核心腳本：全域狀態與 UI 事件中心 -->
+    <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
@@ -447,45 +434,16 @@
         window.charCache = {};
         window.currentTargetChar = "";
 
-        // 網域與防盜檢查
-        const sentinelCheck = () => {
-            const host = window.location.hostname;
-            const proto = window.location.protocol;
-            const isLocal = host === "" || host === "localhost" || host === "127.0.0.1" || proto === 'file:';
-            const isAllowedDomain = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"].some(d => host === d || host.endsWith('.' + d));
-            if (!isLocal && !isAllowedDomain) {
-                document.getElementById('domain-lock-overlay')?.classList.remove('hidden');
-                return false;
-            }
-            return true;
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (!sentinelCheck()) return;
-            if (user) {
-                document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
-                if (window.syncVipStatus) window.syncVipStatus();
-            } else {
-                signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
-            }
-        });
-
-        // --- 字串防呆處理 ---
-        window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
-
-        // --- UI 控制與畫面更新 ---
         window.updateGlobalUI = function() {
             const emailCode = localStorage.getItem('abra_vip_code');
-            const adminStatus = localStorage.getItem('abra_admin_status');
-            
-            if (!emailCode && adminStatus !== 'active') {
+            if (!emailCode) {
                 localStorage.removeItem('abra_vip_status');
                 localStorage.removeItem('abra_admin_status');
                 window.isVIP = false;
                 window.isAdmin = false;
             } else {
                 window.isVIP = (localStorage.getItem('abra_vip_status') === 'active');
-                window.isAdmin = (adminStatus === 'active');
+                window.isAdmin = (localStorage.getItem('abra_admin_status') === 'active');
             }
             
             const elements = {
@@ -506,7 +464,7 @@
                 promoBtn: document.getElementById('promo-action-btn')
             };
 
-            // 初始化隱藏
+            // Reset all panels
             if(elements.adminSection) elements.adminSection.classList.add('hidden');
             if(elements.memberSection) elements.memberSection.classList.remove('hidden');
             if(elements.pBtn) elements.pBtn.classList.add('hidden');
@@ -528,7 +486,6 @@
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
             } else if (emailCode) {
-                // 已登入會員邏輯
                 if(elements.memberSection) elements.memberSection.classList.add('hidden');
                 if(elements.pBtn) elements.pBtn.classList.remove('hidden');
                 if(elements.mBtn) elements.mBtn.classList.remove('hidden');
@@ -544,7 +501,7 @@
                     if(elements.apiKeySetup) elements.apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
                     if(elements.expiryDisplay) elements.expiryDisplay.classList.remove('hidden');
                 } else {
-                    // 已註冊但未繳費或過期
+                    // 已註冊但非 VIP (過期或未繳費)
                     if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
                     if(elements.vBadge) elements.vBadge.classList.add('hidden');
                     if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -552,30 +509,30 @@
                     const pricingHTML = `
                         <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
                             <div class="border-b border-slate-100 pb-3">
-                                <h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free)</h4>
-                                <p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic character splits and translations per day.</span></p>
+                                <h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free Plan)</h4>
+                                <p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic translations and character splits per day.</span></p>
                             </div>
                             <div class="border-b border-slate-100 pb-3">
                                 <h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4>
                                 <p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
                                 <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl">
-                                    <p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 如果您自備 API KEY，還可以開啟另一道魔法之門 (Unlock magic with API KEY):</p>
+                                    <p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 備妥 API KEY，開啟魔法之門 (Unlock magic with API KEY):</p>
                                     <p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p>
                                 </div>
                             </div>
                             <div class="pt-1">
                                 <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4>
                                 <ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                                    <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 / 月 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
-                                    <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 / 6個月 <span class="text-[9px] text-slate-400">(每月僅125元 / $4 USD/mo)</span></span></li>
-                                    <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">👑 NT$ 1,200 / 12個月 <span class="text-[9px] text-yellow-700">(每月僅100元，推薦！/ $3 USD/mo)</span></span></li>
+                                    <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
+                                    <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125 or $4 USD/mo)</span></span></li>
+                                    <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100 or $3 USD/mo) 推薦!</span></span></li>
                                 </ul>
                             </div>
                         </div>
                     `;
 
                     if(elements.promoTitle) elements.promoTitle.textContent = 'Upgrade Required / 需繳費升級';
-                    if(elements.promoDesc) elements.promoDesc.innerHTML = `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通權限。<br><span class="text-[10px] italic font-normal text-slate-500">Please complete payment and contact Abrakai Studio to unlock VIP permissions.</span></p>` + pricingHTML;
+                    if(elements.promoDesc) elements.promoDesc.innerHTML = `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您目前為未繳費或已過期會員，無法使用魔法功能。<br>請繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫開通 VIP 權限。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Please complete payment to unlock VIP. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
                     if(elements.promoBtn) {
                         elements.promoBtn.textContent = 'Contact Studio / 聯絡工作室';
                         elements.promoBtn.onclick = function() { window.open('https://abrakai.github.io/learn-traditional-chinese/', '_blank'); };
@@ -590,30 +547,30 @@
                 const pricingHTML = `
                     <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
                         <div class="border-b border-slate-100 pb-3">
-                            <h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free)</h4>
-                            <p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic character splits and translations per day.</span></p>
+                            <h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> 免費版 (Free Plan)</h4>
+                            <p class="text-[11px] text-slate-500 mt-1 font-bold">每日 20 次基礎拆字與翻譯。<br><span class="italic font-normal text-[10px] text-slate-400">20 basic translations and character splits per day.</span></p>
                         </div>
                         <div class="border-b border-slate-100 pb-3">
                             <h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> VIP 尊榮版 (Premium)</h4>
                             <p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ 無限次數 (Unlimited): <span class="font-normal text-slate-600">英翻中、中文拆字書寫教學與練習，讓您的學習不被中斷。<br><span class="italic text-[10px] text-slate-400">Unlimited translation and character writing practice.</span></span></p>
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl">
-                                <p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 如果您自備 API KEY，還可以開啟另一道魔法之門 (Unlock magic with API KEY):</p>
+                                <p class="text-[10px] text-indigo-700 font-bold mb-1">✨ 備妥 API KEY，開啟魔法之門 (Unlock magic with API KEY):</p>
                                 <p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。<br><span class="italic font-normal text-[10px] text-indigo-600">Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.</span></p>
                             </div>
                         </div>
                         <div class="pt-1">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">收費標準 (Pricing)</h4>
                             <ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 / 月 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
-                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 / 6個月 <span class="text-[9px] text-slate-400">(每月僅125元 / $4 USD/mo)</span></span></li>
-                                <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">👑 NT$ 1,200 / 12個月 <span class="text-[9px] text-yellow-700">(每月僅100元，推薦！/ $3 USD/mo)</span></span></li>
+                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【單月體驗 / 1-Month】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">($5 USD/mo)</span></span></li>
+                                <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【半年方案 / 6-Month】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125 or $4 USD/mo)</span></span></li>
+                                <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【年度超值 / 12-Month】</span> <span class="font-bold">NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100 or $3 USD/mo) 推薦!</span></span></li>
                             </ul>
                         </div>
                     </div>
                 `;
 
                 if(elements.promoTitle) elements.promoTitle.textContent = 'Unlock VIP Access / 解鎖 VIP 權限';
-                if(elements.promoDesc) elements.promoDesc.innerHTML = pricingHTML;
+                if(elements.promoDesc) elements.promoDesc.innerHTML = `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並與 <span class="text-indigo-600 font-black">阿布拉.凱 | 工作室</span> 聯繫升級 VIP。<br><span class="text-slate-500 font-medium mt-1 block">（⚠️ 即使您自備 API KEY，也必須成為付費 VIP 才可開啟進階魔法引擎）</span><br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP to unlock features. Advanced magic requires both VIP status and an API Key.</span></p>` + pricingHTML;
                 if(elements.promoBtn) {
                     elements.promoBtn.textContent = 'Join VIP / 登入或升級';
                     elements.promoBtn.onclick = window.scrollToAuth;
@@ -759,6 +716,7 @@
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
             
+            // 雙重計費防護
             if (e && e.isTrusted) {
                 if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
                     window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
@@ -791,13 +749,25 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
-                    if (window.isVIP && window.activeApiKey) {
-                        if(window.executeAIFetch) window.executeAIFetch(char);
+                    // [PM] 精準分流：VIP且有Key -> 魔法 ; VIP但無Key -> 引導裝Key ; 非VIP -> 擋下
+                    if (window.isVIP) {
+                        if (window.activeApiKey) {
+                            if(window.executeAIFetch) window.executeAIFetch(char);
+                        } else {
+                            document.getElementById('vip-only-content').classList.add('hidden'); 
+                            document.getElementById('free-promo-content').classList.add('hidden'); 
+                            document.getElementById('ai-inner-loader').classList.add('hidden');
+                            document.getElementById('ai-error-panel').classList.add('hidden');
+                            const noKeyPromo = document.getElementById('vip-no-key-promo');
+                            if(noKeyPromo) noKeyPromo.classList.remove('hidden');
+                        }
                     } else { 
                         document.getElementById('vip-only-content').classList.add('hidden'); 
-                        document.getElementById('free-promo-content').classList.remove('hidden'); 
+                        const noKeyPromo = document.getElementById('vip-no-key-promo');
+                        if(noKeyPromo) noKeyPromo.classList.add('hidden');
                         document.getElementById('ai-inner-loader').classList.add('hidden');
                         document.getElementById('ai-error-panel').classList.add('hidden');
+                        document.getElementById('free-promo-content').classList.remove('hidden'); 
                     }
                 };
                 container.appendChild(btn);
@@ -1252,10 +1222,11 @@
                     
                     const messages = data.messages || [];
                     
+                    const container = document.getElementById('admin-chat-history');
                     if(!messages || messages.length === 0) {
-                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
+                        container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
                     } else {
-                        historyDiv.innerHTML = messages.map((m, index) => {
+                        container.innerHTML = messages.map((m, index) => {
                             const isUser = m.role === 'user';
                             const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                             const senderName = isUser ? window.currentMsgName : 'Admin';
@@ -1270,7 +1241,7 @@
                                 </div>
                             `;
                         }).join('');
-                        historyDiv.scrollTop = historyDiv.scrollHeight;
+                        container.scrollTop = container.scrollHeight;
                     }
                     
                     localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
@@ -1516,11 +1487,6 @@
                 if (window.closeProfileModal) window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
-        };
-
-        // 確保初始載入
-        window.onload = function() {
-            if (window.updateGlobalUI) window.updateGlobalUI();
         };
     </script>
 </body>

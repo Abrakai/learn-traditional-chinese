@@ -115,7 +115,7 @@
                             </button>
                         </div>
                         <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1 mt-4 shadow-inner">
-                            <div class="flex items-start gap-2"><i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i><p class="text-[11px] text-slate-500 leading-snug font-bold italic">Dual login required. Subscription will automatically downgrade upon expiry.<br><span class="not-italic">需以 Email 與密碼雙重登入。VIP 到期後系統將自動降級。</span></p></div>
+                            <div class="flex items-start gap-2"><i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i><p class="text-[11px] text-slate-500 leading-snug font-bold italic">Dual login required. Subscription auto-downgrades on expiry. <br><span class="not-italic">需以 Email 與密碼雙重登入。VIP 到期後系統將自動降級。</span></p></div>
                         </div>
                     </div>
                 </form>
@@ -148,7 +148,7 @@
                             <th class="px-6 py-4 border-b">Name & Phone / 姓名與電話</th>
                             <th class="px-6 py-4 border-b">Pay Date & Mos / 匯款日與期數</th>
                             <th class="px-6 py-4 border-b">Expiry / 到期日</th>
-                            <th class="px-6 py-4 border-b">Last 5 Digits & Note / 末五碼與備註</th>
+                            <th class="px-6 py-4 border-b">Remarks / 備註資訊</th>
                             <th class="px-6 py-4 border-b text-right">Actions / 操作</th>
                         </tr>
                     </thead>
@@ -273,7 +273,7 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal (X 關閉按鈕已修復、分離末五碼與備註欄位) -->
+    <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b pb-4 mb-6"><h3 class="text-lg font-black text-slate-800 flex items-center gap-2 font-bold"><i class="ph-fill ph-user-list text-emerald-500"></i> Edit Member / 編輯會員資料</h3><button type="button" onclick="window.closeAdminModal()" class="text-slate-400 hover:text-red-500 text-2xl font-bold transition-colors">✕</button></div>
@@ -283,7 +283,6 @@
                 <div><label class="text-[10px] font-bold text-slate-500 uppercase font-bold">Name / 姓名</label><input type="text" id="admin-member-name" class="w-full px-4 py-3 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-bold"></div>
                 <div><label class="text-[10px] font-bold text-slate-500 uppercase font-bold">Phone / 電話 (國際碼)</label><input type="text" id="admin-member-phone" class="w-full px-4 py-3 rounded-xl border text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                 
-                <!-- [PM] 已根據需求分離這兩個欄位 -->
                 <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-bold">Remittance / 匯款末五碼</label><input type="text" id="admin-member-remittance" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm font-mono" placeholder="例如：88392"></div>
                 <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-bold">Remarks / 備註資訊</label><input type="text" id="admin-member-remarks" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm" placeholder="其他備註事項..."></div>
 
@@ -494,6 +493,12 @@
             } catch(e) { window.showToast("Signup Error / 註冊失敗", true); }
         };
 
+        window.handleLogout = function() {
+            if (window.isAdmin || localStorage.getItem('abra_admin_status') === 'active') { localStorage.setItem('abra_usage_count', '0'); window.freeUsageCount = 0; }
+            localStorage.removeItem('abra_vip_status'); localStorage.removeItem('abra_vip_code'); localStorage.removeItem('abra_admin_status');
+            location.reload();
+        };
+
         // Admin CRUD Handlers
         window.loadAdminMembers = async function() {
             const tbody = document.getElementById('admin-members-tbody'); if(!tbody) return;
@@ -506,7 +511,6 @@
                     const status = diff > 7 ? 'bg-emerald-500' : (diff > 0 ? 'bg-orange-500' : 'bg-red-500');
                     const label = diff > 0 ? `${diff} Days` : (diff === -1 ? 'Pending' : 'Expired');
                     
-                    // [PM] 在表格中分拆顯示末五碼與備註，避免擠在同一行難以閱讀
                     const remittanceTxt = window.getStr(d.remittance).substring(0, 10);
                     const remarksTxt = window.getStr(d.remarks).substring(0, 15);
                     const notesHtml = `<span class="text-emerald-700 font-bold">${remittanceTxt || '-'}</span><br><span class="text-[10px] text-slate-400">${remarksTxt || ''}</span>`;
@@ -539,7 +543,6 @@
                     document.getElementById('admin-months').value = d.months || '';
                     document.getElementById('admin-expiry-date').value = d.expiryDate || '';
                     document.getElementById('admin-member-remittance').value = d.remittance || '';
-                    // [PM] 綁定新增的 Remarks 欄位
                     const remarksEl = document.getElementById('admin-member-remarks');
                     if(remarksEl) remarksEl.value = d.remarks || '';
                 }
@@ -584,7 +587,7 @@
         window.saveProfileInfo = async function() {
             const email = localStorage.getItem('abra_vip_code');
             const key = document.getElementById('profile-api-key').value.trim();
-            if(!window.isVIP && key) return window.showToast("VIP status required to set API Key! / 需具備 VIP 資格", true);
+            if(!window.isVIP && !window.isAdmin && key) return window.showToast("VIP status required to set API Key! / 需具備 VIP 資格", true);
             await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", email), { name: document.getElementById('profile-name').value, password: document.getElementById('profile-pass').value, apiKey: key });
             localStorage.setItem('gemini_api_key', key); window.activeApiKey = key; window.showToast("Saved / 儲存完成"); window.closeProfileModal(); setTimeout(() => location.reload(), 500);
         };
@@ -688,21 +691,36 @@
         window.executeAIFetch = async function(char) {
             const loader = document.getElementById('ai-inner-loader'); loader.classList.remove('hidden');
             ['vip-only-content','vip-no-key-promo','free-promo-content','ai-error-panel'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            // 加入更強力的 Prompt 防呆
             const prompt = `請以台灣教育部辭典標準解析繁體字「${char}」並輸出 JSON。格式:{"zhuyin":"主要注音","polyphonic":[{"zhuyin":"破音","examples":["符合該發音的詞彙"]}],"words":["發音詞彙"],"idioms":[{"idiom":"成語","meaning":"解釋","english":"English"}]}。⚠️ 極嚴格要求:破音字詞彙發音必須100%符合分類! 絕不可放錯!`;
+            
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
                 const result = await res.json();
-                const data = JSON.parse(result.candidates[0].content.parts[0].text.match(/\{[\s\S]*\}/)[0]);
+                
+                // 防空值與錯誤解析防護網
+                if (result.error) throw new Error(result.error.message);
+                if (!result.candidates || result.candidates.length === 0) throw new Error("API Return Blocked / API 拒絕回傳內容");
+                const rawText = result.candidates[0].content?.parts?.[0]?.text;
+                if (!rawText) throw new Error("Empty Response / 回傳內容為空");
+                
+                const match = rawText.match(/\{[\s\S]*\}/);
+                if (!match) throw new Error("JSON Parse Error / 解析格式錯誤");
+                
+                const data = JSON.parse(match[0]);
                 window.renderResult(char, data);
-            } catch (e) { document.getElementById('ai-error-panel').classList.remove('hidden'); document.getElementById('ai-error-debug').textContent = e.message; } 
-            finally { loader.classList.add('hidden'); }
+            } catch (e) { 
+                document.getElementById('ai-error-panel').classList.remove('hidden'); 
+                document.getElementById('ai-error-debug').textContent = e.message; 
+            } finally { loader.classList.add('hidden'); }
         };
 
         window.renderResult = function(char, data) {
             document.getElementById('vip-only-content').classList.remove('hidden');
             document.getElementById('zhuyin-display').textContent = data.zhuyin;
             const pb = document.getElementById('play-char-btn'); pb.classList.remove('hidden'); pb.onclick = () => window.speak(data.zhuyin);
-            // [PM] 注音欺騙法：將國字替換為注音，強迫讀出正確發音
+            
             document.getElementById('polyphonic-display').innerHTML = (data.polyphonic || []).map(p => {
                 const speakTxt = (p.examples || []).map(ex => ex.replace(new RegExp(char, 'g'), p.zhuyin)).join('，');
                 return `<div class="bg-white p-2 rounded-lg border text-xs shadow-sm"><b>${p.zhuyin}</b>: <button onclick="window.speak('${speakTxt}')" class="text-indigo-600 underline font-bold">${(p.examples || []).join(', ')}</button></div>`;

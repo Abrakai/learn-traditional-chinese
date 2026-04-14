@@ -92,6 +92,7 @@
         <span id="toast-msg"></span>
     </div>
 
+    <!-- 雲端狀態橫幅 -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">系統連線狀態良好 / System Connection Stable</span>
@@ -150,7 +151,6 @@
             
             <div class="p-6 md:p-10">
                 <form id="auth-forms-container" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-                    <!-- 註冊表單 -->
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號
@@ -169,7 +169,6 @@
                                     <p class="text-[9px] text-red-500 italic pl-6">For verification, we recommend including the last 4 digits of your phone number in your password.</p>
                                 </div>
                             </div>
-
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                                 <div class="flex items-start gap-2">
                                     <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
@@ -178,12 +177,10 @@
                                     </label>
                                 </div>
                             </div>
-
                             <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
 
-                    <!-- 登入表單 -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400">
                             <i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入
@@ -340,7 +337,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- 畫布區 -->
                 <div class="md:col-span-5 lg:col-span-4 p-8 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-3 left-4 flex flex-col items-start gap-0.5 text-slate-400">
                         <div class="flex items-center gap-1.5"><i class="ph-fill ph-scribble-loop text-lg"></i><span class="text-[10px] font-black uppercase tracking-widest font-bold text-slate-500">Writing Mechanics</span></div>
@@ -354,7 +350,6 @@
                     <p id="quiz-status" class="text-sm mt-4 text-emerald-600 font-bold h-6"></p>
                 </div>
 
-                <!-- AI 分析結果區 -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4">
                         <div class="ai-inner-loader"></div>
@@ -399,7 +394,6 @@
                         </div>
                     </div>
 
-                    <!-- Free Promo Content & Pricing -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 id="promo-title" class="text-xl font-bold text-slate-800">Unlock VIP Access / 解鎖 VIP 權限</h3>
@@ -416,8 +410,6 @@
     </main>
 
     <!-- 區塊 6：全域系統彈出視窗 (Modals) -->
-
-    <!-- User System Messages Modal -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
@@ -434,7 +426,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -476,7 +467,6 @@
         </div>
     </div>
 
-    <!-- Admin Msg Modal -->
     <div id="admin-msg-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
@@ -495,7 +485,6 @@
         </div>
     </div>
 
-    <!-- Admin User CRUD Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -513,12 +502,10 @@
                         <input type="text" id="admin-member-pass" placeholder="建議含手機末4碼" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                     </div>
                 </div>
-                
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Display Name (姓名)</label>
                     <input type="text" id="admin-member-name" placeholder="會員姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Phone (電話 / 國際碼)</label>
@@ -529,7 +516,6 @@
                         <input type="text" id="admin-member-remittance" placeholder="例如：88392" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white font-mono text-emerald-700">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Payment Date (匯款日)</label>
@@ -544,12 +530,10 @@
                         <input type="date" id="admin-expiry-date" class="w-full px-3 py-2 rounded-lg border border-emerald-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs shadow-sm bg-white font-bold text-emerald-700">
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Remarks (其他備註)</label>
                     <input type="text" id="admin-member-remarks" placeholder="其他備註事項" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                 </div>
-
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="window.closeAdminModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wider">Cancel / 取消</button>
                     <button type="button" id="admin-save-btn" onclick="window.saveAdminMember()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-900 py-3 rounded-xl font-black shadow-md transition-all text-sm active:scale-95 uppercase tracking-wider">Save / 儲存會員</button>
@@ -558,7 +542,6 @@
         </div>
     </div>
 
-    <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
             <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2">
@@ -570,14 +553,12 @@
                     <p>Abrakai Studio (以下簡稱本站) 為提供會員服務，將收集您的電子郵件、姓名與密碼。</p>
                     <p class="italic text-slate-400 mb-2">Abrakai Studio collects your email, name, and password to provide member services.</p>
                     <p>您的 API Key 將同步加密儲存於雲端資料庫中，僅供您個人調用 AI 功能使用。</p>
-                    <p class="italic text-slate-400 mb-2">Your API Key is stored in the cloud for your personal AI requests only.</p>
                 </section>
                 <section>
                     <h4 class="font-black text-slate-800 mb-2">2. 免責聲明 (Disclaimer)</h4>
                     <p>本站提供之漢字解析、翻譯內容，部分由第三方 AI 引擎 (Google Gemini) 動態生成。</p>
                     <p class="italic text-slate-400 mb-2">Chinese character analysis and translations are dynamically generated by third-party AI.</p>
                     <p>內容僅供學術輔助參考，無法保證 100% 正確性。若因採用本站內容造成任何損害，本站不承擔法律責任。</p>
-                    <p class="italic text-slate-400">Content is for academic reference only; 100% accuracy is not guaranteed. We are not liable for any losses.</p>
                 </section>
                 <section>
                     <h4 class="font-black text-slate-800 mb-2">3. 會員資格與配額 (Subscription & Quota)</h4>
@@ -595,7 +576,7 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 第一核心模塊：全域狀態與 UI 事件中心 (純淨版) -->
+    <!-- 第一核心腳本：全域狀態與 UI 事件中心 (純淨封裝版) -->
     <script>
         window.MAX_FREE_USES = 20;
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
@@ -637,7 +618,6 @@
                 promoBtn: document.getElementById('promo-action-btn')
             };
 
-            // Reset all panels
             if(elements.adminSection) elements.adminSection.classList.add('hidden');
             if(elements.memberSection) elements.memberSection.classList.remove('hidden');
             if(elements.pBtn) elements.pBtn.classList.add('hidden');
@@ -674,7 +654,6 @@
                     if(elements.apiKeySetup) elements.apiKeySetup.classList.toggle('hidden', !!window.activeApiKey);
                     if(elements.expiryDisplay) elements.expiryDisplay.classList.remove('hidden');
                 } else {
-                    // 已註冊但非 VIP (過期或未繳費)
                     if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
                     if(elements.vBadge) elements.vBadge.classList.add('hidden');
                     if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -712,7 +691,6 @@
                     }
                 }
             } else {
-                // 完全未登入訪客
                 if(elements.qDisplay) elements.qDisplay.classList.remove('hidden');
                 if(elements.vBadge) elements.vBadge.classList.add('hidden');
                 if(elements.qCount) elements.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -750,7 +728,6 @@
                 }
             }
             
-            // 標籤裝飾
             if (window.isAdmin || window.isVIP) {
                 if(elements.badgeTranslate) { elements.badgeTranslate.textContent = 'VIP UNLIMITED'; elements.badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
                 if(elements.badgeSelect) { elements.badgeSelect.textContent = 'VIP UNLIMITED'; elements.badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm'; }
@@ -798,14 +775,14 @@
             });
         };
 
-        // Modal 操作集
+        // Modal 視窗開關
         window.openLegalModal = () => document.getElementById('legal-modal')?.classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal')?.classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal')?.classList.add('hidden');
         window.closeAdminModal = () => {
             document.getElementById('admin-modal')?.classList.add('hidden');
-            document.getElementById('admin-member-email').removeAttribute('readonly');
-            document.getElementById('admin-member-email').classList.remove('bg-slate-100', 'text-slate-500');
+            document.getElementById('admin-member-email')?.removeAttribute('readonly');
+            document.getElementById('admin-member-email')?.classList.remove('bg-slate-100', 'text-slate-500');
         };
         window.closeAdminMsgModal = () => {
             document.getElementById('admin-msg-modal')?.classList.add('hidden');
@@ -814,7 +791,7 @@
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal')?.classList.add('hidden');
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        // 語音發音模組
+        // 語音播報優化 (去除標點)
         const getStr = (val) => (val === null || val === undefined) ? "" : String(val);
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -841,7 +818,6 @@
             localStorage.removeItem('abra_vip_status');
             localStorage.removeItem('abra_vip_code');
             localStorage.removeItem('abra_admin_status');
-            // 保留 usage_count 防止免費仔洗次數
             location.reload(); 
         };
 
@@ -859,7 +835,6 @@
             if (key) { window.activeApiKey = key; localStorage.setItem('gemini_api_key', key); location.reload(); }
         };
 
-        // 翻譯與拆字引擎
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -869,9 +844,7 @@
                 const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                 const d = await res.json();
                 let trans = "";
-                if (d && d[0]) {
-                    trans = d[0].map(item => item[0]).join('');
-                }
+                if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
                 document.getElementById('zh-input').value = trans.trim();
                 
                 if (!window.isVIP) { 
@@ -879,7 +852,6 @@
                     localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
-                // 觸發拆字
                 document.getElementById('split-btn').click();
             } catch(e) {
                 window.showToast("翻譯伺服器連線失敗，請稍後再試", true);
@@ -892,7 +864,7 @@
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
             
-            // 防雙重扣款
+            // 雙重計費防護
             if (e && e.isTrusted) {
                 if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
                     window.showToast("每日試用額度已達上限 / Daily Limit Reached", true); 
@@ -1146,7 +1118,7 @@
             }
         };
 
-        // 全域委派綁定：解決沙盒與動態 DOM 下按鈕失效的問題
+        // 全網單一事件委派，絕不重複，解決沙盒攔截與效能卡頓
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
@@ -1170,7 +1142,7 @@
         };
     </script>
 
-    <!-- 第二模塊：Firebase 與通訊底層邏輯 -->
+    <!-- 第二核心模塊：Firebase 與後台通訊邏輯 (純淨封裝版) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -1560,11 +1532,10 @@
                     
                     const messages = data.messages || [];
                     
-                    const container = document.getElementById('admin-chat-history');
                     if(!messages || messages.length === 0) {
-                        container.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
+                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄</div>';
                     } else {
-                        container.innerHTML = messages.map((m, index) => {
+                        historyDiv.innerHTML = messages.map((m, index) => {
                             const isUser = m.role === 'user';
                             const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                             const senderName = isUser ? window.currentMsgName : 'Admin';
@@ -1579,7 +1550,7 @@
                                 </div>
                             `;
                         }).join('');
-                        container.scrollTop = container.scrollHeight;
+                        historyDiv.scrollTop = historyDiv.scrollHeight;
                     }
                     
                     localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());

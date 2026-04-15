@@ -6,13 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "3.1.2-SECURE"
+    version: "3.2.0-SECURE"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Reset Password Interceptor Fix"
+    description: "Taiwan Chinese Learning Hub - Automated Ghost Migration for Password Resets"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Implemented pre-flight Firestore check in handleResetPassword to bypass Firebase Auth Email Enumeration Protection."
-      - "Accurately intercept legacy users and route them to official LINE instead of silent failure."
+      - "Implemented fully automated Ghost Migration in handleResetPassword."
+      - "System now automatically creates Auth accounts for legacy users in the background when they request a password reset."
+      - "Added fallback to generate temporary strong passwords if legacy passwords trigger auth/weak-password errors."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -870,7 +871,7 @@
             }
         };
 
-        // PM 新增與升級：精準攔截忘記密碼的幽靈帳號狀態
+        // PM 新增與升級：全自動幽靈移轉魔法 (Ghost Migration)
         window.handleResetPassword = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email) { 
@@ -878,7 +879,6 @@
                 return; 
             }
             try {
-                // PM 攔截機制：先去資料庫看是不是「尚未轉移的舊會員」
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 const docSnap = await getDoc(docRef);
@@ -887,8 +887,29 @@
                     const data = docSnap.data();
                     // 如果 password 欄位還有明文密碼，代表他從未成功登入轉移過
                     if (data.password && data.password.length > 0) {
-                        window.showToast("舊會員系統升級中，請聯絡官方 LINE (@841bihdj) 索取臨時密碼", true);
-                        return; // 終止發送，因為 Firebase Auth 裡面根本沒有他
+                        window.showToast("系統正在為您進行安全升級，請稍候...");
+                        try {
+                            // 幽靈轉移：偷偷幫他建立 Auth 加密帳號
+                            const userCred = await createUserWithEmailAndPassword(auth, email, data.password);
+                            // 建立成功後，銷毀舊有明碼
+                            await updateDoc(docRef, { password: "", uid: userCred.user.uid });
+                            // 立即登出，強制走接下來的發送信件流程
+                            await signOut(auth);
+                        } catch(err) {
+                            if (err.code === 'auth/email-already-in-use') {
+                                // 代表他其實建過帳號了只是資料沒同步好，直接清空明文並放行
+                                await updateDoc(docRef, { password: "" });
+                            } else if (err.code === 'auth/weak-password') {
+                                // 【PM 預判】：如果舊密碼太短(不到6碼)導致建立失敗，用隨機高強度密碼代建！
+                                const tempStrongPass = "Abra" + Math.random().toString(36).slice(-8) + "!";
+                                const userCred = await createUserWithEmailAndPassword(auth, email, tempStrongPass);
+                                await updateDoc(docRef, { password: "", uid: userCred.user.uid });
+                                await signOut(auth);
+                            } else {
+                                window.showToast("安全升級遇到阻礙，請聯絡官方 LINE (@841bihdj)", true);
+                                return;
+                            }
+                        }
                     }
                 } else {
                      // 資料庫根本沒這個人
@@ -896,7 +917,7 @@
                      return;
                 }
 
-                // 如果已經轉移過（密碼欄位為空），才真正呼叫 Firebase Auth 發送信件
+                // 所有轉移與確認都完成後，真正呼叫 Firebase Auth 發送信件
                 await sendPasswordResetEmail(auth, email);
                 window.showToast("密碼重設信已寄出！請檢查信箱 (包含垃圾信件匣)");
             } catch(e) {
@@ -1536,6 +1557,7 @@
                 return;
             }
 
+            // PM 新增：最終防線，若因任何情況遺失金鑰，強迫攔截避免撞牆
             if (!window.hasValidApiKey()) {
                 document.getElementById('vip-only-content').classList.add('hidden');
                 document.getElementById('free-promo-content').classList.add('hidden');
@@ -1557,6 +1579,7 @@
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
             
+            // 清除上次殘留的成功徽章
             document.getElementById('active-engine-badge').classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];

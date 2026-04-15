@@ -6,14 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "2.6.0"
+    version: "3.0.0-SECURE"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - LINE Contact CTA Enhanced"
+    description: "Taiwan Chinese Learning Hub - Enterprise Security & Auth Upgrade"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Removed broken QRCode image to clean up UI."
-      - "Enlarged LINE ID (@841bihdj) and Call-to-Action button for better visibility."
-      - "Globally replaced vague 'Contact Studio' texts with explicit LINE ID and hyperlinks."
+      - "Migrated to Firebase Authentication (Email/Password) for military-grade security."
+      - "Implemented Seamless Migration logic for legacy plaintext password users."
+      - "Added 'Forgot Password' password reset functionality."
+      - "Redesigned Admin and Profile modals to strictly separate Auth credentials from Firestore."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -142,12 +143,17 @@
                                 <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase shadow-sm bg-white">
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
+                            <!-- PM 加入：忘記密碼按鈕 -->
+                            <div class="flex justify-between items-center mt-1 mb-2 px-1">
+                                <p class="text-[10px] text-slate-400">登入即代表同意免責聲明</p>
+                                <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 underline transition-colors">Forgot Password? / 忘記密碼</button>
+                            </div>
                             <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">UNLOCK FEATURES / 登入解鎖</span><div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
                         </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1 mt-4 shadow-inner">
-                            <div class="flex items-start gap-2"><i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i><p class="text-[11px] text-slate-500 leading-snug font-bold">系統說明：需以 Email 與密碼雙重登入。VIP 到期後系統將自動降級。<br><span class="text-[9px] font-normal italic">Dual login required. Downgrades automatically on expiry.</span></p></div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-inner">
+                            <div class="flex items-start gap-2"><i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i><p class="text-[11px] text-slate-500 leading-snug font-bold">系統說明：VIP 訂閱到期後，帳號將自動轉換為免付費試用方案。<br><span class="text-[9px] font-normal italic">Downgrades to free plan automatically upon expiry.</span></p></div>
                         </div>
                     </div>
                 </form>
@@ -302,6 +308,7 @@
         </div>
     </div>
 
+    <!-- PM 重構：Profile 密碼更新隱私保護 -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -318,9 +325,9 @@
                     <input type="text" id="profile-name" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">New Password / 修改密碼</label>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Update Password / 修改密碼</label>
                     <div class="relative">
-                        <input type="password" id="profile-pass" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
+                        <input type="password" id="profile-pass" placeholder="Leave blank to keep unchanged / 不修改請留空" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-sm bg-white">
                         <button type="button" onclick="window.togglePassVisibility('profile-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                     </div>
                 </div>
@@ -357,7 +364,7 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal (防呆切分更新版) -->
+    <!-- Admin Member Modal (密碼欄位防護升級版) -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -371,8 +378,8 @@
                         <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Password / 密碼</label>
-                        <input type="text" id="admin-member-pass" placeholder="建議含手機末4碼" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Temp Password / 臨時密碼 (留空則不修改)</label>
+                        <input type="text" id="admin-member-pass" placeholder="僅供新會員初次建立時使用" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                     </div>
                 </div>
                 <div>
@@ -380,7 +387,6 @@
                     <input type="text" id="admin-member-name" placeholder="會員姓名" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white">
                 </div>
                 
-                <!-- PM 修改：將電話與末五碼並排，並做醒目區分 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Phone / 電話 (國際碼)</label>
@@ -407,7 +413,6 @@
                     </div>
                 </div>
                 
-                <!-- PM 修改：將一般備註欄位改為 Textarea 防呆避免混淆 -->
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Remarks / 一般備註</label>
                     <textarea id="admin-member-remarks" rows="2" placeholder="其他備註事項 (請勿將匯款五碼寫在此處)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm bg-white resize-none"></textarea>
@@ -451,11 +456,12 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 【全宇宙唯一的終極模組】一體化整合 Firebase, AI 與 UI 邏輯 -->
+    <!-- 【全宇宙唯一的終極模組】一體化整合 Firebase Auth, AI 與 UI 邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        // PM 導入軍規級身分驗證模組
+        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         // Firebase 基礎設定
         const firebaseConfig = {
@@ -484,7 +490,7 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // 防呆：純文字渲染確保，以及強制金鑰檢驗 (修復幽靈金鑰外洩問題)
+        // 防呆與金鑰檢驗
         window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
         window.hasValidApiKey = function() {
             return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
@@ -499,7 +505,6 @@
             return true;
         };
 
-        // UI 輔助控制 (修復所有 Modal 遺失的開關控制)
         window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
         window.closeAdminMsgModal = () => document.getElementById('admin-msg-modal').classList.add('hidden');
@@ -507,7 +512,7 @@
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal').classList.add('hidden');
 
-        // 開啟 Profile 時自動向 Firebase 拉取最新資料供編輯
+        // PM 修改：Profile 密碼保護，不再回填明文密碼
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
@@ -520,7 +525,7 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     document.getElementById('profile-name').value = data.name || '';
-                    document.getElementById('profile-pass').value = data.password || '';
+                    document.getElementById('profile-pass').value = ''; // 防護：不再回填明文
                     document.getElementById('profile-api-key').value = data.apiKey || '';
                 }
             } catch(e) { window.showToast("載入設定失敗，請確認連線", true); }
@@ -627,7 +632,6 @@
             }
         };
 
-        // PM 需求更新：收費標準全面套用 【台幣總金額(換算單月) | 美金總金額(換算單月)】，並新增官方LINE面板與 QRCode
         function setupPricingTable(els, title, prefixDesc) {
             const pricingHTML = `
                 <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
@@ -662,13 +666,14 @@
             }
         }
 
-        // --- 5. Firebase 後台邏輯與 Auth ---
+        // --- 5. Firebase 後台邏輯與 Auth 狀態監聽 ---
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
             if (user) {
                 document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
                 if (window.syncVipStatus) window.syncVipStatus();
             } else {
+                // 若沒有任何登入狀態，給予匿名存取權供免費計數使用
                 signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
             }
         });
@@ -681,7 +686,6 @@
             } catch(e) { return false; }
         };
 
-        // PM 修改：同步 VIP 狀態時，強制檢驗並隔離/清空幽靈金鑰
         window.syncVipStatus = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) return;
@@ -712,7 +716,6 @@
                         localStorage.setItem('abra_vip_status', 'pending');
                     }
 
-                    // 強制清空無效的殘留金鑰
                     if (data.apiKey && localStorage.getItem('abra_vip_status') === 'active') {
                         localStorage.setItem('gemini_api_key', data.apiKey.trim());
                         window.activeApiKey = data.apiKey.trim();
@@ -736,6 +739,7 @@
             } catch(e) {}
         };
 
+        // PM 重構：軍規級 Auth 登入與無縫轉移機制
         window.handleLogin = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const code = document.getElementById('login-vip-code').value.trim();
@@ -750,46 +754,70 @@
             if(loginBtn) loginBtn.disabled = true;
 
             try {
+                // 管理員通道
                 if (await window.verifyAdminCloud(code)) {
                     localStorage.setItem('abra_admin_status', 'active');
                     window.showToast("管理員身分確認 / Admin Verified.");
                     setTimeout(() => location.reload(), 800);
-                } else if (!email) {
-                    window.showToast("請輸入註冊信箱 / Enter Email", true);
-                } else {
+                    return;
+                }
+
+                if (!email) { window.showToast("請輸入註冊信箱 / Enter Email", true); return; }
+
+                let authSuccess = false;
+                try {
+                    // 嘗試進行官方 Firebase Auth 登入
+                    await signInWithEmailAndPassword(auth, email, code);
+                    authSuccess = true;
+                } catch (e) {
+                    // 若失敗，啟動【無縫轉移機制】：檢查是否為舊系統留存的明文密碼或管理員手動建立的帳號
                     const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                     const docSnap = await getDoc(docRef);
-
+                    
                     if (docSnap.exists() && docSnap.data().password === code) {
+                        try {
+                            // 秘密幫舊客戶或管理員建立的客戶，升級為官方加密帳號
+                            const userCredential = await createUserWithEmailAndPassword(auth, email, code);
+                            // 銷毀舊有明碼紀錄，提升資安層級
+                            await updateDoc(docRef, { password: "", uid: userCredential.user.uid });
+                            authSuccess = true;
+                        } catch(err) {
+                            window.showToast("系統升級中，請點擊忘記密碼重新設定", true);
+                            return;
+                        }
+                    } else {
+                        window.showToast("帳號或密碼錯誤 / Invalid Credentials", true);
+                        return;
+                    }
+                }
+
+                if (authSuccess) {
+                    const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                    localStorage.setItem('abra_vip_code', sanitizedEmail);
+                    
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                    const docSnap = await getDoc(docRef);
+                    if(docSnap.exists()) {
                         const data = docSnap.data();
-                        localStorage.setItem('abra_vip_code', sanitizedEmail);
                         let status = 'pending';
                         if (data.expiryDate) {
                             const daysLeft = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                            if (daysLeft > 0) status = 'active';
-                            else status = 'expired';
+                            status = (daysLeft > 0) ? 'active' : 'expired';
                         }
                         localStorage.setItem('abra_vip_status', status);
-                        
-                        // 登入時也進行金鑰同步與清理
                         if (data.apiKey && status === 'active') {
                             localStorage.setItem('gemini_api_key', data.apiKey.trim());
                             window.activeApiKey = data.apiKey.trim();
-                        } else {
-                            localStorage.removeItem('gemini_api_key');
-                            window.activeApiKey = "";
                         }
-                        
-                        window.showToast("登入成功！ / Login Success!");
-                        setTimeout(() => location.reload(), 800);
-                    } else {
-                        window.showToast("帳號或密碼錯誤 / Invalid Credentials", true);
                     }
+                    
+                    window.showToast("登入成功！ / Login Success!");
+                    setTimeout(() => location.reload(), 800);
                 }
+
             } catch(e) {
-                if(e.code === 'permission-denied') window.showToast("雲端連線權限不足，請重試 / Permission denied", true);
-                else window.showToast("系統繁忙或密碼錯誤，請稍候 / System busy", true);
+                window.showToast("系統繁忙，請稍候 / System busy", true);
             } finally {
                 if(loader) loader.classList.add('hidden');
                 if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
@@ -797,6 +825,7 @@
             }
         };
 
+        // PM 重構：軍規級 Auth 註冊
         window.handleSignup = async function() {
             const agree = document.getElementById('legal-agree')?.checked;
             if (!agree) { window.showToast("請先同意免責聲明 / Agree to Terms", true); return; }
@@ -811,26 +840,55 @@
             if(signupBtn) { signupBtn.textContent = "Processing..."; signupBtn.disabled = true; }
 
             try {
+                // 直接使用 Firebase Auth 建立加密帳號
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                const docSnap = await getDoc(docRef);
                 
-                if (docSnap.exists()) { 
-                    window.showToast("Email 已註冊 / Email registered", true); 
+                await setDoc(docRef, { 
+                    uid: userCredential.user.uid,
+                    name: name, 
+                    email: email, 
+                    signupDate: new Date().toISOString(), 
+                    status: "pending",
+                    password: "" // 防護：徹底消滅明文密碼
+                }, { merge: true });
+                
+                window.showToast("註冊成功！請加官方 LINE @841bihdj 聯絡開通");
+                document.getElementById('reg-name').value = '';
+                document.getElementById('reg-email').value = '';
+                document.getElementById('reg-pass').value = '';
+                document.getElementById('legal-agree').checked = false;
+            } catch(e) { 
+                if (e.code === 'auth/email-already-in-use') {
+                    window.showToast("Email 已註冊，請直接登入 / Email in use", true);
+                } else if (e.code === 'auth/weak-password') {
+                    window.showToast("密碼強度不足，請至少輸入 6 位數", true);
                 } else {
-                    await setDoc(docRef, { name, email, password: pass, signupDate: new Date().toISOString(), status: "pending" });
-                    window.showToast("註冊成功！請加官方 LINE @841bihdj 聯絡開通");
-                    document.getElementById('reg-name').value = '';
-                    document.getElementById('reg-email').value = '';
-                    document.getElementById('reg-pass').value = '';
-                    document.getElementById('legal-agree').checked = false;
+                    window.showToast("註冊失敗，請檢查網路 / Network Error", true);
                 }
-            } catch(e) { window.showToast("註冊失敗，請檢查網路 / Network Error", true); } 
-            finally { if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } }
+            } finally { 
+                if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } 
+            }
         };
 
-        // PM 修改：確保登出時，金鑰一併在生命週期內徹底殲滅，阻斷跨帳戶外洩
-        window.handleLogout = function() {
+        // PM 新增：忘記密碼發送邏輯
+        window.handleResetPassword = async function() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            if (!email) { 
+                window.showToast("請先於上方輸入您的 Email 信箱 / Enter Email first", true); 
+                return; 
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                window.showToast("密碼重設信已寄出！請檢查信箱 (包含垃圾信件匣)");
+            } catch(e) {
+                window.showToast("發送失敗，請確認信箱是否正確註冊", true);
+            }
+        };
+
+        // PM 重構：確保登出時斷開 Auth 連線
+        window.handleLogout = async function() {
             if (window.isAdmin || localStorage.getItem('abra_admin_status') === 'active') {
                 localStorage.setItem('abra_usage_count', '0');
                 window.freeUsageCount = 0;
@@ -840,6 +898,7 @@
             localStorage.removeItem('abra_admin_status');
             localStorage.removeItem('gemini_api_key');
             window.activeApiKey = "";
+            try { await signOut(auth); } catch(e) {}
             location.reload(); 
         };
 
@@ -875,6 +934,8 @@
 
                     const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:text-blue-800";
                     const msgBtnText = hasUnread ? "新回覆" : "傳訊";
+                    
+                    const displayRemarks = data.remarks || (data.password ? "[臨時密碼未轉移]" : '-');
 
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors">
@@ -883,7 +944,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-indigo-700">${data.name || '無'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '未登記電話'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' 個月' : '-'}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-bold ${daysText === '已過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || '尚未設定'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px] whitespace-pre-wrap max-w-[150px] inline-block truncate">${data.remarks || '-'}</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-bold">${data.remittance || '-'}</span><br><span class="text-[10px] whitespace-pre-wrap max-w-[150px] inline-block truncate">${displayRemarks}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-bold text-xs px-3 py-1.5 rounded-lg mr-1 transition-all ${msgBtnClass}">${msgBtnText}</button>
                                 <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-lg mr-1 transition-all">編輯</button>
@@ -921,7 +982,7 @@
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        document.getElementById('admin-member-pass').value = data.password || '';
+                        document.getElementById('admin-member-pass').value = ''; // 防護：後台不顯示明碼
                         document.getElementById('admin-member-name').value = data.name || '';
                         document.getElementById('admin-member-phone').value = data.phone || '';
                         document.getElementById('admin-member-remittance').value = data.remittance || '';
@@ -957,7 +1018,7 @@
             const expiryDate = document.getElementById('admin-expiry-date').value;
             const remarks = document.getElementById('admin-member-remarks').value.trim();
 
-            if (!email || !password || !name) { window.showToast("Email、密碼與姓名為必填欄位", true); return; }
+            if (!email || !name) { window.showToast("Email 與姓名為必填欄位", true); return; }
 
             const saveBtn = document.getElementById('admin-save-btn');
             saveBtn.textContent = "Saving...";
@@ -967,11 +1028,16 @@
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 
-                await setDoc(docRef, {
-                    email: email, password: password, name: name, phone: phone,
+                const payload = {
+                    email: email, name: name, phone: phone,
                     remittance: remittance, paymentDate: paymentDate, months: months,
                     expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
-                }, { merge: true });
+                };
+                
+                // 僅在管理員手動配發「臨時密碼」時才寫入，供會員初次登入觸發升級機制
+                if (password) { payload.password = password; }
+                
+                await setDoc(docRef, payload, { merge: true });
                 
                 window.showToast("會員資料已儲存成功！");
                 if (window.closeAdminModal) window.closeAdminModal();
@@ -1006,10 +1072,10 @@
             try {
                 window.showToast("Preparing CSV... / 準備匯出 CSV...");
                 const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
-                let csvContent = "Email,Password,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
+                let csvContent = "Email,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
                 querySnapshot.forEach(doc => {
                     const d = doc.data();
-                    const row = [ d.email || doc.id, d.password || '', d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
+                    const row = [ d.email || doc.id, d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
                     csvContent += row + "\n";
                 });
                 const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
@@ -1077,6 +1143,7 @@
         };
 
         // --- 7. 個人設定與聊天室 (CRM) ---
+        // PM 修改：Profile 的更新機制加入 Firebase Auth 修改密碼功能
         window.saveProfileInfo = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
@@ -1084,12 +1151,29 @@
             const newApiKey = document.getElementById('profile-api-key').value.trim();
             
             if (!window.isVIP && !window.isAdmin && newApiKey) { window.showToast("未繳費開通，無法設定 API 金鑰", true); return; }
-            if (!newName || !newPass) { window.showToast("請填寫姓名與密碼 / Missing fields", true); return; }
+            if (!newName) { window.showToast("請填寫顯示名稱 / Missing fields", true); return; }
+            
             try {
-                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, password: newPass, apiKey: newApiKey });
+                // 若會員有輸入新密碼，則同步更新至軍規級加密中心
+                if (newPass) {
+                    try {
+                        await updatePassword(auth.currentUser, newPass);
+                    } catch(e) {
+                        if (e.code === 'auth/requires-recent-login') {
+                            window.showToast("修改密碼需重新登入驗證身分", true); return;
+                        } else if (e.code === 'auth/weak-password') {
+                            window.showToast("密碼強度不足，至少需 6 位數", true); return;
+                        } else {
+                            window.showToast("密碼更新失敗: " + e.message, true); return;
+                        }
+                    }
+                }
+            
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, apiKey: newApiKey });
                 if (newApiKey === '') localStorage.removeItem('gemini_api_key');
                 else localStorage.setItem('gemini_api_key', newApiKey.trim());
                 window.activeApiKey = newApiKey.trim();
+                
                 window.showToast("設定已同步至雲端並儲存完成！ / Settings Saved!");
                 if (window.closeProfileModal) window.closeProfileModal();
                 setTimeout(() => location.reload(), 800);
@@ -1350,7 +1434,6 @@
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
                     if (window.isVIP) {
-                        // 雙重防禦：確保存在有效金鑰才放行至解析引擎
                         if (window.hasValidApiKey()) {
                             if(window.executeAIFetch) window.executeAIFetch(char);
                         } else {
@@ -1418,7 +1501,6 @@
             }
         };
 
-        // 升級版 AI 提示詞約束 (嚴格比對發音與詞彙對應關係)
         window.executeAIFetch = async function(char) {
             if (!localStorage.getItem('abra_vip_code')) return;
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1432,7 +1514,6 @@
                 return;
             }
 
-            // PM 新增：最終防線，若因任何情況遺失金鑰，強迫攔截避免撞牆
             if (!window.hasValidApiKey()) {
                 document.getElementById('vip-only-content').classList.add('hidden');
                 document.getElementById('free-promo-content').classList.add('hidden');
@@ -1454,7 +1535,6 @@
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
             
-            // 清除上次殘留的成功徽章
             document.getElementById('active-engine-badge').classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
@@ -1489,7 +1569,7 @@
         window.renderResult = function(char, data) {
             document.getElementById('zhuyin-display').textContent = window.getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
-            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char); // PM 修改：傳入純中文字而非注音符號，解決機器人拼字問題
+            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char);
             
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
@@ -1502,7 +1582,6 @@
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center shadow-sm mt-2 gap-3';
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
                     
-                    // PM 修改：隱藏破音字詞彙 UI，並將第一個隱藏的詞彙傳給語音引擎，藉由真實詞彙騙過引擎達到"流暢的破音發音"
                     let ttsText = char;
                     if (p.examples && p.examples.length > 0) {
                         ttsText = window.getStr(p.examples[0]).replace(/\([^)]*\)/g, '').trim();

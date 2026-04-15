@@ -6,14 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "3.2.0-SECURE"
+    version: "3.2.1-SECURE"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Automated Ghost Migration for Password Resets"
+    description: "Taiwan Chinese Learning Hub - Clean Syntax & Admin Temp Password Safeguard"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Implemented fully automated Ghost Migration in handleResetPassword."
-      - "System now automatically creates Auth accounts for legacy users in the background when they request a password reset."
-      - "Added fallback to generate temporary strong passwords if legacy passwords trigger auth/weak-password errors."
+      - "Fixed SyntaxError caused by duplicated/truncated HTML code."
+      - "Added admin safeguards: Temp Password field is now disabled if the user already has a secure Auth account."
+      - "Improved error handling in handleLogin to guide legacy users directly to password reset if their Auth account already exists."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -142,7 +142,6 @@
                                 <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase shadow-sm bg-white">
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
-                            <!-- PM 加入：忘記密碼按鈕 -->
                             <div class="flex justify-between items-center mt-1 mb-2 px-1">
                                 <p class="text-[10px] text-slate-400">登入即代表同意免責聲明</p>
                                 <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 underline transition-colors">Forgot Password? / 忘記密碼</button>
@@ -363,7 +362,7 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal (密碼欄位防護升級版) -->
+    <!-- Admin Member Modal (防呆切分更新版) -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -459,10 +458,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        // PM 導入軍規級身分驗證模組
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-        // Firebase 基礎設定
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
             authDomain: "abra-learn-zh-vip.firebaseapp.com",
@@ -476,7 +473,6 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         
-        // 全域變數
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
@@ -489,7 +485,6 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // 防呆與金鑰檢驗
         window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
         window.hasValidApiKey = function() {
             return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
@@ -511,7 +506,6 @@
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal').classList.add('hidden');
 
-        // PM 修改：Profile 密碼保護，不再回填明文密碼
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
@@ -524,7 +518,7 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     document.getElementById('profile-name').value = data.name || '';
-                    document.getElementById('profile-pass').value = ''; // 防護：不再回填明文
+                    document.getElementById('profile-pass').value = ''; 
                     document.getElementById('profile-api-key').value = data.apiKey || '';
                 }
             } catch(e) { window.showToast("載入設定失敗，請確認連線", true); }
@@ -550,7 +544,6 @@
 
         window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        // 營運漏斗狀態機
         window.updateGlobalUI = function() {
             const emailCode = localStorage.getItem('abra_vip_code');
             const adminStatus = localStorage.getItem('abra_admin_status');
@@ -665,14 +658,12 @@
             }
         }
 
-        // --- 5. Firebase 後台邏輯與 Auth 狀態監聽 ---
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
             if (user) {
                 document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
                 if (window.syncVipStatus) window.syncVipStatus();
             } else {
-                // 若沒有任何登入狀態，給予匿名存取權供免費計數使用
                 signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
             }
         });
@@ -738,7 +729,6 @@
             } catch(e) {}
         };
 
-        // PM 重構：軍規級 Auth 登入與無縫轉移機制
         window.handleLogin = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const code = document.getElementById('login-vip-code').value.trim();
@@ -753,7 +743,6 @@
             if(loginBtn) loginBtn.disabled = true;
 
             try {
-                // 管理員通道
                 if (await window.verifyAdminCloud(code)) {
                     localStorage.setItem('abra_admin_status', 'active');
                     window.showToast("管理員身分確認 / Admin Verified.");
@@ -765,24 +754,26 @@
 
                 let authSuccess = false;
                 try {
-                    // 嘗試進行官方 Firebase Auth 登入
                     await signInWithEmailAndPassword(auth, email, code);
                     authSuccess = true;
                 } catch (e) {
-                    // 若失敗，啟動【無縫轉移機制】：檢查是否為舊系統留存的明文密碼或管理員手動建立的帳號
                     const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                     const docSnap = await getDoc(docRef);
                     
                     if (docSnap.exists() && docSnap.data().password === code) {
                         try {
-                            // 秘密幫舊客戶或管理員建立的客戶，升級為官方加密帳號
                             const userCredential = await createUserWithEmailAndPassword(auth, email, code);
-                            // 銷毀舊有明碼紀錄，提升資安層級
                             await updateDoc(docRef, { password: "", uid: userCredential.user.uid });
                             authSuccess = true;
                         } catch(err) {
-                            window.showToast("系統升級中，請點擊忘記密碼重新設定", true);
+                            if (err.code === 'auth/email-already-in-use') {
+                                // PM 修改：若 Auth 帳號已存在，此處的密碼為管理員誤設的臨時密碼，引導使用者重設
+                                await updateDoc(docRef, { password: "" }).catch(() => {});
+                                window.showToast("為保護您的帳戶，請點擊「忘記密碼」重新綁定專屬密碼！", true);
+                            } else {
+                                window.showToast("系統升級中，請點擊忘記密碼重新設定", true);
+                            }
                             return;
                         }
                     } else {
@@ -824,7 +815,6 @@
             }
         };
 
-        // PM 重構：軍規級 Auth 註冊
         window.handleSignup = async function() {
             const agree = document.getElementById('legal-agree')?.checked;
             if (!agree) { window.showToast("請先同意免責聲明 / Agree to Terms", true); return; }
@@ -839,7 +829,6 @@
             if(signupBtn) { signupBtn.textContent = "Processing..."; signupBtn.disabled = true; }
 
             try {
-                // 直接使用 Firebase Auth 建立加密帳號
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
@@ -850,7 +839,7 @@
                     email: email, 
                     signupDate: new Date().toISOString(), 
                     status: "pending",
-                    password: "" // 防護：徹底消滅明文密碼
+                    password: "" 
                 }, { merge: true });
                 
                 window.showToast("註冊成功！請加官方 LINE @841bihdj 聯絡開通");
@@ -871,7 +860,6 @@
             }
         };
 
-        // PM 新增與升級：全自動幽靈移轉魔法 (Ghost Migration)
         window.handleResetPassword = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email) { 
@@ -885,22 +873,16 @@
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    // 如果 password 欄位還有明文密碼，代表他從未成功登入轉移過
                     if (data.password && data.password.length > 0) {
                         window.showToast("系統正在為您進行安全升級，請稍候...");
                         try {
-                            // 幽靈轉移：偷偷幫他建立 Auth 加密帳號
                             const userCred = await createUserWithEmailAndPassword(auth, email, data.password);
-                            // 建立成功後，銷毀舊有明碼
                             await updateDoc(docRef, { password: "", uid: userCred.user.uid });
-                            // 立即登出，強制走接下來的發送信件流程
                             await signOut(auth);
                         } catch(err) {
                             if (err.code === 'auth/email-already-in-use') {
-                                // 代表他其實建過帳號了只是資料沒同步好，直接清空明文並放行
                                 await updateDoc(docRef, { password: "" });
                             } else if (err.code === 'auth/weak-password') {
-                                // 【PM 預判】：如果舊密碼太短(不到6碼)導致建立失敗，用隨機高強度密碼代建！
                                 const tempStrongPass = "Abra" + Math.random().toString(36).slice(-8) + "!";
                                 const userCred = await createUserWithEmailAndPassword(auth, email, tempStrongPass);
                                 await updateDoc(docRef, { password: "", uid: userCred.user.uid });
@@ -912,12 +894,10 @@
                         }
                     }
                 } else {
-                     // 資料庫根本沒這個人
                      window.showToast("查無此帳號，請確認信箱或前往註冊", true);
                      return;
                 }
 
-                // 所有轉移與確認都完成後，真正呼叫 Firebase Auth 發送信件
                 await sendPasswordResetEmail(auth, email);
                 window.showToast("密碼重設信已寄出！請檢查信箱 (包含垃圾信件匣)");
             } catch(e) {
@@ -929,7 +909,6 @@
             }
         };
 
-        // PM 重構：確保登出時斷開 Auth 連線
         window.handleLogout = async function() {
             if (window.isAdmin || localStorage.getItem('abra_admin_status') === 'active') {
                 localStorage.setItem('abra_usage_count', '0');
@@ -944,7 +923,6 @@
             location.reload(); 
         };
 
-        // --- 6. Admin CRUD 與報表匯入匯出 ---
         window.loadAdminMembers = async function() {
             const tbody = document.getElementById('admin-members-tbody');
             if(!tbody) return;
@@ -1010,9 +988,11 @@
             }
         };
 
+        // PM 修改：增加管理員臨時密碼欄位的物理防呆鎖定
         window.openAdminModal = async function(emailId = '') {
             document.getElementById('admin-modal').classList.remove('hidden');
             const emailInput = document.getElementById('admin-member-email');
+            const passInput = document.getElementById('admin-member-pass');
             
             if (emailId && typeof emailId === 'string') {
                 emailInput.value = emailId;
@@ -1024,7 +1004,20 @@
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        document.getElementById('admin-member-pass').value = ''; // 防護：後台不顯示明碼
+                        
+                        // 防護：若會員已具備安全加密帳號（有 UID 或密碼欄已清空且非 pending），禁止管理員再次寫入臨時密碼
+                        if (data.uid || (!data.password && data.status !== 'pending')) {
+                            passInput.value = '';
+                            passInput.placeholder = "[已加密] 請會員點擊忘記密碼";
+                            passInput.disabled = true;
+                            passInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        } else {
+                            passInput.value = data.password || '';
+                            passInput.placeholder = "僅供新會員初次建立時使用";
+                            passInput.disabled = false;
+                            passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        }
+
                         document.getElementById('admin-member-name').value = data.name || '';
                         document.getElementById('admin-member-phone').value = data.phone || '';
                         document.getElementById('admin-member-remittance').value = data.remittance || '';
@@ -1038,7 +1031,10 @@
                 emailInput.value = '';
                 emailInput.removeAttribute('readonly');
                 emailInput.classList.remove('bg-slate-100', 'text-slate-500');
-                document.getElementById('admin-member-pass').value = '';
+                passInput.value = '';
+                passInput.placeholder = "僅供新會員初次建立時使用";
+                passInput.disabled = false;
+                passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
                 document.getElementById('admin-member-name').value = '';
                 document.getElementById('admin-member-phone').value = '';
                 document.getElementById('admin-member-remittance').value = '';
@@ -1076,8 +1072,9 @@
                     expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
                 };
                 
-                // 僅在管理員手動配發「臨時密碼」時才寫入，供會員初次登入觸發升級機制
-                if (password) { payload.password = password; }
+                if (password && !document.getElementById('admin-member-pass').disabled) { 
+                    payload.password = password; 
+                }
                 
                 await setDoc(docRef, payload, { merge: true });
                 
@@ -1184,8 +1181,6 @@
             });
         };
 
-        // --- 7. 個人設定與聊天室 (CRM) ---
-        // PM 修改：Profile 的更新機制加入 Firebase Auth 修改密碼功能
         window.saveProfileInfo = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
@@ -1196,7 +1191,6 @@
             if (!newName) { window.showToast("請填寫顯示名稱 / Missing fields", true); return; }
             
             try {
-                // 若會員有輸入新密碼，則同步更新至軍規級加密中心
                 if (newPass) {
                     try {
                         await updatePassword(auth.currentUser, newPass);
@@ -1381,15 +1375,12 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 (符合語音播報自然停頓規範) ---
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            // 已遵照規範：避開 / - _ | () 等符號，改用全形逗號產生自然停頓
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             
-            // PM 修復：建立底層語音校正字典，解決 Web Speech API 原生引擎對破音字與成語的誤讀問題
             const ttsDictionary = {
                 "有的放矢": "有地放矢",
                 "無的放矢": "無地放矢",
@@ -1443,7 +1434,6 @@
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
             
-            // 雙重計費防護
             if (e && e.isTrusted) {
                 if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
                     window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); return; 
@@ -1476,7 +1466,6 @@
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
                     if (window.isVIP) {
-                        // 雙重防禦：確保存在有效金鑰才放行至解析引擎
                         if (window.hasValidApiKey()) {
                             if(window.executeAIFetch) window.executeAIFetch(char);
                         } else {
@@ -1557,7 +1546,6 @@
                 return;
             }
 
-            // PM 新增：最終防線，若因任何情況遺失金鑰，強迫攔截避免撞牆
             if (!window.hasValidApiKey()) {
                 document.getElementById('vip-only-content').classList.add('hidden');
                 document.getElementById('free-promo-content').classList.add('hidden');
@@ -1579,7 +1567,6 @@
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
             
-            // 清除上次殘留的成功徽章
             document.getElementById('active-engine-badge').classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
@@ -1614,7 +1601,7 @@
         window.renderResult = function(char, data) {
             document.getElementById('zhuyin-display').textContent = window.getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
-            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char); // PM 修改：傳入純中文字而非注音符號，解決機器人拼字問題
+            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char);
             
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
@@ -1627,7 +1614,6 @@
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center shadow-sm mt-2 gap-3';
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
                     
-                    // PM 修改：隱藏破音字詞彙 UI，並將第一個隱藏的詞彙傳給語音引擎，藉由真實詞彙騙過引擎達到"流暢的破音發音"
                     let ttsText = char;
                     if (p.examples && p.examples.length > 0) {
                         ttsText = window.getStr(p.examples[0]).replace(/\([^)]*\)/g, '').trim();
@@ -1678,7 +1664,6 @@
             }
         };
 
-        // 全網單一事件委派，消除雙重點擊與沙盒錯誤
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
@@ -1697,7 +1682,6 @@
             }
         });
 
-        // 確保網頁初始狀態
         window.onload = function() {
             if (window.updateGlobalUI) window.updateGlobalUI();
         };

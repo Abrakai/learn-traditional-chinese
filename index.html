@@ -6,12 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "3.1.1-SECURE"
+    version: "3.1.2-SECURE"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Syntax Error Fix"
+    description: "Taiwan Chinese Learning Hub - Reset Password Interceptor Fix"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Fixed SyntaxError: Unexpected end of input in handleSignup function."
+      - "Implemented pre-flight Firestore check in handleResetPassword to bypass Firebase Auth Email Enumeration Protection."
+      - "Accurately intercept legacy users and route them to official LINE instead of silent failure."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -877,13 +878,29 @@
                 return; 
             }
             try {
+                // PM 攔截機制：先去資料庫看是不是「尚未轉移的舊會員」
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // 如果 password 欄位還有明文密碼，代表他從未成功登入轉移過
+                    if (data.password && data.password.length > 0) {
+                        window.showToast("舊會員系統升級中，請聯絡官方 LINE (@841bihdj) 索取臨時密碼", true);
+                        return; // 終止發送，因為 Firebase Auth 裡面根本沒有他
+                    }
+                } else {
+                     // 資料庫根本沒這個人
+                     window.showToast("查無此帳號，請確認信箱或前往註冊", true);
+                     return;
+                }
+
+                // 如果已經轉移過（密碼欄位為空），才真正呼叫 Firebase Auth 發送信件
                 await sendPasswordResetEmail(auth, email);
                 window.showToast("密碼重設信已寄出！請檢查信箱 (包含垃圾信件匣)");
             } catch(e) {
-                // 核心修復：如果 Firebase Auth 找不到這個人 (代表他是還沒登入轉移過的舊會員)
-                if (e.code === 'auth/user-not-found') {
-                    window.showToast("舊會員系統升級中，請聯絡官方 LINE (@841bihdj) 索取臨時密碼", true);
-                } else if (e.code === 'auth/invalid-email') {
+                if (e.code === 'auth/invalid-email') {
                     window.showToast("信箱格式不正確，請重新輸入", true);
                 } else {
                     window.showToast("發送失敗，請確認信箱是否註冊或聯繫工作室", true);
@@ -1506,7 +1523,6 @@
             }
         };
 
-        // 升級版 AI 提示詞約束 (嚴格比對發音與詞彙對應關係)
         window.executeAIFetch = async function(char) {
             if (!localStorage.getItem('abra_vip_code')) return;
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1520,7 +1536,6 @@
                 return;
             }
 
-            // PM 新增：最終防線，若因任何情況遺失金鑰，強迫攔截避免撞牆
             if (!window.hasValidApiKey()) {
                 document.getElementById('vip-only-content').classList.add('hidden');
                 document.getElementById('free-promo-content').classList.add('hidden');
@@ -1542,7 +1557,6 @@
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
             
-            // 清除上次殘留的成功徽章
             document.getElementById('active-engine-badge').classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];

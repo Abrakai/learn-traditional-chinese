@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
+    <!--
+    ---
+    version: "3.4.0-STRIPE-SETUP"
+    author: "Abrakai Studio"
+    description: "Taiwan Chinese Learning Hub - Stripe Error Handling Enhancement"
+    disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
+    updates:
+      - "Enhanced Stripe exception handling to provide clear instructions when dummy price IDs are rejected by the Stripe API."
+    ---
+    -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Hanzi Writer for Stroke Order -->
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://js.stripe.com/v3/"></script>
     
@@ -330,6 +343,7 @@
         </div>
     </div>
 
+    <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -391,6 +405,7 @@
         </div>
     </div>
 
+    <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
             <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2"><i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer</h3>
@@ -420,6 +435,7 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
+    <!-- 【全宇宙唯一的終極模組】一體化整合 Firebase Auth, AI 與 UI 邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -593,7 +609,7 @@
             }
         };
 
-        // PM 重構：導入 Stripe 結帳按鈕邏輯
+        // PM 重構：導入 Stripe 結帳按鈕邏輯 (已升級錯誤捕捉機制)
         window.handleStripeCheckout = async function(priceId, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -628,9 +644,14 @@
                     clientReferenceId: uid // 核心通關密碼：讓 Stripe 知道是哪個 Firebase 用戶付錢的
                 });
 
-                if (error) { window.showToast("結帳系統啟動失敗 / Checkout Failed: " + error.message, true); }
+                if (error) { 
+                    window.showToast("結帳系統啟動失敗 / Checkout Failed: " + error.message, true); 
+                    console.error("Stripe Checkout Error:", error);
+                }
             } catch (e) {
-                window.showToast("連線至金流伺服器失敗 / Network Error", true);
+                // PM 升級：更精準的金流未綁定錯誤提示
+                window.showToast("金流尚未綁定，請替換專屬的 Stripe 金鑰與 Price ID / Setup Required", true);
+                console.error("Stripe Connection Error:", e);
             } finally {
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;

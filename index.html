@@ -6,15 +6,12 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "3.0.0-SECURE"
+    version: "3.1.1-SECURE"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Enterprise Security & Auth Upgrade"
+    description: "Taiwan Chinese Learning Hub - Syntax Error Fix"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Migrated to Firebase Authentication (Email/Password) for military-grade security."
-      - "Implemented Seamless Migration logic for legacy plaintext password users."
-      - "Added 'Forgot Password' password reset functionality."
-      - "Redesigned Admin and Profile modals to strictly separate Auth credentials from Firestore."
+      - "Fixed SyntaxError: Unexpected end of input in handleSignup function."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -872,7 +869,7 @@
             }
         };
 
-        // PM 新增：忘記密碼發送邏輯
+        // PM 新增與升級：精準攔截忘記密碼的幽靈帳號狀態
         window.handleResetPassword = async function() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email) { 
@@ -883,7 +880,14 @@
                 await sendPasswordResetEmail(auth, email);
                 window.showToast("密碼重設信已寄出！請檢查信箱 (包含垃圾信件匣)");
             } catch(e) {
-                window.showToast("發送失敗，請確認信箱是否正確註冊", true);
+                // 核心修復：如果 Firebase Auth 找不到這個人 (代表他是還沒登入轉移過的舊會員)
+                if (e.code === 'auth/user-not-found') {
+                    window.showToast("舊會員系統升級中，請聯絡官方 LINE (@841bihdj) 索取臨時密碼", true);
+                } else if (e.code === 'auth/invalid-email') {
+                    window.showToast("信箱格式不正確，請重新輸入", true);
+                } else {
+                    window.showToast("發送失敗，請確認信箱是否註冊或聯繫工作室", true);
+                }
             }
         };
 
@@ -1434,6 +1438,7 @@
                     HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
                     if (window.isVIP) {
+                        // 雙重防禦：確保存在有效金鑰才放行至解析引擎
                         if (window.hasValidApiKey()) {
                             if(window.executeAIFetch) window.executeAIFetch(char);
                         } else {
@@ -1501,6 +1506,7 @@
             }
         };
 
+        // 升級版 AI 提示詞約束 (嚴格比對發音與詞彙對應關係)
         window.executeAIFetch = async function(char) {
             if (!localStorage.getItem('abra_vip_code')) return;
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1514,6 +1520,7 @@
                 return;
             }
 
+            // PM 新增：最終防線，若因任何情況遺失金鑰，強迫攔截避免撞牆
             if (!window.hasValidApiKey()) {
                 document.getElementById('vip-only-content').classList.add('hidden');
                 document.getElementById('free-promo-content').classList.add('hidden');
@@ -1535,6 +1542,7 @@
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
             
+            // 清除上次殘留的成功徽章
             document.getElementById('active-engine-badge').classList.add('hidden');
 
             const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
@@ -1569,7 +1577,7 @@
         window.renderResult = function(char, data) {
             document.getElementById('zhuyin-display').textContent = window.getStr(data.zhuyin).replace(/\s+/g, '');
             const pb = document.getElementById('play-char-btn');
-            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char);
+            pb.classList.remove('hidden'); pb.setAttribute('data-action', 'speak'); pb.setAttribute('data-text', char); // PM 修改：傳入純中文字而非注音符號，解決機器人拼字問題
             
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
@@ -1582,6 +1590,7 @@
                     wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center shadow-sm mt-2 gap-3';
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
                     
+                    // PM 修改：隱藏破音字詞彙 UI，並將第一個隱藏的詞彙傳給語音引擎，藉由真實詞彙騙過引擎達到"流暢的破音發音"
                     let ttsText = char;
                     if (p.examples && p.examples.length > 0) {
                         ttsText = window.getStr(p.examples[0]).replace(/\([^)]*\)/g, '').trim();

@@ -4,24 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
-    <!--
-    ---
-    version: "3.2.1-SECURE"
-    author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Clean Syntax & Admin Temp Password Safeguard"
-    disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
-    updates:
-      - "Fixed SyntaxError caused by duplicated/truncated HTML code."
-      - "Added admin safeguards: Temp Password field is now disabled if the user already has a secure Auth account."
-      - "Improved error handling in handleLogin to guide legacy users directly to password reset if their Auth account already exists."
-    ---
-    -->
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Hanzi Writer for Stroke Order -->
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -44,7 +30,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- Domain Sentinel -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
@@ -57,23 +42,19 @@
         </p>
     </div>
 
-    <!-- Honeypot -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
-    <!-- Global Toast -->
     <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
 
-    <!-- Cloud Status Banner -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
@@ -107,7 +88,6 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
 
-        <!-- Auth Section -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
@@ -123,9 +103,6 @@
                             <div class="relative">
                                 <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
-                                <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
-                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。</p></div>
-                                </div>
                             </div>
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
                                 <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
@@ -158,7 +135,6 @@
             </div>
         </section>
 
-        <!-- Admin Console Section -->
         <section id="admin-dashboard-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
@@ -195,7 +171,6 @@
             </div>
         </section>
 
-        <!-- Translation Module -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm">1</div><h2 class="text-lg font-semibold tracking-tight">Translate / 英翻中</h2></div>
@@ -208,7 +183,6 @@
             </div>
         </section>
 
-        <!-- Writing Setup Module -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
             <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl shadow-sm">2</div><h2 class="text-lg font-semibold tracking-tight">Learn Writing / 漢字書寫學習</h2></div>
@@ -223,7 +197,6 @@
             <div id="char-container" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[80px] border border-slate-200 items-center justify-center shadow-inner"><span class="text-slate-400 text-xs italic font-bold">Enter text and click Split / 請輸入文字後點擊拆字。</span></div>
         </section>
 
-        <!-- Learning Dashboard (Animations & AI) -->
         <section id="learning-dashboard" class="hidden bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-2"><h2 class="text-base font-semibold flex items-center gap-2 font-bold"><i class="ph ph-graduation-cap text-yellow-400"></i> Study Center / 學習中心</h2><span id="active-engine-badge" class="hidden text-[9px] bg-slate-700 text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-600 uppercase font-black tracking-tighter"></span></div>
@@ -246,7 +219,6 @@
                     
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4"><div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-warning-circle"></i></div><h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight">Issue / 連線受到阻礙</h3><p id="ai-error-debug" class="text-slate-500 text-[11px] font-mono break-all max-w-[320px] bg-slate-50 p-4 rounded-xl border border-slate-200"></p><button type="button" onclick="window.handleAIRetry()" class="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all uppercase tracking-wider">Retry / 重新嘗試</button></div>
 
-                    <!-- AI 魔法結果 (VIP + KEY) -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg mb-2 shadow-sm flex flex-col gap-1">
                             <div class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-amber-500 mt-0.5"></i><p class="text-[10px] text-amber-800 leading-relaxed font-bold italic">VIP Engine Active via Cloud Sync. / VIP 解析引擎運作中，資料已透過雲端自動同步載入。</p></div>
@@ -268,7 +240,6 @@
                         <div id="idioms-section"><h3 class="text-xs font-bold uppercase tracking-widest mb-3 text-slate-400 border-b pb-2">Idioms / 成語解析</h3><div id="idioms-container" class="space-y-4"></div></div>
                     </div>
 
-                    <!-- VIP 無 API Key 引導區 -->
                     <div id="vip-no-key-promo" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
                         <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-magic-wand text-indigo-500"></i></div>
                         <h3 class="text-xl font-bold text-slate-800">API Key Required / 需要魔法金鑰</h3>
@@ -279,7 +250,6 @@
                         <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Set API Key / 前往設定</button>
                     </div>
 
-                    <!-- 免費會員升級引導 (無VIP) -->
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 id="promo-title" class="text-xl font-bold text-slate-800">Unlock VIP Access / 解鎖 VIP 權限</h3>
@@ -291,7 +261,6 @@
         </section>
     </main>
 
-    <!-- 全域系統彈出視窗 Modals -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200 flex flex-col h-[80vh]">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
@@ -306,7 +275,6 @@
         </div>
     </div>
 
-    <!-- PM 重構：Profile 密碼更新隱私保護 -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-md animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -362,7 +330,6 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal (防呆切分更新版) -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-11/12 max-w-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
@@ -424,7 +391,6 @@
         </div>
     </div>
 
-    <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
         <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95">
             <h3 class="text-xl font-black text-slate-800 border-b pb-4 mb-6 flex items-center gap-2"><i class="ph ph-scroll text-red-600"></i> Privacy Policy & Disclaimer</h3>
@@ -454,11 +420,10 @@
         Disclaimer: VIP status unlocks internal quotas. AI services are third-party; stability is managed by API providers.
     </footer>
 
-    <!-- 【全宇宙唯一的終極模組】一體化整合 Firebase Auth, AI 與 UI 邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
@@ -473,6 +438,10 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         
+        // PM 設定：Stripe 官方測試金鑰 (未來可替換為正式金鑰)
+        const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+        
+        // 全域變數
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
@@ -606,13 +575,13 @@
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請繳費並加入官方 LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> 與工作室聯繫開通權限。<br><span class="text-[10px] italic font-normal text-slate-500">Please complete payment and contact Abrakai Studio via LINE to unlock VIP.</span></p>`);
+                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> 由專人為您服務。<br><span class="text-[10px] italic font-normal text-slate-500">Please select a plan below to checkout, or contact us via LINE.</span></p>`);
                 }
             } else {
                 if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，無法使用魔法功能。<br>請註冊、繳費並加入官方 LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> 聯繫升級 VIP。<br><span class="text-[10px] italic font-normal text-slate-400">Upgrade to VIP via official LINE to unlock features.</span></p>`);
+                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。<br><span class="text-[10px] italic font-normal text-slate-400">Please create an account first to unlock features.</span></p>`);
             }
             
             if (window.isAdmin || window.isVIP) {
@@ -624,6 +593,50 @@
             }
         };
 
+        // PM 重構：導入 Stripe 結帳按鈕邏輯
+        window.handleStripeCheckout = async function(priceId, btnElement) {
+            const emailCode = localStorage.getItem('abra_vip_code');
+            if (!emailCode) {
+                window.showToast("請先註冊或登入會員後再進行結帳 / Please login first", true);
+                window.scrollToAuth();
+                return;
+            }
+
+            const originalHTML = btnElement.innerHTML;
+            btnElement.innerHTML = '<div class="loader w-4 h-4 border-2 border-t-white mx-auto"></div>';
+            btnElement.disabled = true;
+
+            try {
+                // 從 Firebase 獲取真實的 Email 與 UID 傳給 Stripe
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode);
+                const docSnap = await getDoc(docRef);
+                let customerEmail = emailCode.replace(/_/g, '.');
+                let uid = emailCode;
+                
+                if (docSnap.exists()) {
+                    customerEmail = docSnap.data().email || customerEmail;
+                    uid = docSnap.data().uid || emailCode;
+                }
+
+                // 呼叫 Stripe 結帳頁面
+                const { error } = await stripe.redirectToCheckout({
+                    lineItems: [{ price: priceId, quantity: 1 }],
+                    mode: 'subscription',
+                    successUrl: window.location.href + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancelUrl: window.location.href,
+                    customerEmail: customerEmail,
+                    clientReferenceId: uid // 核心通關密碼：讓 Stripe 知道是哪個 Firebase 用戶付錢的
+                });
+
+                if (error) { window.showToast("結帳系統啟動失敗 / Checkout Failed: " + error.message, true); }
+            } catch (e) {
+                window.showToast("連線至金流伺服器失敗 / Network Error", true);
+            } finally {
+                btnElement.innerHTML = originalHTML;
+                btnElement.disabled = false;
+            }
+        };
+
         function setupPricingTable(els, title, prefixDesc) {
             const pricingHTML = `
                 <div class="text-left space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full mt-2">
@@ -631,31 +644,38 @@
                     <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">英翻中、中文拆字書寫教學與練習。</span></span></p>
                         <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                     </div>
-                    <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Pricing / 收費標準</h4><ul class="space-y-1.5 text-[11px] font-medium text-slate-600">
-                        <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【1-Month / 單月體驗】</span> <span>NT$ 150 <span class="text-[9px] text-slate-400">(NT$ 150/月)</span> | $5 USD <span class="text-[9px] text-slate-400">($5/mo)</span></span></li>
-                        <li class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100"><span class="font-bold">【6-Month / 半年方案】</span> <span>NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125/月)</span> | $24 USD <span class="text-[9px] text-slate-400">($4/mo)</span></span></li>
-                        <li class="flex justify-between items-center bg-yellow-50 text-yellow-900 p-2 rounded-lg border border-yellow-300 shadow-sm"><span class="font-black flex items-center gap-1"><i class="ph-fill ph-star"></i> 【12-Month / 年度超值】</span> <span class="font-bold">👑 NT$ 1,200 <span class="text-[9px] text-yellow-700">(NT$ 100/月)</span> | $36 USD <span class="text-[9px] text-yellow-700">($3/mo)</span> Recommended!</span></li>
-                    </ul></div>
+                    
+                    <div class="pt-1"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Pricing / 選擇方案升級</h4>
+                        <div class="space-y-2">
+                            <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 gap-3">
+                                <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【1-Month / 單月體驗】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 150 <span class="text-[9px] text-slate-400">(NT$ 150/月)</span> | $5 USD</span></div>
+                                <button type="button" onclick="window.handleStripeCheckout('price_1_month_dummy', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 gap-3">
+                                <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【6-Month / 半年方案】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125/月)</span> | $24 USD</span></div>
+                                <button type="button" onclick="window.handleStripeCheckout('price_6_month_dummy', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-3 rounded-xl border border-yellow-300 shadow-sm gap-3">
+                                <div class="flex-1 text-center sm:text-left"><span class="font-black text-xs block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i>【12-Month / 年度超值】</span> <span class="text-[11px] text-yellow-800 font-bold">👑 NT$ 1,200 <span class="text-[9px] text-yellow-700 opacity-70">(NT$ 100/月)</span> | $36 USD</span></div>
+                                <button type="button" onclick="window.handleStripeCheckout('price_12_month_dummy', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-5 py-2 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
                         <div class="w-14 h-14 bg-emerald-500 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
                         <div class="leading-tight flex flex-col items-center sm:items-start">
-                            <p class="text-base font-black text-emerald-800 tracking-tight">加入官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
-                            <p class="text-xs font-bold text-emerald-600 mt-1">阿布拉.凱 工作室 | 學習繁體中文</p>
-                            <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> 點擊加入好友</a>
+                            <p class="text-base font-black text-emerald-800 tracking-tight">匯款開通官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
+                            <p class="text-[11px] font-bold text-emerald-600 mt-1">若無法刷卡，請聯絡阿布拉.凱工作室索取匯款資訊</p>
+                            <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> 點擊加入好友</a>
                         </div>
                     </div>
                 </div>`;
             if(els.promoTitle) els.promoTitle.textContent = title;
             if(els.promoDesc) els.promoDesc.innerHTML = prefixDesc + pricingHTML;
-            if(els.promoBtn) {
-                if (title.includes('Upgrade Required')) {
-                    els.promoBtn.textContent = 'Contact Studio / 聯絡工作室';
-                    els.promoBtn.onclick = function() { window.open('https://lin.ee/9khpCfe', '_blank'); };
-                } else {
-                    els.promoBtn.textContent = 'Join VIP / 登入或升級';
-                    els.promoBtn.onclick = window.scrollToAuth;
-                }
-            }
+            if(els.promoBtn) els.promoBtn.style.display = 'none'; // 隱藏舊的主按鈕，改由價格表內的按鈕驅動
         }
 
         onAuthStateChanged(auth, async (user) => {
@@ -764,15 +784,17 @@
                     if (docSnap.exists() && docSnap.data().password === code) {
                         try {
                             const userCredential = await createUserWithEmailAndPassword(auth, email, code);
+                            await updateProfile(userCredential.user, { displayName: docSnap.data().name });
                             await updateDoc(docRef, { password: "", uid: userCredential.user.uid });
                             authSuccess = true;
                         } catch(err) {
                             if (err.code === 'auth/email-already-in-use') {
-                                // PM 修改：若 Auth 帳號已存在，此處的密碼為管理員誤設的臨時密碼，引導使用者重設
                                 await updateDoc(docRef, { password: "" }).catch(() => {});
                                 window.showToast("為保護您的帳戶，請點擊「忘記密碼」重新綁定專屬密碼！", true);
+                            } else if (err.code === 'auth/operation-not-allowed') {
+                                window.showToast("【請執行長處理】Firebase 後台尚未開啟 Email 登入功能", true);
                             } else {
-                                window.showToast("系統升級中，請點擊忘記密碼重新設定", true);
+                                window.showToast("系統升級遇到阻礙: " + err.code, true);
                             }
                             return;
                         }
@@ -830,6 +852,7 @@
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                await updateProfile(userCredential.user, { displayName: name });
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 
@@ -842,18 +865,26 @@
                     password: "" 
                 }, { merge: true });
                 
-                window.showToast("註冊成功！請加官方 LINE @841bihdj 聯絡開通");
+                window.showToast("註冊成功！請直接點選下方方案進行線上結帳");
                 document.getElementById('reg-name').value = '';
                 document.getElementById('reg-email').value = '';
                 document.getElementById('reg-pass').value = '';
                 document.getElementById('legal-agree').checked = false;
+                
+                // 自動幫使用者登入，準備前往結帳
+                document.getElementById('login-email').value = email;
+                document.getElementById('login-vip-code').value = pass;
+                window.handleLogin();
+
             } catch(e) { 
                 if (e.code === 'auth/email-already-in-use') {
                     window.showToast("Email 已註冊，請直接登入 / Email in use", true);
                 } else if (e.code === 'auth/weak-password') {
                     window.showToast("密碼強度不足，請至少輸入 6 位數", true);
+                } else if (e.code === 'auth/operation-not-allowed') {
+                    window.showToast("【請執行長處理】Firebase 後台尚未開啟 Email 登入功能", true);
                 } else {
-                    window.showToast("註冊失敗，請檢查網路 / Network Error", true);
+                    window.showToast("註冊失敗: " + e.code, true);
                 }
             } finally { 
                 if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } 
@@ -877,6 +908,7 @@
                         window.showToast("系統正在為您進行安全升級，請稍候...");
                         try {
                             const userCred = await createUserWithEmailAndPassword(auth, email, data.password);
+                            await updateProfile(userCred.user, { displayName: data.name });
                             await updateDoc(docRef, { password: "", uid: userCred.user.uid });
                             await signOut(auth);
                         } catch(err) {
@@ -885,10 +917,14 @@
                             } else if (err.code === 'auth/weak-password') {
                                 const tempStrongPass = "Abra" + Math.random().toString(36).slice(-8) + "!";
                                 const userCred = await createUserWithEmailAndPassword(auth, email, tempStrongPass);
+                                await updateProfile(userCred.user, { displayName: data.name });
                                 await updateDoc(docRef, { password: "", uid: userCred.user.uid });
                                 await signOut(auth);
+                            } else if (err.code === 'auth/operation-not-allowed') {
+                                window.showToast("【請執行長處理】Firebase 後台尚未開啟 Email 登入功能", true);
+                                return;
                             } else {
-                                window.showToast("安全升級遇到阻礙，請聯絡官方 LINE (@841bihdj)", true);
+                                window.showToast("安全升級遇到阻礙: " + err.code, true);
                                 return;
                             }
                         }
@@ -903,8 +939,10 @@
             } catch(e) {
                 if (e.code === 'auth/invalid-email') {
                     window.showToast("信箱格式不正確，請重新輸入", true);
+                } else if (e.code === 'auth/operation-not-allowed') {
+                    window.showToast("【請執行長處理】Firebase 後台尚未開啟 Email 登入功能", true);
                 } else {
-                    window.showToast("發送失敗，請確認信箱是否註冊或聯繫工作室", true);
+                    window.showToast("發送失敗: " + e.code, true);
                 }
             }
         };
@@ -988,7 +1026,6 @@
             }
         };
 
-        // PM 修改：增加管理員臨時密碼欄位的物理防呆鎖定
         window.openAdminModal = async function(emailId = '') {
             document.getElementById('admin-modal').classList.remove('hidden');
             const emailInput = document.getElementById('admin-member-email');
@@ -1005,7 +1042,6 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        // 防護：若會員已具備安全加密帳號（有 UID 或密碼欄已清空且非 pending），禁止管理員再次寫入臨時密碼
                         if (data.uid || (!data.password && data.status !== 'pending')) {
                             passInput.value = '';
                             passInput.placeholder = "[已加密] 請會員點擊忘記密碼";

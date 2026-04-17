@@ -6,16 +6,16 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "4.4.0-CONTEXTUAL-AI-REFINEMENT"
+    version: "4.5.0-SMART-FALLBACK-REFINEMENT"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Contextual AI parsing and Layout Stacking"
+    description: "Taiwan Chinese Learning Hub - Contextual AI, TTS Fixes, and Graceful Translation Degradation"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Context-Aware AI (Image 89): Upgraded prompt and executeAIFetch to pass the full sentence context to Gemini, enabling accurate neutral tones (輕聲) like in '這個'."
-      - "Polyphonic TTS Fix (Image 89): Polyphonic sound buttons now speak the exact Zhuyin string instead of the hidden example vocabulary."
-      - "Header Stacking (Image 90): Wrapped 'Expiry Display' and 'Upgrade Button' in a flex-col container to stack them vertically, saving horizontal space."
-      - "Auto-hide Pricing (Image 90): Disabled forced opening of pricing section for expiring VIPs. Pricing section now auto-hides upon new Translation or Split actions."
-      - "InfoSec Maintained: All auth, validation, and domain restrictions remain active."
+      - "VIP Translation Fallback (Image 91): Fixed issue where VIPs hit 'Network Error' due to 429 Quota Exceeded on translation. The system now gracefully falls back to Google GTX API if Gemini fails."
+      - "Context-Aware Zhuyin (Image 89): Strengthened the AI Prompt to strictly output neutral tones (輕聲) based on sentence context (e.g., ㄍㄜ˙ in 這個)."
+      - "Polyphonic TTS Fix (Image 89): Polyphonic sound buttons now speak the exact Zhuyin string instead of hidden vocabulary."
+      - "Header Stacking & Auto-Hide (Image 90): Stacked 'Expiry Display' and 'Renew Button' vertically. Pricing section now auto-hides upon new Translation or Split actions."
+      - "InfoSec Maintained: All auth, validation, and domain restrictions remain actively secured."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -216,7 +216,7 @@
             </div>
         </section>
 
-        <!-- Translation Module / 智慧翻譯 -->
+        <!-- Translation Module / 智慧翻譯 (Auto-hide logic integrated) -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
@@ -229,7 +229,7 @@
             </div>
         </section>
 
-        <!-- Writing Setup Module / 漢字解構 -->
+        <!-- Writing Setup Module / 漢字解構 (Auto-hide logic integrated) -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
@@ -283,7 +283,7 @@
                         <p class="text-indigo-600 text-xs font-black animate-pulse uppercase tracking-[0.4em]">AI Engine Analyzing... / 解析中...</p>
                     </div>
                     
-                    <!-- AI Error & Quota Exceeded Panel -->
+                    <!-- AI Error & Quota Exceeded Panel (Fixed Image 86) -->
                     <div id="ai-error-panel" class="hidden absolute inset-0 flex flex-col items-center justify-center h-full text-center space-y-4 px-4 bg-white z-20 overflow-y-auto py-10">
                         <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
                         <h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight uppercase">Connection Issue / 連線異常</h3>
@@ -306,7 +306,7 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
-                            <!-- Polyphonic Section -->
+                            <!-- Polyphonic Section (Fixed Image 81) -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -358,6 +358,7 @@
         </div>
     </div>
 
+    <!-- Profile & Settings Modal (Fix 70) -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-8">
@@ -510,7 +511,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 py-16 mt-24 text-center text-slate-400 text-[10px] italic px-6">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v4.4.0-CONTEXTUAL-AI-REFINEMENT</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v4.5.0-SMART-FALLBACK-REFINEMENT</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -687,6 +688,7 @@
                 if(els.memberSection) els.memberSection.classList.add('hidden');
                 if(els.pBtn) els.pBtn.classList.remove('hidden');
                 if(els.mBtn) els.mBtn.classList.remove('hidden');
+                // Fix Image 85: Ensure Logout button is correctly displayed
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; } 
                 
                 if (window.isVIP) {
@@ -698,10 +700,9 @@
                     }
                     if(els.expiryDisplay) els.expiryDisplay.classList.remove('hidden');
                     
-                    // Image 90 Fix: Do not force pricing section to open automatically. Just change button to Red Pulse.
                     if (cachedDays !== '--' && diffNum <= 7) {
                         if(els.headerPricingBtn) {
-                            els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-warning-circle text-base"></i> <span>Renew / 繳費說明</span>`;
+                            els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-warning-circle text-base"></i> <span id="header-pricing-text">Renew / 繳費說明</span>`;
                             els.headerPricingBtn.className = "hidden text-[9px] md:text-[10px] bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap animate-pulse";
                             els.headerPricingBtn.classList.remove('hidden');
                         }
@@ -846,7 +847,6 @@
             if (!sentinelCheck()) return;
             if (user) {
                 document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
-                if (window.syncVipStatus) window.syncVipStatus();
             } else {
                 signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
             }
@@ -1435,7 +1435,7 @@
                             const senderName = isUser ? window.currentUserMsgName : 'Admin';
                             const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
                             const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">Del</button>` : '';
-                            return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-blue-600 text-white' : 'bg-white border-2 border-slate-200 text-slate-800'} px-6 py-4 rounded-[2rem] shadow-xl text-sm font-bold whitespace-pre-wrap">${window.getStr(m.text)}</div><span class="text-[9px] text-slate-400 mt-2 font-black uppercase tracking-widest italic flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
+                            return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-800'} px-6 py-4 rounded-[2rem] shadow-xl text-sm font-bold whitespace-pre-wrap">${window.getStr(m.text)}</div><span class="text-[9px] text-slate-400 mt-2 font-black uppercase tracking-widest italic flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
                         }).join('');
                         historyDiv.scrollTop = historyDiv.scrollHeight;
                     }
@@ -1510,7 +1510,7 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 (上下文解構) ---
+        // --- 8. AI 翻譯、語音與拆字引擎 (修正 Image 91 備援翻譯) ---
         
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -1519,7 +1519,7 @@
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             const ttsDictionary = {
                 "有的放矢": "有地放矢", "無的放矢": "無地放矢", "眾矢之的": "眾矢之地",
-                "目的": "目地", "標的": "標地", "的確": "迪確", "的士": "迪士"
+                "目的": "目地", "標的": "標地", "的確": "迪確", "的士": "迪士", "標的代號": "標地代號", "標的物件": "標地物件"
             };
             for (const [wrong, right] of Object.entries(ttsDictionary)) {
                 cleanText = cleanText.replace(new RegExp(wrong, 'g'), right);
@@ -1554,13 +1554,12 @@
             window.speechSynthesis.speak(ut);
         };
 
-        // 解決 Image 66：純淨無污染的翻譯結果，且點擊翻譯時收合收費表單 (Image 90)
+        // Image 91 Fix: VIP Translation Graceful Degradation to Google GTX
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); return; }
             const word = document.getElementById('eng-input').value.trim();
             if (!word) { window.showToast("Input Required / 請輸入英文單字", true); return; }
             
-            // Image 90 Fix: Auto-hide pricing container when acting
             const pricingSec = document.getElementById('pricing-section-container');
             if (pricingSec && !pricingSec.classList.contains('hidden')) pricingSec.classList.add('hidden');
             
@@ -1569,19 +1568,26 @@
             if(btn) btn.disabled = true;
             window.showToast("Translating... / 智慧翻譯中...");
             
+            let trans = "";
+            
             try {
-                let trans = "";
-                
                 if (window.isVIP && window.hasValidApiKey()) {
-                    const prompt = `Translate the following English text into Traditional Chinese (Taiwan standard). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text to translate: "${word}"`;
-                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const result = await res.json();
-                    if (result.error) throw new Error(result.error.message);
-                    trans = result.candidates[0].content.parts[0].text;
-                } else {
+                    try {
+                        const prompt = `Translate the following English text into Traditional Chinese (Taiwan standard). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text to translate: "${word}"`;
+                        const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                        });
+                        const result = await res.json();
+                        if (result.error) throw new Error(result.error.message);
+                        trans = result.candidates[0].content.parts[0].text;
+                    } catch(geminiErr) {
+                        console.warn("VIP Gemini Translation Failed, falling back to Google GTX:", geminiErr);
+                    }
+                } 
+                
+                // Fallback: If not VIP, or if VIP Gemini failed (Quota Exceeded)
+                if (!trans) {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
                     if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
@@ -1589,7 +1595,6 @@
 
                 if (!trans) throw new Error("Translation returned empty");
                 
-                // 絕對純淨化字串 (移除所有引號與空白)
                 const finalStr = trans.trim().replace(/[「」""'']/g, '');
                 document.getElementById('zh-input').value = finalStr;
                 
@@ -1599,7 +1604,6 @@
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
                 
-                // 自動觸發拆字與自然發音
                 document.getElementById('split-btn').click();
                 window.speak(finalStr);
                 window.showToast("Translate Success / 翻譯完成");
@@ -1614,7 +1618,6 @@
             const text = document.getElementById('zh-input').value.trim();
             if (!text) { window.showToast("Content Required / 請輸入內容", true); return; }
             
-            // Image 90 Fix: Auto-hide pricing container when acting
             const pricingSec = document.getElementById('pricing-section-container');
             if (pricingSec && !pricingSec.classList.contains('hidden')) pricingSec.classList.add('hidden');
             
@@ -1652,7 +1655,7 @@
                     
                     if (window.isVIP) {
                         if (window.hasValidApiKey()) {
-                            // Image 89 Fix: Contextual Parsing. Fetch the entire sentence to ensure context is aware (e.g., '個' -> 'ㄍㄜ˙').
+                            // Contextual Parsing Call
                             if(window.executeAIFetch) window.executeAIFetch(char, text);
                         } else {
                             document.getElementById('vip-only-content').classList.add('hidden'); 
@@ -1725,7 +1728,7 @@
             }
         };
 
-        // Image 89 Fix: Contextual parameter added
+        // Image 89 Contextual Fetch Update
         window.executeAIFetch = async function(char, contextText = "") {
             if (!localStorage.getItem('abra_vip_code')) return;
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1775,13 +1778,13 @@
             
             for (const model of modelNames) {
                 try {
-                    // Image 89 Fix: Prompt requests contextual parsing based on the actual sentence.
+                    // Image 89 Fix: Strict contextual prompt
                     const prompt = `請以台灣教育部辭典標準，根據原文本上下文「${contextText}」，嚴格解析其中的繁體中文字「${char}」並輸出 JSON。
-1. zhuyin: 該字在此文本上下文中的正確注音符號 (含聲調，如為輕聲請務必精準標示，例如「個」在「這個」中應標示輕聲)。
+1. zhuyin: 該字在此文本上下文中的正確注音符號 (含聲調)。⚠️極度重要：若該字在上下文中應發「輕聲」，請務必精準標示！例如「個」在「這個」中唸「ㄍㄜ˙」，「的」在「好的」唸「ㄉㄜ˙」。
 2. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 3. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️ 極度嚴格要求：examples 內的詞彙發音【必須 100% 吻合】該破音字！例如「的」唸「ㄉㄧˊ」可造「的確」，唸「ㄉㄧˋ」可造「目的、有的放矢」，絕不可錯置！若無對應常見詞彙，請留空 []。寧缺勿濫，寧可少放絕對不可放錯！
 4. idioms: 包含「${char}」的成語 (最多4個)。
-格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
+格式：{"zhuyin": "主要注音(含輕聲)", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1845,8 +1848,6 @@
                     wrap.className = 'bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold';
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
                     
-                    // Image 89 Fix: TTS Data-text directly binds to the Zhuyin (Bopomofo) to prevent vocabulary confusion.
-                    // Google TTS perfectly reads pure Zhuyin strings like ㄍㄜˇ.
                     const ttsText = pureZhuyin;
                     
                     wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
@@ -1889,7 +1890,6 @@
             }
         };
 
-        // 全網事件委派防呆
         document.addEventListener('click', (e) => {
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;

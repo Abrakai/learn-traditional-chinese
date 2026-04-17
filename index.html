@@ -6,17 +6,16 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "4.1.5-CEO-UI-REFINEMENT"
+    version: "4.1.6-HOTFIX"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Ultimate UI/UX Calibrated Edition"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Header Layout (Fix 69): Added whitespace-nowrap to all header buttons to prevent text breaking. Added local cache for VIP days to prevent '--' flicker."
-      - "Conversion Funnel: Added 'Upgrade / 升級方案' CTA button in the header specifically for non-VIP users."
-      - "Profile Modal (Fix 70): Shrunk input font sizes to text-sm, shortened placeholders, increased right padding, and shrunk API key note text to prevent icon overlap."
-      - "Natural TTS (Fix 68): Enhanced window.speak to actively fetch premium Taiwanese Mandarin voices with optimized reading pace."
+      - "Critical Hotfix: Removed invalid Firebase collection reference (public/data) that caused page crash."
+      - "UI Fix (Image 71): Fixed 'Upgrade' CTA button in header by correcting target section ID."
+      - "UI Fix (Image 72): Restored the VIP status light logic in onSnapshot to show Green/Orange/Red indicators."
+      - "UI Fix (Image 72): Added explicit Chinese subtitle to the main header title."
       - "Architecture: Retained the entire 1500+ line secure infrastructure."
-      - "Bug Fix: Removed invalid Firebase collection reference that caused a crash on load."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -39,7 +38,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .pass-toggle-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 8px; z-index: 10; display: flex; align-items: center; justify-content: center; }
         .pass-toggle-btn:hover { color: #64748b; }
-        .light-glow { filter: drop-shadow(0 0 4px currentColor); }
+        .light-glow { filter: drop-shadow(0 0 6px currentColor); }
         @keyframes slideUpFade { 0% { opacity: 0; transform: translate(-50%, 20px); } 10% { opacity: 1; transform: translate(-50%, 0); } 90% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -20px); } }
         .toast-animate { animation: slideUpFade 3s ease-in-out forwards; }
         .chat-scroll::-webkit-scrollbar { width: 4px; }
@@ -80,21 +79,29 @@
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header / 雙語導覽列 (修復斷行與按鈕) -->
+    <!-- Header / 雙語導覽列 -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
-            <div>
-                <h1 class="text-xl md:text-2xl font-black tracking-wider">Learn Traditional Chinese</h1>
-                <p class="text-red-100 text-[10px] md:text-xs mt-0.5 font-bold italic uppercase tracking-widest">Abrakai Studio | Taiwan Edition</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-inner">
+                    <i class="ph-fill ph-book-open-text text-2xl"></i>
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-xl md:text-2xl font-black tracking-wider flex items-center gap-2">
+                        Learn Traditional Chinese
+                        <span class="text-sm font-bold opacity-90 hidden sm:inline-block">/ 繁體中文學習中心</span>
+                    </h1>
+                    <p class="text-red-100 text-[10px] md:text-xs mt-0.5 font-bold italic uppercase tracking-widest">Abrakai Studio | Taiwan Edition</p>
+                </div>
             </div>
             <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
                     <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                 </div>
                 
-                <!-- 加入 Upgrade CTA (非VIP顯示) -->
+                <!-- Upgrade CTA -->
                 <button type="button" id="header-pricing-btn" class="hidden text-[10px] md:text-xs bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
-                    <i class="ph-fill ph-storefront text-base"></i> <span class="hidden sm:inline">Upgrade / 方案說明</span>
+                    <i class="ph-fill ph-storefront text-base"></i> <span class="hidden sm:inline">Upgrade / 會員費說明</span>
                 </button>
 
                 <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
@@ -331,9 +338,42 @@
                 </div>
             </div>
         </section>
+
+        <!-- Pricing Section / 訂閱方案 (VIP 隱身) -->
+        <section id="pricing-section" class="hidden bg-white p-12 md:p-20 rounded-[4.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-20 gap-10">
+                <div class="flex items-center gap-8 text-left">
+                    <div class="w-20 h-20 rounded-[2rem] bg-yellow-100 text-yellow-600 flex items-center justify-center font-black text-5xl shadow-inner border border-yellow-200">👑</div>
+                    <div>
+                        <h2 class="text-4xl font-black tracking-tighter text-slate-900 uppercase">Premium Plans / 訂閱方案</h2>
+                        <p class="text-sm text-slate-400 font-bold tracking-[0.2em] mt-2 uppercase italic">Fixed 30:1 Exchange Rate / 匯率 30:1 定價</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-slate-50 px-8 py-3 rounded-full border border-slate-200 shadow-inner">
+                    <i class="ph-fill ph-shield-check text-emerald-500 text-2xl"></i>
+                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest font-black">Secure Checkout / 安全結帳</span>
+                </div>
+            </div>
+            
+            <div id="pricing-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-left font-black">
+                <!-- 動態注入 pricing cards -->
+            </div>
+
+            <!-- Support Area / 客服導引 -->
+            <div class="mt-32 p-12 bg-emerald-50 border-2 border-emerald-100 rounded-[3.5rem] flex flex-col sm:flex-row items-center justify-between gap-12 shadow-inner text-left">
+                <div class="flex items-center gap-8">
+                    <div class="w-20 h-20 bg-emerald-500 rounded-[2.5rem] flex items-center justify-center text-white text-5xl shadow-2xl rotate-6 transition-transform hover:rotate-0 duration-700"><i class="ph-fill ph-chat-circle-dots"></i></div>
+                    <div>
+                        <p class="text-2xl font-black text-emerald-950 leading-tight italic uppercase font-black">CEO Support / 官網客服</p>
+                        <p class="text-base text-emerald-600 mt-2 font-bold leading-relaxed font-bold">LINE 官方帳號 <span class="bg-white px-3 py-1 rounded-xl shadow-sm text-emerald-700 font-mono ring-2 ring-emerald-200 select-all font-black italic">@841bihdj</span><br>由專人為您處理手動開通、收據索取或技術疑難。</p>
+                    </div>
+                </div>
+                <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-600 px-16 py-6 rounded-[2rem] font-black text-xs shadow-2xl border-b-8 border-emerald-200 hover:bg-emerald-50 transition-all active:scale-95 uppercase tracking-widest text-center">Add Line / 立即諮詢</a>
+            </div>
+        </section>
     </main>
 
-    <!-- Modals / 全域彈窗系統 -->
+    <!-- Modals / 彈窗系統 -->
     
     <!-- User Messaging Modal -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
@@ -500,7 +540,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 py-16 mt-24 text-center text-slate-400 text-[10px] italic px-6">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v4.1.5-CEO-UI-REFINEMENT</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v4.1.6-HOTFIX</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -512,7 +552,7 @@
     <!-- 【全宇宙唯一的終極模組】一體化整合 Firebase Auth, AI, Stripe 與 UI 邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -875,7 +915,15 @@
                         if (data.expiryDate) {
                             const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                             status = (diff > 0) ? 'active' : 'expired';
-                            if (diff > 0) localStorage.setItem('abra_vip_days', diff.toString());
+                            if (diff > 0) {
+                                localStorage.setItem('abra_vip_days', diff.toString());
+                                const lightEl = document.getElementById('vip-status-light');
+                                if (diff > 7 && lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_8px_#34d399]";
+                                else if (diff > 0 && lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-orange-400 animate-pulse shadow-[0_0_8px_#fbbf24]";
+                            } else {
+                                const lightEl = document.getElementById('vip-status-light');
+                                if (lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
+                            }
                         }
                         localStorage.setItem('abra_vip_status', status);
                         if (data.apiKey && status === 'active') {
@@ -1011,7 +1059,7 @@
         window.loadAdminMembers = async function() {
             const tbody = document.getElementById('admin-members-tbody');
             if(!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-16 text-slate-400 font-black tracking-widest uppercase">Fetching Cloud Data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-16 text-slate-400 font-black tracking-widest uppercase">Fetching Cloud Data...</td></tr>';
             try {
                 const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
                 let html = '';
@@ -1059,7 +1107,7 @@
                     `;
                 });
                 
-                tbody.innerHTML = html === '' ? '<tr><td colspan="7" class="text-center py-20 font-black uppercase tracking-widest text-slate-400">Database Empty / 無會員資料</td></tr>' : html;
+                tbody.innerHTML = html === '' ? '<tr><td colspan="6" class="text-center py-20 font-black uppercase tracking-widest text-slate-400">Database Empty / 無會員資料</td></tr>' : html;
 
                 if (window.isAdmin) {
                     const msgDot = document.getElementById('msg-dot');
@@ -1069,7 +1117,7 @@
                     }
                 }
             } catch(e) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-20 text-red-500 font-black uppercase tracking-widest">Permission Denied / 載入失敗</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-20 text-red-500 font-black uppercase tracking-widest">Permission Denied / 載入失敗</td></tr>';
             }
         };
 
@@ -1456,7 +1504,7 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 (修正 Image 66 & 68 自然度) ---
+        // --- 8. AI 翻譯、語音與拆字引擎 (自然發音保護) ---
         
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -1480,7 +1528,7 @@
                 if (preferredVoice) ut.voice = preferredVoice;
             }
             
-            ut.rate = 0.85; // 最佳自然語速
+            ut.rate = 0.85;
             ut.pitch = 1.0;
             window.speechSynthesis.speak(ut);
         };
@@ -1514,7 +1562,6 @@
             try {
                 let trans = "";
                 
-                // 若為 VIP 且已綁定金鑰，使用 Gemini 進行極度純淨的翻譯
                 if (window.isVIP && window.hasValidApiKey()) {
                     const prompt = `Translate the following English text into Traditional Chinese (Taiwan standard). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text to translate: "${word}"`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
@@ -1525,7 +1572,6 @@
                     if (result.error) throw new Error(result.error.message);
                     trans = result.candidates[0].content.parts[0].text;
                 } else {
-                    // 保底：Google 免費引擎
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
                     if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }

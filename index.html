@@ -6,15 +6,16 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "4.2.0-HEADER-REFINEMENT"
+    version: "4.2.0-CRITICAL-HOTFIX"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Ultimate UI/UX Calibrated Edition"
+    description: "Taiwan Chinese Learning Hub - Firebase Crash Fix & UX Calibrations"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Bug Fix (Firebase Error): Permanently verified the removal of the invalid 4-segment collection reference to prevent load crashes."
-      - "UI Fix (Image 73): Refactored the header navigation into a clean Two-Layer layout (Status on top, Actions on bottom) to eliminate crowding."
-      - "UI Fix (Image 73): Corrected the HTML ID for the pricing section to ensure the 'Upgrade' button smoothly toggles and scrolls to the plans."
-      - "Architecture: Retained the entire secure infrastructure and 30:1 pricing strategy."
+      - "CRITICAL: Removed invalid Firebase collection reference (public/data) causing page crash on load."
+      - "UI Fix (Image 73-76): Fixed 'Upgrade' CTA button in header by correcting target section ID mapping."
+      - "UI Fix (Image 72): Restored the VIP status light logic in onSnapshot to show Green/Orange/Red indicators. Added Chinese subtitle to header."
+      - "UI Fix (Image 81): Removed polyphonic vocabulary text from UI to avoid TTS confusion, keeping only the pronunciation button."
+      - "Error Handling (Image 77-80): Enhanced error panel to explicitly guide users to check Google AI Studio billing when quota is exceeded (429)."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -68,7 +69,7 @@
     </div>
 
     <!-- System Toast -->
-    <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10">
+    <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[2000] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
 
@@ -78,10 +79,9 @@
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header / 雙語導覽列 (修復 Image 73：改為上下雙層佈局，避免擁擠) -->
+    <!-- Header / 雙語導覽列 (修復 Image 72 中文標題, 修復斷行) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 md:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
-            <!-- Left Side: Logo & Title -->
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-inner">
                     <i class="ph-fill ph-book-open-text text-2xl"></i>
@@ -94,43 +94,33 @@
                     <p class="text-red-100 text-[10px] md:text-xs mt-0.5 font-bold italic uppercase tracking-widest">Abrakai Studio | Taiwan Edition</p>
                 </div>
             </div>
-
-            <!-- Right Side: Two-Layer Controls -->
-            <div class="flex flex-col items-start md:items-end gap-2 w-full md:w-auto mt-2 md:mt-0">
+            <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
+                <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
+                    <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
+                </div>
                 
-                <!-- Top Layer: Status & Upgrade -->
-                <div class="flex items-center gap-2 flex-wrap md:flex-nowrap justify-end w-full">
-                    <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
-                        <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
-                    </div>
-                    
-                    <!-- Upgrade CTA (Works via togglePricingTable) -->
-                    <button type="button" id="header-pricing-btn" class="hidden text-[10px] md:text-xs bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
-                        <i class="ph-fill ph-storefront text-base"></i> <span>Upgrade / 會員費說明</span>
-                    </button>
+                <!-- Upgrade CTA -->
+                <button type="button" id="header-pricing-btn" class="hidden text-[10px] md:text-xs bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                    <i class="ph-fill ph-storefront text-base"></i> <span class="hidden sm:inline">Upgrade / 方案說明</span>
+                </button>
 
-                    <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
-                        <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
-                        <span class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
-                    </div>
-                    <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap">
-                        <i class="ph-fill ph-crown text-base"></i> <span>VIP 會員</span>
-                    </div>
+                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
+                    <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
+                    <span class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                 </div>
-
-                <!-- Bottom Layer: Actions -->
-                <div class="flex items-center gap-2 flex-wrap md:flex-nowrap justify-end w-full">
-                    <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
-                        <i class="ph-fill ph-envelope-simple text-base"></i> <span>Inbox / 訊息</span>
-                        <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
-                    </button>
-                    <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.openProfileModal()">
-                        <i class="ph-fill ph-user-circle text-base"></i> <span>Settings / 設定</span>
-                    </button>
-                    <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
-                        <i class="ph-bold ph-sign-out text-base"></i> <span>Logout / 登出</span>
-                    </button>
+                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap">
+                    <i class="ph-fill ph-crown text-base"></i> <span>VIP 會員</span>
                 </div>
+                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
+                    <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">Inbox / 訊息</span>
+                    <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
+                </button>
+                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.openProfileModal()">
+                    <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Settings / 設定</span>
+                </button>
+                <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
+                    <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
+                </button>
             </div>
         </div>
     </header>
@@ -291,11 +281,11 @@
                         <p class="text-indigo-600 text-xs font-black animate-pulse uppercase tracking-[0.4em]">AI Engine Analyzing... / 解析中...</p>
                     </div>
                     
-                    <!-- Connection Error -->
+                    <!-- Connection Error (Fix 77,78,79,80: Enhanced Error Guidance for Quota) -->
                     <div id="ai-error-panel" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 bg-white z-20 p-8">
                         <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-4xl shadow-inner"><i class="ph-fill ph-warning-circle"></i></div>
                         <h3 id="ai-error-title" class="text-2xl font-black text-slate-800 tracking-tighter uppercase">Connection Issue</h3>
-                        <p id="ai-error-debug" class="text-slate-500 text-xs font-mono break-all max-w-[400px] bg-slate-50 p-5 rounded-2xl border border-slate-200 font-bold"></p>
+                        <p id="ai-error-debug" class="text-slate-500 text-xs font-mono break-all max-w-[400px] bg-slate-50 p-5 rounded-2xl border border-slate-200 font-bold leading-relaxed"></p>
                         <button type="button" onclick="window.handleAIRetry()" class="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest border-b-4 border-slate-700">Retry / 重新連線</button>
                     </div>
 
@@ -312,6 +302,8 @@
                                     <button type="button" id="play-char-btn" class="hidden w-12 h-12 rounded-2xl bg-yellow-400 text-red-900 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-yellow-600"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
                                 </div>
                             </div>
+                            
+                            <!-- Polyphonic / 破音字 (Fix 81: Hide vocabulary, show pronunciation only) -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-6 rounded-3xl border-2 border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-400 tracking-[0.4em] mb-2">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-3 mt-2"></div>
@@ -690,10 +682,19 @@
             if(els.pricingBtn) els.pricingBtn.classList.add('hidden');
             if(els.expiryDisplay) els.expiryDisplay.classList.add('hidden');
             
-            // 快取天數顯示
+            // 快取天數顯示 (解決 Image 69 initial load '--' issue)
             const cachedDays = localStorage.getItem('abra_vip_days') || '--';
             const daysLeftEl = document.getElementById('vip-days-left');
             if (daysLeftEl) daysLeftEl.textContent = cachedDays;
+            
+            // 根據快取天數預先顯示燈號 (解決 Image 72 indicator issue)
+            const lightEl = document.getElementById('vip-status-light');
+            if (lightEl && cachedDays !== '--') {
+                const diffNum = parseInt(cachedDays, 10);
+                if (diffNum > 7) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_8px_#34d399]";
+                else if (diffNum > 0) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-orange-400 animate-pulse shadow-[0_0_8px_#fbbf24]";
+                else lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
+            }
 
             if (window.isAdmin) {
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
@@ -725,14 +726,14 @@
                 } else {
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                     if(els.vBadge) els.vBadge.classList.add('hidden');
-                    if(els.pricingBtn) els.pricingBtn.classList.remove('hidden');
+                    if(els.pricingBtn) els.pricingBtn.classList.remove('hidden'); // Image 71: Show Upgrade CTA for non-VIP
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                     setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
                 }
             } else {
                 if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                 if(els.vBadge) els.vBadge.classList.add('hidden');
-                if(els.pricingBtn) els.pricingBtn.classList.remove('hidden');
+                if(els.pricingBtn) els.pricingBtn.classList.remove('hidden'); // Image 71: Show Upgrade CTA for Guest
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
             }
@@ -1514,7 +1515,7 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 (自然發音保護) ---
+        // --- 8. AI 翻譯、語音與拆字引擎 (Image 81 Fix: 隱藏破音字詞彙) ---
         
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -1558,7 +1559,7 @@
             window.speechSynthesis.speak(ut);
         };
 
-        // 解決 Image 66：純淨無污染的翻譯結果
+        // Image 66 Fix: 純淨翻譯結果 (VIP+KEY 優先)
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("Limit Reached / 試用額度已滿", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -1572,9 +1573,10 @@
             try {
                 let trans = "";
                 
+                // VIP 具備金鑰時，啟動 Gemini 進行精準翻譯
                 if (window.isVIP && window.hasValidApiKey()) {
                     const prompt = `Translate the following English text into Traditional Chinese (Taiwan standard). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text to translate: "${word}"`;
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
@@ -1582,6 +1584,7 @@
                     if (result.error) throw new Error(result.error.message);
                     trans = result.candidates[0].content.parts[0].text;
                 } else {
+                    // 保底：Google 免費引擎
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
                     if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
@@ -1599,7 +1602,7 @@
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
                 
-                // 自動觸發拆字與自然發音
+                // 自動觸發拆解與自然發音
                 document.getElementById('split-btn').click();
                 window.speak(finalStr);
                 window.showToast("Translate Success / 翻譯完成");
@@ -1643,7 +1646,6 @@
                     document.getElementById('learning-dashboard').classList.remove('hidden');
                     document.getElementById('current-learning-char').textContent = char;
                     
-                    // 解決 Image 67：尺寸固定 240，Padding 增加至 35
                     document.getElementById('hanzi-target').innerHTML = '';
                     window.writerInstance = HanziWriter.create('hanzi-target', char, { width: 240, height: 240, padding: 35, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
@@ -1696,20 +1698,18 @@
             if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
         };
 
+        // Fix Image 77, 78, 79, 80: Enhanced Error handling for API Quota Exceeded (429)
         window.fetchWithRetry = async function(url, options, maxRetries = 5) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i <= maxRetries; i++) {
                 try {
                     const res = await fetch(url, options);
-                    if (res.status === 429 && i < maxRetries) {
-                        document.getElementById('ai-error-title').textContent = "AI Engine Resting / AI 休息中";
-                        document.getElementById('ai-error-debug').textContent = `Rate limit. Retrying in ${delays[i]/1000}s... / 觸發頻率限制，稍後重試...`;
-                        document.getElementById('ai-error-panel').classList.remove('hidden');
-                        await new Promise(r => setTimeout(r, delays[i]));
-                        continue;
+                    if (res.status === 429) {
+                        throw new Error("Quota Exceeded (429)"); // Throw immediately to trigger specific UI
                     }
                     return res;
                 } catch (err) {
+                    if (err.message.includes("429")) throw err; // Don't retry if quota is truly exhausted
                     if (i === maxRetries) throw err;
                     await new Promise(r => setTimeout(r, delays[i]));
                 }
@@ -1769,7 +1769,17 @@
                     document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
                     document.getElementById('active-engine-badge').classList.remove('hidden');
                     success = true; break;
-                } catch (e) { document.getElementById('ai-error-debug').textContent = e.message; }
+                } catch (e) { 
+                    // Image 77-80 Fix: Catch API Quota/Billing limits explicitly
+                    let errorMsg = e.message;
+                    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('billing')) {
+                        document.getElementById('ai-error-title').textContent = "API Quota Exceeded / 金鑰額度已滿";
+                        errorMsg = "您已達到 Google AI Studio 的免費層級上限 (Rate Limit)。\n請至 aistudio.google.com 設定帳單以開啟額度 (仍可享有免費配額)。";
+                    } else {
+                        document.getElementById('ai-error-title').textContent = "Connection Issue / 連線中斷";
+                    }
+                    document.getElementById('ai-error-debug').textContent = errorMsg; 
+                }
             }
             loader.classList.add('hidden');
             if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
@@ -1796,8 +1806,9 @@
                         ttsText = window.getStr(p.examples[0]).replace(/\([^)]*\)/g, '').trim();
                     }
                     
-                    wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4 border-r-2 border-purple-100">${pureZhuyin}</span>
-                                      <div class="flex-1 px-2 text-xs text-purple-500 uppercase tracking-widest">${(p.examples||[]).join('、')}</div>
+                    // Image 81 Fix: Removed vocabulary display, kept pronunciation button only
+                    wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
+                                      <div class="flex-1"></div>
                                       <button type="button" data-action="speak" data-text="${ttsText}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
                                           <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
                                       </button>`;

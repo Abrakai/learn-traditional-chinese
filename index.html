@@ -6,16 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "5.4.0-MOEDICT-ROUTING-FIX"
+    version: "5.5.0-MOEDICT-CLEANUP"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Flawless TTS, Dual-Track Radicals, and Resilient Dictionary Routing"
+    description: "Taiwan Chinese Learning Hub - Moedict Radical HTML Strip & TTS Fallback"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Moedict Routing Fix (Image 58): Refactored executeFallbackFetch to use a Multi-Endpoint Polling strategy. Prioritizes the clean URL format (/{char}.json) as requested, with seamless fallbacks to /uni/ and /a/ endpoints to guarantee 100% uptime."
-      - "Homophone TTS Mapper (Fix Req 2 & Image 59): Implemented bopoToCharMap. TTS now natively reads polyphonics flawlessly by passing a hidden homophone character to the engine, avoiding Pinyin glitches while keeping UI pure Bopomofo."
-      - "Dual-Track Radicals/Strokes (Fix Req 1): Upgraded AI prompt and Moedict fallback to extract and display Radical (部首) and Strokes (筆畫)."
-      - "Header Stacking (Fix Req 3): Enforced vertical flex-col stacking for Free/Guest status and upgrade buttons."
-      - "Global LINE Footer (Fix Req 4): Added a fixed, non-intrusive bottom banner providing constant access to the official LINE, enhancing user trust."
+      - "Radical HTML Strip (Fix Image 60): Applied Regex `.replace(/<[^>]+>/g, '')` to the radical extraction in executeFallbackFetch to strip out Moedict's raw anchor tags (e.g. <a href...>)."
+      - "Stroke Count Note: Retained Moedict's 11 strokes for '這' as it is the correct Taiwan MoE standard (辶 is 4 strokes, 言 is 7)."
+      - "Ultimate TTS Fallback (Fix Image 60): Updated window.speak. If a Bopomofo string is not found in bopoToCharMap, it now seamlessly falls back to passing `window.currentTargetChar` to the TTS engine. This completely eliminates the bug where Windows reads unmatched Bopomofo as Pinyin letters."
+      - "Expanded Homophone Map: Added 'ㄓㄟˋ': '這' to the bopoToCharMap for faster direct resolution."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -49,7 +48,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative pb-20">
 
-    <!-- Global Trust Footer (Req 4: Sticky LINE Contact) -->
+    <!-- Global Trust Footer (Sticky LINE Contact) -->
     <div class="fixed bottom-0 left-0 w-full bg-emerald-600 text-white py-3 px-4 shadow-[0_-5px_15px_rgba(0,0,0,0.15)] z-[1000] flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500">
         <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
         <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
@@ -105,14 +104,17 @@
             <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
                 
                 <div class="flex flex-col items-end gap-1.5 w-auto">
+                    <!-- Free Uses Display -->
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
                         <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                     </div>
+                    <!-- VIP Days Display -->
                     <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                         <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow bg-slate-400 flex-shrink-0"></div>
                         <span id="vip-days-text" class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                     </div>
-                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                    <!-- Unified Pricing CTA -->
+                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
                         <i class="ph-fill ph-storefront text-sm flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>
                     </button>
                 </div>
@@ -300,7 +302,7 @@
                         <button type="button" onclick="window.handleAIRetry()" class="bg-slate-800 text-white px-10 py-3.5 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-wider mt-4 flex-shrink-0">Retry / 重新連線</button>
                     </div>
 
-                    <!-- AI Result Body -->
+                    <!-- Result Body -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <!-- Dual-Track Radicals & Strokes UI -->
                         <div class="flex items-center gap-3 mb-6 border-b-2 border-slate-100 pb-5">
@@ -316,7 +318,6 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
-                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -501,7 +502,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.4.0-MOEDICT-ROUTING-FIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.5.0-MOEDICT-CLEANUP</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -510,7 +511,6 @@
         </div>
     </footer>
 
-    <!-- 【一體化整合 Firebase Auth, AI, Moedict 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -543,8 +543,9 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
+        // PM Fix Point 3: Expanded Homophone TTS Map (Bopomofo -> Char)
         const bopoToCharMap = {
-            'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄏㄞˊ': '孩', 'ㄏㄨㄢˊ': '環', 'ㄐㄧㄠˋ': '叫', 'ㄐㄩㄝˊ': '決', 'ㄓㄨㄥˋ': '眾', 'ㄓㄥˋ': '正', 'ㄔㄤˊ': '常', 'ㄓㄤˇ': '掌', 'ㄕㄨˇ': '暑', 'ㄕㄨˋ': '樹', 'ㄕㄨㄛˋ': '朔', 'ㄒㄧㄥˊ': '行', 'ㄏㄤˊ': '航', 'ㄉㄠˇ': '島', 'ㄉㄠˋ': '到', 'ㄈㄚˇ': '法', 'ㄈㄚˋ': '髮', 'ㄍㄜ˙': '個', 'ㄍㄜˋ': '各', 'ㄕˊ': '石', 'ㄉㄢ': '單', 'ㄕㄢˋ': '善', 'ㄔㄢˊ': '禪', 'ㄧㄠˋ': '要', 'ㄧㄠ': '邀', 'ㄏㄠˋ': '浩', 'ㄏㄠˇ': '好', 'ㄧˇ': '以', 'ㄧˋ': '意', 'ㄨㄟˊ': '為', 'ㄨㄟˋ': '位', 'ㄗ': '資', 'ㄗˇ': '子', 'ㄗˋ': '字', 'ㄘ': '疵', 'ㄘˊ': '詞', 'ㄘˇ': '此', 'ㄘˋ': '次', 'ㄙ': '私', 'ㄙˇ': '死', 'ㄙˋ': '四', 'ㄚ': '阿', 'ㄛ': '喔', 'ㄜ': '鵝', 'ㄝ': '耶', 'ㄞ': '哀', 'ㄟ': '欸', 'ㄠ': '熬', 'ㄡ': '歐', 'ㄢ': '安', 'ㄣ': '恩', 'ㄤ': '昂', 'ㄥ': '哼', 'ㄦ': '兒', 'ㄧ': '一', 'ㄨ': '屋', 'ㄩ': '迂', 'ㄅㄛ': '波', 'ㄆㄛ': '坡', 'ㄇㄛ': '摸', 'ㄈㄛ': '佛', 'ㄉㄜ': '德', 'ㄊㄜ': '特', 'ㄋㄜ': '呢', 'ㄌㄜ': '勒', 'ㄌㄜˋ': '樂', 'ㄎㄜ': '科', 'ㄏㄜ': '喝', 'ㄐㄧ': '機', 'ㄑㄧ': '期', 'ㄒㄧ': '西', 'ㄓ': '知', 'ㄔ': '吃', 'ㄕ': '詩', 'ㄖ': '日', 'ㄔㄨㄥˊ': '重', 'ㄓㄨㄥˋ': '重'
+            'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄏㄞˊ': '孩', 'ㄏㄨㄢˊ': '環', 'ㄐㄧㄠˋ': '叫', 'ㄐㄩㄝˊ': '決', 'ㄓㄨㄥˋ': '眾', 'ㄓㄥˋ': '正', 'ㄔㄤˊ': '常', 'ㄓㄤˇ': '掌', 'ㄕㄨˇ': '暑', 'ㄕㄨˋ': '樹', 'ㄕㄨㄛˋ': '朔', 'ㄒㄧㄥˊ': '行', 'ㄏㄤˊ': '航', 'ㄉㄠˇ': '島', 'ㄉㄠˋ': '到', 'ㄈㄚˇ': '法', 'ㄈㄚˋ': '髮', 'ㄍㄜ˙': '個', 'ㄍㄜˋ': '各', 'ㄕˊ': '石', 'ㄉㄢ': '單', 'ㄕㄢˋ': '善', 'ㄔㄢˊ': '禪', 'ㄧㄠˋ': '要', 'ㄧㄠ': '邀', 'ㄏㄠˋ': '浩', 'ㄏㄠˇ': '好', 'ㄧˇ': '以', 'ㄧˋ': '意', 'ㄨㄟˊ': '為', 'ㄨㄟˋ': '位', 'ㄗ': '資', 'ㄗˇ': '子', 'ㄗˋ': '字', 'ㄘ': '疵', 'ㄘˊ': '詞', 'ㄘˇ': '此', 'ㄘˋ': '次', 'ㄙ': '私', 'ㄙˇ': '死', 'ㄙˋ': '四', 'ㄚ': '阿', 'ㄛ': '喔', 'ㄜ': '鵝', 'ㄝ': '耶', 'ㄞ': '哀', 'ㄟ': '欸', 'ㄠ': '熬', 'ㄡ': '歐', 'ㄢ': '安', 'ㄣ': '恩', 'ㄤ': '昂', 'ㄥ': '哼', 'ㄦ': '兒', 'ㄧ': '一', 'ㄨ': '屋', 'ㄩ': '迂', 'ㄅㄛ': '波', 'ㄆㄛ': '坡', 'ㄇㄛ': '摸', 'ㄈㄛ': '佛', 'ㄉㄜ': '德', 'ㄊㄜ': '特', 'ㄋㄜ': '呢', 'ㄌㄜ': '勒', 'ㄌㄜˋ': '樂', 'ㄎㄜ': '科', 'ㄏㄜ': '喝', 'ㄐㄧ': '機', 'ㄑㄧ': '期', 'ㄒㄧ': '西', 'ㄓ': '知', 'ㄔ': '吃', 'ㄕ': '詩', 'ㄖ': '日', 'ㄔㄨㄥˊ': '重', 'ㄓㄨㄥˋ': '重', 'ㄓㄟˋ': '這', 'ㄋㄟˋ': '那'
         };
 
         window.loadVoices = function() { window.availableVoices = window.speechSynthesis.getVoices(); };
@@ -1517,12 +1518,16 @@
             
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             
+            // PM Fix 60.jpg: Ultimate TTS Fallback. If pure Bopomofo isn't mapped, fallback to the Character itself!
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
                 if (bopoToCharMap[mapBopo]) {
                     cleanText = bopoToCharMap[mapBopo];
                 } else if (bopoToCharMap[mapBopo.replace('˙', '')]) {
                     cleanText = bopoToCharMap[mapBopo.replace('˙', '')];
+                } else {
+                    // Fallback to the target character to prevent Windows reading "Z-H-E-I"
+                    cleanText = window.currentTargetChar || mapBopo;
                 }
             } else {
                 const ttsDictionary = {
@@ -1740,7 +1745,7 @@
             }
         };
 
-        // PM Fix 1 & 58.jpg: Track B - Robust Moedict Fallback (Extracts Radicals, Strokes, Idioms)
+        // PM Fix 60.jpg: Track B - Robust Moedict Fallback HTML Strip
         window.executeFallbackFetch = async function(char, errorContext = null) {
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
@@ -1754,7 +1759,6 @@
             document.getElementById('active-engine-badge').classList.remove('hidden');
 
             try {
-                // PM Fix: 萌典連線路由優化 (Moedict Routing Fix)
                 let res = await fetch(`https://www.moedict.tw/${encodeURIComponent(char)}.json`).catch(() => null);
                 if (!res || !res.ok) {
                     res = await fetch(`https://www.moedict.tw/uni/${encodeURIComponent(char)}`).catch(() => null);
@@ -1766,7 +1770,11 @@
                 
                 const dictData = await res.json();
                 
-                let data = { zhuyin: "", radical: dictData.radical || "未知", strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
+                // PM Fix 60.jpg: Clean HTML from Radical string
+                let rawRadical = dictData.radical || "未知";
+                let cleanRadical = rawRadical.replace(/<[^>]+>/g, '').trim();
+                
+                let data = { zhuyin: "", radical: cleanRadical, strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
                 
                 if (dictData.heteronyms && dictData.heteronyms.length > 0) {
                     const cleanBopo = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/[a-zA-Z]/g, '').replace(/　/g, '').trim();
@@ -1808,7 +1816,6 @@
                 window.renderResult(char, data);
                 vipPanel.classList.remove('hidden');
                 
-                // Dynamic Upsell Box Rendering
                 let existingUpsell = document.getElementById('dict-upsell-box');
                 if (existingUpsell) existingUpsell.remove();
                 
@@ -1913,7 +1920,6 @@
                     const rawText = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
                     
-                    // Hybrid Translation: Use Google GTX to overwrite overly literal AI English translations for idioms
                     if (data.idioms && data.idioms.length > 0) {
                         for (let i = 0; i < data.idioms.length; i++) {
                             try {
@@ -1951,7 +1957,6 @@
                 loader.classList.add('hidden');
                 vipPanel.classList.remove('hidden'); 
             } else { 
-                // Graceful Degradation: Fallback to Track B
                 window.showToast("API 金鑰連線失效或額度已滿，已為您無縫切換為基礎字典模式", true);
                 window.executeFallbackFetch(char, { type: 'QUOTA', models: modelErrors.join(', ') });
             }
@@ -1983,7 +1988,7 @@
                     wrap.className = 'bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold';
                     
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-                    const ttsText = pureZhuyin; // Strictly Bopomofo, which triggers homophone map in speak()
+                    const ttsText = pureZhuyin; 
                     
                     wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
                                       <div class="flex-1"></div>
@@ -2044,17 +2049,6 @@
         });
 
         window.onload = function() {
-            // UI Hook: Add Radical/Strokes Header dynamically
-            const vipContent = document.getElementById('vip-only-content');
-            if (vipContent && !document.getElementById('radical-display')) {
-                const headerDiv = document.createElement('div');
-                headerDiv.className = "flex flex-wrap items-center gap-4 mb-6 border-b-2 border-slate-100 pb-5";
-                headerDiv.innerHTML = `
-                    <div class="bg-indigo-50 px-5 py-2.5 rounded-xl border-2 border-indigo-100 text-sm font-black text-indigo-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-book-bookmark text-indigo-500 text-lg"></i> 部首：<span id="radical-display" class="text-indigo-600 text-base">--</span></div>
-                    <div class="bg-emerald-50 px-5 py-2.5 rounded-xl border-2 border-emerald-100 text-sm font-black text-emerald-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-pen-nib text-emerald-500 text-lg"></i> 筆畫：<span id="strokes-display" class="text-emerald-600 text-base">--</span></div>
-                `;
-                vipContent.insertBefore(headerDiv, vipContent.firstChild);
-            }
             if (window.updateGlobalUI) window.updateGlobalUI();
         };
     </script>

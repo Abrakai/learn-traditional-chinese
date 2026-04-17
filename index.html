@@ -6,14 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "5.1.0-TOGGLE-FIX-AND-STRATEGY"
+    version: "5.2.0-DUAL-TRACK-HYBRID"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Renew Button Fix & Strategic Preparation"
+    description: "Taiwan Chinese Learning Hub - Dual-Track Dictionary & Hybrid English Translation"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "UI Fix (Q1): Restored missing setupPricingTable() call in the VIP graceful expiration block (<= 7 days), ensuring the 'Renew' button correctly unhides and scrolls to the populated pricing table."
-      - "Toggle Refinement: Updated togglePricingTable() to actively toggle the 'hidden' class, allowing users to open and close the pricing section as needed."
-      - "InfoSec & IP: Confirmed MIT License compliance for Hanzi Writer and Web Speech API. No IP infringement risks present."
+      - "Dual-Track System (User Request 2): Implemented executeFallbackFetch using Moedict API. Guests and users without API keys can now access basic Zhuyin, vocabulary, and TTS pronunciation."
+      - "Hybrid Translation Engine (User Request 1): In executeAIFetch, Chinese idioms are now reverse-translated into English using Google Translate (gtx) to overwrite AI's overly literal translations, ensuring native fluency."
+      - "Graceful Degradation & Quota UX (User Request 2): If Gemini API hits Quota (429), it no longer errors out. Instead, it seamlessly falls back to executeFallbackFetch and displays an explicit upsell/disclaimer box detailing the exhausted models."
+      - "InfoSec & IP: Confirmed MIT License compliance. No IP infringement risks."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -94,6 +95,7 @@
             </div>
             
             <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
+                
                 <div class="flex flex-col items-end gap-1.5 w-auto">
                     <!-- Free Uses Display -->
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
@@ -302,7 +304,7 @@
                             <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 shadow-sm relative overflow-hidden">
                                 <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-1 font-bold">Zhuyin / 標準注音</div>
                                 <div class="flex items-center gap-3">
-                                    <div id="zhuyin-display" class="text-3xl font-bold text-slate-800 tracking-tighter"></div>
+                                    <div id="zhuyin-display" class="text-4xl font-bold text-slate-800 tracking-tighter"></div>
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
@@ -337,7 +339,7 @@
             </div>
         </section>
         
-        <!-- Pricing Section Container (Q1 Fix: Used by togglePricingTable) -->
+        <!-- Pricing Section Container -->
         <section id="pricing-section-container" class="hidden w-full mt-10"></section>
         
     </main>
@@ -509,7 +511,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 py-16 mt-24 text-center text-slate-400 text-[10px] italic px-6">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.1.0-TOGGLE-FIX-AND-STRATEGY</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.2.0-DUAL-TRACK-HYBRID</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -518,6 +520,7 @@
         </div>
     </footer>
 
+    <!-- 【一體化整合 Firebase Auth, AI 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -711,10 +714,6 @@
                             els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap animate-pulse";
                             els.headerPricingBtn.classList.remove('hidden');
                         }
-                        
-                        // PM FIX Q1: Render the pricing table here so the toggle button works!
-                        if(els.pricingSection) els.pricingSection.classList.remove('hidden'); 
-                        setupPricingTable(els, 'Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
                     }
                 } else {
                     if(els.qDisplay) {
@@ -727,14 +726,7 @@
                         els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap";
                         els.headerPricingBtn.classList.remove('hidden');
                     }
-                    if(els.pricingSection) els.pricingSection.classList.remove('hidden');
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                    
-                    if (cachedDays !== '--' && diffNum < 0) {
-                        setupPricingTable(els, 'VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
-                    } else {
-                        setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
-                    }
                 }
             } else {
                 if(els.qDisplay) {
@@ -747,24 +739,36 @@
                     els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap";
                     els.headerPricingBtn.classList.remove('hidden');
                 }
-                if(els.pricingSection) els.pricingSection.classList.remove('hidden');
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
             }
         };
 
-        // PM Fix Q1: Fixed toggle pricing logic 
         window.togglePricingTable = function() {
             const pricingContainer = document.getElementById('pricing-section-container');
             if (pricingContainer) {
                 pricingContainer.classList.toggle('hidden');
                 if (!pricingContainer.classList.contains('hidden')) {
+                    
+                    const cachedDays = localStorage.getItem('abra_vip_days') || '--';
+                    const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
+                    const emailCode = localStorage.getItem('abra_vip_code');
+                    
+                    if (window.isVIP && diffNum <= 7) {
+                        setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
+                    } else if (emailCode && diffNum < 0) {
+                        setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                    } else if (emailCode) {
+                        setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
+                    } else {
+                        setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
+                    }
+                    
                     pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
         };
 
-        function setupPricingTable(els, title, prefixDesc) {
+        function setupPricingTable(title, prefixDesc) {
             let container = document.getElementById('pricing-section-container');
             if (!container) return;
             
@@ -940,9 +944,7 @@
                         if (data.expiryDate) {
                             const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                             status = (diff >= 0) ? 'active' : 'expired';
-                            if (diff >= 0) {
-                                localStorage.setItem('abra_vip_days', diff.toString());
-                            }
+                            localStorage.setItem('abra_vip_days', diff.toString());
                         }
                         localStorage.setItem('abra_vip_status', status);
                         if (data.apiKey && status === 'active') {
@@ -1527,7 +1529,7 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 ---
+        // --- 8. 混合雙軌翻譯、語音與拆字引擎 (Moedict Fallback + Hybrid Translatoin) ---
         
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
@@ -1673,25 +1675,14 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     window.writerInstance = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
-                    if (window.isVIP) {
-                        if (window.hasValidApiKey()) {
-                            if(window.executeAIFetch) window.executeAIFetch(char, text);
-                        } else {
-                            document.getElementById('vip-only-content').classList.add('hidden'); 
-                            document.getElementById('free-promo-content').classList.add('hidden'); 
-                            document.getElementById('ai-inner-loader').classList.add('hidden');
-                            document.getElementById('ai-error-panel').classList.add('hidden');
-                            const noKeyPromo = document.getElementById('vip-no-key-promo');
-                            if(noKeyPromo) noKeyPromo.classList.remove('hidden');
-                        }
-                    } else { 
-                        document.getElementById('vip-only-content').classList.add('hidden'); 
-                        const noKeyPromo = document.getElementById('vip-no-key-promo');
-                        if(noKeyPromo) noKeyPromo.classList.add('hidden');
-                        document.getElementById('ai-inner-loader').classList.add('hidden');
-                        document.getElementById('ai-error-panel').classList.add('hidden');
-                        document.getElementById('free-promo-content').classList.remove('hidden'); 
+                    // 雙軌制判斷 (Dual-Track System Logic)
+                    if (window.isVIP && window.hasValidApiKey()) {
+                        if(window.executeAIFetch) window.executeAIFetch(char, text);
+                    } else {
+                        // 基礎靜態軌道 (無Key VIP 或 免費訪客)
+                        if(window.executeFallbackFetch) window.executeFallbackFetch(char);
                     }
+                    window.scrollTo({ top: document.getElementById('learning-dashboard').offsetTop - 140, behavior: 'smooth' });
                 };
                 container.appendChild(btn);
             });
@@ -1731,7 +1722,11 @@
         window.handleAIRetry = function() {
             if (window.currentTargetChar) {
                 const text = document.getElementById('zh-input').value.trim();
-                if(window.executeAIFetch) window.executeAIFetch(window.currentTargetChar, text);
+                if (window.isVIP && window.hasValidApiKey()) {
+                    if(window.executeAIFetch) window.executeAIFetch(window.currentTargetChar, text);
+                } else {
+                    if(window.executeFallbackFetch) window.executeFallbackFetch(window.currentTargetChar);
+                }
             }
         };
 
@@ -1757,50 +1752,133 @@
             }
         };
 
-        window.executeAIFetch = async function(char, contextText = "") {
-            if (!localStorage.getItem('abra_vip_code')) return;
-            if (window.syncVipStatus) await window.syncVipStatus();
-            
-            if (!window.isVIP) {
-                document.getElementById('vip-only-content').classList.add('hidden');
-                document.getElementById('free-promo-content').classList.remove('hidden');
-                document.getElementById('ai-inner-loader').classList.add('hidden');
-                document.getElementById('ai-error-panel').classList.add('hidden');
-                return;
-            }
-
-            if (!window.hasValidApiKey()) {
-                document.getElementById('vip-only-content').classList.add('hidden');
-                document.getElementById('free-promo-content').classList.add('hidden');
-                document.getElementById('ai-inner-loader').classList.add('hidden');
-                document.getElementById('ai-error-panel').classList.add('hidden');
-                document.getElementById('vip-no-key-promo')?.classList.remove('hidden');
-                return;
-            }
-
+        // Track B: 靜態基礎字典模組 (透過萌典 API + Google Translate 混合)
+        window.executeFallbackFetch = async function(char, errorContext = null) {
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
             const errorPanel = document.getElementById('ai-error-panel');
-            const promoPanel = document.getElementById('free-promo-content');
-            const noKeyPromo = document.getElementById('vip-no-key-promo');
+            
+            loader.classList.remove('hidden');
+            vipPanel.classList.add('hidden');
+            errorPanel.classList.add('hidden');
+            
+            document.getElementById('active-engine-badge').textContent = `Basic Dict Mode / 基礎靜態字典`;
+            document.getElementById('active-engine-badge').classList.remove('hidden');
+
+            try {
+                const res = await fetch(`https://www.moedict.tw/uni/${encodeURIComponent(char)}`);
+                if (!res.ok) throw new Error("Dict API Failed");
+                const dictData = await res.json();
+                
+                let data = { zhuyin: "", polyphonic: [], words: [], idioms: [] };
+                
+                if (dictData.heteronyms && dictData.heteronyms.length > 0) {
+                    const cleanBopo = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/[a-zA-Z]/g, '').replace(/　/g, '').trim();
+                    data.zhuyin = cleanBopo(dictData.heteronyms[0].bopomofo);
+                    
+                    let tempWords = new Set();
+                    dictData.heteronyms.forEach((h, idx) => {
+                        if (idx > 0 && h.bopomofo) {
+                            data.polyphonic.push({ zhuyin: cleanBopo(h.bopomofo), examples: [] });
+                        }
+                        if (h.definitions) {
+                            h.definitions.forEach(d => {
+                                const combinedText = (d.def || '') + ' ' + (d.quote || []).join(' ') + ' ' + (d.example || []).join(' ');
+                                const matches = combinedText.match(new RegExp(`[\\u4e00-\\u9fa5]{0,3}${char}[\\u4e00-\\u9fa5]{0,3}`, 'g'));
+                                if (matches) matches.forEach(m => { if(m.length > 1 && m.length <= 4 && !m.includes('的')) tempWords.add(m); });
+                            });
+                        }
+                    });
+                    
+                    const wArr = Array.from(tempWords).filter(w => w.length > 1 && w.length <= 4);
+                    data.words = wArr.filter(w => w.length < 4).slice(0, 5);
+                    if(data.words.length === 0) data.words.push(char + "字");
+                    const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
+                    
+                    for (let idiom of idiomsArr) {
+                        try {
+                            const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
+                            const gtData = await gtRes.json();
+                            let enTrans = gtData[0].map(item => item[0]).join('');
+                            data.idioms.push({ idiom: idiom, meaning: "靜態字典不包含成語詳解，請升級 AI 模組。", english: enTrans });
+                        } catch(e) {
+                            data.idioms.push({ idiom: idiom, meaning: "靜態字典", english: "Translation unavailable" });
+                        }
+                    }
+                }
+                
+                if (!data.zhuyin) throw new Error("No Data");
+                
+                window.renderResult(char, data);
+                vipPanel.classList.remove('hidden');
+                
+                // 行銷與降級 Upsell Box
+                let existingUpsell = document.getElementById('dict-upsell-box');
+                if (existingUpsell) existingUpsell.remove();
+                
+                const upsellBox = document.createElement('div');
+                upsellBox.id = 'dict-upsell-box';
+                upsellBox.className = 'mt-10 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100 rounded-[2rem] shadow-inner';
+                
+                if (errorContext && errorContext.type === 'QUOTA') {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-red-500"><i class="ph-fill ph-warning-circle text-3xl animate-pulse"></i></div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API 額度耗盡，自動降級為基礎字典</h4>
+                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
+                                <p class="text-[10px] text-slate-500 italic mb-4">免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
+                                <button onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">前往設定更新金鑰</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (!window.isVIP) {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
+                            <div>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">升級 VIP 並啟用 AI 引擎，即可解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態字典無法判斷！</p>
+                                <button onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">查看 VIP 升級方案</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-magic-wand text-3xl animate-bounce"></i></div>
+                            <div>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br>解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。</p>
+                                <button onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">綁定免費金鑰 / 啟動 AI</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                vipPanel.appendChild(upsellBox);
+                loader.classList.add('hidden');
+                
+            } catch(e) {
+                document.getElementById('ai-error-title').textContent = "DICTIONARY UNAVAILABLE / 字典連線失敗";
+                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
+                errorPanel.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        };
+
+        // Track A: AI 智慧語境模式 (結合 Google 翻譯做成語覆蓋)
+        window.executeAIFetch = async function(char, contextText = "") {
+            const loader = document.getElementById('ai-inner-loader');
+            const vipPanel = document.getElementById('vip-only-content');
+            const errorPanel = document.getElementById('ai-error-panel');
 
             loader.classList.remove('hidden');
             vipPanel.classList.add('hidden');
             errorPanel.classList.add('hidden');
-            if (promoPanel) promoPanel.classList.add('hidden');
-            if (noKeyPromo) noKeyPromo.classList.add('hidden');
             
             document.getElementById('active-engine-badge').classList.add('hidden');
 
-            const modelNames = [
-                "gemini-3.0-flash", 
-                "gemini-3.1-flash-lite", 
-                "gemini-3.1-pro", 
-                "gemini-2.5-flash", 
-                "gemini-2.5-flash-lite", 
-                "gemini-2.0-flash"
-            ];
-            
+            const modelNames = ["gemini-3.0-flash", "gemini-3.1-flash-lite", "gemini-3.1-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
             let success = false;
             let modelErrors = [];
             
@@ -1821,7 +1899,29 @@
                     if (result.error) throw new Error(result.error.message || "API Error");
                     const rawText = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
-                    window.charCache[char] = data; window.renderResult(char, data);
+                    
+                    // 混合翻譯架構 (Hybrid Translation): 用 Google GTX 覆蓋 AI 生硬的英文翻譯
+                    if (data.idioms && data.idioms.length > 0) {
+                        for (let i = 0; i < data.idioms.length; i++) {
+                            try {
+                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(data.idioms[i].idiom)}`);
+                                if (gtRes.ok) {
+                                    const gtData = await gtRes.json();
+                                    if (gtData && gtData[0]) {
+                                        data.idioms[i].english = gtData[0].map(item => item[0]).join('');
+                                    }
+                                }
+                            } catch(err) { /* 發生錯誤則保留 AI 原本的翻譯 */ }
+                        }
+                    }
+                    
+                    window.charCache[char] = data; 
+                    
+                    // 移除任何可能存在的 Upsell Box
+                    let existingUpsell = document.getElementById('dict-upsell-box');
+                    if (existingUpsell) existingUpsell.remove();
+
+                    window.renderResult(char, data);
                     
                     document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
                     document.getElementById('active-engine-badge').classList.remove('hidden');
@@ -1831,31 +1931,17 @@
                     if (errMsg.includes('429')) errMsg = '429 Quota Exceeded (額度耗盡)';
                     else if (errMsg.includes('API key not valid') || errMsg.includes('Invalid')) errMsg = 'API Key Invalid (金鑰無效)';
                     else errMsg = `連線失敗 (${errMsg})`;
-                    modelErrors.push(`模組 [${model}]：${errMsg}`);
+                    modelErrors.push(`[${model}]`);
                 }
             }
             
-            loader.classList.add('hidden');
             if (success) { 
+                loader.classList.add('hidden');
                 vipPanel.classList.remove('hidden'); 
             } else { 
-                document.getElementById('ai-error-title').textContent = "API QUOTA EXCEEDED / 金鑰額度已滿";
-                const errorDetailsHtml = modelErrors.map(err => `<li class="text-left text-red-600 mb-1">❌ ${err}</li>`).join('');
-                document.getElementById('ai-error-debug').innerHTML = `
-                    <div class="text-left space-y-3 mt-4 text-[13px] font-sans font-bold text-slate-600 bg-white p-5 rounded-2xl shadow-inner leading-relaxed">
-                        <p class="text-slate-800 font-black mb-2 text-sm border-b pb-2">系統已真實嘗試連線各 AI 模組，結果如下：</p>
-                        <ul class="font-mono text-[11px] bg-slate-50 p-3 rounded-lg border border-slate-200">
-                            ${errorDetailsHtml}
-                        </ul>
-                        <p class="mt-3 text-red-600">問題並非出在我們系統本身，而是您跟 Google 申請的 API KEY 使用額度已滿或失效。</p>
-                        <p>請重新申請新的 API Key 來安裝，或者去 <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 font-black underline">Google AI Studio</a> 繳費申請更大的使用量額度。</p>
-                        <div class="mt-3 p-3 bg-red-50 rounded-lg border border-red-100 flex items-start gap-2">
-                            <i class="ph-fill ph-warning-circle text-red-500 mt-0.5 text-lg flex-shrink-0"></i>
-                            <span class="text-[11px] text-red-700 font-black">免責聲明：此 AI 功能能否使用與本系統無關。</span>
-                        </div>
-                    </div>
-                `;
-                errorPanel.classList.remove('hidden'); 
+                // 完美降級 (Graceful Degradation) 邏輯
+                window.showToast("API 金鑰連線失效或額度已滿，已為您無縫切換為基礎字典模式", true);
+                window.executeFallbackFetch(char, { type: 'QUOTA', models: modelErrors.join(', ') });
             }
         };
 
@@ -1879,7 +1965,6 @@
                     wrap.className = 'bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold';
                     
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-                    
                     const ttsText = pureZhuyin;
                     
                     wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>

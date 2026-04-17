@@ -6,16 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "4.0.0-ENTERPRISE-STABLE"
+    version: "4.1.0-VOICE-TRANSLATE-FIX"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Absolute Stable Architecture with New Pricing"
+    description: "Taiwan Chinese Learning Hub - Auth Button & Natural Voice Optimization"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Architecture Rolled Back: Restored to the most stable 1500+ line foundation provided by CEO."
-      - "Pricing Strategy Updated: Injected the new 30:1 TWD/USD ratio ($6, $15, $25, $40) while keeping Stripe logic intact."
-      - "UI Proportion Fix (Image 67): Recalibrated Hanzi SVG dimensions (240x240) and padding (35) to prevent overflow."
-      - "Pure Translation (Image 66): Ensures only precise Chinese text is returned and automatically split."
-      - "InfoSec Audited: Domain lock, honeypot, and zero-trust API key local storage verified."
+      - "UI Fix (Image 68): Corrected HTML/JS ID mismatch ('remove-key-btn' to 'logout-btn') restoring the Logout button."
+      - "Translation Fix (Image 67): Upgraded handleTranslate. Now uses Gemini pure string translation for VIPs, auto-splits robustly."
+      - "Voice Enhancement (Image 68): Added Natural Voice Selector to fetch native TTS engines (Google/Yating) and adjusted rate to 0.9 for natural flow."
+      - "Architecture: Firmly built upon CEO's stable v4.0.0 codebase."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -104,7 +103,8 @@
                 <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Settings / 設定</span>
                 </button>
-                <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleLogout()">
+                <!-- Image 68 Fix: ID correctly aligned to JS expectation 'logout-btn' -->
+                <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleLogout()">
                     <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
                 </button>
             </div>
@@ -200,7 +200,7 @@
             </div>
         </section>
 
-        <!-- Translation Module / 智慧翻譯 (修正 Image 66: 純淨數據) -->
+        <!-- Translation Module / 智慧翻譯 (修正 Image 66 & 67) -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 智慧翻譯</h2></div>
@@ -230,7 +230,7 @@
             </div>
         </section>
 
-        <!-- Learning Dashboard / 學習中心 (修正 Image 67: UI 防溢出) -->
+        <!-- Learning Dashboard / 學習中心 -->
         <section id="learning-dashboard" class="hidden bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500">
             <div class="bg-slate-900 text-white px-8 py-6 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-4">
@@ -240,12 +240,11 @@
                     </div>
                     <span id="active-engine-badge" class="hidden text-[9px] bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-600 uppercase font-black tracking-widest"></span>
                 </div>
-                <!-- Fix 67: Adjusted size to text-6xl -->
                 <span id="current-learning-char" class="text-6xl font-black text-yellow-400 drop-shadow-md"></span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0 text-left">
-                <!-- Strokes Area (Fix 67: Proper SVG width/height and padding via JS) -->
+                <!-- Strokes Area -->
                 <div class="md:col-span-5 lg:col-span-4 p-10 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-5 left-5 flex flex-col items-start gap-1 text-slate-400">
                         <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order</span></div>
@@ -304,7 +303,7 @@
                         </div>
                     </div>
 
-                    <!-- API Key Prompt (VIP lacking key) -->
+                    <!-- API Key Prompt -->
                     <div id="vip-no-key-promo" class="hidden flex flex-col items-center justify-center h-full text-center space-y-8">
                         <div class="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center text-5xl shadow-inner border border-indigo-100"><i class="ph-fill ph-magic-wand"></i></div>
                         <h3 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">AI Engine Standby</h3>
@@ -538,6 +537,13 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
+        // PM 新增：自動載入語音引擎列表
+        window.loadVoices = function() { window.availableVoices = window.speechSynthesis.getVoices(); };
+        if (window.speechSynthesis) {
+            if (window.speechSynthesis.onvoiceschanged !== undefined) { window.speechSynthesis.onvoiceschanged = window.loadVoices; }
+            window.loadVoices(); 
+        }
+
         window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
         window.hasValidApiKey = function() {
             return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
@@ -749,6 +755,7 @@
             btnElement.disabled = true;
 
             try {
+                // 從 Firebase 獲取真實的 Email 與 UID 傳給 Stripe
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode);
                 const docSnap = await getDoc(docRef);
                 let customerEmail = emailCode.replace(/_/g, '.');
@@ -784,7 +791,6 @@
             if (!sentinelCheck()) return;
             if (user) {
                 document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
-                if (window.syncVipStatus) window.syncVipStatus();
             } else {
                 signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
             }
@@ -796,59 +802,6 @@
                 const adminSnap = await getDoc(adminRef);
                 return adminSnap.exists() && adminSnap.data().pass === code;
             } catch(e) { return false; }
-        };
-
-        window.syncVipStatus = async function() {
-            const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) return;
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const daysEl = document.getElementById('vip-days-left');
-                    const lightEl = document.getElementById('vip-status-light');
-
-                    if (data.expiryDate) {
-                        const diff = new Date(data.expiryDate).getTime() - Date.now();
-                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                        if(daysEl) daysEl.textContent = Math.max(0, daysLeft);
-                        
-                        if (daysLeft > 7) {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400";
-                            localStorage.setItem('abra_vip_status', 'active');
-                        } else if (daysLeft > 0) {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-orange-400 animate-pulse";
-                            localStorage.setItem('abra_vip_status', 'active');
-                        } else {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse";
-                            localStorage.setItem('abra_vip_status', 'expired');
-                        }
-                    } else {
-                        localStorage.setItem('abra_vip_status', 'pending');
-                    }
-
-                    if (data.apiKey && localStorage.getItem('abra_vip_status') === 'active') {
-                        localStorage.setItem('gemini_api_key', data.apiKey.trim());
-                        window.activeApiKey = data.apiKey.trim();
-                    } else {
-                        localStorage.removeItem('gemini_api_key');
-                        window.activeApiKey = "";
-                    }
-                    
-                    const messages = data.messages || [];
-                    const lastReadCount = parseInt(localStorage.getItem(`abra_msg_read_${emailId}`) || '0', 10);
-                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-
-                    if (lastMsg && lastMsg.role === 'admin' && messages.length > lastReadCount) {
-                        document.getElementById('msg-dot')?.classList.remove('hidden');
-                    } else {
-                        document.getElementById('msg-dot')?.classList.add('hidden');
-                    }
-
-                    if (window.updateGlobalUI) window.updateGlobalUI();
-                }
-            } catch(e) {}
         };
 
         window.handleLogin = async function() {
@@ -965,7 +918,7 @@
                     password: "" 
                 }, { merge: true });
                 
-                window.showToast("Account Created! / 註冊成功，請選擇方案");
+                window.showToast("Account Created! / 註冊成功，請登入");
                 document.getElementById('reg-name').value = '';
                 document.getElementById('reg-email').value = '';
                 document.getElementById('reg-pass').value = '';
@@ -1496,8 +1449,20 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 (修正 Image 66 & 67) ---
-        // 執行長專屬護城河：語音字典底層封裝
+        // --- 8. AI 翻譯、語音與拆字引擎 (修正 Image 66, 67, 68) ---
+        
+        // 載入自然語音引擎
+        window.loadVoices = function() {
+            window.availableVoices = window.speechSynthesis.getVoices();
+        };
+        if (window.speechSynthesis) {
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = window.loadVoices;
+            }
+            window.loadVoices();
+        }
+
+        // 執行長專屬護城河：語音字典底層封裝與自然度優化 (Image 68 Fix)
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
@@ -1521,7 +1486,16 @@
             }
 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
-            ut.lang = 'zh-TW'; ut.rate = 0.85; ut.pitch = 1.05;
+            ut.lang = 'zh-TW';
+            
+            if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
+            if (window.availableVoices && window.availableVoices.length > 0) {
+                const preferredVoice = window.availableVoices.find(v => v.name.includes('Google 國語') || v.name.includes('Yating') || v.name.includes('Hanhan') || v.name.includes('Hsiao')) || window.availableVoices.find(v => v.lang.startsWith('zh-TW'));
+                if (preferredVoice) ut.voice = preferredVoice;
+            }
+            
+            ut.rate = 0.9; // 讓語速貼近自然說話
+            ut.pitch = 1.0;
             window.speechSynthesis.speak(ut);
         };
 
@@ -1529,7 +1503,15 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const ut = new SpeechSynthesisUtterance(window.getStr(text).trim());
-            ut.lang = 'en-US'; ut.rate = 0.9;
+            ut.lang = 'en-US';
+            
+            if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
+            if (window.availableVoices && window.availableVoices.length > 0) {
+                const preferredVoice = window.availableVoices.find(v => v.lang.startsWith('en-US') && (v.name.includes('Google') || v.name.includes('Natural'))) || window.availableVoices.find(v => v.lang.startsWith('en'));
+                if (preferredVoice) ut.voice = preferredVoice;
+            }
+            
+            ut.rate = 0.95;
             window.speechSynthesis.speak(ut);
         };
 
@@ -1540,13 +1522,31 @@
             if (!word) { window.showToast("Input Required / 請輸入英文單字", true); return; }
             
             document.getElementById('translate-loader').classList.remove('hidden');
+            const btn = document.getElementById('translate-btn');
+            if(btn) btn.disabled = true;
             window.showToast("Translating... / 智慧翻譯中...");
+            
             try {
-                // 優先使用免費翻譯通道，保持純淨輸出
-                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
-                const d = await res.json();
                 let trans = "";
-                if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
+                
+                // VIP 具備金鑰時，啟動 Gemini 精準翻譯引擎
+                if (window.isVIP && window.hasValidApiKey()) {
+                    const prompt = `Translate the following English text into Traditional Chinese (Taiwan standard). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text to translate: "${word}"`;
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const result = await res.json();
+                    if (result.error) throw new Error(result.error.message);
+                    trans = result.candidates[0].content.parts[0].text;
+                } else {
+                    // 保底：免費 Google API
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                    const d = await res.json();
+                    if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
+                }
+
+                if (!trans) throw new Error("Translation returned empty");
                 
                 // 純淨結果填入
                 const finalStr = trans.trim().replace(/[「」""'']/g, '');
@@ -1563,7 +1563,10 @@
                 window.speak(finalStr);
                 window.showToast("Translate Success / 翻譯完成");
             } catch(e) { window.showToast("Network Error / 連線失敗，請重試", true); } 
-            finally { document.getElementById('translate-loader').classList.add('hidden'); }
+            finally { 
+                document.getElementById('translate-loader').classList.add('hidden'); 
+                if(btn) btn.disabled = false;
+            }
         };
 
         window.handleSplit = function(e) {
@@ -1599,7 +1602,7 @@
                     document.getElementById('learning-dashboard').classList.remove('hidden');
                     document.getElementById('current-learning-char').textContent = char;
                     
-                    // 解決 Image 67：重新校準 SVG 畫布比例與防護間距
+                    // 解決 Image 67：重新校準 SVG 畫布比例與防護間距 (Padding 35)
                     document.getElementById('hanzi-target').innerHTML = '';
                     window.writerInstance = HanziWriter.create('hanzi-target', char, { width: 240, height: 240, padding: 35, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     

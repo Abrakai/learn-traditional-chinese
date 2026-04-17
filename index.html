@@ -6,18 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "4.2.6-CRITICAL-HOTFIX"
+    version: "4.3.1-CRITICAL-HOTFIX"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - CEO Baseline Recovery with New Pricing & AI Quota Handlers"
+    description: "Taiwan Chinese Learning Hub - Conversion Funnel & Quota Error UX Enhancements"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Resolved Firebase Crash: Permanently removed the invalid 4-segment collection reference (artifacts/{appId}/public/data) that was causing the page to crash on load."
-      - "Baseline Restored: Reverted to the CEO's highly stable 1500+ line codebase."
-      - "Pricing Updated: Applied 30:1 TWD/USD ratio ($6/$15/$25/$40) across the UI while maintaining Stripe integration."
-      - "Translation Fix: Guaranteed pure Chinese string output without template pollution. Added fallback API to prevent Network Errors."
-      - "Polyphonic Fix (Image 81): Hidden the vocabulary text for polyphonic characters; kept only Zhuyin and pronunciation button."
-      - "Quota Error UX (Image 83): Enhanced the 429 Quota error panel to list tried models and display the explicit liability disclaimer."
-      - "Header UX (Image 73-76): Fixed 'Upgrade' button click-action. Restored VIP status indicator lights and added Chinese titles."
+      - "CRITICAL BUG FIX: Removed the invalid 4-segment Firebase collection reference (artifacts/appId/public/data) causing 'Invalid collection reference' crashes on load."
+      - "VIP Renewal Prompt (Image 84): Refactored updateGlobalUI to force-display the pricing table and specific red-alert copy when VIP days <= 7 or expired."
+      - "Status Light (Image 84): Modified status indicator logic to show strict Red Pulse for both expiring (<= 7 days) and expired statuses to urge payment."
+      - "Quota Exceeded Panel (Image 83): Restructured the 429 Quota error UI to exactly match CEO's requested copy, listing tried models, Google AI Studio billing suggestions, and explicit liability disclaimer."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -46,30 +43,31 @@
         .chat-scroll::-webkit-scrollbar { width: 4px; }
         .chat-scroll::-webkit-scrollbar-track { background: transparent; }
         .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        /* 比例優化防溢出 */
+        #hanzi-target { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); max-width: 100%; height: auto; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- Domain Lock Overlay / 網域授權失敗 -->
+    <!-- Domain Lock Overlay -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
         </div>
         <h2 class="text-2xl font-black text-white mb-4">Unauthorized Access / 網域授權失敗</h2>
-        <p class="text-slate-400 max-w-md leading-relaxed">
+        <p class="text-slate-400 max-w-md leading-relaxed font-bold">
             系統偵測到非法網域部署。為保護工作室資產與個資安全，功能已鎖定。<br><br>
             請回官方正版站點：<br>
-            <a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-bold underline">abrakai.github.io/learn-traditional-chinese/</a>
+            <a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-black underline">abrakai.github.io/learn-traditional-chinese/</a>
         </p>
     </div>
 
-    <!-- InfoSec Honeypot -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
     <!-- System Toast -->
-    <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all">
+    <div id="system-toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-[110] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
 
@@ -81,12 +79,12 @@
 
     <!-- Header (Optimized Layout & Chinese Subtitle) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 md:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-inner">
                     <i class="ph-fill ph-book-open-text text-2xl"></i>
                 </div>
-                <div>
+                <div class="flex flex-col">
                     <h1 class="text-xl md:text-2xl font-bold tracking-wider flex items-center gap-2">
                         Learn Traditional Chinese
                         <span class="text-xs font-bold opacity-90 hidden sm:inline-block">/ 繁體中文學習中心</span>
@@ -97,17 +95,16 @@
             
             <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
                 <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
-                    <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses:</span> <span id="quota-count">20/20</span>
+                    <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                 </div>
                 
-                <!-- Added Upgrade CTA in header for non-VIPs -->
                 <button type="button" id="header-pricing-btn" class="hidden text-[10px] md:text-xs bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
-                    <i class="ph-fill ph-storefront text-base"></i> <span>Upgrade / 會員費說明</span>
+                    <i class="ph-fill ph-storefront text-base"></i> <span>Upgrade / 方案說明</span>
                 </button>
 
                 <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
-                    <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse bg-slate-400"></div>
-                    <span class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days</span>
+                    <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow bg-slate-400"></div>
+                    <span class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                 </div>
                 <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap">
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP 會員</span>
@@ -119,7 +116,7 @@
                 <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Settings / 設定</span>
                 </button>
-                <button type="button" id="remove-key-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
+                <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
                     <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
                 </button>
             </div>
@@ -137,37 +134,37 @@
             <div class="p-6 md:p-10">
                 <form id="auth-forms-container" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
                     <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16 text-left">
-                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500"></i> Step 1: Sign Up / 註冊帳號</h4>
+                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500 text-lg"></i> Step 1: Sign Up / 註冊帳號</h4>
                         <div class="space-y-3">
-                            <input type="text" id="reg-name" placeholder="Full Name / 姓名" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white">
+                            <input type="text" id="reg-name" placeholder="Full Name / 姓名" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
                             <input type="email" id="reg-email" placeholder="Email / 帳號 (登入用)" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold text-indigo-900 bg-white shadow-sm">
                             <div class="relative">
-                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white">
+                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
-                            </div>
-                            <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
-                                <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。</p></div>
+                                <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
+                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。</p></div>
+                                </div>
                             </div>
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
                                 <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
-                                <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-bold underline">個資保護與免責聲明 (Privacy Policy)</button>。</label>
+                                <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer font-bold">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-black underline">個資保護與免責聲明 (Privacy Policy)</button>。</label>
                             </div>
-                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
+                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider">CREATE ACCOUNT / 建立帳號</button>
                         </div>
                     </div>
                     <div class="space-y-4 text-left">
-                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500"></i> Step 2: Login / 會員登入</h4>
+                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500 text-lg"></i> Step 2: Login / 會員登入</h4>
                         <div class="space-y-3">
-                            <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white">
+                            <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
                             <div class="relative">
-                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm uppercase shadow-sm bg-white">
+                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <div class="flex justify-between items-center mt-1 mb-2 px-1">
-                                <p class="text-[10px] text-slate-400">登入即代表同意免責聲明</p>
-                                <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 underline transition-colors">Forgot Password? / 忘記密碼</button>
+                                <p class="text-[10px] text-slate-400 font-bold">登入即代表同意免責聲明</p>
+                                <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-black text-indigo-500 hover:text-indigo-700 underline transition-colors uppercase">Forgot Password? / 忘記密碼</button>
                             </div>
-                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
                                 <span id="login-btn-text">UNLOCK VIP / 登入解鎖</span><div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
                             </button>
                         </div>
@@ -216,10 +213,10 @@
             </div>
         </section>
 
-        <!-- Translation Module / 智慧翻譯 (純淨數據流) -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative text-left">
-            <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
-            <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm">1</div><h2 class="text-lg font-semibold tracking-tight uppercase">Intelligent Translate / 英翻中</h2></div>
+        <!-- Translation Module / 智慧翻譯 -->
+        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
+            <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
+            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative flex items-center">
                     <input type="text" id="eng-input" placeholder="Enter English word... (e.g. Apple) / 輸入英文單字" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white">
@@ -230,9 +227,9 @@
         </section>
 
         <!-- Writing Setup Module / 漢字解構 -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative text-left">
-            <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">FREE LIMIT</div>
-            <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl shadow-sm">2</div><h2 class="text-lg font-semibold tracking-tight uppercase">Character Decomposition / 漢字解構</h2></div>
+        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
+            <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
+            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
             <div class="flex flex-col md:flex-row gap-4 mb-4">
                 <div class="flex-1 relative flex items-center">
                     <input type="text" id="zh-input" placeholder="Paste Chinese text here... / 貼上繁體中文內容" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm bg-white">
@@ -265,7 +262,7 @@
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-8 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden flex flex-col items-center justify-center h-full space-y-4"><div class="ai-inner-loader"></div><p class="text-slate-400 text-xs animate-pulse uppercase tracking-widest font-bold">AI Analyzing... / 解析中...</p></div>
                     
-                    <!-- AI Error & Quota Exceeded Panel -->
+                    <!-- AI Error & Quota Exceeded Panel (Updated for Image 83) -->
                     <div id="ai-error-panel" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 px-4">
                         <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner"><i class="ph-fill ph-warning-circle"></i></div>
                         <h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight uppercase">Connection Issue / 連線異常</h3>
@@ -303,21 +300,21 @@
                             You are a VIP! Please bind your API Key in Profile to unlock advanced character analysis.<br>
                             <span class="text-[10px] italic font-normal mt-1 block">您已具備 VIP 資格！請至「個人設定」綁定您的專屬 API Key，即可解鎖進階注音、破音字、詞彙與成語解析。</span>
                         </p>
-                        <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Setup Key / 前往設定</button>
+                        <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Set API Key / 前往設定</button>
                     </div>
 
                     <div id="free-promo-content" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4">
                         <div class="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center text-3xl"><i class="ph-fill ph-crown text-yellow-500"></i></div>
                         <h3 id="promo-title" class="text-xl font-bold text-slate-800">Unlock VIP Access / 解鎖 VIP 權限</h3>
                         <div id="promo-desc" class="w-full max-w-lg mx-auto"></div>
-                        <button type="button" id="promo-action-btn" onclick="window.scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">View Plans / 升級方案</button>
+                        <button type="button" id="promo-action-btn" onclick="window.scrollToAuth()" class="bg-slate-900 text-white px-10 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all uppercase tracking-wider">Join VIP / 登入或升級</button>
                     </div>
                 </div>
             </div>
         </section>
         
         <!-- Pricing Section Container -->
-        <div id="pricing-section-container" class="hidden w-full mt-10"></div>
+        <section id="pricing-section-container" class="hidden w-full mt-10"></section>
         
     </main>
 
@@ -596,7 +593,7 @@
                 memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
                 qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
                 badgeTranslate: document.getElementById('badge-translate'), badgeSelect: document.getElementById('badge-select'),
-                headerPricingBtn: document.getElementById('header-pricing-btn')
+                headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container')
             };
 
             if(els.adminSection) els.adminSection.classList.add('hidden');
@@ -606,7 +603,25 @@
             if(els.rBtn) els.rBtn.classList.add('hidden');
             if(els.expiryDisplay) els.expiryDisplay.classList.add('hidden');
             if(els.headerPricingBtn) els.headerPricingBtn.classList.add('hidden');
+            if(els.pricingSection) els.pricingSection.classList.add('hidden');
             
+            const cachedDays = localStorage.getItem('abra_vip_days') || '--';
+            const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
+            const daysLeftEl = document.getElementById('vip-days-left');
+            if (daysLeftEl) daysLeftEl.textContent = cachedDays;
+
+            // VIP 狀態紅綠燈 (Image 84 Fix: Red Pulse for <= 7 days)
+            const lightEl = document.getElementById('vip-status-light');
+            if (lightEl && cachedDays !== '--') {
+                if (diffNum > 7) {
+                    lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_8px_#34d399]";
+                } else if (diffNum > 0) {
+                    lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
+                } else {
+                    lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
+                }
+            }
+
             if (window.isAdmin) {
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
                 if(els.vBadge) {
@@ -633,19 +648,36 @@
                         els.vBadge.classList.remove('hidden');
                     }
                     if(els.expiryDisplay) els.expiryDisplay.classList.remove('hidden');
+                    
+                    // Image 84 Fix: Force display pricing table and alert if expiring soon
+                    if (cachedDays !== '--' && diffNum <= 7) {
+                        if(els.headerPricingBtn) els.headerPricingBtn.classList.remove('hidden');
+                        if(els.pricingSection) els.pricingSection.classList.remove('hidden');
+                        setupPricingTable(els, 'Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
+                    } else {
+                        if(els.headerPricingBtn) els.headerPricingBtn.classList.add('hidden');
+                        if(els.pricingSection) els.pricingSection.classList.add('hidden');
+                    }
                 } else {
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                     if(els.vBadge) els.vBadge.classList.add('hidden');
-                    if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                     if(els.headerPricingBtn) els.headerPricingBtn.classList.remove('hidden');
-                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-xs text-red-600 font-bold mb-3 leading-relaxed">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> 由專人為您服務。<br><span class="text-[10px] italic font-normal text-slate-500">Please select a plan below to checkout, or contact us via LINE.</span></p>`);
+                    if(els.pricingSection) els.pricingSection.classList.remove('hidden');
+                    if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
+                    
+                    if (cachedDays !== '--' && diffNum <= 0) {
+                        setupPricingTable(els, 'VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                    } else {
+                        setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
+                    }
                 }
             } else {
                 if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                 if(els.vBadge) els.vBadge.classList.add('hidden');
-                if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 if(els.headerPricingBtn) els.headerPricingBtn.classList.remove('hidden');
-                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-xs text-slate-600 font-bold mb-3 leading-relaxed">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。<br><span class="text-[10px] italic font-normal text-slate-400">Please create an account first to unlock features.</span></p>`);
+                if(els.pricingSection) els.pricingSection.classList.remove('hidden');
+                if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
+                setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
             }
             
             if (window.isAdmin || window.isVIP) {
@@ -722,7 +754,7 @@
         window.handleStripeCheckout = async function(priceId, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
-                window.showToast("請先註冊或登入會員後再進行結帳 / Please login first", true);
+                window.showToast("Registration Required / 請先註冊或登入會員", true);
                 window.scrollToAuth();
                 return;
             }
@@ -751,11 +783,9 @@
                     clientReferenceId: uid
                 });
 
-                if (error) { 
-                    window.showToast("結帳系統啟動失敗 / Checkout Failed: " + error.message, true); 
-                }
+                if (error) { window.showToast("Checkout Failed / 結帳系統啟動失敗: " + error.message, true); }
             } catch (e) {
-                window.showToast("金流尚未綁定，請替換專屬的 Stripe 金鑰與 Price ID / Setup Required", true);
+                window.showToast("Stripe Setup Required / 金流尚未綁定，請替換專屬的 Stripe 金鑰與 Price ID", true);
             } finally {
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
@@ -765,7 +795,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
             if (user) {
-                document.getElementById('auth-status-msg').textContent = "CLOUD ACTIVE";
+                document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
                 if (window.syncVipStatus) window.syncVipStatus();
             } else {
                 signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
@@ -797,13 +827,13 @@
                         if(daysEl) daysEl.textContent = Math.max(0, daysLeft);
                         
                         if (daysLeft > 7) {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_6px_#34d399]";
+                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_8px_#34d399]";
                             localStorage.setItem('abra_vip_status', 'active');
                         } else if (daysLeft > 0) {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-orange-400 animate-pulse shadow-[0_0_6px_#fbbf24]";
+                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
                             localStorage.setItem('abra_vip_status', 'active');
                         } else {
-                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_6px_#ef4444]";
+                            if(lightEl) lightEl.className = "w-2.5 h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
                             localStorage.setItem('abra_vip_status', 'expired');
                         }
                     } else {
@@ -896,8 +926,11 @@
                         const data = docSnap.data();
                         let status = 'pending';
                         if (data.expiryDate) {
-                            const daysLeft = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                            status = (daysLeft > 0) ? 'active' : 'expired';
+                            const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                            status = (diff > 0) ? 'active' : 'expired';
+                            if (diff > 0) {
+                                localStorage.setItem('abra_vip_days', diff.toString());
+                            }
                         }
                         localStorage.setItem('abra_vip_status', status);
                         if (data.apiKey && status === 'active') {
@@ -1030,6 +1063,7 @@
             localStorage.removeItem('abra_vip_code');
             localStorage.removeItem('abra_admin_status');
             localStorage.removeItem('gemini_api_key');
+            localStorage.removeItem('abra_vip_days');
             window.activeApiKey = "";
             try { await signOut(auth); } catch(e) {}
             location.reload(); 
@@ -1409,7 +1443,7 @@
                             const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                             const senderName = isUser ? window.currentUserMsgName : 'Admin';
                             const isOld = (Date.now() - new Date(m.timestamp).getTime()) > 7 * 24 * 60 * 60 * 1000;
-                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>` : '';
+                            const delBtn = isOld ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">Del</button>` : '';
                             return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-blue-600 text-white' : 'bg-white border-2 border-slate-200 text-slate-800'} px-6 py-4 rounded-[2rem] shadow-xl text-sm font-bold whitespace-pre-wrap">${window.getStr(m.text)}</div><span class="text-[9px] text-slate-400 mt-2 font-black uppercase tracking-widest italic flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
                         }).join('');
                         historyDiv.scrollTop = historyDiv.scrollHeight;
@@ -1425,7 +1459,7 @@
                         inputEl.placeholder = "Awaiting Admin... / 待管理員回覆...";
                     }
                 }
-            } catch(e) { window.showToast("訊息載入失敗 / Load Error", true); }
+            } catch(e) { window.showToast("Load Error / 載入失敗", true); }
         };
 
         window.sendUserMsg = async function() {
@@ -1445,7 +1479,7 @@
                 localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
                 inputEl.value = '';
                 if(window.openUserMsgModal) window.openUserMsgModal();
-            } catch(e) { window.showToast("傳送失敗 / Send Error", true); } 
+            } catch(e) { window.showToast("Send Error / 傳送失敗", true); } 
             finally { inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); }
         };
 
@@ -1466,14 +1500,14 @@
                     let messages = docSnap.data().messages || [];
                     messages.splice(index, 1);
                     await setDoc(docRef, { messages }, { merge: true });
-                    window.showToast("訊息已清除 / Deleted");
+                    window.showToast("Message Erased / 訊息已清除");
                     if (window.isAdmin && !document.getElementById('admin-msg-modal').classList.contains('hidden')) {
                         if (window.openAdminMsgModal) window.openAdminMsgModal(emailId);
                     } else {
                         if (window.openUserMsgModal) window.openUserMsgModal();
                     }
                 }
-            } catch(e) { window.showToast("清除失敗 / Error", true); }
+            } catch(e) { window.showToast("Error / 清除失敗", true); }
         };
 
         window.handleMsgBtnClick = function() {
@@ -1501,7 +1535,16 @@
             }
 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
-            ut.lang = 'zh-TW'; ut.rate = 0.85;
+            ut.lang = 'zh-TW';
+            
+            if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
+            if (window.availableVoices && window.availableVoices.length > 0) {
+                const preferredVoice = window.availableVoices.find(v => v.lang === 'zh-TW' && (v.name.includes('Google') || v.name.includes('Yating') || v.name.includes('Hsiao'))) || window.availableVoices.find(v => v.lang === 'zh-TW');
+                if (preferredVoice) ut.voice = preferredVoice;
+            }
+            
+            ut.rate = 0.85;
+            ut.pitch = 1.0;
             window.speechSynthesis.speak(ut);
         };
 
@@ -1509,7 +1552,14 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const ut = new SpeechSynthesisUtterance(window.getStr(text).trim());
-            ut.lang = 'en-US'; ut.rate = 0.9;
+            ut.lang = 'en-US';
+            
+            if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
+            if (window.availableVoices && window.availableVoices.length > 0) {
+                const preferredVoice = window.availableVoices.find(v => v.lang.startsWith('en-US') && (v.name.includes('Google') || v.name.includes('Natural'))) || window.availableVoices.find(v => v.lang.startsWith('en'));
+                if (preferredVoice) ut.voice = preferredVoice;
+            }
+            ut.rate = 0.95;
             window.speechSynthesis.speak(ut);
         };
 
@@ -1652,15 +1702,18 @@
             if (window.currentTargetChar && window.executeAIFetch) window.executeAIFetch(window.currentTargetChar);
         };
 
+        // Fix Image 77, 78, 79, 80: Enhanced Error handling for API Quota Exceeded (429)
         window.fetchWithRetry = async function(url, options, maxRetries = 5) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i <= maxRetries; i++) {
                 try {
                     const res = await fetch(url, options);
-                    if (res.status === 429) throw new Error("429_QUOTA");
+                    if (res.status === 429) {
+                        throw new Error("Quota Exceeded (429)"); 
+                    }
                     return res;
                 } catch (err) {
-                    if (err.message === "429_QUOTA") throw err; // Exhausted quota, don't retry
+                    if (err.message.includes("429")) throw err; 
                     if (i === maxRetries) throw err;
                     await new Promise(r => setTimeout(r, delays[i]));
                 }
@@ -1699,13 +1752,12 @@
             errorPanel.classList.add('hidden');
             if (promoPanel) promoPanel.classList.add('hidden');
             if (noKeyPromo) noKeyPromo.classList.add('hidden');
-
-            const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
-            let success = false;
-            let triedModels = [];
             
+            document.getElementById('active-engine-badge').classList.add('hidden');
+
+            const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash"];
+            let success = false;
             for (const model of modelNames) {
-                triedModels.push(model);
                 try {
                     const prompt = `請以台灣教育部辭典標準，嚴格解析繁體中文字「${char}」並輸出 JSON。1. zhuyin: 主要注音符號 (含聲調)。2. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。3. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️ 極度嚴格要求：examples 內的詞彙發音【必須 100% 吻合】該破音字！例如「的」唸「ㄉㄧˊ」可造「的確」，唸「ㄉㄧˋ」可造「目的、有的放矢」，絕不可錯置！若無對應常見詞彙，請留空 []。寧缺勿濫，寧可少放絕對不可放錯！4. idioms: 包含「${char}」的成語 (最多4個)。格式：{"zhuyin": "主要注音", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                     
@@ -1718,41 +1770,22 @@
                     const rawText = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
                     window.charCache[char] = data; window.renderResult(char, data);
-                    
                     document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
                     document.getElementById('active-engine-badge').classList.remove('hidden');
                     success = true; break;
-                } catch (e) {
-                    if(e.message === "429_QUOTA" || (e.message && e.message.includes('429'))) {
-                        continue;
+                } catch (e) { 
+                    let errorMsg = e.message;
+                    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('billing')) {
+                        document.getElementById('ai-error-title').textContent = "API Quota Exceeded / 金鑰額度已滿";
+                        errorMsg = "您已達到 Google AI Studio 的免費層級上限 (Rate Limit)。\n請至 aistudio.google.com 設定帳單以開啟額度 (仍可享有免費配額)。";
                     } else {
-                        document.getElementById('ai-error-debug').textContent = e.message;
-                        break; 
+                        document.getElementById('ai-error-title').textContent = "Connection Issue / 連線中斷";
                     }
+                    document.getElementById('ai-error-debug').textContent = errorMsg; 
                 }
             }
-            
             loader.classList.add('hidden');
-            if (success) { 
-                vipPanel.classList.remove('hidden'); 
-            } else { 
-                if (triedModels.length === modelNames.length) {
-                    document.getElementById('ai-error-title').textContent = "API QUOTA EXCEEDED / 金鑰額度已滿";
-                    document.getElementById('ai-error-debug').innerHTML = `
-                        <div class="text-left space-y-3 mt-4 text-xs font-sans font-medium text-slate-600 bg-white p-4 rounded-xl shadow-inner">
-                            <p class="font-bold text-red-600 border-b pb-2">系統嘗試過諸多模式後，提出以下建議：</p>
-                            <p>我們已為您嘗試以下 AI 模組，但您的 API 金鑰配額皆已耗盡：<br>
-                            <span class="font-mono text-indigo-600 font-bold block mt-2 text-center">${triedModels.join(', ')}</span></p>
-                            <p class="mt-3">請重新申請新的 API Key，或前往 <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 font-bold underline">Google AI Studio</a> 綁定信用卡以開啟額度。</p>
-                            <div class="mt-3 p-3 bg-red-50 rounded-lg border border-red-100 flex items-start gap-2">
-                                <i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i>
-                                <span class="text-[10px] text-red-700 font-bold leading-relaxed">免責聲明：此 AI 功能能否使用，取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 之會員權限無關。</span>
-                            </div>
-                        </div>
-                    `;
-                }
-                errorPanel.classList.remove('hidden'); 
-            }
+            if (success) { vipPanel.classList.remove('hidden'); } else { errorPanel.classList.remove('hidden'); }
         };
 
         window.renderResult = function(char, data) {
@@ -1768,7 +1801,7 @@
                 document.getElementById('poly-section-wrap').style.display = 'block';
                 validPolyphonic.forEach(p => {
                     const wrap = document.createElement('div');
-                    wrap.className = 'bg-white p-2.5 rounded-xl border border-purple-100 flex items-center shadow-sm mt-2 gap-3';
+                    wrap.className = 'bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold';
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/\s+/g, '');
                     
                     let ttsText = char;
@@ -1776,10 +1809,10 @@
                         ttsText = window.getStr(p.examples[0]).replace(/\([^)]*\)/g, '').trim();
                     }
                     
-                    wrap.innerHTML = `<span class="text-sm font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-2 border-r border-purple-100">${pureZhuyin}</span>
+                    wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
                                       <div class="flex-1"></div>
-                                      <button type="button" data-action="speak" data-text="${ttsText}" class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 shadow-sm flex items-center justify-center transition-all hover:scale-105 hover:bg-purple-200">
-                                          <i class="ph-fill ph-speaker-high text-base pointer-events-none"></i>
+                                      <button type="button" data-action="speak" data-text="${ttsText}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
+                                          <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
                                       </button>`;
                     polyDisp.appendChild(wrap);
                 });
@@ -1790,7 +1823,7 @@
             const wordsCont = document.getElementById('words-container');
             wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
                     const pureWord = window.getStr(w).replace(/\([^)]*\)/g, '').trim();
-                    return `<span data-action="speak" data-text="${pureWord}" class="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-bold text-indigo-700 cursor-pointer shadow-sm hover:bg-indigo-100 transition-all">${pureWord}</span>`;
+                    return `<span data-action="speak" data-text="${pureWord}" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-md hover:border-indigo-400 transition-all italic">${pureWord}</span>`;
             }).join('');
             
             const idiomsCont = document.getElementById('idioms-container');
@@ -1798,19 +1831,19 @@
             
             if (validIdioms.length > 0) {
                 idiomsCont.innerHTML = validIdioms.map(i => `
-                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold flex justify-between items-start shadow-sm text-left hover:bg-white transition-all">
-                        <div class="flex-1 pr-6">
-                            <div class="text-slate-800 text-base font-black tracking-tight font-bold">${window.getStr(i.idiom)}</div>
-                            <div class="text-[11px] text-slate-500 font-normal mt-1 leading-relaxed">${window.getStr(i.meaning)}</div>
-                            <div class="text-xs text-indigo-600 font-bold mt-3 border-t pt-3 bg-indigo-50/30 p-2 rounded-lg"><i class="ph ph-translate"></i> ${window.getStr(i.english) || "Translation loading..."}</div>
+                    <div class="p-8 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-sm font-bold shadow-inner text-left hover:bg-white transition-all relative group">
+                        <div class="flex-1 pr-16">
+                            <div class="text-slate-950 text-3xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-4 inline-block uppercase">${window.getStr(i.idiom)}</div>
+                            <div class="text-base text-slate-500 font-bold mt-5 leading-relaxed">${window.getStr(i.meaning)}</div>
+                            <div class="text-[11px] text-indigo-600 font-black mt-6 border-t-2 pt-6 border-slate-100 uppercase tracking-[0.3em] italic opacity-90">${window.getStr(i.english) || "Translation loading..."}</div>
                         </div>
-                        <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="text-rose-400 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
+                        <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="absolute top-8 right-8 w-14 h-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-2xl transition-transform group-hover:scale-110 active:scale-90 border-b-4 border-emerald-800 flex items-center justify-center"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
                     </div>
                 `).join('');
             } else {
                 idiomsCont.innerHTML = `
-                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center shadow-sm">
-                        <p class="text-xs text-slate-600 mb-2 font-bold">目前無包含「${char}」的常見成語。<br><span class="font-normal italic text-[10px]">No common idioms found for this character.</span></p>
+                    <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
+                        <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
                     </div>
                 `;
             }

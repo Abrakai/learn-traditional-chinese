@@ -6,15 +6,17 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "4.1.0-VOICE-TRANSLATE-FIX"
+    version: "4.1.5-CEO-UI-REFINEMENT"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Auth Button & Natural Voice Optimization"
+    description: "Taiwan Chinese Learning Hub - Ultimate UI/UX Calibrated Edition"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "UI Fix (Image 68): Corrected HTML/JS ID mismatch ('remove-key-btn' to 'logout-btn') restoring the Logout button."
-      - "Translation Fix (Image 67): Upgraded handleTranslate. Now uses Gemini pure string translation for VIPs, auto-splits robustly."
-      - "Voice Enhancement (Image 68): Added Natural Voice Selector to fetch native TTS engines (Google/Yating) and adjusted rate to 0.9 for natural flow."
-      - "Architecture: Firmly built upon CEO's stable v4.0.0 codebase."
+      - "Header Layout (Fix 69): Added whitespace-nowrap to all header buttons to prevent text breaking. Added local cache for VIP days to prevent '--' flicker."
+      - "Conversion Funnel: Added 'Upgrade / 升級方案' CTA button in the header specifically for non-VIP users."
+      - "Profile Modal (Fix 70): Shrunk input font sizes to text-sm, shortened placeholders, increased right padding, and shrunk API key note text to prevent icon overlap."
+      - "Natural TTS (Fix 68): Enhanced window.speak to actively fetch premium Taiwanese Mandarin voices with optimized reading pace."
+      - "Architecture: Retained the entire 1500+ line secure infrastructure."
+      - "Bug Fix: Removed invalid Firebase collection reference that caused a crash on load."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -78,33 +80,38 @@
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header / 雙語導覽列 -->
+    <!-- Header / 雙語導覽列 (修復斷行與按鈕) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
                 <h1 class="text-xl md:text-2xl font-black tracking-wider">Learn Traditional Chinese</h1>
                 <p class="text-red-100 text-[10px] md:text-xs mt-0.5 font-bold italic uppercase tracking-widest">Abrakai Studio | Taiwan Edition</p>
             </div>
-            <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-end">
-                <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all">
-                    <i class="ph-fill ph-lightning text-yellow-400"></i> Free Uses / 免費次數: <span id="quota-count">20/20</span>
+            <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
+                <div id="quota-display" class="bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
+                    <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                 </div>
-                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all">
+                
+                <!-- 加入 Upgrade CTA (非VIP顯示) -->
+                <button type="button" id="header-pricing-btn" class="hidden text-[10px] md:text-xs bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                    <i class="ph-fill ph-storefront text-base"></i> <span class="hidden sm:inline">Upgrade / 方案說明</span>
+                </button>
+
+                <div id="vip-expiry-display" class="hidden flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                     <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow animate-pulse"></div>
-                    <span class="text-[10px] font-black tracking-tight uppercase"><span id="vip-days-left">--</span> Days Remaining</span>
+                    <span class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                 </div>
-                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in">
-                    <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>
+                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap">
+                    <i class="ph-fill ph-crown text-base"></i> <span>VIP 會員</span>
                 </div>
-                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleMsgBtnClick()">
+                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">Inbox / 訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
                 </button>
-                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.openProfileModal()">
+                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.openProfileModal()">
                     <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Settings / 設定</span>
                 </button>
-                <!-- Image 68 Fix: ID correctly aligned to JS expectation 'logout-btn' -->
-                <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm" onclick="window.handleLogout()">
+                <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
                     <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
                 </button>
             </div>
@@ -200,7 +207,7 @@
             </div>
         </section>
 
-        <!-- Translation Module / 智慧翻譯 (修正 Image 66 & 67) -->
+        <!-- Translation Module / 智慧翻譯 -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 智慧翻譯</h2></div>
@@ -343,7 +350,7 @@
         </div>
     </div>
 
-    <!-- Profile & Settings Modal -->
+    <!-- Profile & Settings Modal (Fix 70: Resized inputs and labels) -->
     <div id="profile-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-8">
@@ -352,31 +359,31 @@
             </div>
             <div class="space-y-6 text-left">
                 <div>
-                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Account Email / 帳號</label>
-                    <input type="email" id="profile-email" disabled class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-slate-500 text-base font-black cursor-not-allowed shadow-inner">
+                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Account Email / 帳號</label>
+                    <input type="email" id="profile-email" disabled class="w-full px-4 py-3 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-500 text-sm font-black cursor-not-allowed shadow-inner">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Display Name / 姓名</label>
-                    <input type="text" id="profile-name" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:bg-white focus:border-indigo-500 outline-none text-base font-bold shadow-sm bg-slate-50">
+                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Display Name / 姓名</label>
+                    <input type="text" id="profile-name" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold shadow-sm bg-slate-50">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-2">Update Password / 密碼重設</label>
+                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Update Password / 密碼重設</label>
                     <div class="relative">
-                        <input type="password" id="profile-pass" placeholder="Leave blank to keep unchanged / 不修改請留空" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-6 py-4 pr-14 rounded-2xl border-2 border-slate-100 focus:bg-white focus:border-indigo-500 outline-none text-base font-bold shadow-sm bg-slate-50">
-                        <button type="button" onclick="window.togglePassVisibility('profile-pass', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-2"><i class="ph ph-eye text-2xl font-bold"></i></button>
+                        <input type="password" id="profile-pass" placeholder="Leave blank if unchanged / 若不修改請留空" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border-2 border-slate-100 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold shadow-sm bg-slate-50 text-ellipsis">
+                        <button type="button" onclick="window.togglePassVisibility('profile-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-2"><i class="ph ph-eye text-xl font-bold"></i></button>
                     </div>
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-2 ml-2">
-                        <label class="block text-[11px] font-black text-indigo-500 uppercase tracking-widest">AI API Key / 解析金鑰</label>
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[10px] text-indigo-600 underline font-black uppercase tracking-widest hover:text-indigo-800">Get Free Key / 免費申請</a>
+                    <div class="flex justify-between items-center mb-1.5 ml-1">
+                        <label class="block text-[10px] font-black text-indigo-500 uppercase tracking-widest">AI API Key / 解析金鑰</label>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-black uppercase tracking-widest hover:text-indigo-800">Get Free Key / 免費申請</a>
                     </div>
                     <div class="relative">
-                        <input type="password" id="profile-api-key" placeholder="AIzaSy..." readonly onfocus="this.removeAttribute('readonly');" class="w-full px-6 py-4 pr-14 rounded-2xl border-4 border-indigo-50 focus:bg-white focus:border-indigo-500 outline-none text-lg shadow-sm font-mono font-bold bg-slate-50">
-                        <button type="button" onclick="window.togglePassVisibility('profile-api-key', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-300 hover:text-indigo-600 p-2"><i class="ph ph-eye text-2xl font-bold"></i></button>
+                        <input type="password" id="profile-api-key" placeholder="AIzaSy..." readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border-2 border-indigo-100 focus:bg-white focus:border-indigo-500 outline-none text-sm shadow-sm font-mono font-bold bg-slate-50 text-ellipsis">
+                        <button type="button" onclick="window.togglePassVisibility('profile-api-key', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 p-2"><i class="ph ph-eye text-xl font-bold"></i></button>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-3 leading-relaxed font-bold bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <i class="ph-fill ph-shield-check text-emerald-500"></i> Key is securely stored in your local browser cache. It is never transmitted to studio servers.<br><span class="italic font-medium">金鑰僅存於您的瀏覽器本地端，保障個資安全。</span>
+                    <p class="text-[9px] text-slate-400 mt-2 leading-relaxed font-bold bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <i class="ph-fill ph-shield-check text-emerald-500"></i> Key is securely stored locally. / 金鑰僅存於您的瀏覽器本地端，保障個資安全。
                     </p>
                 </div>
                 <div class="pt-6 flex gap-4">
@@ -408,7 +415,7 @@
         </div>
     </div>
 
-    <!-- Admin Member Edit Modal (Full Implementation) -->
+    <!-- Admin Member Edit Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
@@ -493,7 +500,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 py-16 mt-24 text-center text-slate-400 text-[10px] italic px-6">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v3.9.5-CEO-TOTAL-RECOVERY</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v4.1.5-CEO-UI-REFINEMENT</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -521,10 +528,8 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         
-        // PM 設定：Stripe 官方測試金鑰 (全量回歸)
         const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
         
-        // 全域變數
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
@@ -537,7 +542,7 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // PM 新增：自動載入語音引擎列表
+        // 載入高階自然語音引擎
         window.loadVoices = function() { window.availableVoices = window.speechSynthesis.getVoices(); };
         if (window.speechSynthesis) {
             if (window.speechSynthesis.onvoiceschanged !== undefined) { window.speechSynthesis.onvoiceschanged = window.loadVoices; }
@@ -597,8 +602,8 @@
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');
             if (input && icon) {
-                if (input.type === 'password') { input.type = 'text'; icon.className = 'ph ph-eye-slash text-2xl'; } 
-                else { input.type = 'password'; icon.className = 'ph ph-eye text-2xl'; }
+                if (input.type === 'password') { input.type = 'text'; icon.className = 'ph ph-eye-slash text-xl font-bold'; } 
+                else { input.type = 'password'; icon.className = 'ph ph-eye text-xl font-bold'; }
             }
         };
 
@@ -619,12 +624,12 @@
             
             const els = {
                 qDisplay: document.getElementById('quota-display'), vBadge: document.getElementById('vip-status-badge'),
-                pBtn: document.getElementById('profile-btn'), rBtn: document.getElementById('remove-key-btn'), mBtn: document.getElementById('msg-btn'),
+                pBtn: document.getElementById('profile-btn'), logoutBtn: document.getElementById('logout-btn'), mBtn: document.getElementById('msg-btn'),
                 memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
                 apiKeySetup: document.getElementById('api-key-setup'), qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
                 badgeTranslate: document.getElementById('badge-translate'), badgeSelect: document.getElementById('badge-select'),
                 promoTitle: document.getElementById('promo-title'), promoDesc: document.getElementById('promo-desc'), promoBtn: document.getElementById('promo-action-btn'),
-                logoutBtn: document.getElementById('logout-btn')
+                pricingBtn: document.getElementById('header-pricing-btn')
             };
 
             if(els.adminSection) els.adminSection.classList.add('hidden');
@@ -632,14 +637,19 @@
             if(els.pBtn) els.pBtn.classList.add('hidden');
             if(els.mBtn) els.mBtn.classList.add('hidden');
             if(els.logoutBtn) els.logoutBtn.classList.add('hidden');
-            if(els.apiKeySetup) els.apiKeySetup.classList.add('hidden');
+            if(els.pricingBtn) els.pricingBtn.classList.add('hidden');
             if(els.expiryDisplay) els.expiryDisplay.classList.add('hidden');
             
+            // 快取天數顯示
+            const cachedDays = localStorage.getItem('abra_vip_days') || '--';
+            const daysLeftEl = document.getElementById('vip-days-left');
+            if (daysLeftEl) daysLeftEl.textContent = cachedDays;
+
             if (window.isAdmin) {
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
                 if(els.vBadge) {
                     els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="tracking-tighter uppercase">Admin</span>';
-                    els.vBadge.className = "hidden bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
+                    els.vBadge.className = "hidden bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap";
                     els.vBadge.classList.remove('hidden');
                 }
                 if(els.logoutBtn) els.logoutBtn.classList.remove('hidden');
@@ -656,35 +666,36 @@
                 if (window.isVIP) {
                     if(els.qDisplay) els.qDisplay.classList.add('hidden');
                     if(els.vBadge) {
-                        els.vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP Member</span>';
-                        els.vBadge.className = "hidden bg-yellow-400 text-red-900 px-4 py-2 rounded-xl text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in";
+                        els.vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP 會員</span>';
+                        els.vBadge.className = "hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap";
                         els.vBadge.classList.remove('hidden');
                     }
-                    if(els.apiKeySetup) els.apiKeySetup.classList.toggle('hidden', window.hasValidApiKey());
                     if(els.expiryDisplay) els.expiryDisplay.classList.remove('hidden');
+                    if(els.pricingBtn) els.pricingBtn.classList.add('hidden');
                 } else {
                     if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                     if(els.vBadge) els.vBadge.classList.add('hidden');
+                    if(els.pricingBtn) els.pricingBtn.classList.remove('hidden');
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
-                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment via Stripe or LINE <a href="https://lin.ee/9khpCfe" target="_blank" class="text-indigo-600 font-black underline">@841bihdj</a> to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE 由專人為您服務。</span></p>`);
+                    setupPricingTable(els, 'Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
                 }
             } else {
                 if(els.qDisplay) els.qDisplay.classList.remove('hidden');
                 if(els.vBadge) els.vBadge.classList.add('hidden');
+                if(els.pricingBtn) els.pricingBtn.classList.remove('hidden');
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 setupPricingTable(els, 'Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
             }
             
             if (window.isAdmin || window.isVIP) {
-                if(els.badgeTranslate) { els.badgeTranslate.textContent = 'VIP UNLIMITED'; els.badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[10px] font-black px-4 py-2 rounded-bl-xl uppercase tracking-widest shadow-md'; }
-                if(els.badgeSelect) { els.badgeSelect.textContent = 'VIP UNLIMITED'; els.badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[10px] font-black px-4 py-2 rounded-bl-xl uppercase tracking-widest shadow-md'; }
+                if(els.badgeTranslate) { els.badgeTranslate.textContent = 'VIP UNLIMITED'; els.badgeTranslate.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm whitespace-nowrap'; }
+                if(els.badgeSelect) { els.badgeSelect.textContent = 'VIP UNLIMITED'; els.badgeSelect.className = 'absolute top-0 right-0 bg-yellow-400 text-red-900 text-[9px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-sm whitespace-nowrap'; }
             } else {
-                if(els.badgeTranslate) { els.badgeTranslate.textContent = 'FREE LIMIT'; els.badgeTranslate.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-bl-xl uppercase tracking-widest shadow-md'; }
-                if(els.badgeSelect) { els.badgeSelect.textContent = 'FREE LIMIT'; els.badgeSelect.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-bl-xl uppercase tracking-widest shadow-md'; }
+                if(els.badgeTranslate) { els.badgeTranslate.textContent = 'FREE LIMIT'; els.badgeTranslate.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest whitespace-nowrap'; }
+                if(els.badgeSelect) { els.badgeSelect.textContent = 'FREE LIMIT'; els.badgeSelect.className = 'absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest whitespace-nowrap'; }
             }
         };
 
-        // PM 注入：最新 30:1 戰略價格表 (補完所有階層)
         function setupPricingTable(els, title, prefixDesc) {
             const pricingHTML = `
                 <div class="text-left space-y-6 bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 shadow-xl w-full mt-4">
@@ -738,10 +749,9 @@
                 </div>`;
             if(els.promoTitle) els.promoTitle.textContent = title;
             if(els.promoDesc) els.promoDesc.innerHTML = prefixDesc + pricingHTML;
-            if(els.promoBtn) els.promoBtn.style.display = 'none'; // 由動態表單接管
+            if(els.promoBtn) els.promoBtn.style.display = 'none';
         }
 
-        // PM 完整回歸：導入 Stripe 結帳按鈕邏輯
         window.handleStripeCheckout = async function(priceId, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -755,7 +765,6 @@
             btnElement.disabled = true;
 
             try {
-                // 從 Firebase 獲取真實的 Email 與 UID 傳給 Stripe
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode);
                 const docSnap = await getDoc(docRef);
                 let customerEmail = emailCode.replace(/_/g, '.');
@@ -766,7 +775,6 @@
                     uid = docSnap.data().uid || emailCode;
                 }
 
-                // 呼叫 Stripe 結帳頁面
                 const { error } = await stripe.redirectToCheckout({
                     lineItems: [{ price: priceId, quantity: 1 }],
                     mode: 'subscription',
@@ -776,9 +784,7 @@
                     clientReferenceId: uid
                 });
 
-                if (error) { 
-                    window.showToast("Checkout Failed / 結帳系統啟動失敗: " + error.message, true); 
-                }
+                if (error) { window.showToast("Checkout Failed / 結帳系統啟動失敗: " + error.message, true); }
             } catch (e) {
                 window.showToast("Stripe Setup Required / 金流尚未綁定，請替換專屬的 Stripe 金鑰", true);
             } finally {
@@ -867,8 +873,9 @@
                         const data = docSnap.data();
                         let status = 'pending';
                         if (data.expiryDate) {
-                            const daysLeft = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                            status = (daysLeft > 0) ? 'active' : 'expired';
+                            const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                            status = (diff > 0) ? 'active' : 'expired';
+                            if (diff > 0) localStorage.setItem('abra_vip_days', diff.toString());
                         }
                         localStorage.setItem('abra_vip_status', status);
                         if (data.apiKey && status === 'active') {
@@ -994,12 +1001,13 @@
             localStorage.removeItem('abra_vip_code');
             localStorage.removeItem('abra_admin_status');
             localStorage.removeItem('gemini_api_key');
+            localStorage.removeItem('abra_vip_days');
             window.activeApiKey = "";
             try { await signOut(auth); } catch(e) {}
             location.reload(); 
         };
 
-        // --- CEO 行政管理實作 (CSV, Table, Chat) ---
+        // --- CEO 行政管理實作 ---
         window.loadAdminMembers = async function() {
             const tbody = document.getElementById('admin-members-tbody');
             if(!tbody) return;
@@ -1255,7 +1263,7 @@
             });
         };
 
-        // --- Profile & User Message Handling ---
+        // --- Profile & CRM Message Handling ---
         window.saveProfileInfo = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             const newName = document.getElementById('profile-name').value.trim();
@@ -1283,7 +1291,6 @@
                 
                 window.showToast("Profile Synced / 設定已同步！");
                 if (window.closeProfileModal) window.closeProfileModal();
-                // If dashboard is open, trigger AI to refresh
                 if(!document.getElementById('learning-dashboard').classList.contains('hidden') && window.currentTargetChar) {
                     window.executeAIFetch(window.currentTargetChar);
                 }
@@ -1449,38 +1456,17 @@
             }
         };
 
-        // --- 8. AI 翻譯、語音與拆字引擎 (修正 Image 66, 67, 68) ---
+        // --- 8. AI 翻譯、語音與拆字引擎 (修正 Image 66 & 68 自然度) ---
         
-        // 載入自然語音引擎
-        window.loadVoices = function() {
-            window.availableVoices = window.speechSynthesis.getVoices();
-        };
-        if (window.speechSynthesis) {
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = window.loadVoices;
-            }
-            window.loadVoices();
-        }
-
-        // 執行長專屬護城河：語音字典底層封裝與自然度優化 (Image 68 Fix)
         window.speak = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
-            
             const ttsDictionary = {
-                "有的放矢": "有地放矢",
-                "無的放矢": "無地放矢",
-                "眾矢之的": "眾矢之地",
-                "目的": "目地",
-                "標的": "標地",
-                "的確": "迪確",
-                "的士": "迪士",
-                "標的代號": "標地代號",
-                "標的物件": "標地物件"
+                "有的放矢": "有地放矢", "無的放矢": "無地放矢", "眾矢之的": "眾矢之地",
+                "目的": "目地", "標的": "標地", "的確": "迪確", "的士": "迪士", "標的代號": "標地代號", "標的物件": "標地物件"
             };
-            
             for (const [wrong, right] of Object.entries(ttsDictionary)) {
                 cleanText = cleanText.replace(new RegExp(wrong, 'g'), right);
             }
@@ -1490,11 +1476,11 @@
             
             if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
             if (window.availableVoices && window.availableVoices.length > 0) {
-                const preferredVoice = window.availableVoices.find(v => v.name.includes('Google 國語') || v.name.includes('Yating') || v.name.includes('Hanhan') || v.name.includes('Hsiao')) || window.availableVoices.find(v => v.lang.startsWith('zh-TW'));
+                const preferredVoice = window.availableVoices.find(v => v.lang === 'zh-TW' && (v.name.includes('Google') || v.name.includes('Yating') || v.name.includes('Hsiao'))) || window.availableVoices.find(v => v.lang === 'zh-TW');
                 if (preferredVoice) ut.voice = preferredVoice;
             }
             
-            ut.rate = 0.9; // 讓語速貼近自然說話
+            ut.rate = 0.85; // 最佳自然語速
             ut.pitch = 1.0;
             window.speechSynthesis.speak(ut);
         };
@@ -1510,12 +1496,11 @@
                 const preferredVoice = window.availableVoices.find(v => v.lang.startsWith('en-US') && (v.name.includes('Google') || v.name.includes('Natural'))) || window.availableVoices.find(v => v.lang.startsWith('en'));
                 if (preferredVoice) ut.voice = preferredVoice;
             }
-            
             ut.rate = 0.95;
             window.speechSynthesis.speak(ut);
         };
 
-        // 解決 Image 66：純淨翻譯資料流
+        // 解決 Image 66：純淨無污染的翻譯結果
         window.handleTranslate = async function() {
             if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("Limit Reached / 試用額度已滿", true); return; }
             const word = document.getElementById('eng-input').value.trim();
@@ -1529,7 +1514,7 @@
             try {
                 let trans = "";
                 
-                // VIP 具備金鑰時，啟動 Gemini 精準翻譯引擎
+                // 若為 VIP 且已綁定金鑰，使用 Gemini 進行極度純淨的翻譯
                 if (window.isVIP && window.hasValidApiKey()) {
                     const prompt = `Translate the following English text into Traditional Chinese (Taiwan standard). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text to translate: "${word}"`;
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
@@ -1540,7 +1525,7 @@
                     if (result.error) throw new Error(result.error.message);
                     trans = result.candidates[0].content.parts[0].text;
                 } else {
-                    // 保底：免費 Google API
+                    // 保底：Google 免費引擎
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const d = await res.json();
                     if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
@@ -1548,7 +1533,7 @@
 
                 if (!trans) throw new Error("Translation returned empty");
                 
-                // 純淨結果填入
+                // 絕對純淨化字串 (移除所有引號與空白)
                 const finalStr = trans.trim().replace(/[「」""'']/g, '');
                 document.getElementById('zh-input').value = finalStr;
                 
@@ -1558,7 +1543,7 @@
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
                 
-                // 自動觸發拆解與語音
+                // 自動觸發拆字與自然發音
                 document.getElementById('split-btn').click();
                 window.speak(finalStr);
                 window.showToast("Translate Success / 翻譯完成");
@@ -1602,7 +1587,7 @@
                     document.getElementById('learning-dashboard').classList.remove('hidden');
                     document.getElementById('current-learning-char').textContent = char;
                     
-                    // 解決 Image 67：重新校準 SVG 畫布比例與防護間距 (Padding 35)
+                    // 解決 Image 67：尺寸固定 240，Padding 增加至 35
                     document.getElementById('hanzi-target').innerHTML = '';
                     window.writerInstance = HanziWriter.create('hanzi-target', char, { width: 240, height: 240, padding: 35, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     

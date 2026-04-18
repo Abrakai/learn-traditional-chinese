@@ -6,13 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "5.8.0-ADMIN-OVERRIDE-MASTERY"
+    version: "6.0.0-GUMROAD-MOR-CHECKOUT"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Admin Password Override and Auto-Reset Pipeline"
+    description: "Taiwan Chinese Learning Hub - Gumroad Payment Integration for Frictionless Monetization"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Admin Override (Fix Image 97): Unlocked the 'Override Pass' field in the Admin Modal for all users. Admins can now input a temporary bypass code anytime."
-      - "Smart Login Intercept: Refactored handleLogin fallback. If an existing user logs in with the admin's override code, the system intercepts the auth/email-already-in-use error and automatically dispatches a secure Password Reset Email, providing a seamless CRM experience without violating zero-trust architecture."
+      - "Payment Gateway Pivot (Plan B): Replaced LemonSqueezy integration with Gumroad due to 429 block issues."
+      - "Gumroad Checkout Module: Implemented handleGumroadCheckout. Uses direct URL redirection with pre-filled customer email (via ?email= query parameter) to minimize checkout friction."
+      - "Pricing UI Updates: Updated setupPricingTable buttons to pass placeholder Gumroad permalinks (e.g., 'dummy_1_month')."
       - "Retained Features: Bilingual dynamic renders, Polyphonic TTS homophone mappers, Hybrid translation engine, and Stacked UI layouts remain fully active."
     ---
     -->
@@ -22,7 +23,6 @@
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://js.stripe.com/v3/"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
@@ -103,17 +103,14 @@
             <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
                 
                 <div class="flex flex-col items-end gap-1.5 w-auto">
-                    <!-- Free Uses Display -->
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
                         <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                     </div>
-                    <!-- VIP Days Display -->
                     <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                         <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow bg-slate-400 flex-shrink-0"></div>
                         <span id="vip-days-text" class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                     </div>
-                    <!-- Unified Pricing CTA -->
-                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
                         <i class="ph-fill ph-storefront text-sm flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>
                     </button>
                 </div>
@@ -316,6 +313,7 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
+                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -391,6 +389,26 @@
         </div>
     </div>
 
+    <div id="admin-msg-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
+        <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 text-left">
+            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="ph-fill ph-chat-circle-dots text-emerald-500 text-4xl"></i>
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Support Chat</h3>
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">User: <span id="admin-msg-target-name" class="text-slate-700">Loading...</span> <span id="admin-msg-target" class="text-slate-400 font-mono"></span></p>
+                    </div>
+                </div>
+                <button type="button" onclick="window.closeAdminMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
+            </div>
+            <div id="admin-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-5 p-6 mb-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100 shadow-inner h-[50vh] font-bold"></div>
+            <div class="pt-4 border-t-2 border-slate-100 flex gap-3">
+                <textarea id="admin-chat-input" rows="2" placeholder="Type your message to user... / 輸入客服回覆..." class="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-200 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm bg-slate-50 resize-none font-bold"></textarea>
+                <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center border-b-4 border-emerald-800 uppercase tracking-widest">Send</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
@@ -411,9 +429,8 @@
                         <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
                     </div>
                     <div class="space-y-2">
-                        <!-- PM Fix Image 97: Unlock Override Pass field -->
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Override Pass / 臨時密碼</label>
-                        <input type="text" id="admin-member-pass" placeholder="輸入臨時密碼" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
+                        <input type="text" id="admin-member-pass" placeholder="Leave empty if unchanged" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
                     </div>
                 </div>
                 <div class="space-y-2">
@@ -481,7 +498,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.8.0-ADMIN-OVERRIDE-MASTERY</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.0.0-GUMROAD-MOR-CHECKOUT</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -490,6 +507,7 @@
         </div>
     </footer>
 
+    <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -508,8 +526,6 @@
         const auth = getAuth(app);
         const appId = "abra-learn-zh-vip";
         
-        const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
-        
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
         window.MAX_FREE_USES = 20;
@@ -522,6 +538,7 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
+        // Polyphonic deduplication and TTS Homophone map remains secured
         const bopoToCharMap = {
             'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
             'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
@@ -580,6 +597,14 @@
             return true;
         };
 
+        window.triggerSMSReminder = async function(email, diffNum) {
+            const lastSmsDate = localStorage.getItem(`abra_sms_sent_${email}`);
+            const today = new Date().toISOString().split('T')[0];
+            if (lastSmsDate !== today) {
+                localStorage.setItem(`abra_sms_sent_${email}`, today);
+            }
+        };
+
         window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
         window.closeAdminMsgModal = () => document.getElementById('admin-msg-modal').classList.add('hidden');
@@ -589,7 +614,7 @@
 
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
+            if (!emailId) { window.showToast("Please login first / 請先登入", true); return; }
             document.getElementById('profile-email').value = emailId;
             document.getElementById('profile-modal').classList.remove('hidden');
 
@@ -763,6 +788,7 @@
             }
         };
 
+        // PM Fix 6.0.0: Render Gumroad Pricing Table (Passes dummy permalinks for now)
         function setupPricingTable(title, prefixDesc) {
             let container = document.getElementById('pricing-section-container');
             if (!container) return;
@@ -780,25 +806,34 @@
                         <div class="pt-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Pricing Strategy / 方案升級 (30:1)</h4>
                             <div class="space-y-3">
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【1-Month / 單月體驗】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 180 <span class="text-[9px] text-slate-400">(NT$ 180/月)</span> | $6 USD</span></div>
-                                    <button type="button" onclick="window.handleStripeCheckout('price_1_month_dummy', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【1-Month / 單月體驗】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 180 <span class="text-[9px] text-slate-400">(NT$ 180/月)</span> | 6 USD</span></div>
+                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_1_month', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
                                 
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
                                     <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">SMART</div>
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-indigo-900">【3-Month / 季繳首選】</span> <span class="text-[11px] text-indigo-700 font-bold">NT$ 450 <span class="text-[9px] text-indigo-400">(NT$ 150/月)</span> | $15 USD</span></div>
-                                    <button type="button" onclick="window.handleStripeCheckout('price_3_month_dummy', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-indigo-900">【3-Month / 季繳首選】</span> <span class="text-[11px] text-indigo-700 font-bold">NT$ 450 <span class="text-[9px] text-indigo-400">(NT$ 150/月)</span> | 15 USD</span></div>
+                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_3_month', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
                                 
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【6-Month / 半年方案】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125/月)</span> | $25 USD</span></div>
-                                    <button type="button" onclick="window.handleStripeCheckout('price_6_month_dummy', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【6-Month / 半年方案】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125/月)</span> | 25 USD</span></div>
+                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_6_month', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
                                 
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i>【12-Month / 年度超值】</span> <span class="text-[12px] text-yellow-800 font-bold">👑 NT$ 1,200 <span class="text-[9px] text-yellow-700 opacity-70">(NT$ 100/月)</span> | $40 USD</span></div>
-                                    <button type="button" onclick="window.handleStripeCheckout('price_12_month_dummy', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
+                                    <div class="flex-1 text-center sm:text-left"><span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i>【12-Month / 年度超值】</span> <span class="text-[12px] text-yellow-800 font-bold">👑 NT$ 1200 <span class="text-[9px] text-yellow-700 opacity-70">(NT$ 100/月)</span> | 40 USD</span></div>
+                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_12_month', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
+                            <div class="w-14 h-14 bg-emerald-500 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
+                            <div class="leading-tight flex flex-col items-center sm:items-start">
+                                <p class="text-base font-black text-emerald-800 tracking-tight">Official LINE for Remittance / 匯款開通官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
+                                <p class="text-[11px] font-bold text-emerald-600 mt-1">If unable to use credit card, contact Abrakai Studio for wire transfer info. / 若無法刷卡，請聯絡阿布拉.凱工作室索取匯款資訊</p>
+                                <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> Add Friend / 點擊加入好友</a>
                             </div>
                         </div>
                     </div>
@@ -806,7 +841,8 @@
             container.innerHTML = pricingHTML;
         }
 
-        window.handleStripeCheckout = async function(priceId, btnElement) {
+        // PM Fix 6.0.0: Gumroad MoR Integration Function
+        window.handleGumroadCheckout = async function(permalink, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
                 window.showToast("Registration Required / 請先註冊或登入會員", true);
@@ -822,26 +858,19 @@
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode);
                 const docSnap = await getDoc(docRef);
                 let customerEmail = emailCode.replace(/_/g, '.');
-                let uid = emailCode;
                 
-                if (docSnap.exists()) {
-                    customerEmail = docSnap.data().email || customerEmail;
-                    uid = docSnap.data().uid || emailCode;
+                if (docSnap.exists() && docSnap.data().email) {
+                    customerEmail = docSnap.data().email;
                 }
 
-                const { error } = await stripe.redirectToCheckout({
-                    lineItems: [{ price: priceId, quantity: 1 }],
-                    mode: 'subscription',
-                    successUrl: window.location.href + '?session_id={CHECKOUT_SESSION_ID}',
-                    cancelUrl: window.location.href,
-                    customerEmail: customerEmail,
-                    clientReferenceId: uid
-                });
+                // Construct Gumroad URL dynamically to pass Email
+                const checkoutUrl = `https://gumroad.com/l/${permalink}?email=${encodeURIComponent(customerEmail)}`;
 
-                if (error) { window.showToast("Checkout Failed / 結帳系統啟動失敗: " + error.message, true); }
+                // Redirect to Gumroad Hosted Checkout
+                window.location.href = checkoutUrl;
+
             } catch (e) {
-                window.showToast("Stripe Setup Required / 金流尚未綁定，請替換專屬的 Stripe 金鑰與 Price ID", true);
-            } finally {
+                window.showToast("Gumroad Setup Required / 請至程式碼替換您的專屬 Permalink", true);
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
             }
@@ -904,14 +933,8 @@
                             authSuccess = true;
                         } catch(err) {
                             if (err.code === 'auth/email-already-in-use') {
-                                // PM Fix 97: Admin Override Smart Fallback
                                 await updateDoc(docRef, { password: "" }).catch(() => {});
-                                try {
-                                    await sendPasswordResetEmail(auth, email);
-                                    window.showToast("為保障安全，系統已發送「專屬密碼重設信」至您的信箱，請前往重設！", true);
-                                } catch(e2) {
-                                    window.showToast("帳戶受保護，請點擊下方「忘記密碼」重新綁定", true);
-                                }
+                                window.showToast("Account locked. Use Reset Password / 請點擊忘記密碼重新綁定", true);
                             } else {
                                 window.showToast("System Error / 系統升級遇到阻礙: " + err.code, true);
                             }
@@ -1133,7 +1156,6 @@
             }
         };
 
-        // PM Fix 97: Admin Override Password Input unlocked
         window.openAdminModal = async function(emailId = '') {
             document.getElementById('admin-modal').classList.remove('hidden');
             const emailInput = document.getElementById('admin-member-email');
@@ -1150,10 +1172,17 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        passInput.value = data.password || '';
-                        passInput.placeholder = data.uid ? "強制覆寫 (登入將觸發重設)" : "輸入臨時密碼";
-                        passInput.disabled = false;
-                        passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        if (data.uid || (!data.password && data.status !== 'pending')) {
+                            passInput.value = '';
+                            passInput.placeholder = "Encrypted / 已加密";
+                            passInput.disabled = true;
+                            passInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        } else {
+                            passInput.value = data.password || '';
+                            passInput.placeholder = "Leave empty / 留空";
+                            passInput.disabled = false;
+                            passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        }
 
                         document.getElementById('admin-member-name').value = data.name || '';
                         document.getElementById('admin-member-phone').value = data.phone || '';

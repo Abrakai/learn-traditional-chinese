@@ -6,15 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "5.5.0-MOEDICT-CLEANUP"
+    version: "5.6.0-MOEDICT-CLEANUP-AND-HOMOPHONE-MAPPER"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Moedict Radical HTML Strip & TTS Fallback"
+    description: "Taiwan Chinese Learning Hub - Moedict Radical HTML Strip, Deduplication & Advanced TTS"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Radical HTML Strip (Fix Image 60): Applied Regex `.replace(/<[^>]+>/g, '')` to the radical extraction in executeFallbackFetch to strip out Moedict's raw anchor tags (e.g. <a href...>)."
-      - "Stroke Count Note: Retained Moedict's 11 strokes for '這' as it is the correct Taiwan MoE standard (辶 is 4 strokes, 言 is 7)."
-      - "Ultimate TTS Fallback (Fix Image 60): Updated window.speak. If a Bopomofo string is not found in bopoToCharMap, it now seamlessly falls back to passing `window.currentTargetChar` to the TTS engine. This completely eliminates the bug where Windows reads unmatched Bopomofo as Pinyin letters."
-      - "Expanded Homophone Map: Added 'ㄓㄟˋ': '這' to the bopoToCharMap for faster direct resolution."
+      - "Radical HTML Strip (Fix Image 60): Applied Regex `.replace(/<[^>]+>/g, '')` to the radical extraction in executeFallbackFetch to correctly strip Moedict's anchor tags."
+      - "Stroke Count Clarification: Retained 11 strokes for '這' as it strictly adheres to the Taiwan Ministry of Education standard (辶 is 4 strokes, 言 is 7)."
+      - "Polyphonic Deduplication (Fix Image 61): Implemented a Set-based filter in executeFallbackFetch and renderResult to ensure polyphonic pronunciations (like ㄏㄤˊ) appear only once, resolving clutter."
+      - "Ultimate TTS Homophone Mapper (Fix Image 59 & 61 & 62): Vastly expanded bopoToCharMap. TTS now natively reads specific Zhuyin flawlessly by passing a hidden homophone character (e.g. ㄏㄤˊ -> 航, ㄒㄧㄥˊ -> 型) to the engine. This perfectly fixes OS engines reading Bopomofo as Pinyin, and stops default character overrides (like reading 行 always as ㄒㄧㄥˊ)."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -104,17 +104,14 @@
             <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
                 
                 <div class="flex flex-col items-end gap-1.5 w-auto">
-                    <!-- Free Uses Display -->
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
                         <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                     </div>
-                    <!-- VIP Days Display -->
                     <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                         <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow bg-slate-400 flex-shrink-0"></div>
                         <span id="vip-days-text" class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                     </div>
-                    <!-- Unified Pricing CTA -->
-                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
                         <i class="ph-fill ph-storefront text-sm flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>
                     </button>
                 </div>
@@ -314,10 +311,11 @@
                             <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 shadow-sm relative overflow-hidden">
                                 <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-1 font-bold">Zhuyin / 標準注音</div>
                                 <div class="flex items-center gap-3">
-                                    <div id="zhuyin-display" class="text-4xl font-bold text-slate-800 tracking-tighter"></div>
+                                    <div id="zhuyin-display" class="text-3xl font-bold text-slate-800 tracking-tighter"></div>
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
+                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -338,7 +336,7 @@
     <!-- Modals -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200 flex flex-col h-[80vh] text-left">
-            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-6">
+            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-4 mb-4">
                 <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 font-bold"><i class="ph-fill ph-envelope-open text-blue-500"></i> System Inbox / 系統訊息</h3>
                 <button type="button" onclick="window.closeUserMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-xl"></i></button>
             </div>
@@ -502,7 +500,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.5.0-MOEDICT-CLEANUP</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.6.0-MOEDICT-CLEANUP-AND-HOMOPHONE-MAPPER</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -543,9 +541,44 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // PM Fix Point 3: Expanded Homophone TTS Map (Bopomofo -> Char)
+        // PM Fix Point 3 (Image 59, 61, 62): Ultimate Homophone TTS Mapper 
+        // 確保純注音餵給 TTS 時，會被轉換為真實的「同音中文字」，避免 Windows 唸出拼音或唸錯聲調
         const bopoToCharMap = {
-            'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄏㄞˊ': '孩', 'ㄏㄨㄢˊ': '環', 'ㄐㄧㄠˋ': '叫', 'ㄐㄩㄝˊ': '決', 'ㄓㄨㄥˋ': '眾', 'ㄓㄥˋ': '正', 'ㄔㄤˊ': '常', 'ㄓㄤˇ': '掌', 'ㄕㄨˇ': '暑', 'ㄕㄨˋ': '樹', 'ㄕㄨㄛˋ': '朔', 'ㄒㄧㄥˊ': '行', 'ㄏㄤˊ': '航', 'ㄉㄠˇ': '島', 'ㄉㄠˋ': '到', 'ㄈㄚˇ': '法', 'ㄈㄚˋ': '髮', 'ㄍㄜ˙': '個', 'ㄍㄜˋ': '各', 'ㄕˊ': '石', 'ㄉㄢ': '單', 'ㄕㄢˋ': '善', 'ㄔㄢˊ': '禪', 'ㄧㄠˋ': '要', 'ㄧㄠ': '邀', 'ㄏㄠˋ': '浩', 'ㄏㄠˇ': '好', 'ㄧˇ': '以', 'ㄧˋ': '意', 'ㄨㄟˊ': '為', 'ㄨㄟˋ': '位', 'ㄗ': '資', 'ㄗˇ': '子', 'ㄗˋ': '字', 'ㄘ': '疵', 'ㄘˊ': '詞', 'ㄘˇ': '此', 'ㄘˋ': '次', 'ㄙ': '私', 'ㄙˇ': '死', 'ㄙˋ': '四', 'ㄚ': '阿', 'ㄛ': '喔', 'ㄜ': '鵝', 'ㄝ': '耶', 'ㄞ': '哀', 'ㄟ': '欸', 'ㄠ': '熬', 'ㄡ': '歐', 'ㄢ': '安', 'ㄣ': '恩', 'ㄤ': '昂', 'ㄥ': '哼', 'ㄦ': '兒', 'ㄧ': '一', 'ㄨ': '屋', 'ㄩ': '迂', 'ㄅㄛ': '波', 'ㄆㄛ': '坡', 'ㄇㄛ': '摸', 'ㄈㄛ': '佛', 'ㄉㄜ': '德', 'ㄊㄜ': '特', 'ㄋㄜ': '呢', 'ㄌㄜ': '勒', 'ㄌㄜˋ': '樂', 'ㄎㄜ': '科', 'ㄏㄜ': '喝', 'ㄐㄧ': '機', 'ㄑㄧ': '期', 'ㄒㄧ': '西', 'ㄓ': '知', 'ㄔ': '吃', 'ㄕ': '詩', 'ㄖ': '日', 'ㄔㄨㄥˊ': '重', 'ㄓㄨㄥˋ': '重', 'ㄓㄟˋ': '這', 'ㄋㄟˋ': '那'
+            'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
+            'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
+            'ㄏㄞˊ': '孩', 'ㄏㄨㄢˊ': '環', 'ㄏㄞˋ': '害',
+            'ㄐㄧㄠˋ': '叫', 'ㄐㄩㄝˊ': '決', 'ㄐㄧㄠ': '交',
+            'ㄓㄨㄥˋ': '眾', 'ㄔㄨㄥˊ': '蟲',
+            'ㄓㄥˋ': '正', 'ㄔㄤˊ': '常', 'ㄓㄤˇ': '掌', 'ㄓㄤˋ': '帳',
+            'ㄕㄨˇ': '暑', 'ㄕㄨˋ': '樹', 'ㄕㄨㄛˋ': '朔',
+            'ㄒㄧㄥˊ': '型', 'ㄏㄤˊ': '航', 'ㄏㄤˋ': '巷', 'ㄒㄧㄥˋ': '幸',
+            'ㄉㄠˇ': '島', 'ㄉㄠˋ': '到', 'ㄈㄚˇ': '法', 'ㄈㄚˋ': '髮',
+            'ㄍㄜ˙': '個', 'ㄍㄜˋ': '各', 'ㄕˊ': '石',
+            'ㄉㄢ': '單', 'ㄕㄢˋ': '善', 'ㄔㄢˊ': '禪', 'ㄧㄠˋ': '要', 'ㄧㄠ': '邀',
+            'ㄏㄠˋ': '浩', 'ㄏㄠˇ': '好', 'ㄧˇ': '以', 'ㄧˋ': '意',
+            'ㄨㄟˊ': '唯', 'ㄨㄟˋ': '胃', 'ㄗ': '資', 'ㄗˇ': '子', 'ㄗˋ': '字',
+            'ㄘ': '疵', 'ㄘˊ': '詞', 'ㄘˇ': '此', 'ㄘˋ': '次',
+            'ㄙ': '私', 'ㄙˇ': '死', 'ㄙˋ': '四',
+            'ㄚ': '阿', 'ㄛ': '喔', 'ㄜ': '鵝', 'ㄝ': '耶', 'ㄞ': '哀', 'ㄟ': '欸', 'ㄠ': '熬', 'ㄡ': '歐',
+            'ㄢ': '安', 'ㄣ': '恩', 'ㄤ': '昂', 'ㄥ': '哼', 'ㄦ': '兒',
+            'ㄧ': '一', 'ㄨ': '屋', 'ㄩ': '迂',
+            'ㄅㄛ': '波', 'ㄆㄛ': '坡', 'ㄇㄛ': '摸', 'ㄈㄛ': '佛',
+            'ㄊㄜ': '特', 'ㄋㄜ': '呢',
+            'ㄎㄜ': '科', 'ㄏㄜ': '喝', 'ㄐㄧ': '機', 'ㄑㄧ': '期', 'ㄒㄧ': '西',
+            'ㄓ': '知', 'ㄔ': '吃', 'ㄕ': '詩', 'ㄖ': '日',
+            'ㄓㄟˋ': '這', 'ㄋㄟˋ': '內', 'ㄋㄚˋ': '那',
+            'ㄆㄠˋ': '泡', 'ㄆㄠ': '拋', 'ㄐㄧㄚˇ': '甲', 'ㄐㄧㄚˋ': '駕',
+            'ㄏㄜˊ': '河', 'ㄏㄜˋ': '賀', 'ㄏㄨㄛˋ': '或', 'ㄏㄨㄛˊ': '活',
+            'ㄉㄧㄠˋ': '掉', 'ㄊㄧㄠˊ': '條', 'ㄐㄧㄝˇ': '解', 'ㄐㄧㄝˋ': '界',
+            'ㄅㄛˊ': '伯', 'ㄅㄛˋ': '播', 'ㄔㄚ': '差', 'ㄔㄚˋ': '剎', 'ㄔㄞ': '拆', 'ㄘㄧ': '疵',
+            'ㄍㄨㄢ': '觀', 'ㄍㄨㄢˋ': '慣', 'ㄔㄨˇ': '楚', 'ㄔㄨˋ': '處',
+            'ㄓㄨㄢˇ': '轉', 'ㄓㄨㄢˋ': '傳', 'ㄔㄠˊ': '朝', 'ㄓㄠ': '招',
+            'ㄐㄧㄤ': '將', 'ㄐㄧㄤˋ': '降', 'ㄑㄧㄤˇ': '搶', 'ㄑㄧㄤˋ': '嗆',
+            'ㄕㄥˇ': '省', 'ㄒㄧㄥˇ': '醒', 'ㄎㄢˋ': '看', 'ㄎㄢ': '刊',
+            'ㄓㄨㄥ': '中', 'ㄆㄧㄥˊ': '平', 'ㄅㄧㄥˇ': '丙',
+            'ㄒㄧㄤ': '香', 'ㄒㄧㄤˋ': '向', 'ㄐㄧㄠˇ': '角',
+            'ㄓㄠˊ': '著', 'ㄓㄜ˙': '遮', 'ㄓㄨˋ': '注',
+            'ㄏㄨㄟˋ': '會', 'ㄎㄨㄞˋ': '快'
         };
 
         window.loadVoices = function() { window.availableVoices = window.speechSynthesis.getVoices(); };
@@ -710,10 +743,7 @@
                         }
                     }
                 } else {
-                    if(els.qDisplay) {
-                        els.qDisplay.classList.remove('hidden');
-                        els.qDisplay.classList.add('flex');
-                    }
+                    if(els.qDisplay) { els.qDisplay.classList.remove('hidden'); els.qDisplay.classList.add('flex'); }
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.headerPricingBtn) {
                         els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>`;
@@ -723,10 +753,7 @@
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 }
             } else {
-                if(els.qDisplay) {
-                    els.qDisplay.classList.remove('hidden');
-                    els.qDisplay.classList.add('flex');
-                }
+                if(els.qDisplay) { els.qDisplay.classList.remove('hidden'); els.qDisplay.classList.add('flex'); }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.headerPricingBtn) {
                     els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>`;
@@ -1512,13 +1539,13 @@
 
         // --- 8. 雙軌制翻譯、語音與拆字引擎 (AI + Moedict) ---
         
-        window.speak = function(text) {
+        window.speak = function(text, fallbackChar = null) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             
-            // PM Fix 60.jpg: Ultimate TTS Fallback. If pure Bopomofo isn't mapped, fallback to the Character itself!
+            // PM Fix 59/61/62.jpg: Advanced Homophone Mapper
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
                 if (bopoToCharMap[mapBopo]) {
@@ -1527,7 +1554,7 @@
                     cleanText = bopoToCharMap[mapBopo.replace('˙', '')];
                 } else {
                     // Fallback to the target character to prevent Windows reading "Z-H-E-I"
-                    cleanText = window.currentTargetChar || mapBopo;
+                    cleanText = fallbackChar || mapBopo;
                 }
             } else {
                 const ttsDictionary = {
@@ -1611,7 +1638,7 @@
                 }
                 
                 document.getElementById('split-btn').click();
-                window.speak(finalStr);
+                window.speak(finalStr, finalStr);
             } catch(e) { 
                 try {
                     const res2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
@@ -1621,7 +1648,7 @@
                         document.getElementById('zh-input').value = fbTrans;
                         if (!window.isVIP) { window.freeUsageCount++; localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); if(window.updateGlobalUI) window.updateGlobalUI(); }
                         document.getElementById('split-btn').click();
-                        window.speak(fbTrans);
+                        window.speak(fbTrans, fbTrans);
                     } else { throw new Error("Fallback failed"); }
                 } catch(e2) {
                     window.showToast("Translation Error / 翻譯伺服器連線失敗，請稍後再試", true); 
@@ -1692,7 +1719,7 @@
                 window.writerInstance = HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                 window.writerInstance.animateCharacter({
                     onComplete: function() {
-                        window.speak(window.currentTargetChar); 
+                        window.speak(window.currentTargetChar, window.currentTargetChar); 
                     }
                 });
             }
@@ -1706,7 +1733,7 @@
                 window.writerInstance.quiz({ 
                     onComplete: () => {
                         document.getElementById('quiz-status').textContent = 'Perfect!';
-                        window.speak(window.currentTargetChar); 
+                        window.speak(window.currentTargetChar, window.currentTargetChar); 
                     } 
                 });
             }
@@ -1745,7 +1772,7 @@
             }
         };
 
-        // PM Fix 60.jpg: Track B - Robust Moedict Fallback HTML Strip
+        // PM Fix Image 58, 60, 61: Robust Moedict Fallback (HTML Strip & Deduplication)
         window.executeFallbackFetch = async function(char, errorContext = null) {
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
@@ -1770,7 +1797,7 @@
                 
                 const dictData = await res.json();
                 
-                // PM Fix 60.jpg: Clean HTML from Radical string
+                // PM Fix Image 60: Clean HTML from Radical string using Regex
                 let rawRadical = dictData.radical || "未知";
                 let cleanRadical = rawRadical.replace(/<[^>]+>/g, '').trim();
                 
@@ -1781,9 +1808,17 @@
                     data.zhuyin = cleanBopo(dictData.heteronyms[0].bopomofo);
                     
                     let tempWords = new Set();
+                    let seenFallbackZhuyin = new Set();
+                    seenFallbackZhuyin.add(data.zhuyin);
+
                     dictData.heteronyms.forEach((h, idx) => {
                         if (idx > 0 && h.bopomofo) {
-                            data.polyphonic.push({ zhuyin: cleanBopo(h.bopomofo), examples: [] });
+                            let pZhuyin = cleanBopo(h.bopomofo);
+                            // PM Fix Image 61: Deduplication logic
+                            if (pZhuyin && !seenFallbackZhuyin.has(pZhuyin)) {
+                                seenFallbackZhuyin.add(pZhuyin);
+                                data.polyphonic.push({ zhuyin: pZhuyin, examples: [] });
+                            }
                         }
                         if (h.definitions) {
                             h.definitions.forEach(d => {
@@ -1930,7 +1965,7 @@
                                         data.idioms[i].english = gtData[0].map(item => item[0]).join('');
                                     }
                                 }
-                            } catch(err) { /* ignore and use AI english */ }
+                            } catch(err) {}
                         }
                     }
                     
@@ -1963,7 +1998,6 @@
         };
 
         window.renderResult = function(char, data) {
-            // Render Radical and Strokes
             const radicalDisplay = document.getElementById('radical-display');
             const strokesDisplay = document.getElementById('strokes-display');
             if (radicalDisplay) radicalDisplay.textContent = data.radical || '未知';
@@ -1975,28 +2009,39 @@
             
             pb.classList.remove('hidden'); 
             pb.setAttribute('data-action', 'speak'); 
-            pb.setAttribute('data-text', char); 
+            pb.setAttribute('data-text', pureMainZhuyin); 
+            pb.setAttribute('data-fallback', char); 
             
             const polyDisp = document.getElementById('polyphonic-display'); 
             polyDisp.innerHTML = '';
             const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
             
+            // PM Fix Point 3: Polyphonic Deduplication
+            let seenPoly = new Set();
+            seenPoly.add(pureMainZhuyin);
+
+            let polyHTML = '';
             if (validPolyphonic.length > 0) {
-                document.getElementById('poly-section-wrap').style.display = 'block';
                 validPolyphonic.forEach(p => {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold';
-                    
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-                    const ttsText = pureZhuyin; 
-                    
-                    wrap.innerHTML = `<span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
-                                      <div class="flex-1"></div>
-                                      <button type="button" data-action="speak" data-text="${ttsText}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
-                                          <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
-                                      </button>`;
-                    polyDisp.appendChild(wrap);
+                    if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
+                        seenPoly.add(pureZhuyin);
+                        polyHTML += `
+                            <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
+                                <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
+                                <div class="flex-1"></div>
+                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
+                                    <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 });
+            }
+            
+            if (polyHTML) {
+                document.getElementById('poly-section-wrap').style.display = 'block';
+                polyDisp.innerHTML = polyHTML;
             } else {
                 document.getElementById('poly-section-wrap').style.display = 'none';
             }
@@ -2044,11 +2089,21 @@
             } else if (action === 'chat-del') {
                 if (window.deleteMsg) window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
             } else if (action === 'speak') {
-                if (window.speak) window.speak(actionEl.getAttribute('data-text'));
+                if (window.speak) window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
             }
         });
 
         window.onload = function() {
+            const vipContent = document.getElementById('vip-only-content');
+            if (vipContent && !document.getElementById('radical-display')) {
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "flex flex-wrap items-center gap-4 mb-6 border-b-2 border-slate-100 pb-5";
+                headerDiv.innerHTML = `
+                    <div class="bg-indigo-50 px-5 py-2.5 rounded-xl border-2 border-indigo-100 text-sm font-black text-indigo-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-book-bookmark text-indigo-500 text-lg"></i> 部首：<span id="radical-display" class="text-indigo-600 text-base">--</span></div>
+                    <div class="bg-emerald-50 px-5 py-2.5 rounded-xl border-2 border-emerald-100 text-sm font-black text-emerald-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-pen-nib text-emerald-500 text-lg"></i> 筆畫：<span id="strokes-display" class="text-emerald-600 text-base">--</span></div>
+                `;
+                vipContent.insertBefore(headerDiv, vipContent.firstChild);
+            }
             if (window.updateGlobalUI) window.updateGlobalUI();
         };
     </script>

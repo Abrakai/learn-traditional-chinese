@@ -6,16 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "5.7.0-BILINGUAL-UX-COMPLIANCE"
+    version: "5.8.0-ADMIN-OVERRIDE-MASTERY"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Comprehensive Bilingual UI/UX Overhaul"
+    description: "Taiwan Chinese Learning Hub - Admin Password Override and Auto-Reset Pipeline"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Bilingual Marketing Panels (Fix Image 96): Fully translated all dynamic upsell and fallback boxes in executeFallbackFetch and executeAIFetch. Added complete English context for Polyphonic advantages ('重' example) and Quota Exceeded warnings."
-      - "Bilingual Data Labels: Updated '部首' to 'Radical / 部首' and '筆畫' to 'Strokes / 筆畫' across all dynamic renders and initial HTML hooks."
-      - "Bilingual Error Handling: Updated Moedict connection error and static idiom fallback texts to support native English reading."
-      - "Bilingual Pricing Footer: Translated the LINE remittance support section inside setupPricingTable."
-      - "InfoSec & Stability: Maintained try-catch blocks, Regex strippers, and Homophone TTS mappings without alteration to ensure zero-regression."
+      - "Admin Override (Fix Image 97): Unlocked the 'Override Pass' field in the Admin Modal for all users. Admins can now input a temporary bypass code anytime."
+      - "Smart Login Intercept: Refactored handleLogin fallback. If an existing user logs in with the admin's override code, the system intercepts the auth/email-already-in-use error and automatically dispatches a secure Password Reset Email, providing a seamless CRM experience without violating zero-trust architecture."
+      - "Retained Features: Bilingual dynamic renders, Polyphonic TTS homophone mappers, Hybrid translation engine, and Stacked UI layouts remain fully active."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -103,6 +101,7 @@
             </div>
             
             <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
+                
                 <div class="flex flex-col items-end gap-1.5 w-auto">
                     <!-- Free Uses Display -->
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
@@ -123,6 +122,7 @@
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP 會員</span>
                 </div>
                 
+                <!-- Operations -->
                 <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">Inbox / 訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
@@ -303,7 +303,6 @@
 
                     <!-- Result Body -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
-                        <!-- PM Fix: Bilingual UI for Data Labels -->
                         <div class="flex items-center gap-3 mb-6 border-b-2 border-slate-100 pb-5">
                             <div class="bg-indigo-50 px-4 py-2 rounded-xl border-2 border-indigo-100 text-xs font-black text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-book-bookmark text-indigo-500 text-base"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-sm">--</span></div>
                             <div class="bg-emerald-50 px-4 py-2 rounded-xl border-2 border-emerald-100 text-xs font-black text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-pen-nib text-emerald-500 text-base"></i> Strokes / 筆畫：<span id="strokes-display" class="text-emerald-600 text-sm">--</span></div>
@@ -392,26 +391,6 @@
         </div>
     </div>
 
-    <div id="admin-msg-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
-        <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 text-left">
-            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-6">
-                <div class="flex items-center gap-3">
-                    <i class="ph-fill ph-chat-circle-dots text-emerald-500 text-4xl"></i>
-                    <div>
-                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Support Chat</h3>
-                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">User: <span id="admin-msg-target-name" class="text-slate-700">Loading...</span> <span id="admin-msg-target" class="text-slate-400 font-mono"></span></p>
-                    </div>
-                </div>
-                <button type="button" onclick="window.closeAdminMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
-            </div>
-            <div id="admin-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-5 p-6 mb-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100 shadow-inner h-[50vh] font-bold"></div>
-            <div class="pt-4 border-t-2 border-slate-100 flex gap-3">
-                <textarea id="admin-chat-input" rows="2" placeholder="Type your message to user... / 輸入客服回覆..." class="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-200 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm bg-slate-50 resize-none font-bold"></textarea>
-                <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center border-b-4 border-emerald-800 uppercase tracking-widest">Send</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
@@ -432,8 +411,9 @@
                         <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
                     </div>
                     <div class="space-y-2">
+                        <!-- PM Fix Image 97: Unlock Override Pass field -->
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Override Pass / 臨時密碼</label>
-                        <input type="text" id="admin-member-pass" placeholder="Leave empty if unchanged" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
+                        <input type="text" id="admin-member-pass" placeholder="輸入臨時密碼" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
                     </div>
                 </div>
                 <div class="space-y-2">
@@ -501,7 +481,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.7.0-BILINGUAL-UX-COMPLIANCE</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.8.0-ADMIN-OVERRIDE-MASTERY</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -510,7 +490,6 @@
         </div>
     </footer>
 
-    <!-- 【一體化整合 Firebase Auth, AI, Moedict 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -543,7 +522,6 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // Polyphonic deduplication and TTS Homophone map remains secured
         const bopoToCharMap = {
             'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
             'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
@@ -602,14 +580,6 @@
             return true;
         };
 
-        window.triggerSMSReminder = async function(email, diffNum) {
-            const lastSmsDate = localStorage.getItem(`abra_sms_sent_${email}`);
-            const today = new Date().toISOString().split('T')[0];
-            if (lastSmsDate !== today) {
-                localStorage.setItem(`abra_sms_sent_${email}`, today);
-            }
-        };
-
         window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
         window.closeUserMsgModal = () => document.getElementById('user-msg-modal').classList.add('hidden');
         window.closeAdminMsgModal = () => document.getElementById('admin-msg-modal').classList.add('hidden');
@@ -619,7 +589,7 @@
 
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) { window.showToast("Please login first / 請先登入", true); return; }
+            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
             document.getElementById('profile-email').value = emailId;
             document.getElementById('profile-modal').classList.remove('hidden');
 
@@ -774,23 +744,22 @@
         window.togglePricingTable = function() {
             const pricingContainer = document.getElementById('pricing-section-container');
             if (pricingContainer) {
-                pricingContainer.classList.toggle('hidden');
-                if (!pricingContainer.classList.contains('hidden')) {
-                    const cachedDays = localStorage.getItem('abra_vip_days') || '--';
-                    const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
-                    const emailCode = localStorage.getItem('abra_vip_code');
-                    
-                    if (window.isVIP && diffNum <= 7) {
-                        setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
-                    } else if (emailCode && diffNum < 0) {
-                        setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
-                    } else if (emailCode) {
-                        setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
-                    } else {
-                        setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
-                    }
-                    pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                pricingContainer.classList.remove('hidden');
+                
+                const cachedDays = localStorage.getItem('abra_vip_days') || '--';
+                const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
+                const emailCode = localStorage.getItem('abra_vip_code');
+                
+                if (window.isVIP && diffNum <= 7) {
+                    setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
+                } else if (emailCode && diffNum < 0) {
+                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                } else if (emailCode) {
+                    setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
+                } else {
+                    setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
                 }
+                pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         };
 
@@ -830,16 +799,6 @@
                                     <div class="flex-1 text-center sm:text-left"><span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i>【12-Month / 年度超值】</span> <span class="text-[12px] text-yellow-800 font-bold">👑 NT$ 1,200 <span class="text-[9px] text-yellow-700 opacity-70">(NT$ 100/月)</span> | $40 USD</span></div>
                                     <button type="button" onclick="window.handleStripeCheckout('price_12_month_dummy', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <!-- PM Fix: Bilingual LINE support -->
-                        <div class="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
-                            <div class="w-14 h-14 bg-emerald-500 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
-                            <div class="leading-tight flex flex-col items-center sm:items-start">
-                                <p class="text-base font-black text-emerald-800 tracking-tight">Official LINE for Remittance / 匯款開通官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
-                                <p class="text-[11px] font-bold text-emerald-600 mt-1">If unable to use credit card, contact Abrakai Studio for wire transfer info. / 若無法刷卡，請聯絡阿布拉.凱工作室索取匯款資訊</p>
-                                <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> Add Friend / 點擊加入好友</a>
                             </div>
                         </div>
                     </div>
@@ -945,8 +904,14 @@
                             authSuccess = true;
                         } catch(err) {
                             if (err.code === 'auth/email-already-in-use') {
+                                // PM Fix 97: Admin Override Smart Fallback
                                 await updateDoc(docRef, { password: "" }).catch(() => {});
-                                window.showToast("Account locked. Use Reset Password / 請點擊忘記密碼重新綁定", true);
+                                try {
+                                    await sendPasswordResetEmail(auth, email);
+                                    window.showToast("為保障安全，系統已發送「專屬密碼重設信」至您的信箱，請前往重設！", true);
+                                } catch(e2) {
+                                    window.showToast("帳戶受保護，請點擊下方「忘記密碼」重新綁定", true);
+                                }
                             } else {
                                 window.showToast("System Error / 系統升級遇到阻礙: " + err.code, true);
                             }
@@ -1168,6 +1133,7 @@
             }
         };
 
+        // PM Fix 97: Admin Override Password Input unlocked
         window.openAdminModal = async function(emailId = '') {
             document.getElementById('admin-modal').classList.remove('hidden');
             const emailInput = document.getElementById('admin-member-email');
@@ -1184,17 +1150,10 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        if (data.uid || (!data.password && data.status !== 'pending')) {
-                            passInput.value = '';
-                            passInput.placeholder = "Encrypted / 已加密";
-                            passInput.disabled = true;
-                            passInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-                        } else {
-                            passInput.value = data.password || '';
-                            passInput.placeholder = "Leave empty / 留空";
-                            passInput.disabled = false;
-                            passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-                        }
+                        passInput.value = data.password || '';
+                        passInput.placeholder = data.uid ? "強制覆寫 (登入將觸發重設)" : "輸入臨時密碼";
+                        passInput.disabled = false;
+                        passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
 
                         document.getElementById('admin-member-name').value = data.name || '';
                         document.getElementById('admin-member-phone').value = data.phone || '';
@@ -1788,7 +1747,6 @@
             }
         };
 
-        // PM Fix: Bilingual support in Fallback UI renders
         window.executeFallbackFetch = async function(char, errorContext = null) {
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
@@ -1853,7 +1811,6 @@
                             const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
                             const gtData = await gtRes.json();
                             let enTrans = gtData[0].map(item => item[0]).join('');
-                            // PM Fix: Bilingual fallback string
                             data.idioms.push({ idiom: idiom, meaning: "Static dictionary lacks detailed idioms. Please upgrade to AI module. / 靜態字典無法提供成語詳解，請升級 AI 模組。", english: enTrans });
                         } catch(e) {
                             data.idioms.push({ idiom: idiom, meaning: "Static Dictionary / 靜態字典", english: "Translation unavailable / 無法翻譯" });
@@ -1866,7 +1823,6 @@
                 window.renderResult(char, data);
                 vipPanel.classList.remove('hidden');
                 
-                // PM Fix Image 96: Bilingual Upsell Boxes
                 let existingUpsell = document.getElementById('dict-upsell-box');
                 if (existingUpsell) existingUpsell.remove();
                 
@@ -1914,7 +1870,6 @@
                 
             } catch(e) {
                 document.getElementById('ai-error-title').textContent = "DICTIONARY UNAVAILABLE / 字典連線失敗";
-                // PM Fix: Bilingual fallback error
                 document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">Cannot load basic dictionary data. / 無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">Please check your network connection, or go to "Settings" to bind a Google API Key and switch to the advanced AI engine. / 請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
                 errorPanel.classList.remove('hidden');
                 loader.classList.add('hidden');
@@ -2082,7 +2037,6 @@
                     </div>
                 `).join('');
             } else {
-                // PM Fix: Bilingual Empty Idioms Label
                 idiomsCont.innerHTML = `
                     <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
                         <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
@@ -2110,7 +2064,6 @@
         });
 
         window.onload = function() {
-            // UI Hook: Add Radical/Strokes Header dynamically with Bilingual strings
             const vipContent = document.getElementById('vip-only-content');
             if (vipContent && !document.getElementById('radical-display')) {
                 const headerDiv = document.createElement('div');

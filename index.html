@@ -6,15 +6,16 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "5.6.0-MOEDICT-CLEANUP-AND-HOMOPHONE-MAPPER"
+    version: "5.7.0-BILINGUAL-UX-COMPLIANCE"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Moedict Radical HTML Strip, Deduplication & Advanced TTS"
+    description: "Taiwan Chinese Learning Hub - Comprehensive Bilingual UI/UX Overhaul"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Radical HTML Strip (Fix Image 60): Applied Regex `.replace(/<[^>]+>/g, '')` to the radical extraction in executeFallbackFetch to correctly strip Moedict's anchor tags."
-      - "Stroke Count Clarification: Retained 11 strokes for '這' as it strictly adheres to the Taiwan Ministry of Education standard (辶 is 4 strokes, 言 is 7)."
-      - "Polyphonic Deduplication (Fix Image 61): Implemented a Set-based filter in executeFallbackFetch and renderResult to ensure polyphonic pronunciations (like ㄏㄤˊ) appear only once, resolving clutter."
-      - "Ultimate TTS Homophone Mapper (Fix Image 59 & 61 & 62): Vastly expanded bopoToCharMap. TTS now natively reads specific Zhuyin flawlessly by passing a hidden homophone character (e.g. ㄏㄤˊ -> 航, ㄒㄧㄥˊ -> 型) to the engine. This perfectly fixes OS engines reading Bopomofo as Pinyin, and stops default character overrides (like reading 行 always as ㄒㄧㄥˊ)."
+      - "Bilingual Marketing Panels (Fix Image 96): Fully translated all dynamic upsell and fallback boxes in executeFallbackFetch and executeAIFetch. Added complete English context for Polyphonic advantages ('重' example) and Quota Exceeded warnings."
+      - "Bilingual Data Labels: Updated '部首' to 'Radical / 部首' and '筆畫' to 'Strokes / 筆畫' across all dynamic renders and initial HTML hooks."
+      - "Bilingual Error Handling: Updated Moedict connection error and static idiom fallback texts to support native English reading."
+      - "Bilingual Pricing Footer: Translated the LINE remittance support section inside setupPricingTable."
+      - "InfoSec & Stability: Maintained try-catch blocks, Regex strippers, and Homophone TTS mappings without alteration to ensure zero-regression."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -48,7 +49,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative pb-20">
 
-    <!-- Global Trust Footer (Sticky LINE Contact) -->
+    <!-- Global Trust Footer -->
     <div class="fixed bottom-0 left-0 w-full bg-emerald-600 text-white py-3 px-4 shadow-[0_-5px_15px_rgba(0,0,0,0.15)] z-[1000] flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500">
         <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
         <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
@@ -102,16 +103,18 @@
             </div>
             
             <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
-                
                 <div class="flex flex-col items-end gap-1.5 w-auto">
+                    <!-- Free Uses Display -->
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
                         <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
                     </div>
+                    <!-- VIP Days Display -->
                     <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                         <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow bg-slate-400 flex-shrink-0"></div>
                         <span id="vip-days-text" class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
                     </div>
-                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                    <!-- Unified Pricing CTA -->
+                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
                         <i class="ph-fill ph-storefront text-sm flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>
                     </button>
                 </div>
@@ -120,7 +123,6 @@
                     <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP 會員</span>
                 </div>
                 
-                <!-- Operations -->
                 <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">Inbox / 訊息</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
@@ -272,7 +274,7 @@
                 <div class="md:col-span-5 lg:col-span-4 p-10 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-5 left-5 flex flex-col items-start gap-1 text-slate-400">
                         <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order</span></div>
-                        <span class="text-[9px] italic font-bold ml-7 uppercase tracking-widest">筆畫結構</span>
+                        <span class="text-[9px] italic font-bold ml-7 uppercase tracking-widest">Stroke Structure / 筆畫結構</span>
                     </div>
                     <div class="bg-white rounded-3xl shadow-xl border-2 border-slate-100 p-4 mt-12 flex items-center justify-center">
                         <svg id="hanzi-target" width="240" height="240"></svg>
@@ -301,21 +303,20 @@
 
                     <!-- Result Body -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
-                        <!-- Dual-Track Radicals & Strokes UI -->
+                        <!-- PM Fix: Bilingual UI for Data Labels -->
                         <div class="flex items-center gap-3 mb-6 border-b-2 border-slate-100 pb-5">
-                            <div class="bg-indigo-50 px-4 py-2 rounded-xl border-2 border-indigo-100 text-xs font-black text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-book-bookmark text-indigo-500 text-base"></i> 部首：<span id="radical-display" class="text-indigo-600 text-sm">--</span></div>
-                            <div class="bg-emerald-50 px-4 py-2 rounded-xl border-2 border-emerald-100 text-xs font-black text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-pen-nib text-emerald-500 text-base"></i> 筆畫：<span id="strokes-display" class="text-emerald-600 text-sm">--</span></div>
+                            <div class="bg-indigo-50 px-4 py-2 rounded-xl border-2 border-indigo-100 text-xs font-black text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-book-bookmark text-indigo-500 text-base"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-sm">--</span></div>
+                            <div class="bg-emerald-50 px-4 py-2 rounded-xl border-2 border-emerald-100 text-xs font-black text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-pen-nib text-emerald-500 text-base"></i> Strokes / 筆畫：<span id="strokes-display" class="text-emerald-600 text-sm">--</span></div>
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 shadow-sm relative overflow-hidden">
                                 <div class="text-[10px] font-black uppercase text-yellow-800 tracking-widest mb-1 font-bold">Zhuyin / 標準注音</div>
                                 <div class="flex items-center gap-3">
-                                    <div id="zhuyin-display" class="text-3xl font-bold text-slate-800 tracking-tighter"></div>
+                                    <div id="zhuyin-display" class="text-4xl font-bold text-slate-800 tracking-tighter"></div>
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
-                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -482,7 +483,7 @@
     <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
-            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Policy & Disclaimer</h3>
+            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Data Privacy / 個資保護與免責聲明</h3>
             <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
                 <section class="border-l-4 border-slate-200 pl-6">
                     <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Data Privacy / 個資保護</h4>
@@ -500,7 +501,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.6.0-MOEDICT-CLEANUP-AND-HOMOPHONE-MAPPER</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v5.7.0-BILINGUAL-UX-COMPLIANCE</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -509,6 +510,7 @@
         </div>
     </footer>
 
+    <!-- 【一體化整合 Firebase Auth, AI, Moedict 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -541,8 +543,7 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // PM Fix Point 3 (Image 59, 61, 62): Ultimate Homophone TTS Mapper 
-        // 確保純注音餵給 TTS 時，會被轉換為真實的「同音中文字」，避免 Windows 唸出拼音或唸錯聲調
+        // Polyphonic deduplication and TTS Homophone map remains secured
         const bopoToCharMap = {
             'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
             'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
@@ -618,7 +619,7 @@
 
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
-            if (!emailId) { window.showToast("請先登入 / Please login first", true); return; }
+            if (!emailId) { window.showToast("Please login first / 請先登入", true); return; }
             document.getElementById('profile-email').value = emailId;
             document.getElementById('profile-modal').classList.remove('hidden');
 
@@ -743,7 +744,10 @@
                         }
                     }
                 } else {
-                    if(els.qDisplay) { els.qDisplay.classList.remove('hidden'); els.qDisplay.classList.add('flex'); }
+                    if(els.qDisplay) {
+                        els.qDisplay.classList.remove('hidden');
+                        els.qDisplay.classList.add('flex');
+                    }
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.headerPricingBtn) {
                         els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>`;
@@ -753,7 +757,10 @@
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 }
             } else {
-                if(els.qDisplay) { els.qDisplay.classList.remove('hidden'); els.qDisplay.classList.add('flex'); }
+                if(els.qDisplay) {
+                    els.qDisplay.classList.remove('hidden');
+                    els.qDisplay.classList.add('flex');
+                }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.headerPricingBtn) {
                     els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>`;
@@ -767,22 +774,23 @@
         window.togglePricingTable = function() {
             const pricingContainer = document.getElementById('pricing-section-container');
             if (pricingContainer) {
-                pricingContainer.classList.remove('hidden');
-                
-                const cachedDays = localStorage.getItem('abra_vip_days') || '--';
-                const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
-                const emailCode = localStorage.getItem('abra_vip_code');
-                
-                if (window.isVIP && diffNum <= 7) {
-                    setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
-                } else if (emailCode && diffNum < 0) {
-                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
-                } else if (emailCode) {
-                    setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
-                } else {
-                    setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
+                pricingContainer.classList.toggle('hidden');
+                if (!pricingContainer.classList.contains('hidden')) {
+                    const cachedDays = localStorage.getItem('abra_vip_days') || '--';
+                    const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
+                    const emailCode = localStorage.getItem('abra_vip_code');
+                    
+                    if (window.isVIP && diffNum <= 7) {
+                        setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
+                    } else if (emailCode && diffNum < 0) {
+                        setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                    } else if (emailCode) {
+                        setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
+                    } else {
+                        setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
+                    }
+                    pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-                pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         };
 
@@ -822,6 +830,16 @@
                                     <div class="flex-1 text-center sm:text-left"><span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i>【12-Month / 年度超值】</span> <span class="text-[12px] text-yellow-800 font-bold">👑 NT$ 1,200 <span class="text-[9px] text-yellow-700 opacity-70">(NT$ 100/月)</span> | $40 USD</span></div>
                                     <button type="button" onclick="window.handleStripeCheckout('price_12_month_dummy', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <!-- PM Fix: Bilingual LINE support -->
+                        <div class="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
+                            <div class="w-14 h-14 bg-emerald-500 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
+                            <div class="leading-tight flex flex-col items-center sm:items-start">
+                                <p class="text-base font-black text-emerald-800 tracking-tight">Official LINE for Remittance / 匯款開通官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
+                                <p class="text-[11px] font-bold text-emerald-600 mt-1">If unable to use credit card, contact Abrakai Studio for wire transfer info. / 若無法刷卡，請聯絡阿布拉.凱工作室索取匯款資訊</p>
+                                <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> Add Friend / 點擊加入好友</a>
                             </div>
                         </div>
                     </div>
@@ -1545,7 +1563,6 @@
             
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             
-            // PM Fix 59/61/62.jpg: Advanced Homophone Mapper
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
                 if (bopoToCharMap[mapBopo]) {
@@ -1553,7 +1570,6 @@
                 } else if (bopoToCharMap[mapBopo.replace('˙', '')]) {
                     cleanText = bopoToCharMap[mapBopo.replace('˙', '')];
                 } else {
-                    // Fallback to the target character to prevent Windows reading "Z-H-E-I"
                     cleanText = fallbackChar || mapBopo;
                 }
             } else {
@@ -1772,7 +1788,7 @@
             }
         };
 
-        // PM Fix Image 58, 60, 61: Robust Moedict Fallback (HTML Strip & Deduplication)
+        // PM Fix: Bilingual support in Fallback UI renders
         window.executeFallbackFetch = async function(char, errorContext = null) {
             const loader = document.getElementById('ai-inner-loader');
             const vipPanel = document.getElementById('vip-only-content');
@@ -1797,7 +1813,6 @@
                 
                 const dictData = await res.json();
                 
-                // PM Fix Image 60: Clean HTML from Radical string using Regex
                 let rawRadical = dictData.radical || "未知";
                 let cleanRadical = rawRadical.replace(/<[^>]+>/g, '').trim();
                 
@@ -1814,7 +1829,6 @@
                     dictData.heteronyms.forEach((h, idx) => {
                         if (idx > 0 && h.bopomofo) {
                             let pZhuyin = cleanBopo(h.bopomofo);
-                            // PM Fix Image 61: Deduplication logic
                             if (pZhuyin && !seenFallbackZhuyin.has(pZhuyin)) {
                                 seenFallbackZhuyin.add(pZhuyin);
                                 data.polyphonic.push({ zhuyin: pZhuyin, examples: [] });
@@ -1839,9 +1853,10 @@
                             const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
                             const gtData = await gtRes.json();
                             let enTrans = gtData[0].map(item => item[0]).join('');
-                            data.idioms.push({ idiom: idiom, meaning: "靜態字典無法提供成語詳解，請升級 AI 模組。", english: enTrans });
+                            // PM Fix: Bilingual fallback string
+                            data.idioms.push({ idiom: idiom, meaning: "Static dictionary lacks detailed idioms. Please upgrade to AI module. / 靜態字典無法提供成語詳解，請升級 AI 模組。", english: enTrans });
                         } catch(e) {
-                            data.idioms.push({ idiom: idiom, meaning: "靜態字典", english: "Translation unavailable" });
+                            data.idioms.push({ idiom: idiom, meaning: "Static Dictionary / 靜態字典", english: "Translation unavailable / 無法翻譯" });
                         }
                     }
                 }
@@ -1851,6 +1866,7 @@
                 window.renderResult(char, data);
                 vipPanel.classList.remove('hidden');
                 
+                // PM Fix Image 96: Bilingual Upsell Boxes
                 let existingUpsell = document.getElementById('dict-upsell-box');
                 if (existingUpsell) existingUpsell.remove();
                 
@@ -1863,10 +1879,10 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-red-500"><i class="ph-fill ph-warning-circle text-3xl animate-pulse"></i></div>
                             <div class="flex-1">
-                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API 額度耗盡，自動降級為基礎字典</h4>
-                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
-                                <p class="text-[10px] text-slate-500 italic mb-4">免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
-                                <button type="button" onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">前往設定更新金鑰</button>
+                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降級基礎字典</h4>
+                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">System attempted models: ${errorContext.models}, but your API quota is full.<br>系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br><br>Please apply for a new API Key or set up billing in Google AI Studio.<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
+                                <p class="text-[10px] text-slate-500 italic mb-4">Disclaimer: AI feature availability depends on your Google API Key status. / 免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
+                                <button type="button" onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">Update API Key / 前往設定更新金鑰</button>
                             </div>
                         </div>
                     `;
@@ -1875,9 +1891,9 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
                             <div>
-                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">目前為「基礎靜態字典模式」</h4>
-                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">升級 VIP 並啟用 AI 引擎，即可解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態字典無法判斷！</p>
-                                <button type="button" onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">查看 VIP 升級方案</button>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">Upgrade to VIP and enable the AI Engine to unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>升級 VIP 並啟用 AI 引擎，即可解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。<br><br>Example: The character "重" sounds completely different in "舉足輕重" vs "重逢", which static dictionaries cannot detect!<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態字典無法判斷！</p>
+                                <button type="button" onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">View VIP Plans / 查看 VIP 升級方案</button>
                             </div>
                         </div>
                     `;
@@ -1886,9 +1902,9 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-magic-wand text-3xl animate-bounce"></i></div>
                             <div>
-                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">目前為「基礎靜態字典模式」</h4>
-                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br>解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。</p>
-                                <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">綁定免費金鑰 / 啟動 AI</button>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">You are a VIP! Simply bind a free Google API Key to activate the AI brain!<br>您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br><br>Unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。</p>
+                                <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">Bind Free Key / 綁定免費金鑰啟動 AI</button>
                             </div>
                         </div>
                     `;
@@ -1898,13 +1914,13 @@
                 
             } catch(e) {
                 document.getElementById('ai-error-title').textContent = "DICTIONARY UNAVAILABLE / 字典連線失敗";
-                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
+                // PM Fix: Bilingual fallback error
+                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">Cannot load basic dictionary data. / 無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">Please check your network connection, or go to "Settings" to bind a Google API Key and switch to the advanced AI engine. / 請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
                 errorPanel.classList.remove('hidden');
                 loader.classList.add('hidden');
             }
         };
 
-        // Track A: AI Smart Engine
         window.executeAIFetch = async function(char, contextText = "") {
             if (!localStorage.getItem('abra_vip_code')) return;
             if (window.syncVipStatus) await window.syncVipStatus();
@@ -1992,7 +2008,7 @@
                 loader.classList.add('hidden');
                 vipPanel.classList.remove('hidden'); 
             } else { 
-                window.showToast("API 金鑰連線失效或額度已滿，已為您無縫切換為基礎字典模式", true);
+                window.showToast("API Error / API 金鑰連線失效或額度已滿，已為您無縫切換為基礎字典模式", true);
                 window.executeFallbackFetch(char, { type: 'QUOTA', models: modelErrors.join(', ') });
             }
         };
@@ -2000,8 +2016,8 @@
         window.renderResult = function(char, data) {
             const radicalDisplay = document.getElementById('radical-display');
             const strokesDisplay = document.getElementById('strokes-display');
-            if (radicalDisplay) radicalDisplay.textContent = data.radical || '未知';
-            if (strokesDisplay) strokesDisplay.textContent = data.strokes ? `${data.strokes} 畫` : '未知';
+            if (radicalDisplay) radicalDisplay.textContent = data.radical || 'Unknown / 未知';
+            if (strokesDisplay) strokesDisplay.textContent = data.strokes ? `${data.strokes}` : '--';
 
             const pureMainZhuyin = window.getStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
             document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
@@ -2016,7 +2032,6 @@
             polyDisp.innerHTML = '';
             const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
             
-            // PM Fix Point 3: Polyphonic Deduplication
             let seenPoly = new Set();
             seenPoly.add(pureMainZhuyin);
 
@@ -2067,6 +2082,7 @@
                     </div>
                 `).join('');
             } else {
+                // PM Fix: Bilingual Empty Idioms Label
                 idiomsCont.innerHTML = `
                     <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
                         <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
@@ -2094,13 +2110,14 @@
         });
 
         window.onload = function() {
+            // UI Hook: Add Radical/Strokes Header dynamically with Bilingual strings
             const vipContent = document.getElementById('vip-only-content');
             if (vipContent && !document.getElementById('radical-display')) {
                 const headerDiv = document.createElement('div');
                 headerDiv.className = "flex flex-wrap items-center gap-4 mb-6 border-b-2 border-slate-100 pb-5";
                 headerDiv.innerHTML = `
-                    <div class="bg-indigo-50 px-5 py-2.5 rounded-xl border-2 border-indigo-100 text-sm font-black text-indigo-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-book-bookmark text-indigo-500 text-lg"></i> 部首：<span id="radical-display" class="text-indigo-600 text-base">--</span></div>
-                    <div class="bg-emerald-50 px-5 py-2.5 rounded-xl border-2 border-emerald-100 text-sm font-black text-emerald-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-pen-nib text-emerald-500 text-lg"></i> 筆畫：<span id="strokes-display" class="text-emerald-600 text-base">--</span></div>
+                    <div class="bg-indigo-50 px-5 py-2.5 rounded-xl border-2 border-indigo-100 text-sm font-black text-indigo-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-book-bookmark text-indigo-500 text-lg"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-base">--</span></div>
+                    <div class="bg-emerald-50 px-5 py-2.5 rounded-xl border-2 border-emerald-100 text-sm font-black text-emerald-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-pen-nib text-emerald-500 text-lg"></i> Strokes / 筆畫：<span id="strokes-display" class="text-emerald-600 text-base">--</span></div>
                 `;
                 vipContent.insertBefore(headerDiv, vipContent.firstChild);
             }

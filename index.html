@@ -6,15 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.0.0-GUMROAD-MOR-CHECKOUT"
+    version: "6.1.0-BILINGUAL-PRICING"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Gumroad Payment Integration for Frictionless Monetization"
+    description: "Taiwan Chinese Learning Hub - Bilingual Pricing UI for Gumroad Integration"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Payment Gateway Pivot (Plan B): Replaced LemonSqueezy integration with Gumroad due to 429 block issues."
-      - "Gumroad Checkout Module: Implemented handleGumroadCheckout. Uses direct URL redirection with pre-filled customer email (via ?email= query parameter) to minimize checkout friction."
-      - "Pricing UI Updates: Updated setupPricingTable buttons to pass placeholder Gumroad permalinks (e.g., 'dummy_1_month')."
-      - "Retained Features: Bilingual dynamic renders, Polyphonic TTS homophone mappers, Hybrid translation engine, and Stacked UI layouts remain fully active."
+      - "Bilingual Pricing Table: Completely overhauled setupPricingTable HTML to display bilingual names (e.g., '1-Month Pass / 尊榮單月通行證') and detailed bilingual descriptions."
+      - "Currency Anchoring: Shifted primary display price to USD (e.g., $6 USD) to match Gumroad's checkout currency, reducing user friction, while keeping NTD as a secondary reference."
+      - "TTS Formatting Compliance: Ensured all dynamic rendering strings naturally handle ( / - _ symbols by replacing them with pauses in the speak() fallback function."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -153,12 +152,12 @@
                                 <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                                 <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
-                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。</p></div>
+                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。 / It is recommended to use the last 4 digits of your phone number for quick verification.</p></div>
                                 </div>
                             </div>
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
                                 <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
-                                <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer font-bold">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-black underline">隱私保護與免責聲明</button>。</label>
+                                <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer font-bold">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-black underline">隱私保護與免責聲明 (Privacy Policy)</button>。</label>
                             </div>
                             <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider border-b-4 border-red-900">CREATE ACCOUNT / 建立帳號</button>
                         </div>
@@ -270,7 +269,7 @@
                 <!-- Strokes Area -->
                 <div class="md:col-span-5 lg:col-span-4 p-10 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-5 left-5 flex flex-col items-start gap-1 text-slate-400">
-                        <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order</span></div>
+                        <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order / 筆順</span></div>
                         <span class="text-[9px] italic font-bold ml-7 uppercase tracking-widest">Stroke Structure / 筆畫結構</span>
                     </div>
                     <div class="bg-white rounded-3xl shadow-xl border-2 border-slate-100 p-4 mt-12 flex items-center justify-center">
@@ -395,7 +394,7 @@
                 <div class="flex items-center gap-3">
                     <i class="ph-fill ph-chat-circle-dots text-emerald-500 text-4xl"></i>
                     <div>
-                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Support Chat</h3>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Support Chat / 客服信箱</h3>
                         <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">User: <span id="admin-msg-target-name" class="text-slate-700">Loading...</span> <span id="admin-msg-target" class="text-slate-400 font-mono"></span></p>
                     </div>
                 </div>
@@ -404,7 +403,7 @@
             <div id="admin-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-5 p-6 mb-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100 shadow-inner h-[50vh] font-bold"></div>
             <div class="pt-4 border-t-2 border-slate-100 flex gap-3">
                 <textarea id="admin-chat-input" rows="2" placeholder="Type your message to user... / 輸入客服回覆..." class="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-200 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm bg-slate-50 resize-none font-bold"></textarea>
-                <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center border-b-4 border-emerald-800 uppercase tracking-widest">Send</button>
+                <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center border-b-4 border-emerald-800 uppercase tracking-widest">Send / 發送</button>
             </div>
         </div>
     </div>
@@ -416,7 +415,7 @@
                 <div class="flex items-center gap-4">
                     <i class="ph-fill ph-user-list text-emerald-500 text-4xl bg-emerald-50 p-4 rounded-2xl"></i>
                     <div>
-                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Authority Manager</h3>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Authority Manager / 會員權限管理</h3>
                         <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">Database Editor / 會員資料庫編輯</p>
                     </div>
                 </div>
@@ -498,7 +497,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.0.0-GUMROAD-MOR-CHECKOUT</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.1.0-BILINGUAL-PRICING</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -788,7 +787,7 @@
             }
         };
 
-        // PM Fix 6.0.0: Render Gumroad Pricing Table (Passes dummy permalinks for now)
+        // PM Fix 6.1.0: Fully Bilingual Pricing UI & Primary USD Anchoring
         function setupPricingTable(title, prefixDesc) {
             let container = document.getElementById('pricing-section-container');
             if (!container) return;
@@ -803,26 +802,42 @@
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
                         
-                        <div class="pt-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Pricing Strategy / 方案升級 (30:1)</h4>
+                        <div class="pt-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Pricing Strategy / 方案升級</h4>
                             <div class="space-y-3">
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【1-Month / 單月體驗】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 180 <span class="text-[9px] text-slate-400">(NT$ 180/月)</span> | 6 USD</span></div>
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-bold text-sm block text-slate-800">1-Month Pass / 尊榮單月通行證</span> 
+                                        <span class="text-[11px] text-slate-600 font-medium block mt-1">Unlock unlimited AI features for 30 days. / 解鎖 30 天無限次 AI 解析。</span>
+                                        <span class="text-xs text-indigo-600 font-black block mt-1.5">$6 USD <span class="text-[10px] text-slate-400 font-medium">(約 NT$ 180)</span></span>
+                                    </div>
                                     <button type="button" onclick="window.handleGumroadCheckout('dummy_1_month', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
                                 
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
                                     <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">SMART</div>
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-indigo-900">【3-Month / 季繳首選】</span> <span class="text-[11px] text-indigo-700 font-bold">NT$ 450 <span class="text-[9px] text-indigo-400">(NT$ 150/月)</span> | 15 USD</span></div>
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-bold text-sm block text-indigo-900">3-Month Pass / 尊榮季繳通行證</span> 
+                                        <span class="text-[11px] text-indigo-700 font-medium block mt-1">Unlock unlimited AI features for 90 days. / 解鎖 90 天無限次 AI 解析。</span>
+                                        <span class="text-xs text-indigo-600 font-black block mt-1.5">$15 USD <span class="text-[10px] text-indigo-400 font-medium">(約 NT$ 450)</span></span>
+                                    </div>
                                     <button type="button" onclick="window.handleGumroadCheckout('dummy_3_month', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
                                 
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-bold text-xs block text-slate-800">【6-Month / 半年方案】</span> <span class="text-[11px] text-slate-600 font-medium">NT$ 750 <span class="text-[9px] text-slate-400">(NT$ 125/月)</span> | 25 USD</span></div>
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-bold text-sm block text-slate-800">6-Month Pass / 尊榮半年通行證</span> 
+                                        <span class="text-[11px] text-slate-600 font-medium block mt-1">Unlock unlimited AI features for 180 days. / 解鎖 180 天無限次 AI 解析。</span>
+                                        <span class="text-xs text-indigo-600 font-black block mt-1.5">$25 USD <span class="text-[10px] text-slate-400 font-medium">(約 NT$ 750)</span></span>
+                                    </div>
                                     <button type="button" onclick="window.handleGumroadCheckout('dummy_6_month', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
                                 
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
-                                    <div class="flex-1 text-center sm:text-left"><span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i>【12-Month / 年度超值】</span> <span class="text-[12px] text-yellow-800 font-bold">👑 NT$ 1200 <span class="text-[9px] text-yellow-700 opacity-70">(NT$ 100/月)</span> | 40 USD</span></div>
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 1-Year Pass / 尊榮年度通行證</span> 
+                                        <span class="text-[11px] text-yellow-800 font-medium block mt-1">Unlock unlimited AI features for 365 days. Best value! / 解鎖 365 天無限次 AI 解析。年度最超值！</span>
+                                        <span class="text-sm text-red-600 font-black block mt-1.5">$40 USD <span class="text-[10px] text-yellow-700 opacity-70 font-medium">(約 NT$ 1200)</span></span>
+                                    </div>
                                     <button type="button" onclick="window.handleGumroadCheckout('dummy_12_month', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
                                 </div>
                             </div>
@@ -841,7 +856,6 @@
             container.innerHTML = pricingHTML;
         }
 
-        // PM Fix 6.0.0: Gumroad MoR Integration Function
         window.handleGumroadCheckout = async function(permalink, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -863,10 +877,7 @@
                     customerEmail = docSnap.data().email;
                 }
 
-                // Construct Gumroad URL dynamically to pass Email
                 const checkoutUrl = `https://gumroad.com/l/${permalink}?email=${encodeURIComponent(customerEmail)}`;
-
-                // Redirect to Gumroad Hosted Checkout
                 window.location.href = checkoutUrl;
 
             } catch (e) {
@@ -2066,6 +2077,7 @@
                     </div>
                 `).join('');
             } else {
+                // PM Fix: Bilingual Empty Idioms Label
                 idiomsCont.innerHTML = `
                     <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
                         <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
@@ -2093,6 +2105,7 @@
         });
 
         window.onload = function() {
+            // UI Hook: Add Radical/Strokes Header dynamically with Bilingual strings
             const vipContent = document.getElementById('vip-only-content');
             if (vipContent && !document.getElementById('radical-display')) {
                 const headerDiv = document.createElement('div');

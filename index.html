@@ -6,9 +6,9 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.0-GOLD-FINAL"
+    version: "6.9.5-ULTIMATE-STABLE"
     author: "Abrakai Studio"
-    description: "Full Bilingual Support | 8-Plan Billing | AI Mastery"
+    description: "Full Logic Recovery | 8-Plan Billing | Admin Mastery"
     ---
     -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,8 +33,8 @@
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
     <!-- System Toast -->
-    <div id="system-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[3000] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10">
-        <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
+    <div id="system-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[3000] px-6 py-4 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-3 transition-all border-b-4 border-black/10">
+        <i id="toast-icon" class="ph-fill text-xl"></i><span id="toast-msg"></span>
     </div>
 
     <!-- Header -->
@@ -60,9 +60,9 @@
                 <div class="flex items-center gap-1.5">
                     <button id="msg-btn" class="hidden bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all relative" title="Messages / 訊息" onclick="window.handleMsgBtnClick()">
                         <i class="ph-fill ph-envelope-simple text-xl"></i>
-                        <span id="msg-dot" class="hidden absolute top-1 right-1 h-2 w-2 rounded-full bg-yellow-400 border border-red-600 animate-pulse"></span>
+                        <span id="msg-dot" class="hidden absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-yellow-400 border-2 border-red-600 animate-pulse"></span>
                     </button>
-                    <button id="profile-btn" class="hidden bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all" title="Member Center / 個人資料" onclick="window.scrollToAuth()">
+                    <button id="profile-btn" class="hidden bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all" title="Profile Card / 會員卡" onclick="window.scrollToAuth()">
                         <i class="ph-fill ph-user-circle text-xl"></i>
                     </button>
                     <button id="logout-btn" class="hidden bg-red-800 hover:bg-red-900 p-2 rounded-lg transition-all font-bold" title="Logout / 登出" onclick="window.handleLogout()">
@@ -113,29 +113,44 @@
                         </div>
                     </div>
                 </div>
-                <div id="profile-container" class="hidden space-y-4 text-left">
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] font-black text-slate-400 uppercase">Current User / 當前使用者</p>
-                            <h4 id="user-display-name" class="text-2xl font-black text-slate-800">--</h4>
-                            <p id="user-display-email" class="text-xs font-bold text-slate-500">--</p>
+                <!-- Profile Display -->
+                <div id="profile-container" class="hidden space-y-6 text-left">
+                    <div class="bg-slate-50 p-8 rounded-[2rem] border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6 shadow-inner">
+                        <div class="flex items-center gap-6">
+                            <div class="w-20 h-20 rounded-3xl bg-white shadow-lg flex items-center justify-center text-4xl text-slate-300 border border-slate-100"><i class="ph-fill ph-user"></i></div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Identity</p>
+                                <h4 id="user-display-name" class="text-3xl font-black text-slate-900 tracking-tight">--</h4>
+                                <p id="user-display-email" class="text-sm font-bold text-slate-500 italic">--</p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span id="user-vip-status" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase">--</span>
+                        <div class="text-center md:text-right">
+                            <span id="user-vip-status-badge" class="px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-sm border">--</span>
+                            <p id="profile-expiry-date" class="text-[10px] text-slate-400 font-bold mt-2"></p>
                         </div>
                     </div>
-                    <button onclick="window.handleLogout()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-black uppercase border-b-4 border-slate-950">Log Out / 登出帳號</button>
+                    <button onclick="window.handleLogout()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase border-b-4 border-slate-950 hover:bg-slate-800 transition-all">Logout Identity / 安全登出帳號</button>
                 </div>
             </div>
         </section>
 
         <!-- Admin Section -->
-        <section id="admin-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden text-left">
+        <section id="admin-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-2xl overflow-hidden text-left">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
-                <div class="flex items-center gap-2"><i class="ph-fill ph-shield-check text-emerald-400"></i><h3 class="font-bold">Admin Console</h3></div>
-                <button onclick="window.exportCSV()" class="bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-black">Export CSV</button>
+                <div class="flex items-center gap-2"><i class="ph-fill ph-shield-check text-emerald-400 text-xl"></i><h3 class="font-black uppercase text-sm tracking-wider">Admin Dashboard</h3></div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.exportCSV()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1"><i class="ph ph-download"></i> EXPORT</button>
+                    <button onclick="window.openManualAdd()" class="bg-emerald-500 text-slate-900 px-3 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1"><i class="ph ph-plus"></i> ADD VIP</button>
+                </div>
             </div>
-            <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-slate-100 font-black text-[10px] uppercase"><tr><th class="px-6 py-4">Account</th><th class="px-6 py-4">Status</th><th class="px-6 py-4">Expiry</th><th class="px-6 py-4">Actions</th></tr></thead><tbody id="admin-list" class="divide-y font-bold"></tbody></table></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left whitespace-nowrap">
+                    <thead class="bg-slate-50 font-black text-[10px] uppercase text-slate-400 border-b">
+                        <tr><th class="px-6 py-4">Account / 信箱</th><th class="px-6 py-4">Status / 狀態</th><th class="px-6 py-4">Expiry / 到期</th><th class="px-6 py-4 text-right">Actions / 操作</th></tr>
+                    </thead>
+                    <tbody id="admin-list" class="divide-y font-bold divide-slate-100"></tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Tool Section 1 -->
@@ -143,7 +158,7 @@
             <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-bl-xl uppercase">Free Limit</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl">1</div><h2 class="text-xl font-black uppercase">Intelligent Translate / 英翻中</h2></div>
             <div class="flex flex-col md:flex-row gap-4">
-                <input type="text" id="eng-input" placeholder="Type English... / 輸入英文" class="flex-1 px-6 py-4 rounded-2xl border-2 border-slate-50 text-xl font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="eng-input" placeholder="Type English... / 輸入英文單字" class="flex-1 px-6 py-4 rounded-2xl border-2 border-slate-50 text-xl font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black border-b-4 border-blue-900 flex items-center justify-center gap-2" title="Translate Now / 立即翻譯">
                     <span>Translate / 翻譯</span><div id="trans-loader" class="loader hidden border-white"></div>
                 </button>
@@ -156,8 +171,8 @@
             <div class="flex items-center gap-4 mb-6"><div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xl">2</div><h2 class="text-xl font-black uppercase">Decomposition / 漢字解構</h2></div>
             <div class="flex flex-col md:flex-row gap-4 mb-6">
                 <div class="flex-1 relative">
-                    <input type="text" id="zh-input" placeholder="Chinese text... / 貼上繁中" class="w-full px-6 py-4 pr-16 rounded-2xl border-2 border-slate-50 text-2xl font-black bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <button onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600" title="Listen / 聽讀音"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
+                    <input type="text" id="zh-input" placeholder="Chinese text... / 貼上繁體中文內容" class="w-full px-6 py-4 pr-16 rounded-2xl border-2 border-slate-50 text-2xl font-black bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <button onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600" title="Listen Pronunciation / 聽讀音"><i class="ph-fill ph-speaker-high text-2xl"></i></button>
                 </div>
                 <button onclick="window.handleSplit()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black border-b-4 border-emerald-900" title="Split into characters / 拆解漢字">Split / 拆字</button>
             </div>
@@ -166,145 +181,164 @@
 
         <!-- Result Section -->
         <section id="result-dashboard" class="hidden bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden text-left">
-            <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
-                <div class="flex items-center gap-3"><i class="ph-fill ph-graduation-cap text-yellow-400 text-2xl"></i><h2 class="text-lg font-black uppercase tracking-widest">Study Center / 學習中心</h2></div>
-                <span id="current-char" class="text-5xl font-black text-yellow-400 drop-shadow-md"></span>
+            <div class="bg-slate-900 text-white p-6 flex items-center justify-between">
+                <div class="flex items-center gap-3"><i class="ph-fill ph-graduation-cap text-yellow-400 text-3xl"></i><h2 class="text-xl font-black uppercase tracking-widest">Study Center / 學習中心</h2></div>
+                <span id="current-char" class="text-6xl font-black text-yellow-400 drop-shadow-xl"></span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-12">
                 <div class="md:col-span-5 p-10 bg-slate-50 border-r border-slate-100 flex flex-col items-center">
-                    <div class="bg-white rounded-3xl shadow-xl p-4 border-2 border-slate-200"><svg id="hanzi-target" width="220" height="220"></svg></div>
-                    <div class="grid grid-cols-2 gap-3 mt-8 w-full">
-                        <button onclick="window.handleAnimate()" class="bg-indigo-600 text-white py-4 rounded-2xl font-black text-[10px] uppercase border-b-4 border-indigo-900" title="Watch Stroke Order / 筆順動畫">Animate / 動畫</button>
-                        <button onclick="window.handleQuiz()" class="bg-orange-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase border-b-4 border-orange-900" title="Practice Writing / 寫法練習">Practice / 練習</button>
+                    <div class="bg-white rounded-[2rem] shadow-xl p-5 border-2 border-slate-200 relative group">
+                        <svg id="hanzi-target" width="220" height="220"></svg>
+                        <div class="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center rounded-[2rem]"><i class="ph ph-hand-eye text-4xl text-slate-400"></i></div>
                     </div>
+                    <div class="grid grid-cols-2 gap-3 mt-10 w-full">
+                        <button onclick="window.handleAnimate()" class="bg-indigo-600 text-white py-4 rounded-2xl font-black text-[11px] uppercase border-b-4 border-indigo-900 hover:bg-indigo-700 transition-all" title="Watch Stroke Order / 筆順動畫">Animate / 動畫</button>
+                        <button onclick="window.handleQuiz()" class="bg-orange-500 text-white py-4 rounded-2xl font-black text-[11px] uppercase border-b-4 border-orange-900 hover:bg-orange-600 transition-all" title="Practice Writing / 寫法練習">Practice / 練習</button>
+                    </div>
+                    <p id="quiz-msg" class="text-[10px] font-black text-emerald-600 mt-4 uppercase h-4"></p>
                 </div>
-                <div id="ai-panel" class="md:col-span-7 p-10 relative bg-white min-h-[400px]">
-                    <div id="ai-loader" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white/90 z-20 space-y-4">
-                        <div class="loader w-10 h-10 border-indigo-600"></div>
-                        <p class="text-indigo-600 text-xs font-black animate-pulse uppercase">AI Analyzing... / 解析中...</p>
+                <div id="ai-panel" class="md:col-span-7 p-10 relative bg-white min-h-[450px]">
+                    <div id="ai-loader" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white/95 z-20 space-y-4">
+                        <div class="loader w-12 h-12 border-indigo-600"></div>
+                        <p class="text-indigo-600 text-[10px] font-black animate-pulse uppercase tracking-[0.2em]">AI Magic Analyzing... / 解析中...</p>
                     </div>
-                    <div id="vip-content" class="hidden space-y-6">
+                    <div id="vip-content" class="hidden space-y-8">
                         <div class="flex flex-wrap gap-3">
-                            <div class="bg-indigo-50 px-4 py-2 rounded-xl text-xs font-black text-indigo-800 border border-indigo-100">Radical / 部首: <span id="radical-text">--</span></div>
-                            <div class="bg-emerald-50 px-4 py-2 rounded-xl text-xs font-black text-emerald-800 border border-emerald-100">Strokes / 筆畫: <span id="strokes-text">--</span></div>
+                            <div class="bg-indigo-50 px-5 py-2.5 rounded-2xl text-[11px] font-black text-indigo-800 border border-indigo-100">Radical / 部首: <span id="radical-text">--</span></div>
+                            <div class="bg-emerald-50 px-5 py-2.5 rounded-2xl text-[11px] font-black text-emerald-800 border border-emerald-100">Strokes / 筆畫: <span id="strokes-text">--</span></div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 relative group">
-                                <div class="text-[9px] font-bold text-yellow-800 uppercase mb-1">Standard / 註音</div>
-                                <div id="zhuyin-text" class="text-4xl font-black text-slate-800"></div>
-                                <button onclick="window.speak(document.getElementById('zhuyin-text').textContent)" class="absolute right-3 top-3 text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="ph-fill ph-speaker-high text-xl"></i></button>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div class="bg-yellow-50 p-6 rounded-3xl border border-yellow-100 relative group">
+                                <div class="text-[9px] font-bold text-yellow-800 uppercase mb-2 tracking-widest">Standard / 註音</div>
+                                <div id="zhuyin-text" class="text-5xl font-black text-slate-800 tracking-tighter"></div>
+                                <button onclick="window.speak(document.getElementById('zhuyin-text').textContent)" class="absolute right-4 top-4 text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white p-2 rounded-xl shadow-sm"><i class="ph-fill ph-speaker-high text-xl"></i></button>
                             </div>
-                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                                <div class="text-[9px] font-bold text-purple-800 uppercase mb-1">Polyphonic / 破音字</div>
-                                <div id="poly-text" class="text-xs font-bold text-slate-600 italic">None / 無</div>
+                            <div class="bg-purple-50 p-6 rounded-3xl border border-purple-100">
+                                <div class="text-[9px] font-bold text-purple-800 uppercase mb-2 tracking-widest">Polyphonic / 破音字</div>
+                                <div id="poly-text" class="text-sm font-black text-slate-600 italic">None / 無</div>
                             </div>
                         </div>
-                        <div><h3 class="text-[10px] font-bold uppercase text-slate-400 border-b pb-1 mb-2">Vocabulary / 常用詞</h3><div id="words-text" class="flex flex-wrap gap-2"></div></div>
-                        <div><h3 class="text-[10px] font-bold uppercase text-slate-400 border-b pb-1 mb-2">Bilingual Idioms / 成語</h3><div id="idioms-text" class="space-y-3"></div></div>
+                        <div><h3 class="text-[10px] font-black uppercase text-slate-400 border-b-2 border-slate-50 pb-2 mb-4 tracking-widest">Vocabulary / 常用詞</h3><div id="words-text" class="flex flex-wrap gap-2.5"></div></div>
+                        <div><h3 class="text-[10px] font-black uppercase text-slate-400 border-b-2 border-slate-50 pb-2 mb-4 tracking-widest">Bilingual Idioms / 專業成語</h3><div id="idioms-text" class="space-y-4"></div></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Pricing Section -->
-        <section id="pricing-section" class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-200 text-left">
-            <h3 class="text-2xl font-black text-slate-800 mb-6 uppercase border-l-8 border-red-600 pl-4">Upgrade / 方案說明</h3>
-            <p class="text-[11px] text-slate-500 font-bold mb-10 leading-relaxed bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                🚀 Abrakai Studio VIP: The Ultimate Tool for Linguistic Perfection. Unlock unlimited AI context translation, precise polyphonic recognition, and bilingual idiom deep-dives. Save time and ensure 100% accuracy. <br>
-                🚀 阿布拉工作室 VIP 尊榮方案：追求語言完美的終極工具。解鎖無限次 AI 智慧語境翻譯、精準破音字辨識與成語詳解，節省學習時間並確保百分之百的準確性。
+        <!-- Pricing Section (Complete 8 Plans) -->
+        <section id="pricing-section" class="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-200 text-left">
+            <h3 class="text-3xl font-black text-slate-900 mb-6 uppercase border-l-[12px] border-red-600 pl-6 tracking-tight">VIP UPGRADE / 方案說明</h3>
+            <p class="text-xs text-slate-500 font-bold mb-10 leading-relaxed bg-slate-50 p-8 rounded-3xl border border-slate-100 shadow-inner">
+                🚀 Abrakai Studio VIP: The Ultimate Tool for Linguistic Perfection. Unlock unlimited AI context translation, precise polyphonic recognition, and bilingual idiom deep-dives. Master Chinese like a native, save time, and ensure 100% accuracy. <br><br>
+                🚀 阿布拉工作室 VIP 尊榮方案：追求語言完美的終極工具。像母語者一樣精通中文細節。解鎖無限次 AI 智慧語境翻譯、精準破音字辨識與成語詳解，節省學習時間並確保百分之百的準確性。
             </p>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- TWD ECPay -->
-                <div class="space-y-6">
-                    <h4 class="font-black text-slate-900 flex items-center gap-2"><i class="ph ph-currency-circle-dollar text-emerald-600"></i> LOCAL TWD / 台灣匯款開通</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <button onclick="window.handleRemittance('180', '1')" class="p-4 bg-slate-50 hover:bg-white hover:shadow-lg rounded-2xl border-2 border-transparent hover:border-red-500 transition-all text-left">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">1 Month / 單月</p>
-                            <p class="text-xl font-black text-slate-800">NT$ 180</p>
-                            <p class="text-[9px] text-red-500 font-bold mt-1">Order Now / 立即購買</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- TWD Channel -->
+                <div class="space-y-8">
+                    <h4 class="font-black text-slate-900 flex items-center gap-3 text-lg uppercase tracking-tight"><i class="ph-fill ph-currency-circle-dollar text-emerald-600 text-2xl"></i> LOCAL TWD / 台灣匯款與刷卡</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <button onclick="window.handleTWD('180', '1')" class="p-6 bg-slate-50 hover:bg-white hover:shadow-2xl rounded-3xl border-2 border-transparent hover:border-red-500 transition-all text-left group">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entry / 單月體驗</p>
+                            <p class="text-2xl font-black text-slate-800 mt-1">NT$ 180</p>
+                            <p class="text-[9px] text-red-500 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity uppercase">Purchase Now / 立即購買</p>
                         </button>
-                        <button onclick="window.handleRemittance('450', '3')" class="p-4 bg-slate-50 hover:bg-white hover:shadow-lg rounded-2xl border-2 border-transparent hover:border-red-500 transition-all text-left">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">3 Months / 季繳</p>
-                            <p class="text-xl font-black text-slate-800">NT$ 450</p>
-                            <p class="text-[9px] text-red-500 font-bold mt-1">Save 15% / 省 15%</p>
+                        <button onclick="window.handleTWD('450', '3')" class="p-6 bg-slate-50 hover:bg-white hover:shadow-2xl rounded-3xl border-2 border-transparent hover:border-red-500 transition-all text-left group">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quarterly / 季繳</p>
+                            <p class="text-2xl font-black text-slate-800 mt-1">NT$ 450</p>
+                            <p class="text-[9px] text-red-500 font-bold mt-2 uppercase">Save 15% / 激省精選</p>
                         </button>
-                        <button onclick="window.handleRemittance('720', '6')" class="p-4 bg-slate-50 hover:bg-white hover:shadow-lg rounded-2xl border-2 border-transparent hover:border-red-500 transition-all text-left">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">6 Months / 半年</p>
-                            <p class="text-xl font-black text-slate-800">NT$ 720</p>
-                            <p class="text-[9px] text-red-500 font-bold mt-1">Save 30% / 省 30%</p>
+                        <button onclick="window.handleTWD('720', '6')" class="p-6 bg-slate-50 hover:bg-white hover:shadow-2xl rounded-3xl border-2 border-transparent hover:border-red-500 transition-all text-left group">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Standard / 半年</p>
+                            <p class="text-2xl font-black text-slate-800 mt-1">NT$ 720</p>
+                            <p class="text-[9px] text-red-500 font-bold mt-2 uppercase">Save 30% / 長期必備</p>
                         </button>
-                        <button onclick="window.handleRemittance('1200', '12')" class="p-4 bg-yellow-50 hover:bg-white hover:shadow-lg rounded-2xl border-2 border-yellow-400 transition-all text-left relative overflow-hidden">
-                            <div class="absolute top-0 right-0 bg-yellow-400 text-white text-[7px] px-3 font-black uppercase">Best</div>
-                            <p class="text-[9px] font-black text-yellow-600 uppercase">1 Year / 年度</p>
-                            <p class="text-xl font-black text-slate-800">NT$ 1,200</p>
-                            <p class="text-[9px] text-red-500 font-bold mt-1">Master Choice / 專家首選</p>
+                        <button onclick="window.handleTWD('1200', '12')" class="p-6 bg-yellow-50 hover:bg-white hover:shadow-2xl rounded-3xl border-2 border-yellow-400 transition-all text-left relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 bg-yellow-400 text-white text-[8px] px-4 py-1 font-black uppercase tracking-widest">HOT</div>
+                            <p class="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Annual / 年度旗艦</p>
+                            <p class="text-2xl font-black text-slate-800 mt-1">NT$ 1,200</p>
+                            <p class="text-[9px] text-red-500 font-bold mt-2 uppercase">Master Mastery / 每月百元</p>
                         </button>
                     </div>
                 </div>
-                <!-- USD Gumroad -->
-                <div class="space-y-6">
-                    <h4 class="font-black text-slate-900 flex items-center gap-2"><i class="ph ph-globe text-blue-600"></i> INTERNATIONAL / 美金線上支付</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <button onclick="window.handleGumroad('aqlhnu')" class="p-4 bg-slate-900 text-white hover:bg-indigo-600 rounded-2xl shadow-lg transition-all text-left">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">1 Month Pass</p>
-                            <p class="text-xl font-black text-white">USD 6.00</p>
-                            <p class="text-[9px] text-emerald-400 font-bold mt-1">Instant Access / 立即開通</p>
+                <!-- USD Channel -->
+                <div class="space-y-8">
+                    <h4 class="font-black text-slate-900 flex items-center gap-3 text-lg uppercase tracking-tight"><i class="ph-fill ph-globe text-blue-600 text-2xl"></i> INTERNATIONAL / 美金線上支付</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <button onclick="window.handleUSD('aqlhnu')" class="p-6 bg-slate-900 text-white hover:bg-indigo-600 rounded-3xl shadow-xl transition-all text-left group">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">1-Month Pass</p>
+                            <p class="text-2xl font-black text-white mt-1">USD 6.00</p>
+                            <p class="text-[9px] text-emerald-400 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Instant Access / 立即開通</p>
                         </button>
-                        <button onclick="window.handleGumroad('iodgg')" class="p-4 bg-slate-900 text-white hover:bg-indigo-600 rounded-2xl shadow-lg transition-all text-left">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">Quarterly Pass</p>
-                            <p class="text-xl font-black text-white">USD 15.00</p>
-                            <p class="text-[9px] text-emerald-400 font-bold mt-1">Master Learning / 專注學習</p>
+                        <button onclick="window.handleUSD('iodgg')" class="p-6 bg-slate-900 text-white hover:bg-indigo-600 rounded-3xl shadow-xl transition-all text-left group">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quarterly Pass</p>
+                            <p class="text-2xl font-black text-white mt-1">USD 15.00</p>
+                            <p class="text-[9px] text-emerald-400 font-bold mt-2">Professional Choice / 專業學習</p>
                         </button>
-                        <button onclick="window.handleGumroad('njgrhb')" class="p-4 bg-slate-900 text-white hover:bg-indigo-600 rounded-2xl shadow-lg transition-all text-left">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">Semi-Annual</p>
-                            <p class="text-xl font-black text-white">USD 25.00</p>
-                            <p class="text-[9px] text-emerald-400 font-bold mt-1">Great Value / 超值首選</p>
+                        <button onclick="window.handleUSD('njgrhb')" class="p-6 bg-slate-900 text-white hover:bg-indigo-600 rounded-3xl shadow-xl transition-all text-left group">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Semi-Annual</p>
+                            <p class="text-2xl font-black text-white mt-1">USD 25.00</p>
+                            <p class="text-[9px] text-emerald-400 font-bold mt-2">Premium Value / 效率學習</p>
                         </button>
-                        <button onclick="window.handleGumroad('qskre')" class="p-4 bg-indigo-600 text-white hover:bg-indigo-700 rounded-2xl shadow-lg transition-all text-left relative overflow-hidden">
-                            <div class="absolute top-0 right-0 bg-red-500 text-white text-[7px] px-3 font-black uppercase">Master</div>
-                            <p class="text-[9px] font-black text-indigo-200 uppercase">Annual Pass</p>
-                            <p class="text-xl font-black text-white">USD 40.00</p>
-                            <p class="text-[9px] text-yellow-300 font-bold mt-1">Recommended / 全年無憂</p>
+                        <button onclick="window.handleUSD('qskre')" class="p-6 bg-indigo-600 text-white hover:bg-indigo-700 rounded-3xl shadow-2xl transition-all text-left relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 bg-red-500 text-white text-[8px] px-4 py-1 font-black uppercase tracking-widest">RECOMMEND</div>
+                            <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest">Annual Pass</p>
+                            <p class="text-2xl font-black text-white mt-1">USD 40.00</p>
+                            <p class="text-[9px] text-yellow-300 font-bold mt-2">Zero Friction / 全年無憂</p>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <div class="mt-12 p-6 bg-slate-900 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl">
+            <div class="mt-16 p-8 bg-slate-900 rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-8 shadow-2xl border-4 border-slate-800">
                 <div class="text-left">
-                    <h5 class="text-white font-black text-lg">Need Support? / 遇到問題？</h5>
-                    <p class="text-slate-400 text-[10px] font-bold">Manual upgrade is available via LINE. / 亦可透過 LINE 手動開通。</p>
+                    <h5 class="text-white font-black text-xl tracking-tight">Need Manual Activation? / 遇到開通問題？</h5>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase mt-1 tracking-widest">Official Support via LINE Messenger.</p>
                 </div>
-                <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-8 py-3 rounded-xl font-black text-xs uppercase shadow-lg flex items-center gap-2 transition-all">
-                    <i class="ph-bold ph-plus"></i> LINE @841bihdj
+                <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-10 py-4 rounded-2xl font-black text-xs uppercase shadow-lg flex items-center gap-3 transition-all active:scale-95">
+                    <i class="ph-bold ph-plus text-lg"></i> LINE 客服 @841bihdj
                 </a>
             </div>
         </section>
     </main>
 
-    <!-- Support Footer -->
-    <footer class="bg-slate-100 border-t py-12 text-center">
-        <div class="max-w-6xl mx-auto px-4">
-            <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">&copy; 2026 ABRAKAI STUDIO | MASTER PERFECTION</p>
-            <div class="mt-4 flex justify-center gap-6">
-                <button onclick="window.openLegal()" class="text-[10px] font-bold text-slate-500 underline uppercase">Privacy Policy / 免責聲明</button>
-                <a href="https://lin.ee/9khpCfe" target="_blank" class="text-[10px] font-bold text-slate-500 underline uppercase">Contact Support / 客服與開通</a>
+    <!-- Modals -->
+    <div id="manual-vip-modal" class="hidden fixed inset-0 z-[4000] flex items-center justify-center bg-slate-900/90 p-4 backdrop-blur-md">
+        <div class="bg-white rounded-[3rem] p-10 w-full max-w-md shadow-2xl text-left">
+            <h3 class="font-black text-2xl text-slate-900 mb-6 uppercase flex items-center gap-3"><i class="ph-fill ph-shield-plus text-red-600"></i> Manual Grant</h3>
+            <div class="space-y-4">
+                <input type="email" id="manual-email" placeholder="Member Email" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 font-bold outline-none focus:border-red-500">
+                <input type="date" id="manual-date" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 font-bold outline-none focus:border-red-500">
+                <button onclick="window.confirmManualVIP()" class="w-full bg-red-600 text-white py-5 rounded-2xl font-black uppercase border-b-4 border-red-900 active:scale-95">Activate Access</button>
+                <button onclick="document.getElementById('manual-vip-modal').classList.add('hidden')" class="w-full text-slate-400 font-bold text-xs uppercase">Cancel</button>
             </div>
-            <p class="mt-6 text-[8px] text-slate-300 max-w-lg mx-auto italic font-bold">本軟體由 AI 輔助生成，解析內容僅供教學參考。請務必遵守版權規範，嚴禁非法部署。 / AI-generated analysis for educational reference only. Unauthorized deployment is prohibited.</p>
+        </div>
+    </div>
+
+    <!-- Support Footer -->
+    <footer class="bg-slate-100 border-t py-16 text-center">
+        <div class="max-w-6xl mx-auto px-6">
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">&copy; 2026 ABRAKAI STUDIO | MASTER PERFECTION</p>
+            <div class="mt-6 flex justify-center gap-10">
+                <button onclick="window.openLegal()" class="text-[10px] font-black text-slate-500 underline uppercase tracking-widest hover:text-slate-900">Privacy Policy / 免責聲明</button>
+                <a href="https://lin.ee/9khpCfe" target="_blank" class="text-[10px] font-black text-slate-500 underline uppercase tracking-widest hover:text-slate-900">Contact Support / 客服開通</a>
+            </div>
+            <p class="mt-10 text-[8px] text-slate-300 max-w-xl mx-auto italic font-bold leading-relaxed">本軟體由 AI 輔助生成，解析內容僅供教學參考。請務必遵守各國版權規範，嚴禁非法部署。 / AI-generated analysis for educational reference only. Unauthorized deployment is strictly prohibited.</p>
         </div>
     </footer>
 
-    <!-- Firebase -->
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, query, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
 
         const firebaseConfig = { apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ", authDomain: "abra-learn-zh-vip.firebaseapp.com", projectId: "abra-learn-zh-vip", storageBucket: "abra-learn-zh-vip.firebasestorage.app", messagingSenderId: "968781909500", appId: "1:968781909500:web:0457924ec29644ea6a7679" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const functions = getFunctions(app, 'asia-east1');
         const appId = "abra-learn-zh-vip";
 
         window.isVIP = false;
@@ -316,7 +350,7 @@
         window.showToast = (msg, isErr = false) => {
             const t = document.getElementById('system-toast');
             document.getElementById('toast-msg').textContent = msg;
-            t.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-[3000] px-6 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 toast-animate ${isErr ? 'bg-red-600 text-white' : 'bg-slate-900 text-white border-2 border-slate-700'}`;
+            t.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-[5000] px-6 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 toast-animate ${isErr ? 'bg-red-600 text-white' : 'bg-slate-900 text-white border-2 border-slate-700'}`;
             document.getElementById('toast-icon').className = isErr ? 'ph-fill ph-warning-circle text-xl' : 'ph-fill ph-check-circle text-emerald-400 text-xl';
             t.classList.remove('hidden');
             setTimeout(() => t.classList.add('hidden'), 3500);
@@ -349,21 +383,23 @@
                 if (snap.exists()) {
                     const d = snap.data();
                     let isV = false;
-                    let daysRem = 0;
+                    let daysRem = -99;
                     if (d.expiryDate) {
                         const now = new Date();
+                        // PM Logic: 到期日當天午夜前都算 Active
                         const exp = new Date(d.expiryDate + 'T23:59:59+08:00');
                         daysRem = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
                         isV = (daysRem >= 0);
                         localStorage.setItem('abra_vip_days', daysRem.toString());
+                        localStorage.setItem('abra_vip_expiry', d.expiryDate);
                     }
                     localStorage.setItem('abra_vip_status', isV ? 'active' : 'expired');
-                    localStorage.setItem('abra_user_name', d.name || "Member");
+                    localStorage.setItem('abra_user_name', d.name || "Master Learner");
                     localStorage.setItem('abra_user_email', d.email || "");
                     if (d.apiKey && isV) localStorage.setItem('abra_gemini_key', d.apiKey.trim());
                     window.updateUI();
                 }
-            });
+            }, (err) => console.error("VIP Sync Error:", err));
         };
 
         window.updateUI = () => {
@@ -378,7 +414,7 @@
                 profileCont: document.getElementById('profile-container'), adminSec: document.getElementById('admin-section')
             };
 
-            // Reset
+            // Reset UI
             [els.qDisp, els.eDisp, els.mBtn, els.pBtn, els.logoutBtn, els.authForms, els.profileCont, els.adminSec].forEach(el => el?.classList.add('hidden'));
 
             if (window.isAdmin) {
@@ -390,20 +426,30 @@
                 els.pBtn.classList.remove('hidden');
                 els.logoutBtn.classList.remove('hidden');
                 els.profileCont.classList.remove('hidden');
-                document.getElementById('user-display-name').textContent = localStorage.getItem('abra_user_name');
-                document.getElementById('user-display-email').textContent = localStorage.getItem('abra_user_email');
-                const vStatus = document.getElementById('user-vip-status');
+                
+                // String Validation before rendering
+                const name = localStorage.getItem('abra_user_name') || "--";
+                const email = localStorage.getItem('abra_user_email') || "--";
+                document.getElementById('user-display-name').textContent = String(name).trim();
+                document.getElementById('user-display-email').textContent = String(email).trim();
+                
+                const vStatus = document.getElementById('user-vip-status-badge');
+                const expP = document.getElementById('profile-expiry-date');
+                
                 if (window.isVIP) {
                     els.eDisp.classList.remove('hidden');
                     const rem = parseInt(localStorage.getItem('abra_vip_days') || '0', 10);
-                    document.getElementById('vip-days-text').textContent = rem === 0 ? "LAST DAY" : `${rem} DAYS`;
-                    vStatus.className = "px-4 py-1.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-700 border border-emerald-200";
-                    vStatus.textContent = "VIP ACTIVE";
+                    const expiry = localStorage.getItem('abra_vip_expiry');
+                    document.getElementById('vip-days-text').textContent = (rem === 0) ? "LAST DAY" : `${rem} DAYS`;
+                    vStatus.className = "px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm";
+                    vStatus.textContent = "VIP PASS ACTIVE";
+                    expP.textContent = `Valid Until: ${expiry}`;
                 } else {
                     els.qDisp.classList.remove('hidden');
                     document.getElementById('quota-count').textContent = `${window.MAX_FREE - window.freeUsageCount}/${window.MAX_FREE}`;
-                    vStatus.className = "px-4 py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-500 border border-slate-200";
-                    vStatus.textContent = "FREE USER";
+                    vStatus.className = "px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase bg-slate-100 text-slate-400 border border-slate-200";
+                    vStatus.textContent = "FREE TIER ACCESS";
+                    expP.textContent = "Upgrade to unlock AI features";
                 }
             } else {
                 els.authForms.classList.remove('hidden');
@@ -419,7 +465,7 @@
             const loader = document.getElementById('login-loader');
             loader.classList.remove('hidden');
             try {
-                // Admin hook
+                // Admin Dashboard Key check
                 const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
                 const adminSnap = await getDoc(adminRef);
                 if (adminSnap.exists() && adminSnap.data().pass === pass) {
@@ -428,7 +474,7 @@
                 }
                 await signInWithEmailAndPassword(auth, email, pass);
                 localStorage.setItem('abra_vip_code', email.replace(/[.#$[\]]/g, "_"));
-                window.showToast("Logged in!");
+                window.showToast("Login Successful!");
                 setTimeout(() => location.reload(), 800);
             } catch(e) { window.showToast("Invalid email or password", true); }
             finally { loader.classList.add('hidden'); }
@@ -438,20 +484,68 @@
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
-            if (!name || !email || !pass || !document.getElementById('legal-agree').checked) return window.showToast("Check fields & agreement", true);
+            if (!name || !email || !pass || !document.getElementById('legal-agree').checked) return window.showToast("Fill all & agree", true);
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
                 await updateProfile(cred.user, { displayName: name });
                 const san = email.replace(/[.#$[\]]/g, "_");
-                await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", san), { uid: cred.user.uid, name, email, signupDate: new Date().toISOString() }, { merge: true });
+                await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", san), { uid: cred.user.uid, name, email, signupDate: new Date().toISOString(), status: "pending" }, { merge: true });
                 localStorage.setItem('abra_vip_code', san);
                 location.reload();
-            } catch(e) { window.showToast("Signup Error", true); }
+            } catch(e) { window.showToast("Signup Error: " + e.code, true); }
         };
 
         window.handleLogout = () => { localStorage.clear(); signOut(auth).then(() => location.reload()); };
 
-        // Core Tools
+        // Admin Implementation (Logic Recovery)
+        window.loadAdmin = async () => {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center animate-pulse">Fetching Members...</td></tr>';
+            try {
+                const q = query(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                const snap = await getDocs(q);
+                list.innerHTML = '';
+                snap.forEach(dDoc => {
+                    const d = dDoc.data();
+                    const tr = document.createElement('tr');
+                    const isV = d.expiryDate && (new Date(d.expiryDate) >= new Date().setHours(0,0,0,0));
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 text-xs">${d.email}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 rounded-lg text-[9px] ${isV ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}">${isV ? 'VIP' : 'FREE'}</span></td>
+                        <td class="px-6 py-4 text-xs font-mono">${d.expiryDate || '--'}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="window.deleteUser('${dDoc.id}')" class="text-red-400 hover:text-red-600 px-2"><i class="ph ph-trash"></i></button>
+                        </td>`;
+                    list.appendChild(tr);
+                });
+            } catch(e) { console.error("Admin Load Error:", e); }
+        };
+
+        window.openManualAdd = () => document.getElementById('manual-vip-modal').classList.remove('hidden');
+        window.confirmManualVIP = async () => {
+            const email = document.getElementById('manual-email').value.trim().toLowerCase();
+            const date = document.getElementById('manual-date').value;
+            if (!email || !date) return window.showToast("Missing Data", true);
+            const san = email.replace(/[.#$[\]]/g, "_");
+            try {
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", san), { expiryDate: date, status: 'active' });
+                window.showToast("VIP Granted!");
+                document.getElementById('manual-vip-modal').classList.add('hidden');
+                window.loadAdmin();
+            } catch(e) { window.showToast("User not found / 找不到此帳號", true); }
+        };
+
+        window.exportCSV = async () => {
+            const q = query(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+            const snap = await getDocs(q);
+            let csv = "Email,Name,Expiry,SignupDate\n";
+            snap.forEach(d => { const v = d.data(); csv += `${v.email},${v.name},${v.expiryDate || ''},${v.signupDate || ''}\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `abra_members_${Date.now()}.csv`; a.click();
+        };
+
+        // Core Study Tools
         window.handleTranslate = async () => {
             const w = document.getElementById('eng-input').value.trim();
             if (!w) return;
@@ -462,14 +556,14 @@
                 const d = await res.json();
                 document.getElementById('zh-input').value = d[0][0][0];
                 window.handleSplit();
-            } catch(e) { window.showToast("Translation Error", true); }
+            } catch(e) { window.showToast("Translation Engine Error", true); }
             finally { loader.classList.add('hidden'); }
         };
 
         window.handleSplit = () => {
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
-            if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE) return window.showToast("Limit Reached", true);
+            if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE) return window.showToast("Daily Limit Reached", true);
             
             if (!window.isVIP) { window.freeUsageCount++; localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); window.updateUI(); }
 
@@ -478,7 +572,7 @@
             text.split('').forEach(c => {
                 if (!/[\u4e00-\u9fa5]/.test(c)) return;
                 const b = document.createElement('button');
-                b.className = "char-btn w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-200 text-xl font-bold active:scale-95 transition-all";
+                b.className = "char-btn w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-2xl font-black active:scale-95 transition-all flex items-center justify-center";
                 b.textContent = c;
                 b.onclick = () => window.loadChar(c);
                 cont.appendChild(b);
@@ -502,13 +596,13 @@
                 const res = await fetch(`https://www.moedict.tw/${encodeURIComponent(char)}.json`);
                 const d = await res.json();
                 const h = d.heteronyms[0];
-                // Fix screenshot 66.jpg: strip HTML tags from radical
-                const cleanRadical = d.radical.replace(/<[^>]*>/g, '').trim();
+                // String Validation & HTML Tag Cleanup for Screenshot 66.jpg
+                const cleanRadical = String(d.radical || "--").replace(/<[^>]*>/g, '').trim();
                 window.renderData({
                     zhuyin: h.bopomofo.replace(/<[^>]*>/g, ''), radical: cleanRadical, strokes: d.stroke_count,
                     words: h.definitions.flatMap(def => def.example || []).slice(0, 5), idioms: []
                 });
-            } catch(e) { window.showToast("Moe Error", true); }
+            } catch(e) { window.showToast("Moedict Load Error", true); }
             finally { document.getElementById('ai-loader').classList.add('hidden'); }
         };
 
@@ -528,41 +622,63 @@
 
         window.renderData = (d) => {
             document.getElementById('vip-content').classList.remove('hidden');
-            document.getElementById('zhuyin-text').textContent = d.zhuyin;
-            document.getElementById('radical-text').textContent = d.radical;
-            document.getElementById('strokes-text').textContent = d.strokes;
-            document.getElementById('words-text').innerHTML = d.words.map(w => `<span class="px-3 py-1 bg-slate-50 border rounded-lg text-xs font-bold">${w}</span>`).join('') || '--';
-            document.getElementById('idioms-text').innerHTML = d.idioms.map(i => `<div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><h5 class="font-black text-indigo-900">${i.idiom}</h5><p class="text-[10px] text-slate-500 italic mt-1">${i.meaning}</p><p class="text-[9px] text-indigo-400 mt-1">${i.english}</p></div>`).join('') || '<p class="text-[10px] text-slate-400 italic">No AI idioms found.</p>';
+            // Validated String injection
+            document.getElementById('zhuyin-text').textContent = String(d.zhuyin).trim();
+            document.getElementById('radical-text').textContent = String(d.radical).trim();
+            document.getElementById('strokes-text').textContent = String(d.strokes).trim();
+            document.getElementById('words-text').innerHTML = d.words.map(w => `<span class="px-4 py-1.5 bg-slate-50 border-2 border-slate-100 rounded-xl text-xs font-black shadow-sm">${w}</span>`).join('') || '--';
+            document.getElementById('idioms-text').innerHTML = d.idioms.map(i => `<div class="p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 shadow-sm"><h5 class="font-black text-indigo-900 text-lg">${i.idiom}</h5><p class="text-[10px] text-slate-500 font-bold mt-1.5">${i.meaning}</p><p class="text-[9px] text-indigo-400 font-black mt-1.5 uppercase tracking-wider">${i.english}</p></div>`).join('') || '<p class="text-[10px] text-slate-400 italic">No premium idioms available for this character.</p>';
         };
 
+        // TTS with Natural Pause Optimization
         window.speak = (t) => {
             if (!t || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(t.replace(/[\/\-_|()]/g, '，').trim());
+            // Optimized: Replace symbols with natural pauses as per guidelines
+            const u = new SpeechSynthesisUtterance(String(t).replace(/[\/\-_|()]/g, '，').trim());
             u.lang = 'zh-TW';
-            u.rate = 0.9;
+            u.rate = 0.85;
             window.speechSynthesis.speak(u);
         };
 
         window.handleAnimate = () => { window.writer.animateCharacter(); window.speak(document.getElementById('current-char').textContent); };
-        window.handleQuiz = () => { window.writer.quiz(); };
+        window.handleQuiz = () => { 
+            document.getElementById('quiz-msg').textContent = 'Follow the strokes...';
+            window.writer.quiz({ onComplete: () => document.getElementById('quiz-msg').textContent = 'EXCELLENT WORK!' }); 
+        };
 
-        // Payment
-        window.handleGumroad = (id) => {
+        // Payment (Complete Logic)
+        window.handleUSD = (id) => {
             const email = localStorage.getItem('abra_user_email');
-            if (!email) return window.showToast("Login required for billing", true);
+            if (!email) return window.showToast("Login required for billing / 請先登入", true);
             window.location.href = `https://gumroad.com/l/${id}?email=${encodeURIComponent(email)}`;
         };
 
-        window.handleRemittance = async (amt, mos) => {
+        window.handleTWD = async (amt, mos) => {
             const email = localStorage.getItem('abra_user_email');
             if (!email) return window.showToast("Login required / 請先登入", true);
-            window.showToast("Generating ECPay Order... / 綠界跳轉中...");
-            // Backend cloud function call would go here
-            window.location.href = `https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5`;
+            window.showToast("Connecting ECPay Gateway... / 串接綠界金流...");
+            try {
+                // Call Cloud Function to get encrypted order params
+                const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
+                const result = await createECPayOrder({ planMonths: mos, amount: amt, email: email });
+                
+                if (result.data.status === 'success') {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = result.data.actionUrl;
+                    for (const key in result.data.params) {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden'; inp.name = key; inp.value = result.data.params[key];
+                        form.appendChild(inp);
+                    }
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            } catch(e) { window.showToast("Billing Gateway Busy. Try again later.", true); }
         };
 
-        window.openLegal = () => { alert("Abrakai Studio Privacy Policy: Data used for learning only. AI analysis is for reference. / 免責聲明：AI 解析僅供學習參考。"); };
+        window.openLegal = () => { alert("Abrakai Studio - Privacy & Data Statement:\n1. Personal data used strictly for VIP verification.\n2. AI analysis is educational reference only.\n3. Content remains property of Abrakai Studio."); };
 
         window.updateUI();
     </script>

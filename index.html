@@ -2,25 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
-    <!--
-    ---
-    version: "6.1.0-BILINGUAL-PRICING"
-    author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Bilingual Pricing UI for Gumroad Integration"
-    disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
-    updates:
-      - "Bilingual Pricing Table: Completely overhauled setupPricingTable HTML to display bilingual names (e.g., '1-Month Pass / 尊榮單月通行證') and detailed bilingual descriptions."
-      - "Currency Anchoring: Shifted primary display price to USD (e.g., $6 USD) to match Gumroad's checkout currency, reducing user friction, while keeping NTD as a secondary reference."
-      - "TTS Formatting Compliance: Ensured all dynamic rendering strings naturally handle ( / - _ symbols by replacing them with pauses in the speak() fallback function."
-    ---
-    -->
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Hanzi Writer for Stroke Order -->
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
@@ -42,19 +27,15 @@
         .chat-scroll::-webkit-scrollbar-track { background: transparent; }
         .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         #hanzi-target { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); max-width: 100%; height: auto; }
+        
+        /* Mobile Typing Mode Auto-Hide CSS (Smooth Slide Up) */
+        @media (max-width: 767px) {
+            body.typing-mode header { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative pb-20">
+<body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- Global Trust Footer -->
-    <div class="fixed bottom-0 left-0 w-full bg-emerald-600 text-white py-3 px-4 shadow-[0_-5px_15px_rgba(0,0,0,0.15)] z-[1000] flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500">
-        <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
-        <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
-            <i class="ph-bold ph-plus text-base"></i> LINE @841bihdj
-        </a>
-    </div>
-
-    <!-- Domain Lock Overlay -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
@@ -67,67 +48,62 @@
         </p>
     </div>
 
-    <!-- InfoSec Honeypot -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
-    <!-- System Toast -->
     <div id="system-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[2100] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
 
-    <!-- Auth Error Banner -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header -->
-    <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 md:py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-inner">
-                    <i class="ph-fill ph-book-open-text text-2xl"></i>
+    <header class="bg-red-600 text-white shadow-md sticky top-0 z-50 transition-all duration-300 ease-in-out">
+        <div class="max-w-6xl mx-auto px-4 py-3 md:py-5 flex flex-row items-center justify-between gap-2 md:gap-4 w-full">
+            <div class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0">
+                    <i class="ph-fill ph-book-open-text text-xl md:text-2xl"></i>
                 </div>
                 <div class="flex flex-col">
-                    <h1 class="text-xl md:text-2xl font-bold tracking-wider flex items-center gap-2">
-                        Learn Traditional Chinese
+                    <h1 class="text-lg md:text-2xl font-bold tracking-wider flex items-center gap-2">
+                        Learn Chinese
                         <span class="text-xs font-bold opacity-90 hidden sm:inline-block">/ 繁體中文學習中心</span>
                     </h1>
-                    <p class="text-red-100 text-[10px] md:text-xs mt-0.5 font-medium italic uppercase tracking-widest">Abrakai Studio | Taiwan Edition</p>
+                    <p class="hidden md:block text-red-100 text-[10px] md:text-xs mt-0.5 font-medium italic uppercase tracking-widest">Abrakai Studio | Taiwan Edition</p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end flex-wrap md:flex-nowrap">
+            <div class="flex items-center gap-2 md:gap-4 justify-end flex-wrap sm:flex-nowrap">
                 
                 <div class="flex flex-col items-end gap-1.5 w-auto">
-                    <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-2 shadow-inner transition-all whitespace-nowrap">
-                        <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses / 免費次數:</span> <span id="quota-count">20/20</span>
+                    <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-2 py-1.5 md:px-3 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-1.5 shadow-inner transition-all whitespace-nowrap">
+                        <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses:</span> <span id="quota-count">20/20</span>
                     </div>
-                    <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
+                    <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1.5 bg-slate-900 px-2 py-1.5 md:px-3 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                         <div id="vip-status-light" class="w-2.5 h-2.5 rounded-full light-glow bg-slate-400 flex-shrink-0"></div>
-                        <span id="vip-days-text" class="text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days / 剩餘天數</span>
+                        <span id="vip-days-text" class="text-[9px] md:text-[10px] font-black tracking-tight uppercase text-emerald-50"><span id="vip-days-left">--</span> Days</span>
                     </div>
-                    <button type="button" id="header-pricing-btn" class="hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
-                        <i class="ph-fill ph-storefront text-sm flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>
+                    <button type="button" id="header-pricing-btn" title="Upgrade / 升級方案" class="hidden w-full justify-center text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap" onclick="window.togglePricingTable()">
+                        <i class="ph-fill ph-storefront text-lg sm:text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>
                     </button>
                 </div>
 
-                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap ml-2">
-                    <i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP 會員</span>
+                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap ml-1 md:ml-2">
+                    <i class="ph-fill ph-crown text-lg sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
-                <!-- Operations -->
-                <button type="button" id="msg-btn" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
-                    <i class="ph-fill ph-envelope-simple text-base"></i> <span class="hidden sm:inline">Inbox / 訊息</span>
+                <button type="button" id="msg-btn" title="Inbox / 訊息中心" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
+                    <i class="ph-fill ph-envelope-simple text-xl sm:text-base"></i> <span class="hidden sm:inline">Inbox</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
                 </button>
-                <button type="button" id="profile-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.openProfileModal()">
-                    <i class="ph-fill ph-user-circle text-base"></i> <span class="hidden sm:inline">Settings / 設定</span>
+                <button type="button" id="profile-btn" title="Settings / 個人設定" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.openProfileModal()">
+                    <i class="ph-fill ph-user-circle text-xl sm:text-base"></i> <span class="hidden sm:inline">Settings</span>
                 </button>
-                <button type="button" id="logout-btn" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
-                    <i class="ph-bold ph-sign-out text-base"></i> <span class="hidden sm:inline">Logout / 登出</span>
+                <button type="button" id="logout-btn" title="Logout / 登出系統" class="hidden text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white text-white p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleLogout()">
+                    <i class="ph-bold ph-sign-out text-xl sm:text-base"></i> <span class="hidden sm:inline">Logout</span>
                 </button>
             </div>
         </div>
@@ -135,7 +111,6 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
         
-        <!-- Auth Section -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
@@ -152,7 +127,7 @@
                                 <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                                 <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
-                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE (@841bihdj) 快速核對匯款開通。 / It is recommended to use the last 4 digits of your phone number for quick verification.</p></div>
+                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE 快速核對匯款開通。 / Strongly recommend using the last 4 digits of your phone number.</p></div>
                                 </div>
                             </div>
                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
@@ -171,7 +146,7 @@
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <div class="flex justify-between items-center mt-1 mb-2 px-1">
-                                <p class="text-[10px] text-slate-400 font-bold">登入即代表同意免責聲明</p>
+                                <p class="text-[10px] text-slate-400 font-bold">Login implies agreement to terms. / 登入即代表同意免責聲明</p>
                                 <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-black text-indigo-500 hover:text-indigo-700 underline transition-colors uppercase">Forgot Password? / 忘記密碼</button>
                             </div>
                             <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2 border-b-4 border-yellow-600">
@@ -186,7 +161,6 @@
             </div>
         </section>
 
-        <!-- Admin Dashboard Section -->
         <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
@@ -222,7 +196,6 @@
             </div>
         </section>
 
-        <!-- Translation Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
@@ -235,7 +208,6 @@
             </div>
         </section>
 
-        <!-- Writing Setup Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
@@ -252,7 +224,6 @@
             </div>
         </section>
 
-        <!-- Learning Dashboard -->
         <section id="learning-dashboard" class="hidden bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500 text-left">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-4">
@@ -266,7 +237,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- Strokes Area -->
                 <div class="md:col-span-5 lg:col-span-4 p-10 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-5 left-5 flex flex-col items-start gap-1 text-slate-400">
                         <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order / 筆順</span></div>
@@ -282,14 +252,12 @@
                     <p id="quiz-status" class="text-sm mt-6 text-emerald-600 font-black h-6 uppercase tracking-widest"></p>
                 </div>
 
-                <!-- AI Analysis Area -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-10 md:p-12 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-20 space-y-6">
                         <div class="ai-inner-loader"></div>
                         <p class="text-indigo-600 text-xs font-black animate-pulse uppercase tracking-[0.4em]">AI Engine Analyzing... / 解析中...</p>
                     </div>
                     
-                    <!-- AI Error Panel -->
                     <div id="ai-error-panel" class="hidden absolute inset-0 flex flex-col items-center justify-center h-full text-center space-y-4 px-4 bg-white z-20 overflow-y-auto py-10">
                         <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
                         <h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight uppercase">Connection Issue / 連線異常</h3>
@@ -297,7 +265,6 @@
                         <button type="button" onclick="window.handleAIRetry()" class="bg-slate-800 text-white px-10 py-3.5 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-wider mt-4 flex-shrink-0">Retry / 重新連線</button>
                     </div>
 
-                    <!-- Result Body -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="flex items-center gap-3 mb-6 border-b-2 border-slate-100 pb-5">
                             <div class="bg-indigo-50 px-4 py-2 rounded-xl border-2 border-indigo-100 text-xs font-black text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-book-bookmark text-indigo-500 text-base"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-sm">--</span></div>
@@ -312,7 +279,6 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
-                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -325,12 +291,17 @@
             </div>
         </section>
         
-        <!-- Pricing Section Container -->
         <section id="pricing-section-container" class="hidden w-full mt-10"></section>
+        
+        <div id="global-trust-footer" class="w-full bg-emerald-600 text-white py-3 px-4 shadow-sm z-40 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500 mt-16 rounded-3xl mb-8 max-w-6xl mx-auto">
+            <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
+            <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
+                <i class="ph-bold ph-plus text-base"></i> LINE @841bihdj
+            </a>
+        </div>
         
     </main>
 
-    <!-- Modals -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200 flex flex-col h-[80vh] text-left">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-4 mb-4">
@@ -408,7 +379,6 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
@@ -476,7 +446,6 @@
         </div>
     </div>
 
-    <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
             <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Data Privacy / 個資保護與免責聲明</h3>
@@ -495,9 +464,9 @@
         </div>
     </div>
 
-    <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-32 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
+    <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.1.0-BILINGUAL-PRICING</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.6.0-MOBILE-UX-OPTIMIZED</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -506,7 +475,6 @@
         </div>
     </footer>
 
-    <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -562,7 +530,7 @@
             'ㄎㄜ': '科', 'ㄏㄜ': '喝', 'ㄐㄧ': '機', 'ㄑㄧ': '期', 'ㄒㄧ': '西',
             'ㄓ': '知', 'ㄔ': '吃', 'ㄕ': '詩', 'ㄖ': '日',
             'ㄓㄟˋ': '這', 'ㄋㄟˋ': '內', 'ㄋㄚˋ': '那',
-            'ㄆㄠˋ': '泡', 'ㄆㄠ': '拋', 'ㄐㄧㄚˇ': '甲', 'ㄐㄧㄚˋ': '駕',
+            'ㄆㄠˋ': '泡', 'ㄆㄠ': '泡', 'ㄐㄧㄚˇ': '甲', 'ㄐㄧㄚˋ': '駕',
             'ㄏㄜˊ': '河', 'ㄏㄜˋ': '賀', 'ㄏㄨㄛˋ': '或', 'ㄏㄨㄛˊ': '活',
             'ㄉㄧㄠˋ': '掉', 'ㄊㄧㄠˊ': '條', 'ㄐㄧㄝˇ': '解', 'ㄐㄧㄝˋ': '界',
             'ㄅㄛˊ': '伯', 'ㄅㄛˋ': '播', 'ㄔㄚ': '差', 'ㄔㄚˋ': '剎', 'ㄔㄞ': '拆', 'ㄘㄧ': '疵',
@@ -686,11 +654,11 @@
             
             if (daysTextEl && cachedDays !== '--') {
                 if (diffNum > 0) {
-                    daysTextEl.innerHTML = `<span id="vip-days-left">${diffNum}</span> Days / 剩餘天數`;
+                    daysTextEl.innerHTML = `<span id="vip-days-left">${diffNum}</span> Days`;
                 } else if (diffNum === 0) {
-                    daysTextEl.innerHTML = `LAST DAY / 最後一天`;
+                    daysTextEl.innerHTML = `LAST DAY`;
                 } else {
-                    daysTextEl.innerHTML = `EXPIRED / 已過期`;
+                    daysTextEl.innerHTML = `EXPIRED`;
                 }
             }
 
@@ -706,8 +674,8 @@
             if (window.isAdmin) {
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
                 if(els.vBadge) {
-                    els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="tracking-tighter uppercase">Admin</span>';
-                    els.vBadge.className = "hidden bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap";
+                    els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">Admin</span>';
+                    els.vBadge.className = "hidden bg-slate-800 text-emerald-400 p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap";
                     els.vBadge.classList.remove('hidden');
                 }
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; }
@@ -724,16 +692,16 @@
                 if (window.isVIP) {
                     if(els.qDisplay) els.qDisplay.classList.add('hidden');
                     if(els.vBadge) {
-                        els.vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="tracking-tighter uppercase">VIP 會員</span>';
-                        els.vBadge.className = "hidden bg-yellow-400 text-red-900 px-3 py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap";
+                        els.vBadge.innerHTML = '<i class="ph-fill ph-crown text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>';
+                        els.vBadge.className = "hidden bg-yellow-400 text-red-900 p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1.5 animate-in zoom-in whitespace-nowrap";
                         els.vBadge.classList.remove('hidden');
                     }
                     if(els.expiryDisplay) els.expiryDisplay.classList.remove('hidden');
                     
                     if (cachedDays !== '--' && diffNum <= 7) {
                         if(els.headerPricingBtn) {
-                            els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-warning-circle text-base flex-shrink-0"></i> <span id="header-pricing-text">Renew / 繳費說明</span>`;
-                            els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap animate-pulse";
+                            els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-warning-circle text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Renew</span>`;
+                            els.headerPricingBtn.className = "hidden w-full justify-center text-[10px] bg-red-500 hover:bg-red-600 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap animate-pulse";
                             els.headerPricingBtn.classList.remove('hidden');
                         }
                     }
@@ -744,8 +712,8 @@
                     }
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.headerPricingBtn) {
-                        els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>`;
-                        els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap";
+                        els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
+                        els.headerPricingBtn.className = "hidden w-full justify-center text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap";
                         els.headerPricingBtn.classList.remove('hidden');
                     }
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -757,8 +725,8 @@
                 }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.headerPricingBtn) {
-                    els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text">Upgrade / 方案說明</span>`;
-                    els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap";
+                    els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
+                    els.headerPricingBtn.className = "hidden w-full justify-center text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap";
                     els.headerPricingBtn.classList.remove('hidden');
                 }
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -787,7 +755,7 @@
             }
         };
 
-        // PM Fix 6.1.0: Fully Bilingual Pricing UI & Primary USD Anchoring
+        // PM Fix 6.5.0: LIVE Gumroad Links injected
         function setupPricingTable(title, prefixDesc) {
             let container = document.getElementById('pricing-section-container');
             if (!container) return;
@@ -795,60 +763,100 @@
             const pricingHTML = `
                 <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-200">
                     <div class="text-left space-y-3 w-full">
-                        <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-2">${title}</h3>
+                        <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-2">${window.getStr(title)}</h3>
                         ${prefixDesc}
                         <div class="border-b border-slate-100 pb-3 pt-4"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">20 basic translations and character splits per day.<br><span class="italic font-normal text-[10px] text-slate-400">每日 20 次基礎拆字與翻譯。</span></p></div>
                         <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">英翻中、中文拆字書寫教學與練習。</span></span></p>
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
                         
-                        <div class="pt-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Pricing Strategy / 方案升級</h4>
+                        <div class="pt-6">
+                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph-fill ph-globe text-base"></i> 🌐 國際美金刷卡區 (USD)</h4>
                             <div class="space-y-3">
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
                                     <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-slate-800">1-Month Pass / 尊榮單月通行證</span> 
-                                        <span class="text-[11px] text-slate-600 font-medium block mt-1">Unlock unlimited AI features for 30 days. / 解鎖 30 天無限次 AI 解析。</span>
-                                        <span class="text-xs text-indigo-600 font-black block mt-1.5">$6 USD <span class="text-[10px] text-slate-400 font-medium">(約 NT$ 180)</span></span>
+                                        <span class="font-bold text-sm block text-slate-800">1-Month Pass / 單月通行證</span> 
+                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">$6 USD</span>
+                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（美金 6 元產品費用 ＋ 海外交易手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_1_month', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                                    <button type="button" onclick="window.handleGumroadCheckout('aqlhnu', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
-                                
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
                                     <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">SMART</div>
                                     <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-indigo-900">3-Month Pass / 尊榮季繳通行證</span> 
-                                        <span class="text-[11px] text-indigo-700 font-medium block mt-1">Unlock unlimited AI features for 90 days. / 解鎖 90 天無限次 AI 解析。</span>
-                                        <span class="text-xs text-indigo-600 font-black block mt-1.5">$15 USD <span class="text-[10px] text-indigo-400 font-medium">(約 NT$ 450)</span></span>
+                                        <span class="font-bold text-sm block text-indigo-900">3-Month Pass / 季繳通行證</span> 
+                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">$15 USD</span>
+                                        <span class="text-[10px] text-indigo-700 font-medium block mt-1">（美金 15 元產品費用 ＋ 海外交易手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_3_month', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                                    <button type="button" onclick="window.handleGumroadCheckout('iodgg', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
-                                
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
                                     <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-slate-800">6-Month Pass / 尊榮半年通行證</span> 
-                                        <span class="text-[11px] text-slate-600 font-medium block mt-1">Unlock unlimited AI features for 180 days. / 解鎖 180 天無限次 AI 解析。</span>
-                                        <span class="text-xs text-indigo-600 font-black block mt-1.5">$25 USD <span class="text-[10px] text-slate-400 font-medium">(約 NT$ 750)</span></span>
+                                        <span class="font-bold text-sm block text-slate-800">6-Month Pass / 半年通行證</span> 
+                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">$25 USD</span>
+                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（美金 25 元產品費用 ＋ 海外交易手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_6_month', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
+                                    <button type="button" onclick="window.handleGumroadCheckout('njgrhb', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                 </div>
-                                
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
                                     <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 1-Year Pass / 尊榮年度通行證</span> 
-                                        <span class="text-[11px] text-yellow-800 font-medium block mt-1">Unlock unlimited AI features for 365 days. Best value! / 解鎖 365 天無限次 AI 解析。年度最超值！</span>
-                                        <span class="text-sm text-red-600 font-black block mt-1.5">$40 USD <span class="text-[10px] text-yellow-700 opacity-70 font-medium">(約 NT$ 1200)</span></span>
+                                        <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 1-Year Pass / 年度通行證</span> 
+                                        <span class="text-base text-red-600 font-black block mt-1.5">$40 USD</span>
+                                        <span class="text-[10px] text-yellow-800 font-medium block mt-1">（美金 40 元產品費用 ＋ 海外交易手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('dummy_12_month', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
+                                    <button type="button" onclick="window.handleGumroadCheckout('qskre', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-8">
+                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-credit-card text-base"></i> 🇹🇼 台灣台幣刷卡區 (綠界 ECPay 全自動)</h4>
+                            <div class="space-y-3">
+                                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-bold text-sm block text-slate-800">尊榮單月通行證 (1-Month)</span> 
+                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 180</span>
+                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（台幣 180 元產品費用 ＋ 海外交易手續費，依發卡銀行當下匯率換算）</span>
+                                    </div>
+                                    <button type="button" onclick="window.handleECPayCheckout(1, 180, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
+                                </div>
+                                <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
+                                    <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">首選</div>
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-bold text-sm block text-indigo-900">尊榮季繳通行證 (3-Month)</span> 
+                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 450</span>
+                                        <span class="text-[10px] text-indigo-700 font-medium block mt-1">（台幣 450 元產品費用 ＋ 海外交易手續費，依發卡銀行當下匯率換算）</span>
+                                    </div>
+                                    <button type="button" onclick="window.handleECPayCheckout(3, 450, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
+                                </div>
+                                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-bold text-sm block text-slate-800">尊榮半年通行證 (6-Month)</span> 
+                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 750</span>
+                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（台幣 750 元產品費用 ＋ 海外交易手續費，依發卡銀行當下匯率換算）</span>
+                                    </div>
+                                    <button type="button" onclick="window.handleECPayCheckout(6, 750, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
+                                </div>
+                                <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 尊榮年度通行證 (1-Year)</span> 
+                                        <span class="text-base text-red-600 font-black block mt-1.5">NT$ 1200</span>
+                                        <span class="text-[10px] text-yellow-800 font-medium block mt-1">（台幣 1200 元產品費用 ＋ 海外交易手續費，依發卡銀行當下匯率換算）</span>
+                                    </div>
+                                    <button type="button" onclick="window.handleECPayCheckout(12, 1200, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> 升級年度 VIP</button>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
-                            <div class="w-14 h-14 bg-emerald-500 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
-                            <div class="leading-tight flex flex-col items-center sm:items-start">
-                                <p class="text-base font-black text-emerald-800 tracking-tight">Official LINE for Remittance / 匯款開通官方 LINE <span class="text-emerald-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-emerald-200">@841bihdj</span></p>
-                                <p class="text-[11px] font-bold text-emerald-600 mt-1">If unable to use credit card, contact Abrakai Studio for wire transfer info. / 若無法刷卡，請聯絡阿布拉.凱工作室索取匯款資訊</p>
-                                <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> Add Friend / 點擊加入好友</a>
+                        <div class="pt-8 border-t border-slate-100 mt-6">
+                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph-fill ph-bank text-base"></i> 🏦 現金匯款 (免除海外手續費 / 人工開通)</h4>
+                            <div class="p-4 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
+                                <div class="w-14 h-14 bg-slate-400 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
+                                <div class="leading-tight flex flex-col items-center sm:items-start">
+                                    <p class="text-base font-black text-slate-800 tracking-tight">Official LINE for Remittance / 匯款開通官方 LINE <span class="text-slate-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-slate-200">@841bihdj</span></p>
+                                    <p class="text-[11px] font-bold text-slate-500 mt-1">如在台灣，可另採匯款方式免除海外手續費。請洽阿布拉.凱 工作室的官方 LINE 聯繫匯款方式，採原價收費 (180/450/750/1200)，由客服為您核帳並人工開通。</p>
+                                    <a href="https://lin.ee/9khpCfe" target="_blank" class="inline-flex mt-3 text-[13px] bg-slate-500 hover:bg-slate-600 text-white px-6 py-2 rounded-xl font-black transition-colors shadow-md active:scale-95 tracking-wider items-center gap-2"><i class="ph-bold ph-plus text-lg"></i> Add Friend / 點擊加入好友</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -877,11 +885,59 @@
                     customerEmail = docSnap.data().email;
                 }
 
-                const checkoutUrl = `https://gumroad.com/l/${permalink}?email=${encodeURIComponent(customerEmail)}`;
+                const checkoutUrl = `https://gumroad.com/l/${window.getStr(permalink)}?email=${encodeURIComponent(customerEmail)}`;
                 window.location.href = checkoutUrl;
 
             } catch (e) {
                 window.showToast("Gumroad Setup Required / 請至程式碼替換您的專屬 Permalink", true);
+                btnElement.innerHTML = originalHTML;
+                btnElement.disabled = false;
+            }
+        };
+
+        // PM Fix 6.4.0: 呼叫 Firebase Cloud Functions 發起綠界加密結帳
+        window.handleECPayCheckout = async function(planMonths, price, btnElement) {
+            const emailCode = localStorage.getItem('abra_vip_code');
+            if (!emailCode) {
+                window.showToast("請先註冊或登入會員", true);
+                window.scrollToAuth();
+                return;
+            }
+
+            const originalHTML = btnElement.innerHTML;
+            btnElement.innerHTML = '<div class="loader w-4 h-4 border-2 border-t-white mx-auto"></div>';
+            btnElement.disabled = true;
+
+            try {
+                // 動態載入 Firebase Functions SDK 以節省初次網頁載入資源
+                const { getFunctions, httpsCallable } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js");
+                const functions = getFunctions(app, 'asia-east1');
+                const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
+
+                const res = await createECPayOrder({ planMonths: planMonths, amount: price, email: emailCode });
+                
+                if (res.data && res.data.status === 'success') {
+                    // 動態建立隱藏表單提交至綠界
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = window.getStr(res.data.actionUrl);
+                    form.style.display = 'none';
+                    
+                    const params = res.data.params;
+                    for (const key in params) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = window.getStr(key);
+                        input.value = window.getStr(params[key]); // 字串有效性檢查
+                        form.appendChild(input);
+                    }
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    throw new Error("Order generation failed.");
+                }
+            } catch (e) {
+                window.showToast("金流連線失敗，請確認後端已部署或稍後再試", true);
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
             }
@@ -2077,13 +2133,28 @@
                     </div>
                 `).join('');
             } else {
-                // PM Fix: Bilingual Empty Idioms Label
                 idiomsCont.innerHTML = `
                     <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
                         <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
                     </div>
                 `;
             }
+        };
+
+        window.setupTypingMode = function() {
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea');
+            inputs.forEach(el => {
+                el.addEventListener('focus', () => {
+                    if (window.innerWidth < 768) {
+                        document.body.classList.add('typing-mode');
+                    }
+                });
+                el.addEventListener('blur', () => {
+                    setTimeout(() => {
+                        document.body.classList.remove('typing-mode');
+                    }, 150); 
+                });
+            });
         };
 
         document.addEventListener('click', (e) => {
@@ -2105,7 +2176,6 @@
         });
 
         window.onload = function() {
-            // UI Hook: Add Radical/Strokes Header dynamically with Bilingual strings
             const vipContent = document.getElementById('vip-only-content');
             if (vipContent && !document.getElementById('radical-display')) {
                 const headerDiv = document.createElement('div');
@@ -2117,6 +2187,9 @@
                 vipContent.insertBefore(headerDiv, vipContent.firstChild);
             }
             if (window.updateGlobalUI) window.updateGlobalUI();
+            
+            // 啟動手機版智慧鍵盤偵測
+            window.setupTypingMode();
         };
     </script>
 </body>

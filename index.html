@@ -6,14 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.1-CEO-STRICT-HOTFIX"
+    version: "7.1.2-FINAL-UI-HOTFIX"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Strict Connection & Translation Fixes"
+    description: "2200+ Lines Core. Fixed Idiom English Casing & Restored Polyphonic Examples."
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Connection: Removed dynamic imports for Firebase Functions to fix ECPay stability."
-      - "Translation: Idiom English now translates the 'meaning' instead of literal characters."
-      - "UX: Custom Upsell messages for Free vs VIP-without-Key users as per CEO design."
+      - "UI: Removed 'uppercase' from Idiom English translation for better readability (74.jpg fix)."
+      - "UI: Injected 'p.examples' into Polyphonic rendering box to display word context (75.jpg fix)."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -502,7 +501,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.1-CEO-STRICT-HOTFIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v7.1.2-FINAL-UI-HOTFIX</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -2171,11 +2170,15 @@
                     const pureZhuyin = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
                     if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
                         seenPoly.add(pureZhuyin);
+                        // PM Fix 75.jpg: 把範例印回畫面上
+                        const examplesStr = (p.examples && p.examples.length > 0) ? "如：" + p.examples.map(ex => `「${window.getSafeStr(ex)}」`).join('、') : "請升級解鎖 AI 範例";
                         polyHTML += `
                             <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
-                                <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
-                                <div class="flex-1"></div>
-                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
+                                <div class="flex flex-col flex-1">
+                                    <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter px-2">${pureZhuyin}</span>
+                                    <span class="text-[11px] text-purple-500 mt-2 px-2 leading-relaxed">${examplesStr}</span>
+                                </div>
+                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 flex-shrink-0 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
                                     <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
                                 </button>
                             </div>
@@ -2206,7 +2209,7 @@
                         <div class="flex-1 pr-16">
                             <div class="text-slate-950 text-3xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-4 inline-block uppercase">${window.getSafeStr(i.idiom)}</div>
                             <div class="text-base text-slate-500 font-bold mt-5 leading-relaxed">${window.getSafeStr(i.meaning)}</div>
-                            <div class="text-[11px] text-indigo-600 font-black mt-6 border-t-2 pt-6 border-slate-100 uppercase tracking-[0.3em] italic opacity-90">${window.getSafeStr(i.english) || "Translation loading..."}</div>
+                            <div class="text-[11px] text-indigo-600 font-black mt-6 border-t-2 pt-6 border-slate-100 tracking-wide italic opacity-90 leading-relaxed">${window.getSafeStr(i.english) || "Translation loading..."}</div>
                         </div>
                         <button type="button" data-action="speak" data-text="${window.getSafeStr(i.idiom)}" class="absolute top-8 right-8 w-14 h-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-2xl transition-transform group-hover:scale-110 active:scale-90 border-b-4 border-emerald-800 flex items-center justify-center"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
                     </div>

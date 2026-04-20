@@ -6,13 +6,12 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.0-CONTENT-REFINEMENT"
+    version: "6.7.1-PAYMENT-HOTFIX"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - UX & Copywriting Refinement"
+    description: "Taiwan Chinese Learning Hub - Payment Connection Hotfix"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Copywriting: Corrected ECPay pricing text. Removed inaccurate 'overseas fee' mention for domestic transactions."
-      - "UI Cleanup: Removed redundant 'Add Friend' button in the manual transfer section as the global footer is now naturally positioned below it."
+      - "Payment: Refactored Firebase Functions import to static to resolve ECPay connection failures."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -145,7 +144,7 @@
                             <input type="text" id="reg-name" placeholder="Full Name / 姓名" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
                             <input type="email" id="reg-email" placeholder="Email / 帳號 (登入用)" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold text-indigo-900 bg-white shadow-sm">
                             <div class="relative">
-                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
+                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm font-bold">
                                 <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                                 <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
                                     <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE 快速核對匯款開通。 / Strongly recommend using the last 4 digits of your phone number.</p></div>
@@ -163,7 +162,7 @@
                         <div class="space-y-3">
                             <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
                             <div class="relative">
-                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
+                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm font-bold">
                                 <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
                             </div>
                             <div class="flex justify-between items-center mt-1 mb-2 px-1">
@@ -413,7 +412,7 @@
     </div>
 
     <!-- Admin Member Modal -->
-    <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
+    <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
                 <div class="flex items-center gap-4">
@@ -501,7 +500,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.0-CONTENT-REFINEMENT</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.1-PAYMENT-HOTFIX</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -515,6 +514,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
@@ -527,6 +527,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const functions = getFunctions(app, 'asia-east1');
         const appId = "abra-learn-zh-vip";
         
         window.firebaseDbInstance = db;
@@ -947,9 +948,6 @@
             btnElement.disabled = true;
 
             try {
-                // 動態載入 Firebase Functions SDK 以節省初次網頁載入資源
-                const { getFunctions, httpsCallable } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js");
-                const functions = getFunctions(app, 'asia-east1');
                 const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
 
                 const res = await createECPayOrder({ planMonths: planMonths, amount: price, email: emailCode });
@@ -1066,6 +1064,7 @@
                             localStorage.setItem('abra_vip_days', diff.toString());
                         }
                         localStorage.setItem('abra_vip_status', status);
+                        localStorage.setItem('abra_user_name', data.name || "Member");
                         if (data.apiKey && status === 'active') {
                             localStorage.setItem('gemini_api_key', data.apiKey.trim());
                             window.activeApiKey = data.apiKey.trim();
@@ -2105,8 +2104,8 @@
         window.renderResult = function(char, data) {
             const radicalDisplay = document.getElementById('radical-display');
             const strokesDisplay = document.getElementById('strokes-display');
-            if (radicalDisplay) radicalDisplay.textContent = data.radical || 'Unknown / 未知';
-            if (strokesDisplay) strokesDisplay.textContent = data.strokes ? `${data.strokes}` : '--';
+            if (radicalDisplay) radicalDisplay.textContent = window.getStr(data.radical) || 'Unknown / 未知';
+            if (strokesDisplay) strokesDisplay.textContent = window.getStr(data.strokes) ? `${data.strokes}` : '--';
 
             const pureMainZhuyin = window.getStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
             document.getElementById('zhuyin-display').textContent = pureMainZhuyin;

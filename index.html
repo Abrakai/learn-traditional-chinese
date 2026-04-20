@@ -6,14 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.1-CEO-STRICT-HOTFIX"
+    version: "6.7.0-CONTENT-REFINEMENT"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Strict Connection & Translation Fixes"
+    description: "Taiwan Chinese Learning Hub - UX & Copywriting Refinement"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Connection: Removed dynamic imports for Firebase Functions to fix ECPay stability."
-      - "Translation: Idiom English now translates the 'meaning' instead of literal characters."
-      - "UX: Custom Upsell messages for Free vs VIP-without-Key users as per CEO design."
+      - "Copywriting: Corrected ECPay pricing text. Removed inaccurate 'overseas fee' mention for domestic transactions."
+      - "UI Cleanup: Removed redundant 'Add Friend' button in the manual transfer section as the global footer is now naturally positioned below it."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -502,7 +501,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.1-CEO-STRICT-HOTFIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.0-CONTENT-REFINEMENT</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -513,11 +512,9 @@
 
     <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad, ECPay 與 UI 邏輯】 -->
     <script type="module">
-        // PM Fix: 靜態載入 firebase-functions，徹底解決點擊結帳時找不到引擎的問題
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
@@ -527,11 +524,9 @@
             messagingSenderId: "968781909500",
             appId: "1:968781909500:web:0457924ec29644ea6a7679"
         };
-        
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const functions = getFunctions(app, 'asia-east1'); // 提早綁定全域金流引擎
         const appId = "abra-learn-zh-vip";
         
         window.firebaseDbInstance = db;
@@ -938,7 +933,7 @@
             }
         };
 
-        // PM Fix: 靜態載入 firebase-functions，徹底解決點擊結帳時引擎尚未準備好的錯誤
+        // PM Fix: 降維打擊 - 捨棄 Firebase SDK，改採原生 fetch (REST API) 直連以規避作用域與 CORS 阻擋
         window.handleECPayCheckout = async function(planMonths, price, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -952,32 +947,53 @@
             btnElement.disabled = true;
 
             try {
-                // 直接使用已經綁定好的全域 functions 引擎
-                const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
-
-                const res = await createECPayOrder({ planMonths: planMonths, amount: price, email: emailCode });
+                const functionUrl = "https://asia-east1-abra-learn-zh-vip.cloudfunctions.net/createECPayOrder";
                 
-                if (res.data && res.data.status === 'success') {
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: {
+                            planMonths: planMonths, 
+                            amount: price, 
+                            email: emailCode
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const resData = await response.json();
+                const result = resData.result || resData.data;
+                
+                if (result && result.status === 'success') {
+                    // 動態建立隱藏表單提交至綠界
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = window.getStr(res.data.actionUrl);
+                    form.action = window.getStr(result.actionUrl);
                     form.style.display = 'none';
                     
-                    const params = res.data.params;
+                    const params = result.params;
                     for (const key in params) {
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = window.getStr(key);
-                        input.value = window.getStr(params[key]);
+                        input.value = window.getStr(params[key]); // 字串有效性檢查
                         form.appendChild(input);
                     }
                     document.body.appendChild(form);
                     form.submit();
                 } else {
-                    throw new Error("Order generation failed.");
+                    throw new Error("Order parameters generation failed.");
                 }
             } catch (e) {
-                window.showToast("金流連線失敗，請確認後端已部署或稍後再試", true);
+                console.error("ECPay Checkout Error:", e);
+                // 錯誤碼顯影化
+                window.showToast(`金流連線失敗 (${e.message})，請確認權限或稍後再試`, true);
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
             }
@@ -1942,30 +1958,15 @@
                     data.words = wArr.filter(w => w.length < 4).slice(0, 5);
                     if(data.words.length === 0) data.words.push(char + "字");
                     
-                    // PM Fix 08.jpg: 基礎字典也抓取成語意義，並翻譯其意義而非成語表面
                     const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
                     for (let idiom of idiomsArr) {
                         try {
-                            let meaning = "";
-                            try {
-                                const mRes = await fetch(`https://www.moedict.tw/${encodeURIComponent(idiom)}.json`);
-                                if (mRes.ok) {
-                                    const mData = await mRes.json();
-                                    if (mData.heteronyms && mData.heteronyms[0].definitions) {
-                                        meaning = mData.heteronyms[0].definitions[0].def.replace(/<[^>]+>/g, '').replace(/~[a-zA-Z0-9_]+~/g, '');
-                                    }
-                                }
-                            } catch(e) {}
-                            
-                            if(!meaning) meaning = "基礎成語組合，綁定 AI 金鑰可獲取更生動的文脈詳解。";
-
-                            const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(meaning)}`);
+                            const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
                             const gtData = await gtRes.json();
                             let enTrans = gtData[0].map(item => item[0]).join('');
-                            
-                            data.idioms.push({ idiom: idiom, meaning: meaning, english: enTrans });
+                            data.idioms.push({ idiom: idiom, meaning: "Static dictionary lacks detailed idioms. Please upgrade to AI module. / 靜態字典無法提供成語詳解，請升級 AI 模組。", english: enTrans });
                         } catch(e) {
-                            data.idioms.push({ idiom: idiom, meaning: "基礎成語 / Basic Idiom", english: "Translation unavailable / 無法翻譯" });
+                            data.idioms.push({ idiom: idiom, meaning: "Static Dictionary / 靜態字典", english: "Translation unavailable / 無法翻譯" });
                         }
                     }
                 }
@@ -1982,7 +1983,6 @@
                 upsellBox.id = 'dict-upsell-box';
                 upsellBox.className = 'mt-10 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100 rounded-[2rem] shadow-inner';
                 
-                // PM Fix 08.jpg: 客製化身分引導文案
                 if (errorContext && errorContext.type === 'QUOTA') {
                     upsellBox.innerHTML = `
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
@@ -2001,10 +2001,7 @@
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
                             <div>
                                 <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
-                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">
-                                    您目前正在使用靜態字典。為了提升學習成效，不論何種身分皆提供基礎中英解析。<br><br>
-                                    💡 升級 VIP 會員並綁定 API 金鑰，解鎖無限次 AI 智慧大腦，獲得更生動、不死板的成語詳解與上下文破音字判斷！
-                                </p>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">Upgrade to VIP and enable the AI Engine to unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>升級 VIP 並啟用 AI 引擎，即可解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。<br><br>Example: The character "重" sounds completely different in "舉足輕重" vs "重逢", which static dictionaries cannot detect!<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態字典無法判斷！</p>
                                 <button type="button" onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">View VIP Plans / 查看 VIP 升級方案</button>
                             </div>
                         </div>
@@ -2012,13 +2009,10 @@
                 } else {
                     upsellBox.innerHTML = `
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-yellow-500"><i class="ph-fill ph-crown text-3xl animate-pulse"></i></div>
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-magic-wand text-3xl animate-bounce"></i></div>
                             <div>
-                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">VIP Member (Basic Mode) / 尊榮會員 (基礎模式)</h4>
-                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">
-                                    您已是 VIP 會員！目前為基礎靜態字典解析。<br><br>
-                                    💡 只需綁定免費 Google API 金鑰，即可啟動 AI 智慧大腦，解鎖更生動、不死板的成語詳解與精準英文語意翻譯！
-                                </p>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">You are a VIP! Simply bind a free Google API Key to activate the AI brain!<br>您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br><br>Unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。</p>
                                 <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">Bind Free Key / 綁定免費金鑰啟動 AI</button>
                             </div>
                         </div>
@@ -2067,7 +2061,6 @@
             
             for (const model of modelNames) {
                 try {
-                    // PM Fix 08.jpg: 修改 prompt，讓 AI 直接產出「解釋意涵」的翻譯，而非暴力使用 GT 覆寫
                     const prompt = `請以台灣教育部辭典標準，根據原文本上下文「${contextText}」，嚴格解析其中的繁體中文字「${char}」並輸出 JSON。
 1. zhuyin: 該字在此文本上下文中的正確注音符號 (含聲調)。⚠️極度重要：絕對禁止輸出漢語拼音(Pinyin)或任何英文字母！只能有純注音符號！若該字在上下文中應發「輕聲」，請務必精準標示！
 2. radical: 該字的部首名稱 (例如: 水部)。
@@ -2075,7 +2068,7 @@
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️極度嚴格要求：若該字「沒有」其他常用的破音字發音（如「是」、「我」等單一發音字），請務必將 polyphonic 設為空陣列 []，絕對禁止捏造或硬湊破音字！若有破音字，examples 內的詞彙發音【必須 100% 吻合】該破音字！
 6. idioms: 包含「${char}」的成語 (最多4個)。
-格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "該成語『解釋意涵』的流暢英文翻譯(非字面直譯)"}]}`;
+格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2086,7 +2079,19 @@
                     const rawText = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
                     
-                    // 移除 Google Translate 暴力覆寫，完全保留 AI 的生動語意翻譯
+                    if (data.idioms && data.idioms.length > 0) {
+                        for (let i = 0; i < data.idioms.length; i++) {
+                            try {
+                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(data.idioms[i].idiom)}`);
+                                if (gtRes.ok) {
+                                    const gtData = await gtRes.json();
+                                    if (gtData && gtData[0]) {
+                                        data.idioms[i].english = gtData[0].map(item => item[0]).join('');
+                                    }
+                                }
+                            } catch(err) {}
+                        }
+                    }
                     
                     window.charCache[char] = data; 
                     

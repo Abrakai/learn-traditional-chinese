@@ -515,6 +515,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA1e19CgvvV_nHH0VbpUfUqpGax2NnZynQ",
@@ -527,6 +528,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const functions = getFunctions(app, 'asia-east1');
         const appId = "abra-learn-zh-vip";
         
         window.firebaseDbInstance = db;
@@ -933,7 +935,7 @@
             }
         };
 
-        // PM Fix: 降維打擊 - 捨棄 Firebase SDK，改採原生 fetch (REST API) 直連以規避作用域與 CORS 阻擋
+        // PM Fix: 靜態載入 firebase-functions 並處理 IAM 阻擋錯誤
         window.handleECPayCheckout = async function(planMonths, price, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -947,53 +949,57 @@
             btnElement.disabled = true;
 
             try {
-                const functionUrl = "https://asia-east1-abra-learn-zh-vip.cloudfunctions.net/createECPayOrder";
-                
-                const response = await fetch(functionUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        data: {
-                            planMonths: planMonths, 
-                            amount: price, 
-                            email: emailCode
-                        }
-                    })
-                });
+                // 使用頂端靜態載入的 functions
+                const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const resData = await response.json();
-                const result = resData.result || resData.data;
+                const res = await createECPayOrder({ planMonths: planMonths, amount: price, email: emailCode });
                 
-                if (result && result.status === 'success') {
-                    // 動態建立隱藏表單提交至綠界
+                if (res.data && res.data.status === 'success') {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = window.getStr(result.actionUrl);
+                    form.action = window.getStr(res.data.actionUrl);
                     form.style.display = 'none';
                     
-                    const params = result.params;
+                    const params = res.data.params;
                     for (const key in params) {
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = window.getStr(key);
-                        input.value = window.getStr(params[key]); // 字串有效性檢查
+                        input.value = window.getStr(params[key]);
                         form.appendChild(input);
                     }
                     document.body.appendChild(form);
                     form.submit();
                 } else {
-                    throw new Error("Order parameters generation failed.");
+                    throw new Error("Order generation failed.");
                 }
             } catch (e) {
-                console.error("ECPay Checkout Error:", e);
-                // 錯誤碼顯影化
-                window.showToast(`金流連線失敗 (${e.message})，請確認權限或稍後再試`, true);
+                console.error("ECPay Connection Error:", e);
+                // 攔截 Firebase 的 Failed to fetch (通常代表 CORS/IAM 阻擋)
+                if (e.message && e.message.includes("fetch")) {
+                    const overlay = document.getElementById('domain-lock-overlay');
+                    overlay.innerHTML = `
+                        <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-pulse">
+                            <i class="ph-fill ph-lock-key"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-white mb-4">Google Cloud 權限阻擋 (CORS)</h2>
+                        <p class="text-slate-300 max-w-md leading-relaxed font-bold text-left bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            前端程式碼已正確發送請求，但被您的 Google Cloud 防火牆擋下。<br><br>
+                            <span class="text-emerald-400">✅ 唯一解決步驟：</span><br>
+                            1. 進入 Google Cloud Console 的 <span class="text-yellow-400">Cloud Functions</span><br>
+                            2. 找到 <code class="text-yellow-400 bg-slate-900 px-1 rounded">createECPayOrder</code><br>
+                            3. 點擊上方的「權限」<br>
+                            4. 點擊新增主體，輸入 <code class="text-yellow-400 bg-slate-900 px-1 rounded">allUsers</code><br>
+                            5. 角色選擇 <code class="text-yellow-400 bg-slate-900 px-1 rounded">Cloud Functions 叫用者</code> (Invoker)<br>
+                            6. 儲存後重整此網頁即可成功跳轉綠界！
+                        </p>
+                        <button onclick="document.getElementById('domain-lock-overlay').classList.add('hidden')" class="mt-8 bg-white text-slate-900 px-8 py-3 rounded-full font-black shadow-lg hover:scale-105 transition-transform">我已了解，關閉視窗</button>
+                    `;
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                } else {
+                    window.showToast("金流連線失敗，請確認後端已部署或稍後再試", true);
+                }
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
             }

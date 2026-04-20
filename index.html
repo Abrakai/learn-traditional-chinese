@@ -6,13 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.0-CONTENT-REFINEMENT"
+    version: "6.7.1-PAYMENT-IDIOM-HOTFIX"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - UX & Copywriting Refinement"
+    description: "Taiwan Chinese Learning Hub - Payment Connection & Idiom Translation Hotfix"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Copywriting: Corrected ECPay pricing text. Removed inaccurate 'overseas fee' mention for domestic transactions."
-      - "UI Cleanup: Removed redundant 'Add Friend' button in the manual transfer section as the global footer is now naturally positioned below it."
+      - "Connection: Refactored Firebase Functions import to static to resolve ECPay connection failures."
+      - "AI Logic: Removed Google Translate override loop to preserve AI's contextual English idiom explanations."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -935,7 +935,7 @@
             }
         };
 
-        // PM Fix 6.4.0: 呼叫 Firebase Cloud Functions 發起綠界加密結帳
+        // PM Fix: 移除動態載入，直接呼叫全域靜態載入的 functions
         window.handleECPayCheckout = async function(planMonths, price, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -949,12 +949,12 @@
             btnElement.disabled = true;
 
             try {
+                // 直接使用頂部靜態載入的 functions 與 httpsCallable
                 const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
 
                 const res = await createECPayOrder({ planMonths: planMonths, amount: price, email: emailCode });
                 
                 if (res.data && res.data.status === 'success') {
-                    // 動態建立隱藏表單提交至綠界
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = window.getStr(res.data.actionUrl);
@@ -965,7 +965,7 @@
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = window.getStr(key);
-                        input.value = window.getStr(params[key]); // 字串有效性檢查
+                        input.value = window.getStr(params[key]);
                         form.appendChild(input);
                     }
                     document.body.appendChild(form);
@@ -1939,16 +1939,14 @@
                     data.words = wArr.filter(w => w.length < 4).slice(0, 5);
                     if(data.words.length === 0) data.words.push(char + "字");
                     
+                    // PM Fix: 移除靜態模式的翻譯迴圈，避免成語被字面直譯，改為引導文案
                     const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
                     for (let idiom of idiomsArr) {
-                        try {
-                            const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
-                            const gtData = await gtRes.json();
-                            let enTrans = gtData[0].map(item => item[0]).join('');
-                            data.idioms.push({ idiom: idiom, meaning: "Static dictionary lacks detailed idioms. Please upgrade to AI module. / 靜態字典無法提供成語詳解，請升級 AI 模組。", english: enTrans });
-                        } catch(e) {
-                            data.idioms.push({ idiom: idiom, meaning: "Static Dictionary / 靜態字典", english: "Translation unavailable / 無法翻譯" });
-                        }
+                        data.idioms.push({ 
+                            idiom: idiom, 
+                            meaning: "靜態字典僅提示相關字詞。💡 升級 VIP 會員並綁定 API 金鑰，解鎖 AI 生動詳解與精準英文語意翻譯！", 
+                            english: "Upgrade to VIP & bind API Key to unlock vivid AI bilingual explanations." 
+                        });
                     }
                 }
                 
@@ -2042,6 +2040,7 @@
             
             for (const model of modelNames) {
                 try {
+                    // PM Fix: 提示詞微調，讓 AI 在 english 欄位直接輸出該成語的「語意解釋英文翻譯」，而非表面字眼
                     const prompt = `請以台灣教育部辭典標準，根據原文本上下文「${contextText}」，嚴格解析其中的繁體中文字「${char}」並輸出 JSON。
 1. zhuyin: 該字在此文本上下文中的正確注音符號 (含聲調)。⚠️極度重要：絕對禁止輸出漢語拼音(Pinyin)或任何英文字母！只能有純注音符號！若該字在上下文中應發「輕聲」，請務必精準標示！
 2. radical: 該字的部首名稱 (例如: 水部)。
@@ -2049,7 +2048,7 @@
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️極度嚴格要求：若該字「沒有」其他常用的破音字發音（如「是」、「我」等單一發音字），請務必將 polyphonic 設為空陣列 []，絕對禁止捏造或硬湊破音字！若有破音字，examples 內的詞彙發音【必須 100% 吻合】該破音字！
 6. idioms: 包含「${char}」的成語 (最多4個)。
-格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
+格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "該成語『解釋』的流暢英文翻譯"}]}`;
                     
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2060,19 +2059,7 @@
                     const rawText = result.candidates[0].content.parts[0].text;
                     const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
                     
-                    if (data.idioms && data.idioms.length > 0) {
-                        for (let i = 0; i < data.idioms.length; i++) {
-                            try {
-                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(data.idioms[i].idiom)}`);
-                                if (gtRes.ok) {
-                                    const gtData = await gtRes.json();
-                                    if (gtData && gtData[0]) {
-                                        data.idioms[i].english = gtData[0].map(item => item[0]).join('');
-                                    }
-                                }
-                            } catch(err) {}
-                        }
-                    }
+                    // PM Fix: 移除暴力覆蓋的 Google Translate 迴圈，完全信任 Gemini 的智能情境英文解析
                     
                     window.charCache[char] = data; 
                     

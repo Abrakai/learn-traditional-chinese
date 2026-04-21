@@ -742,7 +742,7 @@
                     if (cachedDays !== '--' && diffNum <= 7) {
                         if(els.headerPricingBtn) {
                             els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-warning-circle text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Renew</span>`;
-                            els.headerPricingBtn.className = "hidden w-full justify-center text-[10px] bg-red-500 hover:bg-red-600 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm font-black whitespace-nowrap animate-pulse";
+                            els.headerPricingBtn.className = "hidden w-full justify-center text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(250,204,21,0.8)] font-black whitespace-nowrap animate-pulse";
                             els.headerPricingBtn.classList.remove('hidden');
                         }
                     }
@@ -2037,9 +2037,9 @@
                             const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
                             const gtData = await gtRes.json();
                             let enTrans = gtData[0].map(item => item[0]).join('');
-                            data.idioms.push({ idiom: idiom, meaning: "Static dictionary lacks detailed idioms. Please upgrade to AI module. / 靜態字典無法提供成語詳解，請升級 AI 模組。", english: enTrans });
+                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典無法提供成語詳解，請至 [Settings] 綁定金鑰啟用 AI 解析！", english: enTrans });
                         } catch(e) {
-                            data.idioms.push({ idiom: idiom, meaning: "Static Dictionary / 靜態字典", english: "Translation unavailable / 無法翻譯" });
+                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典無成語庫", english: "Translation unavailable" });
                         }
                     }
                 }
@@ -2140,7 +2140,7 @@
 3. strokes: 該字的總筆畫數 (僅需數字，例如: 10)。
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️極度嚴格要求：若該字「沒有」其他常用的破音字發音（如「是」、「我」等單一發音字），請務必將 polyphonic 設為空陣列 []，絕對禁止捏造或硬湊破音字！若有破音字，examples 內的詞彙發音【必須 100% 吻合】該破音字！
-6. idioms: 包含「${char}」的成語 (最多4個)。
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請提供「道地的英文意譯」，絕對禁止字面直譯（例如「人山人海」應譯為 a sea of people 而非 people mountain）。
 格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                     
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
@@ -2156,20 +2156,6 @@
                         throw new Error("AI 回傳格式異常，無法擷取 JSON 結構");
                     }
                     const data = JSON.parse(matchResult[0]);
-                    
-                    if (data.idioms && data.idioms.length > 0) {
-                        for (let i = 0; i < data.idioms.length; i++) {
-                            try {
-                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(data.idioms[i].idiom)}`);
-                                if (gtRes.ok) {
-                                    const gtData = await gtRes.json();
-                                    if (gtData && gtData[0]) {
-                                        data.idioms[i].english = gtData[0].map(item => item[0]).join('');
-                                    }
-                                }
-                            } catch(err) {}
-                        }
-                    }
                     
                     window.charCache[char] = data; 
                     

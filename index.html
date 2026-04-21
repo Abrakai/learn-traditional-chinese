@@ -6,15 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.7-TYPOGRAPHY-AUDIO-PATCH"
+    version: "6.7.8-UI-METRICS-PATCH"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Fluid Typography & Granular Audio"
+    description: "Taiwan Chinese Learning Hub - Fluid Typography & Always-Visible Metrics"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "UI Fix: Removed 'uppercase' class from English idiom definitions for better readability."
-      - "Feature: Added granular TTS audio buttons for both Chinese meanings and English definitions in the Idioms section."
-      - "UI Refinement: Tweaked clamp() bounds on the header title to prevent cutoff on extremely narrow mobile devices."
-      - "Bugfix: View counter now forces UI display with local fallback values even if Firestore denies read permission."
+      - "UI Fix: Forced View Counter to be visible by default (removed 'hidden' class) to prevent it from disappearing during DB permission errors."
+      - "UI Fix: Enhanced Fluid Typography (clamp) for the main LOGO to dynamically scale perfectly on any mobile screen width."
+      - "UI Fix: Optimized View Counter text on narrow screens by replacing text with icons to save header space."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -88,25 +87,27 @@
             <!-- Left Side: Logo & Title (Responsive with clamp and truncate) -->
             <div class="flex items-center gap-1.5 md:gap-3 flex-1 min-w-0">
                 <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0 transition-all">
-                    <i class="ph-fill ph-book-open-text text-xl md:text-2xl"></i>
+                    <i class="ph-fill ph-book-open-text text-[clamp(1.1rem,3vw,1.5rem)]"></i>
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <h1 class="font-bold tracking-wider flex items-center gap-1.5 truncate text-[clamp(0.85rem,3.5vw,1.5rem)] transition-all">
+                    <h1 class="font-black tracking-wider flex items-center gap-1.5 truncate text-[clamp(14px,4.5vw,26px)] transition-all">
                         Learn Chinese
-                        <span class="text-[clamp(0.6rem,2vw,0.75rem)] font-bold opacity-90 hidden lg:inline-block">/ 繁體中文學習中心</span>
+                        <span class="text-[clamp(10px,2vw,14px)] font-bold opacity-90 hidden lg:inline-block">/ 繁體中文學習中心</span>
                     </h1>
-                    <p class="hidden md:block text-red-100 mt-0.5 font-medium italic uppercase tracking-widest truncate text-[clamp(0.55rem,1.5vw,0.75rem)] transition-all">Abrakai Studio | Taiwan Edition</p>
+                    <p class="hidden md:block text-red-100 mt-0.5 font-medium italic uppercase tracking-widest truncate text-[clamp(10px,1.5vw,12px)] transition-all">Abrakai Studio | Taiwan Edition</p>
                 </div>
             </div>
             
             <!-- Right Side: Actions & Badges -->
             <div class="flex items-center gap-1.5 md:gap-3 justify-end flex-shrink-0">
                 
-                <!-- NEW: Dynamic View Counter Badge -->
-                <div id="view-counter-badge" class="hidden items-center gap-1 bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-slate-600 shadow-sm transition-all whitespace-nowrap">
+                <!-- Fixed: View Counter Badge is now ALWAYS visible (flex instead of hidden) -->
+                <div id="view-counter-badge" class="flex items-center gap-1 bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-slate-600 shadow-sm transition-all whitespace-nowrap">
                     <i class="ph-fill ph-chart-line-up text-emerald-400 text-[10px] sm:text-sm"></i>
-                    <span class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
-                        VIEWS <span id="total-views" class="text-white">--</span> <span class="mx-0.5 md:mx-1 text-slate-500">|</span> TODAY <span id="today-views" class="text-white">--</span>
+                    <span class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase flex items-center gap-0.5">
+                        <span class="hidden sm:inline">VIEWS</span><i class="ph-fill ph-eye sm:hidden text-slate-400" title="Total Views"></i> <span id="total-views" class="text-white ml-0.5">--</span> 
+                        <span class="mx-0.5 md:mx-1 text-slate-500">|</span> 
+                        <span class="hidden sm:inline">TODAY</span><i class="ph-fill ph-calendar-blank sm:hidden text-slate-400" title="Today's Views"></i> <span id="today-views" class="text-white ml-0.5">--</span>
                     </span>
                 </div>
 
@@ -514,7 +515,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.7-TYPOGRAPHY-AUDIO-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.8-UI-METRICS-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -1976,7 +1977,7 @@
             const errorPanel = document.getElementById('ai-error-panel');
             
             try {
-                loader.classList.remove('hidden');
+                if(loader) loader.classList.remove('hidden');
                 if(vipPanel) vipPanel.classList.add('hidden');
                 if(errorPanel) errorPanel.classList.add('hidden');
                 
@@ -2263,7 +2264,7 @@
                             </div>
                             
                             <div class="mt-4 border-t-2 pt-4 border-slate-100 flex items-start gap-2">
-                                <div class="text-[12px] text-indigo-600 font-bold tracking-wide italic opacity-90 leading-relaxed flex-1">${window.getStr(i.english) || "Translation loading..."}</div>
+                                <div class="text-[13px] text-indigo-600 font-bold tracking-wide italic opacity-90 leading-relaxed flex-1">${window.getStr(i.english) || "Translation loading..."}</div>
                                 <button type="button" data-action="speak-eng" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors mt-0.5"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                             </div>
                         </div>
@@ -2324,7 +2325,7 @@
                     
                 } catch (dbErr) {
                     console.warn("View counter init restricted by DB rules. Showing local count.");
-                    updateBadge(); // 顯示本地端計數器以維持 UI 一致性
+                    updateBadge(); 
                 }
             } catch(e) {
                 console.error("Counter Error", e);

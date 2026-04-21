@@ -2021,4 +2021,395 @@
             document.getElementById('active-engine-badge').classList.remove('hidden');
 
             try {
-                let res = await fetch(`https://www.moedict.tw/${encodeURIComponent(char
+                let res = await fetch(`https://www.moedict.tw/${encodeURIComponent(char)}.json`).catch(() => null);
+                if (!res || !res.ok) {
+                    res = await fetch(`https://www.moedict.tw/uni/${encodeURIComponent(char)}`).catch(() => null);
+                }
+                if (!res || !res.ok) {
+                    res = await fetch(`https://www.moedict.tw/a/${encodeURIComponent(char)}.json`).catch(() => null);
+                }
+                if (!res || !res.ok) throw new Error("Moedict API Failed");
+                
+                const dictData = await res.json();
+                
+                let rawRadical = dictData.radical || "未知";
+                let cleanRadical = rawRadical.replace(/<[^>]+>/g, '').trim();
+                
+                let data = { zhuyin: "", radical: cleanRadical, strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
+                
+                if (dictData.heteronyms && dictData.heteronyms.length > 0) {
+                    const cleanBopo = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/[a-zA-Z]/g, '').replace(/　/g, '').trim();
+                    data.zhuyin = cleanBopo(dictData.heteronyms[0].bopomofo);
+                    
+                    let tempWords = new Set();
+                    let seenFallbackZhuyin = new Set();
+                    seenFallbackZhuyin.add(data.zhuyin);
+
+                    dictData.heteronyms.forEach((h, idx) => {
+                        if (idx > 0 && h.bopomofo) {
+                            let pZhuyin = cleanBopo(h.bopomofo);
+                            if (pZhuyin && !seenFallbackZhuyin.has(pZhuyin)) {
+                                seenFallbackZhuyin.add(pZhuyin);
+                                data.polyphonic.push({ zhuyin: pZhuyin, examples: [] });
+                            }
+                        }
+                        if (h.definitions) {
+                            h.definitions.forEach(d => {
+                                const combinedText = (d.def || '') + ' ' + (d.quote || []).join(' ') + ' ' + (d.example || []).join(' ');
+                                const matches = combinedText.match(new RegExp(`[\\u4e00-\\u9fa5]{0,3}${char}[\\u4e00-\\u9fa5]{0,3}`, 'g'));
+                                if (matches) matches.forEach(m => { if(m.length > 1 && m.length <= 4 && !m.includes('的')) tempWords.add(m); });
+                            });
+                        }
+                    });
+                    
+                    const wArr = Array.from(tempWords).filter(w => w.length > 1 && w.length <= 4);
+                    data.words = wArr.filter(w => w.length < 4).slice(0, 5);
+                    if(data.words.length === 0) data.words.push(char + "字");
+                    
+                    const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
+                    for (let idiom of idiomsArr) {
+                        try {
+                            let meaning = "";
+                            try {
+                                const mRes = await fetch(`https://www.moedict.tw/${encodeURIComponent(idiom)}.json`);
+                                if (mRes.ok) {
+                                    const mData = await mRes.json();
+                                    if (mData.heteronyms && mData.heteronyms[0].definitions) {
+                                        meaning = mData.heteronyms[0].definitions[0].def.replace(/<[^>]+>/g, '').replace(/~[a-zA-Z0-9_]+~/g, '');
+                                    }
+                                }
+                            } catch(e) {}
+                            
+                            if(!meaning) meaning = "基礎成語組合，綁定 AI 金鑰可獲取更生動的文脈詳解。";
+
+                            const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(meaning)}`);
+                            const gtData = await gtRes.json();
+                            let enTrans = gtData[0].map(item => item[0]).join('');
+                            
+                            data.idioms.push({ idiom: idiom, meaning: meaning, english: enTrans });
+                        } catch(e) {
+                            data.idioms.push({ idiom: idiom, meaning: "基礎成語 / Basic Idiom", english: "Translation unavailable / 無法翻譯" });
+                        }
+                    }
+                }
+                
+                if (!data.zhuyin) throw new Error("No Data");
+                
+                try {
+                    window.renderResult(char, data);
+                    vipPanel.classList.remove('hidden');
+                } catch(renderErr) {
+                    console.error("Render Error:", renderErr);
+                    window.showToast("Data rendering error / 資料解析與渲染異常，請重試", true);
+                }
+                
+                let existingUpsell = document.getElementById('dict-upsell-box');
+                if (existingUpsell) existingUpsell.remove();
+                
+                const upsellBox = document.createElement('div');
+                upsellBox.id = 'dict-upsell-box';
+                upsellBox.className = 'mt-10 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100 rounded-[2rem] shadow-inner';
+                
+                if (errorContext && errorContext.type === 'QUOTA') {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-red-500"><i class="ph-fill ph-warning-circle text-3xl animate-pulse"></i></div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降級基礎字典</h4>
+                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">System attempted models: ${errorContext.models}, but your API quota is full.<br>系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br><br>Please apply for a new API Key or set up billing in Google AI Studio.<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
+                                <p class="text-[10px] text-slate-500 italic mb-4">Disclaimer: AI feature availability depends on your Google API Key status. / 免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
+                                <button type="button" onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">Update API Key / 前往設定更新金鑰</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (!window.isVIP) {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
+                            <div>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">
+                                    您目前正在使用靜態字典。為了提升學習成效，不論何種身分皆提供基礎中英解析。<br><br>
+                                    💡 升級 VIP 會員並綁定 API 金鑰，解鎖無限次 AI 智慧大腦，獲得更生動、不死板的成語詳解與上下文破音字判斷！
+                                </p>
+                                <button type="button" onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">View VIP Plans / 查看 VIP 升級方案</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-yellow-500"><i class="ph-fill ph-crown text-3xl animate-pulse"></i></div>
+                            <div>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">VIP Member (Basic Mode) / 尊榮會員 (基礎模式)</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">
+                                    您已是 VIP 會員！目前為基礎靜態字典解析。<br><br>
+                                    💡 只需綁定免費 Google API 金鑰，即可啟動 AI 智慧大腦，解鎖更生動、不死板的成語詳解與精準英文語意翻譯！
+                                </p>
+                                <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">Bind Free Key / 綁定免費金鑰啟動 AI</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                vipPanel.appendChild(upsellBox);
+                loader.classList.add('hidden');
+                
+            } catch(e) {
+                document.getElementById('ai-error-title').textContent = "DICTIONARY UNAVAILABLE / 字典連線失敗";
+                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">Cannot load basic dictionary data. / 無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">Please check your network connection, or go to "Settings" to bind a Google API Key and switch to the advanced AI engine. / 請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
+                errorPanel.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        };
+
+        window.executeAIFetch = async function(char, contextText = "") {
+            if (!localStorage.getItem('abra_vip_code')) return;
+            if (window.syncVipStatus) await window.syncVipStatus();
+            
+            if (!window.isVIP || !window.hasValidApiKey()) {
+                window.executeFallbackFetch(char);
+                return;
+            }
+
+            const loader = document.getElementById('ai-inner-loader');
+            const vipPanel = document.getElementById('vip-only-content');
+            const errorPanel = document.getElementById('ai-error-panel');
+
+            loader.classList.remove('hidden');
+            vipPanel.classList.add('hidden');
+            errorPanel.classList.add('hidden');
+            document.getElementById('active-engine-badge').classList.add('hidden');
+
+            const modelNames = [
+                "gemini-3.0-flash", 
+                "gemini-3.1-flash-lite", 
+                "gemini-3.1-pro", 
+                "gemini-2.5-flash", 
+                "gemini-2.5-flash-lite", 
+                "gemini-2.0-flash"
+            ];
+            
+            let success = false;
+            let modelErrors = [];
+            
+            for (const model of modelNames) {
+                try {
+                    const prompt = `請以台灣教育部辭典標準，根據原文本上下文「${contextText}」，嚴格解析其中的繁體中文字「${char}」並輸出 JSON。
+1. zhuyin: 該字在此文本上下文中的正確注音符號 (含聲調)。⚠️極度重要：絕對禁止輸出漢語拼音(Pinyin)或任何英文字母！只能有純注音符號！若該字在上下文中應發「輕聲」，請務必精準標示！
+2. radical: 該字的部首名稱 (例如: 水部)。
+3. strokes: 該字的總筆畫數 (僅需數字，例如: 10)。
+4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
+5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️極度嚴格要求：若該字「沒有」其他常用的破音字發音（如「是」、「我」等單一發音字），請務必將 polyphonic 設為空陣列 []，絕對禁止捏造或硬湊破音字！若有破音字，examples 內的詞彙發音【必須 100% 吻合】該破音字！
+6. idioms: 包含「${char}」的成語 (最多4個)。
+格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "該成語『解釋意涵』的流暢英文翻譯 (請務必使用一般句首大寫、專有名詞大寫，其餘小寫 Sentence case，嚴禁通篇全大寫)"}]}`;
+                    
+                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const result = await res.json();
+                    if (result.error) throw new Error(result.error.message || "API Error");
+                    const rawText = result.candidates[0].content.parts[0].text;
+                    const data = JSON.parse(rawText.match(/\{[\s\S]*\}/)[0]);
+                    
+                    window.charCache[char] = data; 
+                    
+                    let existingUpsell = document.getElementById('dict-upsell-box');
+                    if (existingUpsell) existingUpsell.remove();
+
+                    try {
+                        window.renderResult(char, data);
+                        document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
+                        document.getElementById('active-engine-badge').classList.remove('hidden');
+                        success = true; break;
+                    } catch(renderErr) {
+                        console.error("Render Error:", renderErr);
+                        window.showToast("Data rendering error / 資料解析與渲染異常，請重試", true);
+                        break;
+                    }
+                } catch (e) {
+                    let errMsg = e.message;
+                    if (errMsg.includes('429')) errMsg = '429 Quota Exceeded (額度耗盡)';
+                    else if (errMsg.includes('API key not valid') || errMsg.includes('Invalid')) errMsg = 'API Key Invalid (金鑰無效)';
+                    else errMsg = `連線失敗 (${errMsg})`;
+                    modelErrors.push(`[${model}]`);
+                }
+            }
+            
+            if (success) { 
+                loader.classList.add('hidden');
+                vipPanel.classList.remove('hidden'); 
+            } else { 
+                window.showToast("API Error / API 金鑰連線失效或額度已滿，已為您無縫切換為基礎字典模式", true);
+                window.executeFallbackFetch(char, { type: 'QUOTA', models: modelErrors.join(', ') });
+            }
+        };
+
+        // PM Fix: 鈦合金等級的 Null-Safe 渲染引擎，保證陣列缺失時絕對不會崩潰白畫面
+        window.renderResult = function(char, data) {
+            try {
+                if (!data) data = {};
+                
+                const safeData = {
+                    radical: data.radical || 'Unknown / 未知',
+                    strokes: data.strokes || '--',
+                    zhuyin: data.zhuyin || '',
+                    polyphonic: Array.isArray(data.polyphonic) ? data.polyphonic : [],
+                    words: Array.isArray(data.words) ? data.words : [],
+                    idioms: Array.isArray(data.idioms) ? data.idioms : []
+                };
+
+                const radicalDisplay = document.getElementById('radical-display');
+                const strokesDisplay = document.getElementById('strokes-display');
+                if (radicalDisplay) radicalDisplay.textContent = window.getSafeStr(safeData.radical);
+                if (strokesDisplay) strokesDisplay.textContent = window.getSafeStr(safeData.strokes);
+
+                const pureMainZhuyin = window.getSafeStr(safeData.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
+                const pb = document.getElementById('play-char-btn');
+                
+                if (pureMainZhuyin) {
+                    pb.classList.remove('hidden'); 
+                    pb.setAttribute('data-action', 'speak'); 
+                    pb.setAttribute('data-text', pureMainZhuyin); 
+                    pb.setAttribute('data-fallback', char); 
+                } else {
+                    pb.classList.add('hidden');
+                }
+                
+                const polyDisp = document.getElementById('polyphonic-display'); 
+                polyDisp.innerHTML = '';
+                
+                const zhuyinRegex = /^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/;
+                const validPolyphonic = safeData.polyphonic.filter(p => {
+                    const pureZ = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                    return pureZ && pureZ !== safeData.zhuyin && zhuyinRegex.test(pureZ);
+                });
+                
+                let seenPoly = new Set();
+                seenPoly.add(pureMainZhuyin);
+
+                let polyHTML = '';
+                if (validPolyphonic.length > 0) {
+                    validPolyphonic.forEach(p => {
+                        const pureZhuyin = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                        if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
+                            seenPoly.add(pureZhuyin);
+                            const pExamples = Array.isArray(p.examples) ? p.examples : [];
+                            const examplesStr = pExamples.length > 0 ? "如：" + pExamples.map(ex => `「${window.getSafeStr(ex)}」`).join('、') : "請升級解鎖 AI 範例";
+                            polyHTML += `
+                                <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
+                                    <div class="flex flex-col flex-1">
+                                        <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter px-2">${pureZhuyin}</span>
+                                        <span class="text-[11px] text-purple-500 mt-2 px-2 leading-relaxed">${examplesStr}</span>
+                                    </div>
+                                    <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 flex-shrink-0 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
+                                        <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                
+                if (polyHTML) {
+                    document.getElementById('poly-section-wrap').style.display = 'block';
+                    polyDisp.innerHTML = polyHTML;
+                } else {
+                    document.getElementById('poly-section-wrap').style.display = 'none';
+                }
+                
+                const wordsCont = document.getElementById('words-container');
+                wordsCont.innerHTML = safeData.words.slice(0, 6).map(w => {
+                        const pureWord = window.getSafeStr(w).replace(/\([^)]*\)/g, '').trim();
+                        if(!pureWord) return '';
+                        return `<button type="button" data-action="speak" data-text="${pureWord}" class="px-5 py-2.5 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-sm hover:border-indigo-400 hover:shadow-md transition-all flex items-center gap-2 group active:scale-95"><span>${pureWord}</span><i class="ph-fill ph-speaker-high text-slate-300 group-hover:text-indigo-500 pointer-events-none transition-colors"></i></button>`;
+                }).join('');
+                if (wordsCont.innerHTML === '') {
+                    wordsCont.innerHTML = `<span class="text-slate-400 text-xs italic font-bold py-2">無相關詞彙</span>`;
+                }
+                
+                const idiomsCont = document.getElementById('idioms-container');
+                const validIdioms = safeData.idioms.filter(i => i && i.idiom && window.getSafeStr(i.idiom).includes(char) && window.getSafeStr(i.idiom).length >= 3).slice(0, 6);
+                
+                if (validIdioms.length > 0) {
+                    idiomsCont.innerHTML = validIdioms.map(i => `
+                        <div class="p-8 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-sm font-bold shadow-inner text-left hover:bg-white transition-all relative group">
+                            <div class="flex-1 pr-16">
+                                <div class="text-slate-950 text-3xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-4 inline-block uppercase">${window.getSafeStr(i.idiom)}</div>
+                                <div class="text-base text-slate-500 font-bold mt-5 leading-relaxed">${window.getSafeStr(i.meaning)}</div>
+                                <div class="text-[12px] normal-case tracking-normal text-indigo-700 font-bold mt-5 border-t-2 pt-5 border-slate-100 leading-relaxed opacity-90">${window.getSafeStr(i.english) || "Translation loading..."}</div>
+                            </div>
+                            <button type="button" data-action="speak" data-text="${window.getSafeStr(i.idiom)}" class="absolute top-8 right-8 w-14 h-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-2xl transition-transform group-hover:scale-110 active:scale-90 border-b-4 border-emerald-800 flex items-center justify-center"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
+                        </div>
+                    `).join('');
+                } else {
+                    idiomsCont.innerHTML = `
+                        <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
+                            <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error("Titanium Render Error Safely Caught:", err);
+                window.showToast("Data rendering error / 資料解析與渲染異常，系統已自動攔截", true);
+            }
+        };
+
+        window.setupTypingMode = function() {
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea');
+            inputs.forEach(el => {
+                el.addEventListener('focus', () => {
+                    if (window.innerWidth < 768) {
+                        document.body.classList.add('typing-mode');
+                    }
+                });
+                el.addEventListener('blur', () => {
+                    setTimeout(() => {
+                        document.body.classList.remove('typing-mode');
+                    }, 150); 
+                });
+            });
+        };
+
+        document.addEventListener('click', (e) => {
+            const actionEl = e.target.closest('[data-action]');
+            if (!actionEl) return;
+            
+            const action = actionEl.getAttribute('data-action');
+            if (action === 'admin-edit') {
+                if (window.openAdminModal) window.openAdminModal(actionEl.getAttribute('data-id'));
+            } else if (action === 'admin-delete') {
+                if (window.deleteAdminMember) window.deleteAdminMember(actionEl.getAttribute('data-id'), actionEl);
+            } else if (action === 'admin-msg') {
+                if (window.openAdminMsgModal) window.openAdminMsgModal(actionEl.getAttribute('data-id'));
+            } else if (action === 'chat-del') {
+                if (window.deleteMsg) window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
+            } else if (action === 'speak') {
+                if (window.speak) window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
+            }
+        });
+
+        const initUI = function() {
+            const vipContent = document.getElementById('vip-only-content');
+            if (vipContent && !document.getElementById('radical-display')) {
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "flex flex-wrap items-center gap-4 mb-6 border-b-2 border-slate-100 pb-5";
+                headerDiv.innerHTML = `
+                    <div class="bg-indigo-50 px-5 py-2.5 rounded-xl border-2 border-indigo-100 text-sm font-black text-indigo-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-book-bookmark text-indigo-500 text-lg"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-base">--</span></div>
+                    <div class="bg-emerald-50 px-5 py-2.5 rounded-xl border-2 border-emerald-100 text-sm font-black text-emerald-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-pen-nib text-emerald-500 text-lg"></i> Strokes / 筆畫：<span id="strokes-display" class="text-emerald-600 text-base">--</span></div>
+                `;
+                vipContent.insertBefore(headerDiv, vipContent.firstChild);
+            }
+            if (window.updateGlobalUI) window.updateGlobalUI();
+            if (window.setupTypingMode) window.setupTypingMode();
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initUI);
+        } else {
+            initUI();
+        }
+    </script>
+</body>
+</html>

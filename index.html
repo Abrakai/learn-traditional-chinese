@@ -4,22 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
-    <!--
-    ---
-    version: "7.1.2-FINAL-UI-HOTFIX"
-    author: "Abrakai Studio"
-    description: "2200+ Lines Core. Fixed Idiom English Casing & Restored Polyphonic Examples."
-    disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
-    updates:
-      - "UI: Removed 'uppercase' from Idiom English translation for better readability (74.jpg fix)."
-      - "UI: Injected 'p.examples' into Polyphonic rendering box to display word context (75.jpg fix)."
-    ---
-    -->
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Hanzi Writer for Stroke Order -->
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
@@ -47,10 +33,19 @@
             body.typing-mode header { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         }
     </style>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YOUR_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // 將下方的 G-YOUR_MEASUREMENT_ID 替換為您的 ID
+      gtag('config', 'G-YOUR_MEASUREMENT_ID');
+    </script>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- Domain Lock Overlay -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
@@ -63,23 +58,19 @@
         </p>
     </div>
 
-    <!-- InfoSec Honeypot -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
-    <!-- System Toast -->
     <div id="system-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[2100] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10">
         <i id="toast-icon" class="ph-fill text-lg"></i><span id="toast-msg"></span>
     </div>
 
-    <!-- Auth Error Banner -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header (Optimized for Mobile with Sliding Animation) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50 transition-all duration-300 ease-in-out">
         <div class="max-w-6xl mx-auto px-4 py-3 md:py-5 flex flex-row items-center justify-between gap-2 md:gap-4 w-full">
             <div class="flex items-center gap-2 md:gap-3 flex-shrink-0">
@@ -114,7 +105,6 @@
                     <i class="ph-fill ph-crown text-lg sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
-                <!-- Operations (Icon-only on mobile - Direct Trigger) -->
                 <button type="button" id="msg-btn" title="Inbox / 訊息中心" class="hidden relative text-[10px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-xl sm:text-base"></i> <span class="hidden sm:inline">Inbox</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500 border border-red-600"></span></span>
@@ -131,7 +121,6 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
         
-        <!-- Auth Section -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
@@ -182,7 +171,6 @@
             </div>
         </section>
 
-        <!-- Admin Dashboard Section -->
         <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
@@ -218,7 +206,6 @@
             </div>
         </section>
 
-        <!-- Translation Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
@@ -231,7 +218,6 @@
             </div>
         </section>
 
-        <!-- Writing Setup Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
@@ -248,7 +234,6 @@
             </div>
         </section>
 
-        <!-- Learning Dashboard -->
         <section id="learning-dashboard" class="hidden bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500 text-left">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-4">
@@ -262,7 +247,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- Strokes Area -->
                 <div class="md:col-span-5 lg:col-span-4 p-10 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-5 left-5 flex flex-col items-start gap-1 text-slate-400">
                         <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order / 筆順</span></div>
@@ -278,14 +262,12 @@
                     <p id="quiz-status" class="text-sm mt-6 text-emerald-600 font-black h-6 uppercase tracking-widest"></p>
                 </div>
 
-                <!-- AI Analysis Area -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-10 md:p-12 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-20 space-y-6">
                         <div class="ai-inner-loader"></div>
                         <p class="text-indigo-600 text-xs font-black animate-pulse uppercase tracking-[0.4em]">AI Engine Analyzing... / 解析中...</p>
                     </div>
                     
-                    <!-- AI Error Panel -->
                     <div id="ai-error-panel" class="hidden absolute inset-0 flex flex-col items-center justify-center h-full text-center space-y-4 px-4 bg-white z-20 overflow-y-auto py-10">
                         <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
                         <h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight uppercase">Connection Issue / 連線異常</h3>
@@ -293,7 +275,6 @@
                         <button type="button" onclick="window.handleAIRetry()" class="bg-slate-800 text-white px-10 py-3.5 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-wider mt-4 flex-shrink-0">Retry / 重新連線</button>
                     </div>
 
-                    <!-- Result Body -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="flex items-center gap-3 mb-6 border-b-2 border-slate-100 pb-5">
                             <div class="bg-indigo-50 px-4 py-2 rounded-xl border-2 border-indigo-100 text-xs font-black text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-book-bookmark text-indigo-500 text-base"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-sm">--</span></div>
@@ -308,7 +289,6 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
-                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -321,10 +301,8 @@
             </div>
         </section>
         
-        <!-- Pricing Section Container -->
         <section id="pricing-section-container" class="hidden w-full mt-10"></section>
         
-        <!-- Un-fixed Global Trust Footer (Moved to naturally follow content) -->
         <div id="global-trust-footer" class="w-full bg-emerald-600 text-white py-3 px-4 shadow-sm z-40 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500 mt-16 rounded-3xl mb-8 max-w-6xl mx-auto">
             <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
             <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
@@ -334,7 +312,6 @@
         
     </main>
 
-    <!-- Modals -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200 flex flex-col h-[80vh] text-left">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-4 mb-4">
@@ -412,7 +389,6 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
@@ -480,7 +456,6 @@
         </div>
     </div>
 
-    <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
             <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Data Privacy / 個資保護與免責聲明</h3>
@@ -510,9 +485,7 @@
         </div>
     </footer>
 
-    <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad, ECPay 與 UI 邏輯】 -->
     <script type="module">
-        // PM Fix: 靜態載入 firebase-functions，徹底解決跨域與模組作用域遺失問題
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
@@ -530,7 +503,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const functions = getFunctions(app, 'asia-east1'); // 提早綁定全域金流引擎
+        const functions = getFunctions(app, 'asia-east1'); 
         const appId = "abra-learn-zh-vip";
         
         window.firebaseDbInstance = db;
@@ -545,10 +518,8 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // 增量邏輯：強制字串防護層
         window.getSafeStr = (val) => (val === null || val === undefined) ? "" : String(val).replace(/<[^>]*>?/gm, '').trim();
 
-        // Polyphonic deduplication and TTS Homophone map remains secured
         const bopoToCharMap = {
             'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
             'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
@@ -593,11 +564,6 @@
             window.loadVoices(); 
         }
 
-        window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
-        window.hasValidApiKey = function() {
-            return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
-        };
-
         const sentinelCheck = () => {
             const host = window.location.hostname;
             const proto = window.location.protocol;
@@ -605,14 +571,6 @@
             const isAllowedDomain = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"].some(d => host === d || host.endsWith('.' + d));
             if (!isLocal && !isAllowedDomain) { document.getElementById('domain-lock-overlay')?.classList.remove('hidden'); return false; }
             return true;
-        };
-
-        window.triggerSMSReminder = async function(email, diffNum) {
-            const lastSmsDate = localStorage.getItem(`abra_sms_sent_${email}`);
-            const today = new Date().toISOString().split('T')[0];
-            if (lastSmsDate !== today) {
-                localStorage.setItem(`abra_sms_sent_${email}`, today);
-            }
         };
 
         window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
@@ -665,12 +623,10 @@
             const emailCode = localStorage.getItem('abra_vip_code');
             const adminStatus = localStorage.getItem('abra_admin_status');
             
-            // 增量邏輯：欄位殘留防禦 (63.jpg)
             if (!emailCode && adminStatus !== 'active') {
                 localStorage.removeItem('abra_vip_status');
                 localStorage.removeItem('abra_admin_status');
                 window.isVIP = false; window.isAdmin = false;
-                // 重置所有輸入欄位
                 ['login-email', 'login-vip-code', 'reg-name', 'reg-email', 'reg-pass'].forEach(id => {
                     const el = document.getElementById(id); if(el) el.value = '';
                 });
@@ -817,7 +773,6 @@
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
                         
-                        <!-- 1. USD Transparent Pricing Section (Gumroad LIVE) -->
                         <div class="pt-6">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph-fill ph-globe text-base"></i> 🌐 國際美金刷卡區 (USD)</h4>
                             <div class="space-y-3">
@@ -857,7 +812,6 @@
                             </div>
                         </div>
 
-                        <!-- 2. ECPay TWD Local Pricing Section (Updated PM Text) -->
                         <div class="pt-8">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-credit-card text-base"></i> 🇹🇼 台灣台幣刷卡區 (綠界 ECPay 全自動)</h4>
                             <div class="space-y-3">
@@ -897,7 +851,6 @@
                             </div>
                         </div>
                         
-                        <!-- 3. TWD Offline Manual Transfer Section (Updated PM Layout) -->
                         <div class="pt-8 border-t border-slate-100 mt-6">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph-fill ph-bank text-base"></i> 🏦 現金匯款 (免除海外手續費 / 人工開通)</h4>
                             <div class="p-4 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
@@ -944,7 +897,6 @@
             }
         };
 
-        // PM Fix: 處理 Firebase Functions SDK IAM 阻擋，加入錯誤捕捉與提示
         window.handleECPayCheckout = async function(planMonths, price, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
@@ -958,7 +910,6 @@
             btnElement.disabled = true;
 
             try {
-                // 直接使用頂部靜態載入的 functions 與 httpsCallable
                 const createECPayOrder = httpsCallable(functions, 'createECPayOrder');
 
                 const res = await createECPayOrder({ planMonths: planMonths, amount: price, email: emailCode });
@@ -984,7 +935,6 @@
                 }
             } catch (e) {
                 console.error("ECPay Connection Error:", e);
-                // 攔截 Failed to fetch (通常代表 CORS/IAM 阻擋)
                 if (e.message && e.message.includes("fetch")) {
                     const overlay = document.getElementById('domain-lock-overlay');
                     overlay.innerHTML = `
@@ -2170,7 +2120,6 @@
                     const pureZhuyin = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
                     if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
                         seenPoly.add(pureZhuyin);
-                        // PM Fix 75.jpg: 把範例印回畫面上
                         const examplesStr = (p.examples && p.examples.length > 0) ? "如：" + p.examples.map(ex => `「${window.getSafeStr(ex)}」`).join('、') : "請升級解鎖 AI 範例";
                         polyHTML += `
                             <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">

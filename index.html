@@ -6,14 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.2-PERMISSION-FIX-PATCH"
+    version: "6.7.3-SECURITY-RULES-PATCH"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Strict Auth Init & System Busy Fix"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Authfix: Added dedicated try-catch for legacy DB getDoc in handleLogin to gracefully handle Firestore permission denial and show 'Invalid Credentials' instead of 'System busy'."
+      - "Authfix: Added specific permission-denied catchers in handleLogin and handleSignup to explicitly inform admins to update Firestore Security Rules."
+      - "Authfix: Added dedicated try-catch for legacy DB getDoc in handleLogin to gracefully handle Firestore permission denial."
       - "Authfix: Refactored onAuthStateChanged to strict initAuth() pattern with custom token fallback to prevent Race Condition."
-      - "Debug: Exposed inner e.message in handleLogin and handleSignup instead of hardcoded 'System busy'."
       - "Security: Added getStr() to legacy profile name migration."
     ---
     -->
@@ -503,7 +503,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.2-PERMISSION-FIX-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.3-SECURITY-RULES-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -1081,7 +1081,11 @@
                         docSnap = await getDoc(docRef);
                     } catch (dbErr) {
                         console.error("Legacy DB Permission/Network Error:", dbErr);
-                        window.showToast("Invalid Credentials / 帳號或密碼錯誤", true);
+                        if (dbErr.code === 'permission-denied' || (dbErr.message && dbErr.message.includes('permission'))) {
+                            window.showToast("資料庫權限不足！請管理員至 Firebase 放行 Security Rules", true);
+                        } else {
+                            window.showToast("Invalid Credentials / 帳號或密碼錯誤", true);
+                        }
                         return;
                     }
                     
@@ -1111,22 +1115,30 @@
                     const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                     localStorage.setItem('abra_vip_code', sanitizedEmail);
                     
-                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
-                    const docSnap = await getDoc(docRef);
-                    if(docSnap.exists()) {
-                        const data = docSnap.data();
-                        let status = 'pending';
-                        if (data.expiryDate) {
-                            const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                            status = (diff >= 0) ? 'active' : 'expired';
-                            localStorage.setItem('abra_vip_days', diff.toString());
+                    try {
+                        const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                        const docSnap = await getDoc(docRef);
+                        if(docSnap.exists()) {
+                            const data = docSnap.data();
+                            let status = 'pending';
+                            if (data.expiryDate) {
+                                const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                                status = (diff >= 0) ? 'active' : 'expired';
+                                localStorage.setItem('abra_vip_days', diff.toString());
+                            }
+                            localStorage.setItem('abra_vip_status', status);
+                            localStorage.setItem('abra_user_name', data.name || "Member");
+                            if (data.apiKey && status === 'active') {
+                                localStorage.setItem('gemini_api_key', data.apiKey.trim());
+                                window.activeApiKey = data.apiKey.trim();
+                            }
                         }
-                        localStorage.setItem('abra_vip_status', status);
-                        localStorage.setItem('abra_user_name', data.name || "Member");
-                        if (data.apiKey && status === 'active') {
-                            localStorage.setItem('gemini_api_key', data.apiKey.trim());
-                            window.activeApiKey = data.apiKey.trim();
-                        }
+                    } catch (syncErr) {
+                         console.error("Post-login getDoc error:", syncErr);
+                         if (syncErr.code === 'permission-denied' || (syncErr.message && syncErr.message.includes('permission'))) {
+                             window.showToast("登入成功但權限不足，無法讀取會員效期 (請更新 Rules)", true);
+                             return; // 終止刷新以顯示錯誤
+                         }
                     }
                     
                     window.showToast("Login Success! / 登入成功！");
@@ -1135,7 +1147,11 @@
 
             } catch(e) {
                 console.error("Login Cascade Error:", e);
-                window.showToast("系統繁忙 / Error: " + (e.message || e.code || "Unknown"), true);
+                if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
+                    window.showToast("登入失敗：資料庫權限不足，請更新 Firestore Rules", true);
+                } else {
+                    window.showToast("系統繁忙 / Error: " + (e.message || e.code || "Unknown"), true);
+                }
             } finally {
                 if(loader) loader.classList.add('hidden');
                 if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
@@ -1183,9 +1199,15 @@
 
             } catch(e) { 
                 console.error("Signup Error:", e);
-                if (e.code === 'auth/email-already-in-use') window.showToast("Email in use / 信箱已註冊，請登入", true);
-                else if (e.code === 'auth/weak-password') window.showToast("Password too weak / 密碼強度不足 (至少 6 碼)", true);
-                else window.showToast("Signup Error / 註冊失敗: " + (e.message || e.code), true);
+                if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
+                    window.showToast("註冊失敗：資料庫寫入被拒 (請更新 Security Rules)", true);
+                } else if (e.code === 'auth/email-already-in-use') {
+                    window.showToast("Email in use / 信箱已註冊，請登入", true);
+                } else if (e.code === 'auth/weak-password') {
+                    window.showToast("Password too weak / 密碼強度不足 (至少 6 碼)", true);
+                } else {
+                    window.showToast("Signup Error / 註冊失敗: " + (e.message || e.code), true);
+                }
             } finally { 
                 if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } 
             }

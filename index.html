@@ -6,14 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.5-UI-RESILIENCE-PATCH"
+    version: "6.7.6-FLUID-UI-PATCH"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Mobile Header & AI Panel Resilience"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
+      - "Feature: Added Firestore-backed View Counter (Total/Today) with non-blocking fail-safe."
+      - "UI Fix: Implemented Fluid Typography using clamp() for smooth LOGO scaling."
       - "UI Fix: Reworked mobile header flex layout with min-w-0 and truncate to prevent text overflow on small screens."
       - "Bugfix: Wrapped entire executeAIFetch in a master Try-Catch to prevent silent blank panels."
-      - "UX Refinement: Improved empty state messaging for idioms to clearly explain Basic Dict limitations."
       - "Authfix: Clarified login failure toast to handle DB permission block gracefully."
     ---
     -->
@@ -81,27 +82,35 @@
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header (Optimized for Mobile with Sliding Animation) -->
+    <!-- Header (Optimized for Mobile with Sliding Animation & Fluid Scaling) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50 transition-all duration-300 ease-in-out">
         <div class="max-w-6xl mx-auto px-3 py-3 md:px-4 md:py-5 flex flex-row items-center justify-between gap-1.5 md:gap-4 w-full">
             
-            <!-- Left Side: Logo & Title (Responsive with truncate) -->
+            <!-- Left Side: Logo & Title (Responsive with clamp and truncate) -->
             <div class="flex items-center gap-1.5 md:gap-3 flex-1 min-w-0">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0 transition-all">
                     <i class="ph-fill ph-book-open-text text-xl md:text-2xl"></i>
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <h1 class="text-base sm:text-lg md:text-2xl font-bold tracking-wider flex items-center gap-1.5 truncate">
+                    <h1 class="font-bold tracking-wider flex items-center gap-1.5 truncate text-[clamp(1rem,4vw,1.5rem)] transition-all">
                         Learn Chinese
-                        <span class="text-[10px] sm:text-xs font-bold opacity-90 hidden lg:inline-block">/ 繁體中文學習中心</span>
+                        <span class="text-[clamp(0.6rem,2vw,0.75rem)] font-bold opacity-90 hidden lg:inline-block">/ 繁體中文學習中心</span>
                     </h1>
-                    <p class="hidden md:block text-red-100 text-[10px] md:text-xs mt-0.5 font-medium italic uppercase tracking-widest truncate">Abrakai Studio | Taiwan Edition</p>
+                    <p class="hidden md:block text-red-100 mt-0.5 font-medium italic uppercase tracking-widest truncate text-[clamp(0.55rem,1.5vw,0.75rem)] transition-all">Abrakai Studio | Taiwan Edition</p>
                 </div>
             </div>
             
-            <!-- Right Side: Actions (Compact on mobile) -->
-            <div class="flex items-center gap-1.5 md:gap-4 justify-end flex-shrink-0">
+            <!-- Right Side: Actions & Badges -->
+            <div class="flex items-center gap-1.5 md:gap-3 justify-end flex-shrink-0">
                 
+                <!-- NEW: Dynamic View Counter Badge -->
+                <div id="view-counter-badge" class="hidden items-center gap-1 bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-slate-600 shadow-sm transition-all whitespace-nowrap">
+                    <i class="ph-fill ph-chart-line-up text-emerald-400 text-[10px] sm:text-sm"></i>
+                    <span class="text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
+                        VIEWS <span id="total-views" class="text-white">--</span> <span class="mx-0.5 md:mx-1 text-slate-500">|</span> TODAY <span id="today-views" class="text-white">--</span>
+                    </span>
+                </div>
+
                 <div class="flex flex-col items-end gap-1 w-auto">
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-1.5 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-xs font-bold border border-red-500 flex items-center gap-1 shadow-inner transition-all whitespace-nowrap">
                         <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses:</span> <span id="quota-count">20/20</span>
@@ -115,7 +124,7 @@
                     </button>
                 </div>
 
-                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1 animate-in zoom-in whitespace-nowrap ml-0.5 md:ml-2">
+                <div id="vip-status-badge" class="hidden bg-yellow-400 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black border border-yellow-300 shadow-lg flex items-center gap-1 animate-in zoom-in whitespace-nowrap ml-0.5 md:ml-1">
                     <i class="ph-fill ph-crown text-sm sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
@@ -506,7 +515,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.5-UI-RESILIENCE-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.6-FLUID-UI-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -2147,6 +2156,20 @@
                         }
                         const data = JSON.parse(matchResult[0]);
                         
+                        if (data.idioms && data.idioms.length > 0) {
+                            for (let i = 0; i < data.idioms.length; i++) {
+                                try {
+                                    const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(data.idioms[i].idiom)}`);
+                                    if (gtRes.ok) {
+                                        const gtData = await gtRes.json();
+                                        if (gtData && gtData[0]) {
+                                            data.idioms[i].english = gtData[0].map(item => item[0]).join('');
+                                        }
+                                    }
+                                } catch(err) {}
+                            }
+                        }
+                        
                         window.charCache[char] = data; 
                         
                         let existingUpsell = document.getElementById('dict-upsell-box');
@@ -2270,6 +2293,48 @@
             }
         };
 
+        window.initViewCounter = async function() {
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const statsRef = doc(db, "artifacts", appId, "public", "data", "system_stats", "visits");
+                
+                let total = 1;
+                let todayViews = 1;
+                
+                try {
+                    const docSnap = await getDoc(statsRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        total = (data.total || 0) + 1;
+                        if (data.lastDate === todayStr) {
+                            todayViews = (data.todayViews || 0) + 1;
+                        } else {
+                            todayViews = 1;
+                        }
+                    }
+                    
+                    const badge = document.getElementById('view-counter-badge');
+                    if (badge) {
+                        badge.classList.remove('hidden');
+                        badge.classList.add('flex');
+                        document.getElementById('total-views').textContent = total;
+                        document.getElementById('today-views').textContent = todayViews;
+                    }
+
+                    setDoc(statsRef, {
+                        total: total,
+                        todayViews: todayViews,
+                        lastDate: todayStr
+                    }, { merge: true }).catch(e => {});
+                    
+                } catch (dbErr) {
+                    console.warn("View counter init restricted by DB rules.");
+                }
+            } catch(e) {
+                console.error("Counter Error", e);
+            }
+        };
+
         window.setupTypingMode = function() {
             const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea');
             inputs.forEach(el => {
@@ -2317,7 +2382,7 @@
             }
             if (window.updateGlobalUI) window.updateGlobalUI();
             
-            // 啟動手機版智慧鍵盤偵測
+            window.initViewCounter();
             window.setupTypingMode();
         };
     </script>

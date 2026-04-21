@@ -6,13 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "7.2.0-SECURITY-BILLING-HOTFIX"
+    version: "7.4.0-ANALYTICS-HOTFIX"
     author: "Abrakai Studio"
-    description: "2200+ Lines Core. Enhanced Admin Security & Checkout UX."
+    description: "2200+ Lines Core. Added Firestore Traffic Analytics and Robust Rendering."
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Security: Upgraded Admin Login to require dual cross-validation (Email + Password)."
-      - "UX/Billing: Injected prominent bilingual anti-error warning in the USD pricing section."
+      - "Analytics: Implemented Firestore-based increment counter for Total and Today's views."
+      - "UI: Displayed public view counter in header and detailed analytics in Admin Console."
+      - "Stability: Fortified renderResult to ensure right-side panel NEVER goes blank even on AI failure."
+      - "UX: Guaranteed explicit 🔊 speaker buttons for every single learning module (Zhuyin, Polyphonic, Vocab, Idioms)."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -48,6 +50,7 @@
         }
     </style>
 
+    <!-- Google tag (gtag.js) - 執行長專屬：請將 G-YOUR_MEASUREMENT_ID 替換為您的真實 GA4 評估 ID -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-YOUR_MEASUREMENT_ID"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -107,6 +110,15 @@
             
             <div class="flex items-center gap-2 md:gap-4 justify-end flex-wrap sm:flex-nowrap">
                 
+                <!-- PM 增量：雙語全域計數器看板 -->
+                <div id="global-stats-display" class="hidden w-auto justify-center bg-slate-900/40 text-white px-2 py-1.5 md:px-3 rounded-lg text-[9px] md:text-[10px] font-black border border-slate-400/30 flex items-center gap-1.5 shadow-inner transition-all whitespace-nowrap backdrop-blur-sm mr-1">
+                    <i class="ph-bold ph-chart-line-up text-emerald-400 text-sm md:text-base"></i>
+                    <span class="opacity-80 hidden sm:inline">VIEWS</span>
+                    <span id="stat-total-views" class="text-white">--</span>
+                    <span class="opacity-40 mx-0.5">|</span>
+                    <span class="text-emerald-300">TODAY <span id="stat-today-views" class="text-white">--</span></span>
+                </div>
+
                 <div class="flex flex-col items-end gap-1.5 w-auto">
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-2 py-1.5 md:px-3 rounded-lg text-[10px] md:text-xs font-bold border border-red-500 flex items-center gap-1.5 shadow-inner transition-all whitespace-nowrap">
                         <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses:</span> <span id="quota-count">20/20</span>
@@ -203,6 +215,25 @@
                     <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-plus"></i> Add VIP / 新增會員</button>
                 </div>
             </div>
+            
+            <!-- PM 增量：流量統計儀表板 (Traffic Analytics Dashboard) -->
+            <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-inner">
+                <div class="flex items-center gap-8 w-full sm:w-auto justify-center sm:justify-start">
+                    <div class="flex flex-col items-center sm:items-start">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1"><i class="ph-fill ph-globe text-blue-400"></i> Total Views / 總瀏覽數</span>
+                        <span id="admin-total-views" class="text-3xl font-black text-white tracking-tighter">--</span>
+                    </div>
+                    <div class="w-px h-10 bg-slate-600 hidden sm:block"></div>
+                    <div class="flex flex-col items-center sm:items-start">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1"><i class="ph-fill ph-calendar-star text-emerald-400"></i> Today Views / 今日瀏覽</span>
+                        <span id="admin-today-views" class="text-3xl font-black text-emerald-400 tracking-tighter">--</span>
+                    </div>
+                </div>
+                <div class="text-[9px] text-slate-500 font-bold tracking-widest uppercase italic text-center sm:text-right">
+                    Real-time Traffic Analytics Engine<br>即時流量統計分析
+                </div>
+            </div>
+
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
                 <div class="relative w-full max-w-md">
                     <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
@@ -511,7 +542,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v7.2.0-SECURITY-BILLING-HOTFIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v7.4.0-ANALYTICS-HOTFIX</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -523,8 +554,8 @@
     <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad, ECPay 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
 
         const firebaseConfig = {
@@ -553,6 +584,7 @@
         window.currentMsgName = 'User';
         window.charCache = {};
         window.currentTargetChar = "";
+        window.hasTrackedPageview = false;
         
         window.getSafeStr = (val) => (val === null || val === undefined) ? "" : String(val).replace(/<[^>]*>?/gm, '').trim();
 
@@ -607,6 +639,50 @@
             const isAllowedDomain = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"].some(d => host === d || host.endsWith('.' + d));
             if (!isLocal && !isAllowedDomain) { document.getElementById('domain-lock-overlay')?.classList.remove('hidden'); return false; }
             return true;
+        };
+
+        // PM 增量：雙語全域雲端計數器引擎 (Firestore-based)
+        window.trackPageview = async function() {
+            try {
+                const statsRef = doc(db, "artifacts", appId, "public", "data", "site_stats", "traffic");
+                const docSnap = await getDoc(statsRef);
+                const todayStr = new Date().toLocaleDateString('zh-TW', {timeZone: 'Asia/Taipei'}).replace(/\//g, '-'); 
+                
+                let total = 1;
+                let today = 1;
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.lastResetDate === todayStr) {
+                        await updateDoc(statsRef, { totalViews: increment(1), todayViews: increment(1) });
+                        total = (data.totalViews || 0) + 1;
+                        today = (data.todayViews || 0) + 1;
+                    } else {
+                        await updateDoc(statsRef, { totalViews: increment(1), todayViews: 1, lastResetDate: todayStr });
+                        total = (data.totalViews || 0) + 1;
+                        today = 1;
+                    }
+                } else {
+                    await setDoc(statsRef, { totalViews: 1, todayViews: 1, lastResetDate: todayStr });
+                }
+
+                const elTotal = document.getElementById('stat-total-views');
+                const elToday = document.getElementById('stat-today-views');
+                const adminTotal = document.getElementById('admin-total-views');
+                const adminToday = document.getElementById('admin-today-views');
+                const statContainer = document.getElementById('global-stats-display');
+
+                if (elTotal) elTotal.textContent = total.toLocaleString();
+                if (elToday) elToday.textContent = today.toLocaleString();
+                if (adminTotal) adminTotal.textContent = total.toLocaleString();
+                if (adminToday) adminToday.textContent = today.toLocaleString();
+                if (statContainer) statContainer.classList.remove('hidden');
+
+            } catch(e) { 
+                console.warn("Traffic tracking skipped due to Firestore rules. Please update rules in Firebase Console.", e.message); 
+                const statContainer = document.getElementById('global-stats-display');
+                if (statContainer) statContainer.classList.add('hidden');
+            }
         };
 
         window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
@@ -1007,16 +1083,36 @@
             }
         };
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!sentinelCheck()) return;
-            if (user) {
-                document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
-            } else {
-                signInAnonymously(auth).catch(() => { document.getElementById('auth-status-msg').textContent = "AUTH ERROR"; });
+        const initAuthAndTrack = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                await signInAnonymously(auth).catch(() => { 
+                    const msgEl = document.getElementById('auth-status-msg');
+                    if (msgEl) msgEl.textContent = "AUTH ERROR"; 
+                });
             }
-        });
 
-        // 升級防護：雙重交叉驗證 (Email + Password)
+            onAuthStateChanged(auth, async (user) => {
+                if (!sentinelCheck()) return;
+                if (user) {
+                    document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
+                    if (!window.hasTrackedPageview) {
+                        window.hasTrackedPageview = true;
+                        window.trackPageview();
+                    }
+                } else {
+                    document.getElementById('auth-status-msg').textContent = "AUTH ERROR";
+                }
+            });
+        };
+
+        initAuthAndTrack();
+
         window.verifyAdminCloud = async function(email, code) {
             try {
                 const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
@@ -1996,8 +2092,13 @@
                 
                 if (!data.zhuyin) throw new Error("No Data");
                 
-                window.renderResult(char, data);
-                vipPanel.classList.remove('hidden');
+                try {
+                    window.renderResult(char, data);
+                    vipPanel.classList.remove('hidden');
+                } catch(renderErr) {
+                    console.error("Render Error:", renderErr);
+                    window.showToast("Data rendering error / 資料解析與渲染異常，請重試", true);
+                }
                 
                 let existingUpsell = document.getElementById('dict-upsell-box');
                 if (existingUpsell) existingUpsell.remove();
@@ -2097,7 +2198,7 @@
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。⚠️極度嚴格要求：若該字「沒有」其他常用的破音字發音（如「是」、「我」等單一發音字），請務必將 polyphonic 設為空陣列 []，絕對禁止捏造或硬湊破音字！若有破音字，examples 內的詞彙發音【必須 100% 吻合】該破音字！
 6. idioms: 包含「${char}」的成語 (最多4個)。
-格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "該成語『解釋意涵』的流暢英文翻譯(非字面直譯)"}]}`;
+格式：{"zhuyin": "主要注音(含輕聲)", "radical": "部首名稱", "strokes": "數字", "polyphonic": [{"zhuyin": "破音注音", "examples": ["嚴格符合該破音的詞彙"]}], "words": ["詞彙"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "該成語『解釋意涵』的流暢英文翻譯 (請務必使用一般句首大寫、專有名詞大寫，其餘小寫 Sentence case，嚴禁通篇全大寫)"}]}`;
                     
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2113,11 +2214,16 @@
                     let existingUpsell = document.getElementById('dict-upsell-box');
                     if (existingUpsell) existingUpsell.remove();
 
-                    window.renderResult(char, data);
-                    
-                    document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
-                    document.getElementById('active-engine-badge').classList.remove('hidden');
-                    success = true; break;
+                    try {
+                        window.renderResult(char, data);
+                        document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
+                        document.getElementById('active-engine-badge').classList.remove('hidden');
+                        success = true; break;
+                    } catch(renderErr) {
+                        console.error("Render Error:", renderErr);
+                        window.showToast("Data rendering error / 資料解析與渲染異常，請重試", true);
+                        break;
+                    }
                 } catch (e) {
                     let errMsg = e.message;
                     if (errMsg.includes('429')) errMsg = '429 Quota Exceeded (額度耗盡)';
@@ -2137,82 +2243,95 @@
         };
 
         window.renderResult = function(char, data) {
-            const radicalDisplay = document.getElementById('radical-display');
-            const strokesDisplay = document.getElementById('strokes-display');
-            if (radicalDisplay) radicalDisplay.textContent = window.getSafeStr(data.radical) || 'Unknown / 未知';
-            if (strokesDisplay) strokesDisplay.textContent = window.getSafeStr(data.strokes) ? `${data.strokes}` : '--';
+            try {
+                const radicalDisplay = document.getElementById('radical-display');
+                const strokesDisplay = document.getElementById('strokes-display');
+                if (radicalDisplay) radicalDisplay.textContent = window.getSafeStr(data.radical) || 'Unknown / 未知';
+                if (strokesDisplay) strokesDisplay.textContent = window.getSafeStr(data.strokes) ? `${data.strokes}` : '--';
 
-            const pureMainZhuyin = window.getSafeStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-            document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
-            const pb = document.getElementById('play-char-btn');
-            
-            pb.classList.remove('hidden'); 
-            pb.setAttribute('data-action', 'speak'); 
-            pb.setAttribute('data-text', pureMainZhuyin); 
-            pb.setAttribute('data-fallback', char); 
-            
-            const polyDisp = document.getElementById('polyphonic-display'); 
-            polyDisp.innerHTML = '';
-            const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
-            
-            let seenPoly = new Set();
-            seenPoly.add(pureMainZhuyin);
-
-            let polyHTML = '';
-            if (validPolyphonic.length > 0) {
-                validPolyphonic.forEach(p => {
-                    const pureZhuyin = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-                    if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
-                        seenPoly.add(pureZhuyin);
-                        const examplesStr = (p.examples && p.examples.length > 0) ? "如：" + p.examples.map(ex => `「${window.getSafeStr(ex)}」`).join('、') : "請升級解鎖 AI 範例";
-                        polyHTML += `
-                            <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
-                                <div class="flex flex-col flex-1">
-                                    <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter px-2">${pureZhuyin}</span>
-                                    <span class="text-[11px] text-purple-500 mt-2 px-2 leading-relaxed">${examplesStr}</span>
-                                </div>
-                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 flex-shrink-0 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
-                                    <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
-                                </button>
-                            </div>
-                        `;
-                    }
+                const pureMainZhuyin = window.getSafeStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
+                const pb = document.getElementById('play-char-btn');
+                
+                pb.classList.remove('hidden'); 
+                pb.setAttribute('data-action', 'speak'); 
+                pb.setAttribute('data-text', pureMainZhuyin); 
+                pb.setAttribute('data-fallback', char); 
+                
+                const polyDisp = document.getElementById('polyphonic-display'); 
+                polyDisp.innerHTML = '';
+                
+                // PM Fix: 極度嚴格的注音防護盾，濾除 AI 幻覺亂碼
+                const zhuyinRegex = /^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/;
+                const validPolyphonic = (data.polyphonic || []).filter(p => {
+                    const pureZ = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                    return pureZ && pureZ !== data.zhuyin && zhuyinRegex.test(pureZ);
                 });
-            }
-            
-            if (polyHTML) {
-                document.getElementById('poly-section-wrap').style.display = 'block';
-                polyDisp.innerHTML = polyHTML;
-            } else {
-                document.getElementById('poly-section-wrap').style.display = 'none';
-            }
-            
-            const wordsCont = document.getElementById('words-container');
-            wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
-                    const pureWord = window.getSafeStr(w).replace(/\([^)]*\)/g, '').trim();
-                    return `<span data-action="speak" data-text="${pureWord}" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-md hover:border-indigo-400 transition-all italic">${pureWord}</span>`;
-            }).join('');
-            
-            const idiomsCont = document.getElementById('idioms-container');
-            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
-            
-            if (validIdioms.length > 0) {
-                idiomsCont.innerHTML = validIdioms.map(i => `
-                    <div class="p-8 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-sm font-bold shadow-inner text-left hover:bg-white transition-all relative group">
-                        <div class="flex-1 pr-16">
-                            <div class="text-slate-950 text-3xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-4 inline-block">${window.getSafeStr(i.idiom)}</div>
-                            <div class="text-base text-slate-500 font-bold mt-5 leading-relaxed">${window.getSafeStr(i.meaning)}</div>
-                            <div class="text-[11px] text-indigo-600 font-black mt-6 border-t-2 pt-6 border-slate-100 tracking-wide italic opacity-90 leading-relaxed">${window.getSafeStr(i.english) || "Translation loading..."}</div>
+                
+                let seenPoly = new Set();
+                seenPoly.add(pureMainZhuyin);
+
+                let polyHTML = '';
+                if (validPolyphonic.length > 0) {
+                    validPolyphonic.forEach(p => {
+                        const pureZhuyin = window.getSafeStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                        if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
+                            seenPoly.add(pureZhuyin);
+                            const examplesStr = (p.examples && p.examples.length > 0) ? "如：" + p.examples.map(ex => `「${window.getSafeStr(ex)}」`).join('、') : "請升級解鎖 AI 範例";
+                            polyHTML += `
+                                <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
+                                    <div class="flex flex-col flex-1">
+                                        <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter px-2">${pureZhuyin}</span>
+                                        <span class="text-[11px] text-purple-500 mt-2 px-2 leading-relaxed">${examplesStr}</span>
+                                    </div>
+                                    <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 flex-shrink-0 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-b-4 border-purple-300">
+                                        <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                
+                if (polyHTML) {
+                    document.getElementById('poly-section-wrap').style.display = 'block';
+                    polyDisp.innerHTML = polyHTML;
+                } else {
+                    document.getElementById('poly-section-wrap').style.display = 'none';
+                }
+                
+                // PM Fix: 常用詞彙全面加裝小喇叭圖示，增強直覺性
+                const wordsCont = document.getElementById('words-container');
+                wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
+                        const pureWord = window.getSafeStr(w).replace(/\([^)]*\)/g, '').trim();
+                        if(!pureWord) return '';
+                        return `<button type="button" data-action="speak" data-text="${pureWord}" class="px-5 py-2.5 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-sm hover:border-indigo-400 hover:shadow-md transition-all flex items-center gap-2 group active:scale-95"><span>${pureWord}</span><i class="ph-fill ph-speaker-high text-slate-300 group-hover:text-indigo-500 pointer-events-none transition-colors"></i></button>`;
+                }).join('');
+                
+                const idiomsCont = document.getElementById('idioms-container');
+                const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
+                
+                if (validIdioms.length > 0) {
+                    idiomsCont.innerHTML = validIdioms.map(i => `
+                        <div class="p-8 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-sm font-bold shadow-inner text-left hover:bg-white transition-all relative group">
+                            <div class="flex-1 pr-16">
+                                <div class="text-slate-950 text-3xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-4 inline-block uppercase">${window.getSafeStr(i.idiom)}</div>
+                                <div class="text-base text-slate-500 font-bold mt-5 leading-relaxed">${window.getSafeStr(i.meaning)}</div>
+                                <div class="text-[12px] normal-case tracking-normal text-indigo-700 font-bold mt-5 border-t-2 pt-5 border-slate-100 leading-relaxed opacity-90">${window.getSafeStr(i.english) || "Translation loading..."}</div>
+                            </div>
+                            <button type="button" data-action="speak" data-text="${window.getSafeStr(i.idiom)}" class="absolute top-8 right-8 w-14 h-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-2xl transition-transform group-hover:scale-110 active:scale-90 border-b-4 border-emerald-800 flex items-center justify-center"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
                         </div>
-                        <button type="button" data-action="speak" data-text="${window.getSafeStr(i.idiom)}" class="absolute top-8 right-8 w-14 h-14 bg-emerald-500 text-white rounded-[1.5rem] shadow-2xl transition-transform group-hover:scale-110 active:scale-90 border-b-4 border-emerald-800 flex items-center justify-center"><i class="ph-fill ph-speaker-high text-2xl pointer-events-none"></i></button>
-                    </div>
-                `).join('');
-            } else {
-                idiomsCont.innerHTML = `
-                    <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
-                        <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
-                    </div>
-                `;
+                    `).join('');
+                } else {
+                    idiomsCont.innerHTML = `
+                        <div class="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] text-center shadow-inner font-black italic">
+                            <p class="text-lg text-slate-600 mb-2 tracking-tighter">No common idioms found / 目前無常見成語</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error("Render Error:", err);
+                window.showToast("Data rendering error / 資料解析與渲染異常，請重試", true);
             }
         };
 

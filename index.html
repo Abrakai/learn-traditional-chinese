@@ -14,7 +14,7 @@
       - "Feature: Upgraded View Counter with localStorage caching to ensure metrics increment visually even when Firestore permissions are blocked."
       - "UI Fix: Changed view counter to strict vertical stacking (flex-col) to save horizontal space."
       - "UI Fix: Enhanced Fluid Typography using clamp() and removed 'truncate' to strictly prevent website name cutoff."
-      - "Security: Clarified AI sandbox behavior and reinforced API KEY validation for production environments."
+      - "UX Fix: Re-engineered Moedict fallback to fetch standard idiom definitions even when AI is unavailable."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -85,9 +85,9 @@
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50 transition-all duration-300 ease-in-out">
         <div class="max-w-6xl mx-auto px-3 py-3 md:px-4 md:py-5 flex flex-row items-center justify-between gap-1.5 md:gap-4 w-full">
             
-            <!-- Left Side: Logo & Title (Optimized Fluid Scaling) -->
+            <!-- Left Side: Logo & Title (Optimized Fluid Scaling without cutoffs) -->
             <div class="flex items-center gap-1.5 md:gap-3 flex-1 min-w-0 pr-1">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0 transition-all">
                     <i class="ph-fill ph-book-open-text text-[clamp(1.1rem,3vw,1.5rem)]"></i>
                 </div>
                 <div class="flex flex-col min-w-0">
@@ -102,7 +102,7 @@
             <!-- Right Side: Actions & Badges -->
             <div class="flex items-center gap-1.5 md:gap-3 justify-end flex-shrink-0">
                 
-                <!-- Fixed: View Counter strictly Stacked (上下排列) to save space -->
+                <!-- Fixed: View Counter strictly Stacked (上下排列) to save horizontal space -->
                 <div id="view-counter-badge" class="flex flex-col items-start sm:items-center justify-center bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-md sm:rounded-lg border border-slate-600 shadow-sm transition-all leading-none gap-1 w-max">
                     <div class="flex items-center gap-1 text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
                         <i class="ph-fill ph-eye text-emerald-400 text-[10px] sm:text-sm" title="Total Views"></i>
@@ -518,7 +518,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.10-LAYOUT-METRICS-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.10-METRICS-FLUID-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -801,7 +801,7 @@
                 if (window.isVIP && diffNum <= 7) {
                     setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
                 } else if (emailCode && diffNum < 0) {
-                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4導致您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
                 } else if (emailCode) {
                     setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
                 } else {
@@ -1237,7 +1237,7 @@
                         try {
                             const userCred = await createUserWithEmailAndPassword(auth, email, data.password);
                             await updateProfile(userCred.user, { displayName: data.name });
-                            await updateDoc(docRef, { password: "", uid: userCred.user.uid });
+                            await updateDoc(docRef, { password: "" , uid: userCred.user.uid });
                             await signOut(auth);
                         } catch(err) {
                             if (err.code === 'auth/email-already-in-use') {
@@ -2033,14 +2033,30 @@
                     if(data.words.length === 0) data.words.push(char + "字");
                     
                     const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
+                    
+                    // NEW: Optimized Idiom Fetch for Elders (even without AI)
                     for (let idiom of idiomsArr) {
                         try {
-                            const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
-                            const gtData = await gtRes.json();
-                            let enTrans = gtData[0].map(item => item[0]).join('');
-                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典無法提供成語詳解，請至 [Settings] 綁定金鑰啟用 AI 引擎！", english: enTrans });
+                            const idiomRes = await fetch(`https://www.moedict.tw/${encodeURIComponent(idiom)}.json`);
+                            if (idiomRes.ok) {
+                                const idiomData = await idiomRes.json();
+                                let meaning = "暫無詳細解釋";
+                                if (idiomData.heteronyms && idiomData.heteronyms[0].definitions) {
+                                    meaning = idiomData.heteronyms[0].definitions.map(d => d.def).join('；').replace(/<[^>]+>/g, '');
+                                }
+                                
+                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
+                                const gtData = await gtRes.json();
+                                let enTrans = gtData[0].map(item => item[0]).join('');
+                                
+                                data.idioms.push({ 
+                                    idiom: idiom, 
+                                    meaning: "📜 " + meaning, 
+                                    english: enTrans 
+                                });
+                            }
                         } catch(e) {
-                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典無成語庫", english: "Translation unavailable" });
+                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典暫無此詞詳解", english: "Translation unavailable" });
                         }
                     }
                 }
@@ -2098,7 +2114,7 @@
             } catch(e) {
                 console.error("Fallback Fetch Error:", e);
                 document.getElementById('ai-error-title').textContent = "DICTIONARY UNAVAILABLE / 字典連線失敗";
-                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">Cannot load basic dictionary data. / 無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold導致畫面呈現錯誤。請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
+                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">Cannot load basic dictionary data. / 無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
                 if(errorPanel) errorPanel.classList.remove('hidden');
                 if(loader) loader.classList.add('hidden');
             }
@@ -2135,7 +2151,7 @@
 3. strokes: 該字的總筆畫數 (僅需數字)。
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。
-6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文解釋；english 請提供「道地的英文意譯」，絕對禁止字面直譯（例如「人山人海」應譯為 a sea of people 而非 people mountain）。
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請提供「道地的英文意譯」，絕對禁止字面直譯（例如「人山人海」應譯為 a sea of people 而非 people mountain）。
 格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                         
                         const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
@@ -2239,14 +2255,20 @@
                         <div class="flex-1 pr-16">
                             <div class="text-slate-950 text-2xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-3 inline-block">${window.getStr(i.idiom)}</div>
                             
-                            <div class="mt-4 flex items-start gap-2">
-                                <div class="text-base text-slate-600 font-bold leading-relaxed flex-1">${window.getStr(i.meaning)}</div>
-                                <button type="button" data-action="speak" data-text="${window.getStr(i.meaning)}" class="text-slate-300 hover:text-emerald-500 transition-colors mt-0.5"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                            <div class="mt-4 flex flex-col items-start gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-400 uppercase tracking-widest font-black italic">Meanings / 解析：</span>
+                                    <button type="button" data-action="speak" data-text="${window.getStr(i.meaning)}" class="text-slate-300 hover:text-emerald-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                </div>
+                                <div class="text-base text-slate-600 font-bold leading-relaxed">${window.getStr(i.meaning)}</div>
                             </div>
                             
-                            <div class="mt-3 border-t pt-3 border-slate-100 flex items-start gap-2">
-                                <div class="text-[13px] text-indigo-500 font-bold tracking-wide italic opacity-90 leading-relaxed flex-1">${window.getStr(i.english) || "Translation loading..."}</div>
-                                <button type="button" data-action="speak-eng" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors mt-0.5"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                            <div class="mt-4 border-t pt-3 border-slate-100 flex flex-col items-start gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">English / 意譯：</span>
+                                    <button type="button" data-action="speak-eng" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                </div>
+                                <div class="text-[13px] text-indigo-500 font-bold tracking-wide opacity-90 leading-relaxed">${window.getStr(i.english) || "Translation loading..."}</div>
                             </div>
                         </div>
                         <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="absolute top-8 right-8 w-12 h-12 bg-emerald-500 text-white rounded-[1.25rem] shadow-lg transition-transform group-hover:scale-110 active:scale-90 flex items-center justify-center" title="播放成語"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>

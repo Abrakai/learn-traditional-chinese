@@ -6,15 +6,16 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.10-METRICS-FLUID-PATCH"
+    version: "6.7.11-NEWEBPAY-AI-TRANSLATION-PATCH"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Fluid Typography & Persistent Metrics"
+    description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & NewebPay"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Feature: Upgraded View Counter with localStorage caching to ensure metrics increment visually even when Firestore permissions are blocked."
-      - "UI Fix: Changed view counter to strict vertical stacking (flex-col) to save horizontal space."
-      - "UI Fix: Enhanced Fluid Typography using clamp() and removed 'truncate' to strictly prevent website name cutoff."
-      - "UX Fix: Re-engineered Moedict fallback to fetch standard idiom definitions even when AI is unavailable."
+      - "UI Fix: Changed 'Learn Chinese' to 'Learn Traditional Chinese'."
+      - "UI Fix: Translated view counter text to traditional Chinese (總瀏覽數/今日瀏覽)."
+      - "Payment: Replaced ECPay with NewebPay to avoid high AI-site fees."
+      - "AI Engine: Updated Prompt to provide comprehensive English analysis based on Chinese idiom meaning."
+      - "Core: Strengthened string validation before DOM rendering."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -92,7 +93,7 @@
                 </div>
                 <div class="flex flex-col min-w-0">
                     <h1 class="font-black tracking-wider flex flex-wrap items-baseline gap-1 text-[clamp(14px,4.5vw,26px)] leading-tight transition-all">
-                        Learn Chinese
+                        Learn Traditional Chinese
                         <span class="text-[clamp(10px,2vw,14px)] font-bold opacity-90 hidden lg:inline-block">/ 繁體中文學習中心</span>
                     </h1>
                     <p class="hidden md:block text-red-100 mt-0.5 font-medium italic uppercase tracking-widest text-[clamp(10px,1.5vw,12px)] transition-all">Abrakai Studio | Taiwan Edition</p>
@@ -106,11 +107,11 @@
                 <div id="view-counter-badge" class="flex flex-col items-start sm:items-center justify-center bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-md sm:rounded-lg border border-slate-600 shadow-sm transition-all leading-none gap-1 w-max">
                     <div class="flex items-center gap-1 text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
                         <i class="ph-fill ph-eye text-emerald-400 text-[10px] sm:text-sm" title="Total Views"></i>
-                        <span class="hidden sm:inline">VIEWS</span> <span id="total-views" class="text-white">--</span>
+                        <span class="hidden sm:inline">總瀏覽數</span> <span id="total-views" class="text-white">--</span>
                     </div>
                     <div class="flex items-center gap-1 text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
                         <i class="ph-fill ph-calendar-blank text-emerald-400 text-[10px] sm:text-sm" title="Today's Views"></i>
-                        <span class="hidden sm:inline">TODAY</span> <span id="today-views" class="text-white">--</span>
+                        <span class="hidden sm:inline">今日瀏覽</span> <span id="today-views" class="text-white">--</span>
                     </div>
                 </div>
 
@@ -391,7 +392,7 @@
                 <div>
                     <div class="flex justify-between items-center mb-1.5 ml-1">
                         <label class="block text-[10px] font-bold text-indigo-500 uppercase tracking-widest">AI API Key / 解析金鑰</label>
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold font-bold">Get Free Key / 免費申請</a>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[9px] text-indigo-600 underline font-bold">Get Free Key / 免費申請</a>
                     </div>
                     <div class="relative">
                         <input type="password" id="profile-api-key" placeholder="AIzaSy..." readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-indigo-100 focus:bg-white focus:border-indigo-500 outline-none text-sm shadow-sm font-mono font-bold bg-slate-50 text-ellipsis">
@@ -518,7 +519,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.10-METRICS-FLUID-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.11-NEWEBPAY-AI-TRANSLATION-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -527,7 +528,7 @@
         </div>
     </footer>
 
-    <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad, ECPay 與 UI 邏輯】 -->
+    <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad, NewebPay 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -603,7 +604,14 @@
             window.loadVoices(); 
         }
 
-        window.getStr = (val) => (val === null || val === undefined) ? "" : String(val);
+        // 強制字串有效性檢查：避免渲染層讀取到 undefined 或 null 導致崩潰
+        window.getStr = (val) => {
+            if (val === null || val === undefined) return "";
+            const strVal = String(val);
+            if (strVal.trim().toLowerCase() === "undefined" || strVal.trim().toLowerCase() === "null") return "";
+            return strVal.trim();
+        };
+
         window.hasValidApiKey = function() {
             return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
         };
@@ -801,7 +809,7 @@
                 if (window.isVIP && diffNum <= 7) {
                     setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
                 } else if (emailCode && diffNum < 0) {
-                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4導致您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> 您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</p>`);
                 } else if (emailCode) {
                     setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
                 } else {
@@ -865,9 +873,9 @@
                             </div>
                         </div>
 
-                        <!-- 2. ECPay TWD Local Pricing Section -->
+                        <!-- 2. NewebPay TWD Local Pricing Section (Replaced ECPay) -->
                         <div class="pt-8">
-                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-credit-card text-base"></i> 🇹🇼 台灣台幣刷卡區 (綠界 ECPay 全自動)</h4>
+                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-credit-card text-base"></i> 🇹🇼 台灣台幣刷卡區 (藍新 NewebPay 全自動)</h4>
                             <div class="space-y-3">
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
                                     <div class="flex-1 text-center sm:text-left">
@@ -875,7 +883,7 @@
                                         <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 180</span>
                                         <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleECPayCheckout(1, 180, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
+                                    <button type="button" onclick="window.handleNewebPayCheckout(1, 180, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
                                 </div>
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
                                     <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">首選</div>
@@ -884,7 +892,7 @@
                                         <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 450</span>
                                         <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleECPayCheckout(3, 450, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
+                                    <button type="button" onclick="window.handleNewebPayCheckout(3, 450, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
                                 </div>
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
                                     <div class="flex-1 text-center sm:text-left">
@@ -892,7 +900,7 @@
                                         <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 750</span>
                                         <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleECPayCheckout(6, 750, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
+                                    <button type="button" onclick="window.handleNewebPayCheckout(6, 750, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
                                 </div>
                                 <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
                                     <div class="flex-1 text-center sm:text-left">
@@ -900,7 +908,7 @@
                                         <span class="text-base text-red-600 font-black block mt-1.5">NT$ 1200</span>
                                         <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
                                     </div>
-                                    <button type="button" onclick="window.handleECPayCheckout(12, 1200, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> 升級年度 VIP</button>
+                                    <button type="button" onclick="window.handleNewebPayCheckout(12, 1200, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> 升級年度 VIP</button>
                                 </div>
                             </div>
                         </div>
@@ -957,7 +965,7 @@
             }
         };
 
-        window.handleECPayCheckout = async function(planMonths, price, btnElement) {
+        window.handleNewebPayCheckout = async function(planMonths, price, btnElement) {
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
                 window.showToast("請先註冊或登入會員", true);
@@ -970,7 +978,7 @@
             btnElement.disabled = true;
 
             try {
-                const functionUrl = "https://asia-east1-abra-learn-zh-vip.cloudfunctions.net/createECPayOrder";
+                const functionUrl = "https://asia-east1-abra-learn-zh-vip.cloudfunctions.net/createNewebPayOrder";
                 
                 const response = await fetch(functionUrl, {
                     method: 'POST',
@@ -1013,7 +1021,7 @@
                     throw new Error("Order parameters generation failed.");
                 }
             } catch (e) {
-                console.error("ECPay Checkout Error:", e);
+                console.error("NewebPay Checkout Error:", e);
                 window.showToast(`金流連線失敗 (${e.message})，請確認權限或稍後再試`, true);
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
@@ -1747,6 +1755,7 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
+            // 語音播報優化（避開 / - _ 等符號採自然停頓，僅數學算式須唸出）
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
@@ -2034,7 +2043,6 @@
                     
                     const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
                     
-                    // NEW: Optimized Idiom Fetch for Elders (even without AI)
                     for (let idiom of idiomsArr) {
                         try {
                             const idiomRes = await fetch(`https://www.moedict.tw/${encodeURIComponent(idiom)}.json`);
@@ -2151,7 +2159,7 @@
 3. strokes: 該字的總筆畫數 (僅需數字)。
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。
-6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請提供「道地的英文意譯」，絕對禁止字面直譯（例如「人山人海」應譯為 a sea of people 而非 people mountain）。
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請針對前述的中文解析，進行全英文翻譯與解析（Translate the detailed Chinese meaning into English comprehensively）。
 格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                         
                         const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {

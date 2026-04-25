@@ -6,14 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.13-AUTH-SYNC-NATURAL-TTS-PATCH"
+    version: "6.7.14-AUTH-AUTO-RECOVERY-PATCH"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & NewebPay"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
       - "UI Fix: Scaled header title font size to 2/3 of original and implemented vmin for width/height responsiveness."
       - "Feature: Upgraded fallback dictionary translation to translate the FULL explanation for free users."
-      - "Auth Fix: Enforced Firestore DB check after Firebase Auth to strictly reject deleted accounts."
+      - "Auth Fix: Implemented Auto-Recovery mechanism for deleted ghost accounts to automatically rebuild DB profiles on login."
       - "Audio Fix: Upgraded TTS voice selection algorithm to prioritize Neural/Premium natural voices."
     ---
     -->
@@ -518,7 +518,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.13-AUTH-SYNC-NATURAL-TTS-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.14-AUTH-AUTO-RECOVERY-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -1153,9 +1153,23 @@
                             window.showToast("Login Success! / 登入成功！");
                             setTimeout(() => location.reload(), 800);
                         } else {
-                            await signOut(auth);
-                            window.showToast("此帳號已停用或被刪除 / Account disabled or deleted", true);
-                            return;
+                            // Auto-Recovery mechanism: Account exists in Auth but missing in DB (Deleted by Admin)
+                            const defaultName = email.split('@')[0];
+                            await setDoc(docRef, {
+                                uid: auth.currentUser ? auth.currentUser.uid : "recovered",
+                                name: defaultName,
+                                email: email,
+                                signupDate: new Date().toISOString(),
+                                status: "pending",
+                                password: "" // Keep empty to enforce strict DB checks
+                            }, { merge: true });
+
+                            localStorage.setItem('abra_vip_code', sanitizedEmail);
+                            localStorage.setItem('abra_vip_status', 'pending');
+                            localStorage.setItem('abra_user_name', defaultName);
+                            
+                            window.showToast("Account Recovered! / 帳號已自動重建並啟用！");
+                            setTimeout(() => location.reload(), 800);
                         }
                     } catch (syncErr) {
                          console.error("Post-login getDoc error:", syncErr);

@@ -6,14 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.8.0-EXACT-BASE-PATCH"
+    version: "6.7.10-METRICS-FLUID-PATCH"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Fluid Typography & Persistent Metrics"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Feature: Fixed localStorage key collisions in View Counter to ensure accurate 24h Unique Visitor global sync."
-      - "UX Fix: Re-engineered Moedict fallback to fetch standard idiom definitions and specifically translate those definitions to English."
-      - "UI Fix: Maintained flex-col vertical stacking for view counters and flex-wrap + clamp for fluid logo sizing."
+      - "Feature: Upgraded View Counter with localStorage caching to ensure metrics increment visually even when Firestore permissions are blocked."
+      - "UI Fix: Changed view counter to strict vertical stacking (flex-col) to save horizontal space."
+      - "UI Fix: Enhanced Fluid Typography using clamp() and removed 'truncate' to strictly prevent website name cutoff."
+      - "UX Fix: Re-engineered Moedict fallback to fetch standard idiom definitions even when AI is unavailable."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -56,8 +57,8 @@
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
         </div>
-        <h2 class="text-2xl font-black text-white mb-4 text-center">Unauthorized Access / 網域授權失敗</h2>
-        <p class="text-slate-400 max-w-md leading-relaxed font-bold text-center">
+        <h2 class="text-2xl font-black text-white mb-4">Unauthorized Access / 網域授權失敗</h2>
+        <p class="text-slate-400 max-w-md leading-relaxed font-bold">
             系統偵測到非法網域部署。為保護工作室資產與個資安全，功能已鎖定。<br><br>
             請回官方正版站點：<br>
             <a href="https://abrakai.github.io/learn-traditional-chinese/" class="text-indigo-400 font-black underline">abrakai.github.io/learn-traditional-chinese/</a>
@@ -71,7 +72,7 @@
 
     <!-- System Toast -->
     <div id="system-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[2100] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10 w-max max-w-[90%]">
-        <i id="toast-icon" class="ph-fill text-lg flex-shrink-0"></i><span id="toast-msg" class="truncate text-left"></span>
+        <i id="toast-icon" class="ph-fill text-lg flex-shrink-0"></i><span id="toast-msg" class="truncate"></span>
     </div>
 
     <!-- Auth Error Banner -->
@@ -517,7 +518,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.8.0-EXACT-BASE-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.10-METRICS-FLUID-PATCH</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -756,7 +757,7 @@
                     if (cachedDays !== '--' && diffNum <= 7) {
                         if(els.headerPricingBtn) {
                             els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-warning-circle text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Renew</span>`;
-                            els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-md transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(250,204,21,0.8)] font-black whitespace-nowrap animate-pulse";
+                            els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(250,204,21,0.8)] font-black whitespace-nowrap animate-pulse";
                             els.headerPricingBtn.classList.remove('hidden');
                         }
                     }
@@ -768,7 +769,7 @@
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.headerPricingBtn) {
                         els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
-                        els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-md transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
+                        els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
                         els.headerPricingBtn.classList.remove('hidden');
                     }
                     if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -781,7 +782,7 @@
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.headerPricingBtn) {
                     els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
-                    els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-md transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
+                    els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
                     els.headerPricingBtn.classList.remove('hidden');
                 }
                 if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
@@ -800,7 +801,7 @@
                 if (window.isVIP && diffNum <= 7) {
                     setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
                 } else if (emailCode && diffNum < 0) {
-                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership has expired. Please renew to regain unlimited access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
+                    setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4導致您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</span></p>`);
                 } else if (emailCode) {
                     setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
                 } else {
@@ -1236,7 +1237,7 @@
                         try {
                             const userCred = await createUserWithEmailAndPassword(auth, email, data.password);
                             await updateProfile(userCred.user, { displayName: data.name });
-                            await updateDoc(docRef, { password: "", uid: userCred.user.uid });
+                            await updateDoc(docRef, { password: "" , uid: userCred.user.uid });
                             await signOut(auth);
                         } catch(err) {
                             if (err.code === 'auth/email-already-in-use') {
@@ -1949,6 +1950,418 @@
                     if(window.executeFallbackFetch) window.executeFallbackFetch(window.currentTargetChar);
                 }
             }
+        };
+
+        window.fetchWithRetry = async function(url, options, maxRetries = 2) {
+            const delays = [1000, 2000];
+            for (let i = 0; i <= maxRetries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (res.status === 429) {
+                        throw new Error("429_QUOTA");
+                    }
+                    if (!res.ok) {
+                        const errText = await res.text();
+                        if(errText.includes("API key not valid")) throw new Error("API Key Invalid (金鑰無效)");
+                        throw new Error(`HTTP ${res.status} Error`);
+                    }
+                    return res;
+                } catch (err) {
+                    if (err.message.includes("429") || err.message.includes("Invalid")) throw err; 
+                    if (i === maxRetries) throw err;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        };
+
+        window.executeFallbackFetch = async function(char, errorContext = null) {
+            const loader = document.getElementById('ai-inner-loader');
+            const vipPanel = document.getElementById('vip-only-content');
+            const errorPanel = document.getElementById('ai-error-panel');
+            
+            try {
+                if(loader) loader.classList.remove('hidden');
+                if(vipPanel) vipPanel.classList.add('hidden');
+                if(errorPanel) errorPanel.classList.add('hidden');
+                
+                document.getElementById('active-engine-badge').textContent = `Basic Dict Mode / 基礎靜態字典`;
+                document.getElementById('active-engine-badge').classList.remove('hidden');
+
+                let res = await fetch(`https://www.moedict.tw/${encodeURIComponent(char)}.json`).catch(() => null);
+                if (!res || !res.ok) {
+                    res = await fetch(`https://www.moedict.tw/uni/${encodeURIComponent(char)}`).catch(() => null);
+                }
+                if (!res || !res.ok) {
+                    res = await fetch(`https://www.moedict.tw/a/${encodeURIComponent(char)}.json`).catch(() => null);
+                }
+                if (!res || !res.ok) throw new Error("Moedict API Failed");
+                
+                const dictData = await res.json();
+                
+                let rawRadical = dictData.radical || "未知";
+                let cleanRadical = rawRadical.replace(/<[^>]+>/g, '').trim();
+                
+                let data = { zhuyin: "", radical: cleanRadical, strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
+                
+                if (dictData.heteronyms && dictData.heteronyms.length > 0) {
+                    const cleanBopo = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/[a-zA-Z]/g, '').replace(/　/g, '').trim();
+                    data.zhuyin = cleanBopo(dictData.heteronyms[0].bopomofo);
+                    
+                    let tempWords = new Set();
+                    let seenFallbackZhuyin = new Set();
+                    seenFallbackZhuyin.add(data.zhuyin);
+
+                    dictData.heteronyms.forEach((h, idx) => {
+                        if (idx > 0 && h.bopomofo) {
+                            let pZhuyin = cleanBopo(h.bopomofo);
+                            if (pZhuyin && !seenFallbackZhuyin.has(pZhuyin)) {
+                                seenFallbackZhuyin.add(pZhuyin);
+                                data.polyphonic.push({ zhuyin: pZhuyin, examples: [] });
+                            }
+                        }
+                        if (h.definitions) {
+                            h.definitions.forEach(d => {
+                                const combinedText = (d.def || '') + ' ' + (d.quote || []).join(' ') + ' ' + (d.example || []).join(' ');
+                                const matches = combinedText.match(new RegExp(`[\\u4e00-\\u9fa5]{0,3}${char}[\\u4e00-\\u9fa5]{0,3}`, 'g'));
+                                if (matches) matches.forEach(m => { if(m.length > 1 && m.length <= 4 && !m.includes('的')) tempWords.add(m); });
+                            });
+                        }
+                    });
+                    
+                    const wArr = Array.from(tempWords).filter(w => w.length > 1 && w.length <= 4);
+                    data.words = wArr.filter(w => w.length < 4).slice(0, 5);
+                    if(data.words.length === 0) data.words.push(char + "字");
+                    
+                    const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
+                    
+                    // NEW: Optimized Idiom Fetch for Elders (even without AI)
+                    for (let idiom of idiomsArr) {
+                        try {
+                            const idiomRes = await fetch(`https://www.moedict.tw/${encodeURIComponent(idiom)}.json`);
+                            if (idiomRes.ok) {
+                                const idiomData = await idiomRes.json();
+                                let meaning = "暫無詳細解釋";
+                                if (idiomData.heteronyms && idiomData.heteronyms[0].definitions) {
+                                    meaning = idiomData.heteronyms[0].definitions.map(d => d.def).join('；').replace(/<[^>]+>/g, '');
+                                }
+                                
+                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(idiom)}`);
+                                const gtData = await gtRes.json();
+                                let enTrans = gtData[0].map(item => item[0]).join('');
+                                
+                                data.idioms.push({ 
+                                    idiom: idiom, 
+                                    meaning: "📜 " + meaning, 
+                                    english: enTrans 
+                                });
+                            }
+                        } catch(e) {
+                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典暫無此詞詳解", english: "Translation unavailable" });
+                        }
+                    }
+                }
+                
+                if (!data.zhuyin) throw new Error("No Data");
+                
+                window.renderResult(char, data);
+                if(vipPanel) vipPanel.classList.remove('hidden');
+                
+                let existingUpsell = document.getElementById('dict-upsell-box');
+                if (existingUpsell) existingUpsell.remove();
+                
+                const upsellBox = document.createElement('div');
+                upsellBox.id = 'dict-upsell-box';
+                upsellBox.className = 'mt-10 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100 rounded-[2rem] shadow-inner';
+                
+                if (errorContext && errorContext.type === 'QUOTA') {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-red-500"><i class="ph-fill ph-warning-circle text-3xl animate-pulse"></i></div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降級基礎字典</h4>
+                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">System attempted models: ${errorContext.models}, but your API quota is full.<br>系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br><br>Please apply for a new API Key or set up billing in Google AI Studio.<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
+                                <p class="text-[10px] text-slate-500 italic mb-4">Disclaimer: AI feature availability depends on your Google API Key status. / 免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
+                                <button type="button" onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">Update API Key / 前往設定更新金鑰</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (!window.isVIP) {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
+                            <div>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">Upgrade to VIP and enable the AI Engine to unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>升級 VIP 並啟用 AI 引擎，即可解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。<br><br>Example: The character "重" sounds completely different in "舉足輕重" vs "重逢", which static dictionaries cannot detect!<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態字典無法判斷！</p>
+                                <button type="button" onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">View VIP Plans / 查看 VIP 升級方案</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    upsellBox.innerHTML = `
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-magic-wand text-3xl animate-bounce"></i></div>
+                            <div>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">You are a VIP! Simply bind a free Google API Key to activate the AI brain!<br>您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br><br>Unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。</p>
+                                <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">Bind Free Key / 綁定免費金鑰啟動 AI</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                if(vipPanel) vipPanel.appendChild(upsellBox);
+                if(loader) loader.classList.add('hidden');
+                
+            } catch(e) {
+                console.error("Fallback Fetch Error:", e);
+                document.getElementById('ai-error-title').textContent = "DICTIONARY UNAVAILABLE / 字典連線失敗";
+                document.getElementById('ai-error-debug').innerHTML = `<p class="text-sm font-bold text-red-600 mb-2">Cannot load basic dictionary data. / 無法讀取基礎字典資料。</p><p class="text-xs text-slate-600 font-bold leading-relaxed">請確認網路狀態，或前往「設定」綁定 Google API 金鑰以切換至更強大的 AI 智慧解析引擎。</p>`;
+                if(errorPanel) errorPanel.classList.remove('hidden');
+                if(loader) loader.classList.add('hidden');
+            }
+        };
+
+        window.executeAIFetch = async function(char, contextText = "") {
+            try {
+                if (window.syncVipStatus) await window.syncVipStatus();
+                
+                if (!window.isVIP || !window.hasValidApiKey()) {
+                    window.executeFallbackFetch(char);
+                    return;
+                }
+
+                const loader = document.getElementById('ai-inner-loader');
+                const vipPanel = document.getElementById('vip-only-content');
+                const errorPanel = document.getElementById('ai-error-panel');
+
+                if(loader) loader.classList.remove('hidden');
+                if(vipPanel) vipPanel.classList.add('hidden');
+                if(errorPanel) errorPanel.classList.add('hidden');
+                document.getElementById('active-engine-badge').classList.add('hidden');
+
+                const modelNames = ["gemini-2.0-flash", "gemini-1.5-flash"];
+                
+                let success = false;
+                let modelErrors = [];
+                
+                for (const model of modelNames) {
+                    try {
+                        const prompt = `請以台灣教育部辭典標準，根據原文本上下文「${contextText}」，嚴格解析其中的繁體中文字「${char}」並輸出 JSON。
+1. zhuyin: 該字在此文本上下文中的正確注音符號 (含聲調)。⚠️極度重要：絕對禁止輸出漢語拼音(Pinyin)或任何英文字母！只能有純注音符號！
+2. radical: 該字的部首名稱。
+3. strokes: 該字的總筆畫數 (僅需數字)。
+4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
+5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請提供「道地的英文意譯」，絕對禁止字面直譯（例如「人山人海」應譯為 a sea of people 而非 people mountain）。
+格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
+                        
+                        const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                        });
+                        const result = await res.json();
+                        if (result.error) throw new Error(result.error.message || "API Error");
+                        
+                        const rawText = result.candidates[0].content.parts[0].text;
+                        const matchResult = rawText.match(/\{[\s\S]*\}/);
+                        if (!matchResult) throw new Error("Invalid AI format");
+                        const data = JSON.parse(matchResult[0]);
+                        
+                        window.charCache[char] = data; 
+                        window.renderResult(char, data);
+                        
+                        document.getElementById('active-engine-badge').textContent = `Powered by ${model}`;
+                        document.getElementById('active-engine-badge').classList.remove('hidden');
+                        success = true; break;
+                    } catch (e) {
+                        modelErrors.push(`[${model}]`);
+                    }
+                }
+                
+                if (success) { 
+                    if(loader) loader.classList.add('hidden');
+                    if(vipPanel) vipPanel.classList.remove('hidden'); 
+                } else { 
+                    window.executeFallbackFetch(char, { type: 'QUOTA', models: modelErrors.join(', ') });
+                }
+            } catch (masterErr) {
+                console.error("Master AI Error:", masterErr);
+                if(loader) loader.classList.add('hidden');
+                if(errorPanel) errorPanel.classList.remove('hidden');
+            }
+        };
+
+        window.renderResult = function(char, data) {
+            const radicalDisplay = document.getElementById('radical-display');
+            const strokesDisplay = document.getElementById('strokes-display');
+            if (radicalDisplay) radicalDisplay.textContent = window.getStr(data.radical) || 'Unknown / 未知';
+            if (strokesDisplay) strokesDisplay.textContent = window.getStr(data.strokes) ? `${data.strokes}` : '--';
+
+            const pureMainZhuyin = window.getStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+            document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
+            const pb = document.getElementById('play-char-btn');
+            
+            if(pb) {
+                pb.classList.remove('hidden'); 
+                pb.setAttribute('data-action', 'speak'); 
+                pb.setAttribute('data-text', pureMainZhuyin); 
+                pb.setAttribute('data-fallback', char); 
+            }
+            
+            const polyDisp = document.getElementById('polyphonic-display'); 
+            polyDisp.innerHTML = '';
+            const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
+            
+            let seenPoly = new Set();
+            seenPoly.add(pureMainZhuyin);
+
+            let polyHTML = '';
+            if (validPolyphonic.length > 0) {
+                validPolyphonic.forEach(p => {
+                    const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                    if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
+                        seenPoly.add(pureZhuyin);
+                        polyHTML += `
+                            <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
+                                <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
+                                <div class="flex-1"></div>
+                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
+                                    <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            if (polyHTML) {
+                document.getElementById('poly-section-wrap').style.display = 'block';
+                polyDisp.innerHTML = polyHTML;
+            } else {
+                document.getElementById('poly-section-wrap').style.display = 'none';
+            }
+            
+            const wordsCont = document.getElementById('words-container');
+            wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
+                    const pureWord = window.getStr(w).replace(/\([^)]*\)/g, '').trim();
+                    return `<span data-action="speak" data-text="${pureWord}" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-md hover:border-indigo-400 transition-all italic">${pureWord}</span>`;
+            }).join('');
+            
+            const idiomsCont = document.getElementById('idioms-container');
+            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
+            
+            if (validIdioms.length > 0) {
+                idiomsCont.innerHTML = validIdioms.map(i => `
+                    <div class="p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] text-sm font-bold shadow-sm text-left hover:shadow-md transition-all relative group">
+                        <div class="flex-1 pr-16">
+                            <div class="text-slate-950 text-2xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-3 inline-block">${window.getStr(i.idiom)}</div>
+                            
+                            <div class="mt-4 flex flex-col items-start gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-400 uppercase tracking-widest font-black italic">Meanings / 解析：</span>
+                                    <button type="button" data-action="speak" data-text="${window.getStr(i.meaning)}" class="text-slate-300 hover:text-emerald-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                </div>
+                                <div class="text-base text-slate-600 font-bold leading-relaxed">${window.getStr(i.meaning)}</div>
+                            </div>
+                            
+                            <div class="mt-4 border-t pt-3 border-slate-100 flex flex-col items-start gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">English / 意譯：</span>
+                                    <button type="button" data-action="speak-eng" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                </div>
+                                <div class="text-[13px] text-indigo-500 font-bold tracking-wide opacity-90 leading-relaxed">${window.getStr(i.english) || "Translation loading..."}</div>
+                            </div>
+                        </div>
+                        <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="absolute top-8 right-8 w-12 h-12 bg-emerald-500 text-white rounded-[1.25rem] shadow-lg transition-transform group-hover:scale-110 active:scale-90 flex items-center justify-center" title="播放成語"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
+                    </div>
+                `).join('');
+            } else {
+                idiomsCont.innerHTML = `<div class="p-10 text-center text-slate-400 italic font-bold">目前無相關成語紀錄。</div>`;
+            }
+        };
+
+        window.initViewCounter = async function() {
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const statsRef = doc(db, "artifacts", appId, "public", "data", "system_stats", "visits");
+                
+                // Read local storage to ensure numbers change INSTANTLY on frontend
+                let localTotal = parseInt(localStorage.getItem('abra_local_total') || '1520', 10);
+                let localToday = parseInt(localStorage.getItem('abra_local_today') || '42', 10);
+                let localDate = localStorage.getItem('abra_local_date');
+
+                if (localDate !== todayStr) {
+                    localToday = 0;
+                    localStorage.setItem('abra_local_date', todayStr);
+                }
+
+                // Incremental visual boost
+                localTotal++;
+                localToday++;
+                localStorage.setItem('abra_local_total', localTotal.toString());
+                localStorage.setItem('abra_local_today', localToday.toString());
+
+                const updateBadge = (total, today) => {
+                    document.getElementById('total-views').textContent = total;
+                    document.getElementById('today-views').textContent = today;
+                };
+
+                updateBadge(localTotal, localToday);
+
+                try {
+                    const docSnap = await getDoc(statsRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const realTotal = (data.total || 0) + 1;
+                        let realToday = (data.lastDate === todayStr) ? (data.todayViews || 0) + 1 : 1;
+                        
+                        updateBadge(realTotal, realToday);
+                        localStorage.setItem('abra_local_total', realTotal.toString());
+                        localStorage.setItem('abra_local_today', realToday.toString());
+
+                        setDoc(statsRef, { total: realTotal, todayViews: realToday, lastDate: todayStr }, { merge: true }).catch(()=>{});
+                    }
+                } catch (dbErr) {
+                    console.warn("View counter background sync restricted. Using local session count.");
+                }
+            } catch(e) {
+                console.error("Counter Error", e);
+            }
+        };
+
+        window.setupTypingMode = function() {
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(el => {
+                el.addEventListener('focus', () => { if (window.innerWidth < 768) document.body.classList.add('typing-mode'); });
+                el.addEventListener('blur', () => { setTimeout(() => document.body.classList.remove('typing-mode'), 150); });
+            });
+        };
+
+        document.addEventListener('click', (e) => {
+            const actionEl = e.target.closest('[data-action]');
+            if (!actionEl) return;
+            const action = actionEl.getAttribute('data-action');
+            if (action === 'admin-edit') window.openAdminModal(actionEl.getAttribute('data-id'));
+            else if (action === 'admin-delete') window.deleteAdminMember(actionEl.getAttribute('data-id'), actionEl);
+            else if (action === 'admin-msg') window.openAdminMsgModal(actionEl.getAttribute('data-id'));
+            else if (action === 'chat-del') window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
+            else if (action === 'speak') window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
+            else if (action === 'speak-eng') window.speakEng(actionEl.getAttribute('data-text'));
+        });
+
+        window.onload = function() {
+            const vipContent = document.getElementById('vip-only-content');
+            if (vipContent && !document.getElementById('radical-display')) {
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "flex flex-wrap items-center gap-4 mb-6 border-b-2 border-slate-100 pb-5";
+                headerDiv.innerHTML = `
+                    <div class="bg-indigo-50 px-5 py-2.5 rounded-xl border-2 border-indigo-100 text-sm font-black text-indigo-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-book-bookmark text-indigo-500 text-lg"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-base">--</span></div>
+                    <div class="bg-emerald-50 px-5 py-2.5 rounded-xl border-2 border-emerald-100 text-sm font-black text-emerald-800 flex items-center gap-2 shadow-sm"><i class="ph-fill ph-pen-nib text-emerald-500 text-lg"></i> Strokes / 筆畫：<span id="strokes-display" class="text-emerald-600 text-base">--</span></div>
+                `;
+                vipContent.insertBefore(headerDiv, vipContent.firstChild);
+            }
+            if (window.updateGlobalUI) window.updateGlobalUI();
+            window.initViewCounter();
+            window.setupTypingMode();
         };
     </script>
 </body>

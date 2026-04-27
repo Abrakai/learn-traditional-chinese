@@ -6,15 +6,12 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.14-AUTH-AUTO-RECOVERY-PATCH"
+    version: "6.7.15-STRICT-AUTH-BLOCK"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & NewebPay"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "UI Fix: Scaled header title font size to 2/3 of original and implemented vmin for width/height responsiveness."
-      - "Feature: Upgraded fallback dictionary translation to translate the FULL explanation for free users."
-      - "Auth Fix: Implemented Auto-Recovery mechanism for deleted ghost accounts to automatically rebuild DB profiles on login."
-      - "Audio Fix: Upgraded TTS voice selection algorithm to prioritize Neural/Premium natural voices."
+      - "Auth Fix: Changed Auto-Recovery to Strict Block. Deleted users are now completely denied access."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -518,7 +515,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.14-AUTH-AUTO-RECOVERY-PATCH</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.15-STRICT-AUTH-BLOCK</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -832,7 +829,6 @@
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
                         
-                        <!-- 1. USD Transparent Pricing Section (Gumroad LIVE) -->
                         <div class="pt-6">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph-fill ph-globe text-base"></i> 🌐 國際美金刷卡區 (USD)</h4>
                             <div class="space-y-3">
@@ -872,7 +868,6 @@
                             </div>
                         </div>
 
-                        <!-- 2. NewebPay TWD Local Pricing Section (Replaced ECPay) -->
                         <div class="pt-8">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-credit-card text-base"></i> 🇹🇼 台灣台幣刷卡區 (藍新 NewebPay 全自動)</h4>
                             <div class="space-y-3">
@@ -912,7 +907,6 @@
                             </div>
                         </div>
                         
-                        <!-- 3. TWD Offline Manual Transfer Section -->
                         <div class="pt-8 border-t border-slate-100 mt-6">
                             <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph-fill ph-bank text-base"></i> 🏦 現金匯款 (免除海外手續費 / 人工開通)</h4>
                             <div class="p-4 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
@@ -1153,23 +1147,13 @@
                             window.showToast("Login Success! / 登入成功！");
                             setTimeout(() => location.reload(), 800);
                         } else {
-                            // Auto-Recovery mechanism: Account exists in Auth but missing in DB (Deleted by Admin)
-                            const defaultName = email.split('@')[0];
-                            await setDoc(docRef, {
-                                uid: auth.currentUser ? auth.currentUser.uid : "recovered",
-                                name: defaultName,
-                                email: email,
-                                signupDate: new Date().toISOString(),
-                                status: "pending",
-                                password: "" // Keep empty to enforce strict DB checks
-                            }, { merge: true });
-
-                            localStorage.setItem('abra_vip_code', sanitizedEmail);
-                            localStorage.setItem('abra_vip_status', 'pending');
-                            localStorage.setItem('abra_user_name', defaultName);
-                            
-                            window.showToast("Account Recovered! / 帳號已自動重建並啟用！");
-                            setTimeout(() => location.reload(), 800);
+                            // Strict Block mechanism: Account deleted from DB
+                            await signOut(auth);
+                            window.showToast("此帳號已被管理員移除，拒絕登入 / Account removed by admin", true);
+                            if(loader) loader.classList.add('hidden');
+                            if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
+                            if(loginBtn) loginBtn.disabled = false;
+                            return;
                         }
                     } catch (syncErr) {
                          console.error("Post-login getDoc error:", syncErr);

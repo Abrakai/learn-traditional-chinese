@@ -6,15 +6,14 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.27-PLG-REVERSE-ENGINE"
+    version: "6.7.28-BI-DIRECTIONAL-FIX"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Product-Led Growth & Bi-directional Polyglot"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "PLG Redesign: Removed Auth section from main flow. Converted to a popup Auth Modal."
-      - "UX Improvement: Added smart 'Log In' button to Header for guests."
-      - "Bi-directional Engine: Added Reverse Translation Card when splitting Chinese characters."
-      - "Polyglot Magic: Reverse translation automatically syncs with selected native language and Polyglot TTS."
+      - "Bi-directional UX: Reverse translation now correctly populates Module 1 input box for a true learning loop."
+      - "Error Handling: Fixed Polyglot fallback engine to correctly pass target languages (ja, ko, th, etc.)."
+      - "Error Handling: Improved Reverse Translation error catching to show a UI card instead of silent failure."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -123,7 +122,6 @@
                     <i class="ph-fill ph-crown text-sm sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
-                <!-- 🌐 PLG 首頁無阻力設計：新增未登入時的 Header Auth 按鈕 -->
                 <button type="button" id="header-auth-btn" title="Login / 註冊" class="hidden text-[9px] md:text-xs bg-slate-800 hover:bg-slate-900 border border-slate-700 text-white p-1.5 sm:px-4 sm:py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md font-black whitespace-nowrap uppercase tracking-widest" onclick="window.openAuthModal()">
                     <i class="ph-bold ph-sign-in text-lg sm:text-base"></i> <span class="hidden md:inline">Log In</span>
                 </button>
@@ -633,7 +631,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.27-PLG-REVERSE-ENGINE</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.28-BI-DIRECTIONAL-FIX</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -921,10 +919,9 @@
                 adminSection: document.getElementById('admin-dashboard-section'),
                 qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
                 headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container'),
-                authBtn: document.getElementById('header-auth-btn') // 🌐
+                authBtn: document.getElementById('header-auth-btn') 
             };
 
-            // PLG Flow: By default hide tools unless admin
             if(els.adminSection) els.adminSection.classList.add('hidden');
             if(els.pBtn) els.pBtn.classList.add('hidden');
             if(els.mBtn) els.mBtn.classList.add('hidden');
@@ -997,7 +994,6 @@
                     }
                 }
             } else {
-                // Not logged in -> Show Sign Up Button
                 if(els.authBtn) { els.authBtn.classList.remove('hidden'); els.authBtn.style.display = 'flex'; }
                 if(els.qDisplay) {
                     els.qDisplay.classList.remove('hidden');
@@ -1510,7 +1506,7 @@
                                 window.activeApiKey = data.apiKey.trim();
                             }
                             window.showToast("Login Success! / 登入成功！");
-                            window.closeAuthModal(); // 🌐 PLG: 登入成功自動關閉 Modal
+                            window.closeAuthModal();
                             setTimeout(() => location.reload(), 800);
                         } else {
                             await signOut(auth);
@@ -2307,7 +2303,8 @@
                 window.speak(finalStr, finalStr);
             } catch(e) { 
                 try {
-                    const res2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
+                    const langCode = window.currentNativeLang || 'en';
+                    const res2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=${langCode}|zh-TW`);
                     const d2 = await res2.json();
                     if (d2 && d2.responseData && d2.responseData.translatedText) {
                         const fbTrans = d2.responseData.translatedText.trim().replace(/[「」""'']/g, '');
@@ -2322,7 +2319,6 @@
             } finally { document.getElementById('translate-loader').classList.add('hidden'); }
         };
 
-        // 🌐 v6.7.27: 雙向學習閉環 (Reverse Translation Engine)
         window.handleSplit = async function(e) {
             const text = document.getElementById('zh-input').value.trim();
             if (!text) return;
@@ -2357,7 +2353,7 @@
             const container = document.getElementById('char-container');
             const revWrap = document.getElementById('reverse-trans-wrap');
             
-            // 🔄 反向翻譯邏輯
+            // 🔄 雙向學習引擎：反向翻譯邏輯
             try {
                 let reverseTrans = "";
                 const langCode = window.currentNativeLang || 'en';
@@ -2367,7 +2363,7 @@
                 const displayLangName = langNameMap[langCode] || 'English';
 
                 if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
-                    const prompt = `Translate the following Traditional Chinese text to ${targetLang}. Output ONLY the exact translated string. NO explanations, NO quotes. Text: "${text}"`;
+                    const prompt = `Translate the following Traditional Chinese text to ${targetLang}. Output ONLY the exact translated string. NO explanations, NO quotes, NO pronunciation. Text: "${text}"`;
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -2385,6 +2381,9 @@
                 reverseTrans = window.getStr(reverseTrans).trim().replace(/[「」""'']/g, '');
 
                 if (reverseTrans) {
+                    // 🌐 完美達成真正的視覺閉環：將翻譯結果同步填回 Module 1 母語框中
+                    document.getElementById('eng-input').value = reverseTrans;
+
                     const safeTransForFunc = reverseTrans.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                     revWrap.innerHTML = `
                         <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 relative overflow-hidden">
@@ -2399,11 +2398,20 @@
                     `;
                     revWrap.classList.remove('hidden');
                 } else {
-                    revWrap.classList.add('hidden');
+                    throw new Error("Empty reverse translation");
                 }
             } catch(e) {
                 console.error("Reverse Trans Error:", e);
-                revWrap.classList.add('hidden');
+                revWrap.innerHTML = `
+                    <div class="bg-red-50 border border-red-100 rounded-3xl p-5 shadow-sm flex items-center gap-4">
+                        <div class="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md flex-shrink-0"><i class="ph-bold ph-warning-circle text-xl"></i></div>
+                        <div class="flex-1">
+                            <h4 class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Translation Failed / 翻譯連線失敗</h4>
+                            <p class="text-xs font-bold text-red-800">免費翻譯伺服器滿載，無法反向翻譯回母語。請稍後再試，或升級 VIP 綁定金鑰以啟動 AI 解析。</p>
+                        </div>
+                    </div>
+                `;
+                revWrap.classList.remove('hidden');
             }
 
             container.innerHTML = '';

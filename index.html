@@ -6,14 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.21-MULTI-PROMO-MANAGER"
+    version: "6.7.22-REALTIME-PROFILE-SYNC"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & Promo Tracking"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Quota System: Added dedicated Multi-Promo Code Manager Modal."
-      - "Admin UI: Full CRUD support for multiple invite codes with individual expiry dates."
-      - "Auth Flow: Real-time validation of Promo Codes. Expired or deleted codes auto-downgrade users."
+      - "Architecture: Implemented Real-time User Profile Sync via onSnapshot."
+      - "UX Fix: Admin changes to user quotas, promo codes, or expiry dates now reflect instantly on the user's screen without requiring a re-login."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -194,7 +193,6 @@
 
         <!-- Admin Dashboard Section -->
         <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
-            <!-- 🌐 全域額度管理區塊 -->
             <div class="bg-indigo-900 px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 border-b-4 border-indigo-950">
                 <div class="flex items-center gap-2"><i class="ph-fill ph-sliders text-2xl text-indigo-400"></i><h3 class="font-black text-sm md:text-base text-white uppercase tracking-widest">Global Config / 全域額度設定</h3></div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
@@ -210,7 +208,6 @@
                     
                     <div class="w-px h-6 bg-indigo-700 mx-1"></div>
                     
-                    <!-- 🎟️ 開啟多重邀請碼控制台按鈕 -->
                     <button type="button" onclick="window.openPromoModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest border-b-4 border-purple-800"><i class="ph-bold ph-ticket"></i> Promo Codes</button>
                 </div>
             </div>
@@ -373,7 +370,6 @@
                 <button type="button" onclick="window.closePromoModal()" class="text-slate-300 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
             </div>
             
-            <!-- Add New Code Form -->
             <div class="bg-purple-50 p-6 rounded-3xl border border-purple-100 mb-8 flex flex-col md:flex-row items-end gap-4 shadow-inner">
                 <div class="space-y-2 flex-1 w-full">
                     <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Code / 專屬邀請碼</label>
@@ -390,7 +386,6 @@
                 <button type="button" onclick="window.savePromoCode()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-3.5 rounded-xl font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-purple-800 flex items-center justify-center gap-2"><i class="ph-bold ph-plus"></i> Add</button>
             </div>
 
-            <!-- Codes Table -->
             <div class="overflow-x-auto border-2 border-slate-100 rounded-3xl bg-slate-50 shadow-inner">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-slate-200 text-slate-500 border-b-2 border-slate-200 uppercase tracking-widest text-[10px] font-bold">
@@ -408,7 +403,7 @@
                 </table>
             </div>
             <p class="text-[10px] text-slate-400 mt-4 leading-relaxed font-bold bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-start gap-2">
-                <i class="ph-fill ph-info text-slate-500 mt-0.5"></i> 刪除或過期的邀請碼，將導致已綁定該碼的使用者在下次登入時，自動降級為一般註冊會員的預設額度。
+                <i class="ph-fill ph-info text-slate-500 mt-0.5"></i> 刪除或過期的邀請碼，將導致已綁定該碼的使用者在下次登入或重新整理時，自動降級為一般註冊會員的預設額度。
             </p>
         </div>
     </div>
@@ -443,7 +438,6 @@
                     <input type="text" id="profile-name" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold shadow-sm bg-slate-50">
                 </div>
                 
-                <!-- 🌐 新增：後追綁定邀請碼欄位 -->
                 <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-inner">
                     <label class="block text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1.5 flex items-center gap-1"><i class="ph-fill ph-ticket"></i> Promo Code / 綁定邀請碼</label>
                     <input type="text" id="profile-invite-code" placeholder="輸入專屬邀請碼以升級特權" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm font-black shadow-sm bg-white text-purple-900 uppercase">
@@ -552,7 +546,7 @@
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest ml-2">Custom Quota / 專屬次數</label>
-                        <input type="number" id="admin-member-limit" placeholder="留空用預設" class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 outline-none text-xs bg-indigo-50 shadow-sm font-black text-indigo-700">
+                        <input type="number" id="admin-member-limit" placeholder="留白以套用群組" class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 outline-none text-xs bg-indigo-50 shadow-sm font-black text-indigo-700">
                     </div>
                 </div>
                 
@@ -589,7 +583,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.21-MULTI-PROMO-MANAGER</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.22-REALTIME-PROFILE-SYNC</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -619,11 +613,8 @@
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
         
-        // 🌐 全域動態額度設定 (基礎)
         window.sysConfig = { guestLimit: 10, memberLimit: 15 };
-        // 🎟️ 多重邀請碼資料庫 (雲端同步)
         window.promoCodesData = {};
-        // 📊 零成本統計地圖
         window.promoStatsMap = {};
         
         window.MAX_FREE_USES = 10; 
@@ -636,10 +627,8 @@
         window.charCache = {};
         window.currentTargetChar = "";
         
-        // 紀錄目前登入者原始的邀請碼，用於 Profile 修改比對
         window.currentUserInviteCode = "";
 
-        // 儲存基礎全域設定 (Guest / Member)
         window.saveSystemConfig = async function(e) {
             const saveBtn = e ? e.target : null;
             const gl = parseInt(document.getElementById('sys-guest-limit').value, 10);
@@ -663,7 +652,6 @@
             }
         };
         
-        // 🎟️ 邀請碼管理中心邏輯
         window.openPromoModal = function() {
             document.getElementById('promo-manager-modal').classList.remove('hidden');
             window.renderPromoTable();
@@ -674,7 +662,7 @@
         window.renderPromoTable = function() {
             const tbody = document.getElementById('promo-table-body');
             let html = '';
-            const todayStr = new Date().toISOString().split('T')[0]; // 安全的字串日期比較
+            const todayStr = new Date().toISOString().split('T')[0]; 
 
             for (const code in window.promoCodesData) {
                 const p = window.promoCodesData[code];
@@ -862,7 +850,6 @@
                 window.isAdmin = (adminStatus === 'active');
             }
             
-            // 🌐 智慧多重邀請碼：動態額度計算
             let currentLimit = window.sysConfig.guestLimit;
             if (window.isVIP || window.isAdmin) {
                 currentLimit = '∞';
@@ -872,15 +859,14 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 
                 if (custom && custom !== 'undefined' && custom !== 'null') {
-                    currentLimit = parseInt(custom, 10); // 獨立客製化額度最高優先級
+                    currentLimit = parseInt(custom, 10); 
                 } else if (userInviteCode && window.promoCodesData[userInviteCode]) {
-                    // 核對多重邀請碼字典
                     const promo = window.promoCodesData[userInviteCode];
                     const isExpired = promo.expiry && promo.expiry < todayStr;
                     if (!isExpired) {
                         currentLimit = parseInt(promo.limit, 10);
                     } else {
-                        currentLimit = window.sysConfig.memberLimit; // 邀請碼過期，自動降級回一般會員
+                        currentLimit = window.sysConfig.memberLimit; 
                     }
                 } else {
                     currentLimit = window.sysConfig.memberLimit;
@@ -992,7 +978,6 @@
                 const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
                 const emailCode = localStorage.getItem('abra_vip_code');
                 
-                // 🌐 多重邀請碼行銷文案判定
                 let customLimit = localStorage.getItem('abra_custom_limit');
                 let hasCustom = customLimit && customLimit !== 'undefined' && customLimit !== 'null';
                 let userInviteCode = localStorage.getItem('abra_invite_code');
@@ -1012,7 +997,7 @@
                     setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> 您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</p>`);
                 } else if (emailCode) {
                     let currentLimitDisplay = hasCustom ? customLimit : (validPromo ? validPromo.limit : window.sysConfig.memberLimit);
-                    let prefixMsg = validPromo ? `✨ 專屬禮遇：系統偵測您已綁定邀請碼「${userInviteCode}」，目前享有每日 ${currentLimitDisplay} 次免費額度。` : `✨ 會員專屬：您目前享有每日 ${currentLimitDisplay} 次免費額度。`;
+                    let prefixMsg = validPromo && !hasCustom ? `✨ 專屬禮遇：系統偵測您已綁定邀請碼「${userInviteCode}」，目前享有每日 ${currentLimitDisplay} 次免費額度。` : `✨ 會員專屬：您目前享有每日 ${currentLimitDisplay} 次免費額度。`;
                     setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-indigo-700 font-bold mb-4 leading-relaxed bg-indigo-50 p-4 rounded-xl border border-indigo-100">${prefixMsg}<br><span class="text-[11px] italic font-normal text-slate-500">歡迎點擊下方方案升級 VIP 會員，解除次數限制並解鎖 AI 深度解析！</span></p>`);
                 } else {
                     setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">👋 訪客專屬：您目前享有每日 ${window.sysConfig.guestLimit} 次免費額度。<br><span class="text-[11px] font-black text-indigo-600 underline cursor-pointer" onclick="window.scrollToAuth()">點此免費註冊會員，即可提升至每日 ${window.sysConfig.memberLimit} 次！若有專屬邀請碼，請於註冊時填寫解鎖特權。</span><br><span class="text-[10px] italic font-normal text-slate-500 mt-1 block">或直接選擇下方方案升級 VIP，享受無限次暢遊。</span></p>`);
@@ -1252,7 +1237,7 @@
                     try {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } catch (tokenError) {
-                        console.warn("Custom token failed (likely mismatch with custom Firebase config), falling back to anonymous:", tokenError.code);
+                        console.warn("Custom token failed, falling back to anonymous:", tokenError.code);
                         await signInAnonymously(auth);
                     }
                 } else {
@@ -1266,6 +1251,7 @@
 
         let sysConfigUnsub = null;
         let promoCodesUnsub = null;
+        let userProfileUnsub = null; // 🌐 新增：個人資料即時監聽器
 
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
@@ -1289,7 +1275,6 @@
                     });
                 }
                 
-                // 🌐 監聽多重邀請碼資料庫
                 if (!promoCodesUnsub) {
                     promoCodesUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "system_config", "promo_codes"), (docSnap) => {
                         if(docSnap.exists()){
@@ -1299,7 +1284,6 @@
                         }
                         if(window.updateGlobalUI) window.updateGlobalUI();
                         
-                        // 若管理面板開啟中，即時更新表格
                         const modal = document.getElementById('promo-manager-modal');
                         if (modal && !modal.classList.contains('hidden')) {
                             window.renderPromoTable();
@@ -1308,10 +1292,55 @@
                         console.warn("Promo Sync restricted:", error.message);
                     });
                 }
+
+                // 🌐 即時個人資料庫同步 (取代過往只能在重整/登入時抓取的靜態設計)
+                const emailCode = localStorage.getItem('abra_vip_code');
+                if (emailCode && !userProfileUnsub) {
+                    userProfileUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            
+                            // 即時計算 VIP 到期日
+                            let status = 'pending';
+                            if (data.expiryDate) {
+                                const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                                status = (diff >= 0) ? 'active' : 'expired';
+                                localStorage.setItem('abra_vip_days', diff.toString());
+                            } else {
+                                localStorage.removeItem('abra_vip_days');
+                            }
+                            localStorage.setItem('abra_vip_status', status);
+                            
+                            // 即時同步專屬客製化額度
+                            if (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') {
+                                localStorage.setItem('abra_custom_limit', data.customLimit);
+                            } else {
+                                localStorage.removeItem('abra_custom_limit');
+                            }
+                            
+                            // 即時同步綁定的邀請碼
+                            if (data.inviteCode) {
+                                localStorage.setItem('abra_invite_code', data.inviteCode);
+                            } else {
+                                localStorage.removeItem('abra_invite_code');
+                            }
+
+                            // 觸發 UI 變更，瞬間反映管理員在後台修改的額度
+                            if(window.updateGlobalUI) window.updateGlobalUI();
+                        } else {
+                            // 帳號被管理員刪除，強制登出
+                            window.handleLogout();
+                        }
+                    }, (error) => {
+                        console.warn("User Profile Sync restricted:", error.message);
+                    });
+                }
+
             } else {
                 document.getElementById('auth-status-msg').textContent = "AUTH ERROR";
                 if (sysConfigUnsub) { sysConfigUnsub(); sysConfigUnsub = null; }
                 if (promoCodesUnsub) { promoCodesUnsub(); promoCodesUnsub = null; }
+                if (userProfileUnsub) { userProfileUnsub(); userProfileUnsub = null; }
             }
         });
 
@@ -1464,7 +1493,6 @@
             
             if (!name || !email || !pass) { window.showToast("Fill all fields / 請填寫完整資料", true); return; }
             
-            // 🌐 智慧多重邀請碼核對
             if (inviteCode) {
                 const promo = window.promoCodesData[inviteCode];
                 if (!promo) {
@@ -1599,14 +1627,12 @@
                 let html = '';
                 let globalUnread = false; 
                 
-                // 📊 零成本聚合：重置綁定人數統計
                 window.promoStatsMap = {}; 
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const emailId = docSnap.id;
                     
-                    // 統計各邀請碼綁定人數
                     if (data.inviteCode) {
                         const code = data.inviteCode.toUpperCase();
                         window.promoStatsMap[code] = (window.promoStatsMap[code] || 0) + 1;
@@ -1660,7 +1686,6 @@
                 
                 tbody.innerHTML = html === '' ? '<tr><td colspan="7" class="text-center py-20 font-black uppercase tracking-widest text-slate-400">Database Empty / 無會員資料</td></tr>' : html;
                 
-                // 刷新 Promo Modal (若開啟中) 以顯示最新的人數統計
                 const modal = document.getElementById('promo-manager-modal');
                 if (modal && !modal.classList.contains('hidden')) {
                     window.renderPromoTable();
@@ -1894,22 +1919,21 @@
             if (!window.isVIP && !window.isAdmin && newApiKey) { window.showToast("未繳費開通，無法設定 API 金鑰", true); return; }
             if (!newName) { window.showToast("請填寫顯示名稱 / Missing fields", true); return; }
             
-            // 🌐 智慧多重邀請碼：核對與解綁
             let inviteCodeToSave = window.currentUserInviteCode;
             if (newInviteCode !== window.currentUserInviteCode) {
                 if (newInviteCode === '') {
-                    inviteCodeToSave = ''; // 允許解除綁定
+                    inviteCodeToSave = ''; 
                 } else if (window.promoCodesData[newInviteCode]) {
                     const promo = window.promoCodesData[newInviteCode];
                     const todayStr = new Date().toISOString().split('T')[0];
                     if (promo.expiry && promo.expiry < todayStr) {
                         window.showToast("該邀請碼已過期失效 / Promo Code Expired", true);
-                        return; // 驗證失敗，中斷儲存
+                        return; 
                     }
-                    inviteCodeToSave = newInviteCode; // 驗證成功，蓋上鋼印
+                    inviteCodeToSave = newInviteCode; 
                 } else {
                     window.showToast("邀請碼無效 / Invalid Promo Code", true);
-                    return; // 驗證失敗，中斷儲存
+                    return; 
                 }
             }
 
@@ -1939,7 +1963,8 @@
                 
                 window.showToast("設定已同步至雲端並儲存完成！ / Settings Saved!");
                 if (window.closeProfileModal) window.closeProfileModal();
-                setTimeout(() => location.reload(), 800);
+                
+                // 移除強制重新載入，因為我們現在有 userProfileUnsub 可以即時同步！
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         };
 
@@ -2116,7 +2141,6 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            // 語音播報優化（避開 / - _ 等符號採自然停頓，僅數學算式須唸出）
             let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
             
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {

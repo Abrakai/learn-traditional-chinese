@@ -6,13 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.22-REALTIME-PROFILE-SYNC"
+    version: "6.7.23-NEWEBPAY-AUTO-HEAL"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & Promo Tracking"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Architecture: Implemented Real-time User Profile Sync via onSnapshot."
-      - "UX Fix: Admin changes to user quotas, promo codes, or expiry dates now reflect instantly on the user's screen without requiring a re-login."
+      - "Payment Guard: Implemented Auto-Healing Email Sanitizer before NewebPay/Gumroad API calls to prevent MPG01013 format crashes caused by corrupted DB entries (e.g. _com instead of .com)."
+      - "UX Fix: Enforced real email or dot-restored email display in Profile Modal instead of raw sanitized ID."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -583,7 +583,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.22-REALTIME-PROFILE-SYNC</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.23-NEWEBPAY-AUTO-HEAL</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -794,7 +794,8 @@
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("Please login first / 請先登入", true); return; }
-            document.getElementById('profile-email').value = emailId;
+            // 🌐 強制顯示小數點的真實信箱
+            document.getElementById('profile-email').value = emailId.replace(/_/g, '.');
             document.getElementById('profile-modal').classList.remove('hidden');
 
             try {
@@ -802,6 +803,10 @@
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    
+                    // 🌐 如果資料庫有真正的 email 欄位，就用它覆蓋
+                    if (data.email) document.getElementById('profile-email').value = window.getStr(data.email);
+                    
                     document.getElementById('profile-name').value = window.getStr(data.name);
                     document.getElementById('profile-pass').value = ''; 
                     
@@ -1137,7 +1142,16 @@
                     console.warn("Firebase email fetch blocked, using fallback email:", dbErr);
                 }
 
-                const checkoutUrl = `https://gumroad.com/l/${window.getStr(permalink)}?email=${encodeURIComponent(customerEmail)}`;
+                // 🌐 終極自癒防呆：確保送給 Gumroad 的信箱格式絕對正確
+                let safeEmail = customerEmail;
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+                    safeEmail = safeEmail.replace(/_(com|tw|net|org|edu|io)$/i, '.$1');
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+                        safeEmail = ""; // Gumroad 允許為空，讓使用者自己填
+                    }
+                }
+
+                const checkoutUrl = `https://gumroad.com/l/${window.getStr(permalink)}?email=${encodeURIComponent(safeEmail)}`;
                 window.location.href = checkoutUrl;
 
             } catch (e) {
@@ -1172,6 +1186,15 @@
                     console.warn("Firebase email fetch blocked, using fallback email:", dbErr);
                 }
 
+                // 🌐 終極自癒防呆：攔截並修復資料庫中被汙染的信箱 (如 abrakai_99@gmail_com)
+                let safeEmail = customerEmail;
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+                    safeEmail = safeEmail.replace(/_(com|tw|net|org|edu|io)$/i, '.$1');
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+                        safeEmail = "payment@" + (window.location.hostname || "abrakai.com");
+                    }
+                }
+
                 const functionUrl = "https://asia-east1-abra-learn-zh-vip.cloudfunctions.net/createNewebPayOrder";
                 
                 const response = await fetch(functionUrl, {
@@ -1183,7 +1206,7 @@
                         data: {
                             planMonths: planMonths, 
                             amount: price, 
-                            email: customerEmail
+                            email: safeEmail // 送出保證安全無毒的信箱
                         }
                     })
                 });
@@ -1251,7 +1274,7 @@
 
         let sysConfigUnsub = null;
         let promoCodesUnsub = null;
-        let userProfileUnsub = null; // 🌐 新增：個人資料即時監聽器
+        let userProfileUnsub = null; 
 
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
@@ -1293,14 +1316,12 @@
                     });
                 }
 
-                // 🌐 即時個人資料庫同步 (取代過往只能在重整/登入時抓取的靜態設計)
                 const emailCode = localStorage.getItem('abra_vip_code');
                 if (emailCode && !userProfileUnsub) {
                     userProfileUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode), (docSnap) => {
                         if (docSnap.exists()) {
                             const data = docSnap.data();
                             
-                            // 即時計算 VIP 到期日
                             let status = 'pending';
                             if (data.expiryDate) {
                                 const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -1311,24 +1332,20 @@
                             }
                             localStorage.setItem('abra_vip_status', status);
                             
-                            // 即時同步專屬客製化額度
                             if (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') {
                                 localStorage.setItem('abra_custom_limit', data.customLimit);
                             } else {
                                 localStorage.removeItem('abra_custom_limit');
                             }
                             
-                            // 即時同步綁定的邀請碼
                             if (data.inviteCode) {
                                 localStorage.setItem('abra_invite_code', data.inviteCode);
                             } else {
                                 localStorage.removeItem('abra_invite_code');
                             }
 
-                            // 觸發 UI 變更，瞬間反映管理員在後台修改的額度
                             if(window.updateGlobalUI) window.updateGlobalUI();
                         } else {
-                            // 帳號被管理員刪除，強制登出
                             window.handleLogout();
                         }
                     }, (error) => {
@@ -1964,7 +1981,6 @@
                 window.showToast("設定已同步至雲端並儲存完成！ / Settings Saved!");
                 if (window.closeProfileModal) window.closeProfileModal();
                 
-                // 移除強制重新載入，因為我們現在有 userProfileUnsub 可以即時同步！
             } catch(e) { window.showToast("更新失敗 / Save failed", true); }
         };
 

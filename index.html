@@ -6,13 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.23-NEWEBPAY-AUTO-HEAL"
+    version: "6.7.24-B2B-PROMO-MANAGEMENT"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & Promo Tracking"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Payment Guard: Implemented Auto-Healing Email Sanitizer before NewebPay/Gumroad API calls to prevent MPG01013 format crashes caused by corrupted DB entries (e.g. _com instead of .com)."
-      - "UX Fix: Enforced real email or dot-restored email display in Profile Modal instead of raw sanitized ID."
+      - "Admin UI: Added 'Remark' field and column to Promo Codes Manager for B2B tracking."
+      - "Admin UI: Added 'EDIT' action to modify existing Promo Codes without recreating."
+      - "Admin UI: Implemented One-Click cross-filtering. Clicking User count in modal auto-filters main table."
+      - "Search: Upgraded main Admin search bar to explicitly support filtering by Promo Codes."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -224,7 +226,8 @@
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
                 <div class="relative w-full max-w-md">
                     <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                    <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone... / 搜尋會員資訊" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
+                    <!-- 🌐 更新搜尋框提示字眼 -->
+                    <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone, Promo Code... / 搜尋信箱、姓名、手機、邀請碼" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
                 </div>
             </div>
             <div class="p-0 overflow-x-auto">
@@ -358,52 +361,61 @@
 
     <!-- 🎟️ Promo Codes Manager Modal -->
     <div id="promo-manager-modal" class="hidden fixed inset-0 z-[1400] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 transition-opacity">
-        <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 text-left">
+        <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 text-left flex flex-col">
             <div class="flex justify-between items-center border-b-4 border-purple-50 pb-6 mb-6">
                 <div class="flex items-center gap-4">
                     <i class="ph-fill ph-ticket text-purple-500 text-4xl bg-purple-50 p-4 rounded-2xl"></i>
                     <div>
                         <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Promo Codes / 邀請碼管理中心</h3>
-                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mt-1">Multi-Code Manager & Stats Tracker</p>
+                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mt-1">Multi-Code Manager & B2B Tracking</p>
                     </div>
                 </div>
                 <button type="button" onclick="window.closePromoModal()" class="text-slate-300 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
             </div>
             
-            <div class="bg-purple-50 p-6 rounded-3xl border border-purple-100 mb-8 flex flex-col md:flex-row items-end gap-4 shadow-inner">
-                <div class="space-y-2 flex-1 w-full">
-                    <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Code / 專屬邀請碼</label>
-                    <input type="text" id="new-promo-code" placeholder="例如: SUMMER50" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-black uppercase text-purple-900">
+            <div class="bg-purple-50 p-6 rounded-3xl border border-purple-100 mb-8 shadow-inner flex-shrink-0">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Code / 邀請碼</label>
+                        <input type="text" id="new-promo-code" placeholder="如: SUMMER50" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-black uppercase text-purple-900">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Limit / 每日額度</label>
+                        <input type="number" id="new-promo-limit" placeholder="30" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-black text-purple-900 text-center">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1 flex items-center gap-1">Expiry / 到期日 <span class="text-purple-400 font-normal italic lowercase">(Optional)</span></label>
+                        <input type="date" id="new-promo-expiry" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-bold text-purple-700">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1 flex items-center gap-1">Remark / 管理備註</label>
+                        <input type="text" id="new-promo-remark" placeholder="如: 麗林國小專用" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-bold text-purple-700">
+                    </div>
                 </div>
-                <div class="space-y-2 w-full md:w-32">
-                    <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Limit / 每日額度</label>
-                    <input type="number" id="new-promo-limit" placeholder="30" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-black text-purple-900 text-center">
+                <div class="mt-5 flex justify-end">
+                    <button type="button" onclick="window.savePromoCode()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-10 py-3.5 rounded-xl font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-purple-800 flex items-center justify-center gap-2"><i class="ph-bold ph-floppy-disk"></i> Save Code / 儲存邀請碼</button>
                 </div>
-                <div class="space-y-2 flex-1 w-full">
-                    <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1 flex items-center gap-1">Expiry Date / 到期日 <span class="text-purple-400 font-normal italic lowercase">(Optional)</span></label>
-                    <input type="date" id="new-promo-expiry" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-bold text-purple-700">
-                </div>
-                <button type="button" onclick="window.savePromoCode()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-3.5 rounded-xl font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-purple-800 flex items-center justify-center gap-2"><i class="ph-bold ph-plus"></i> Add</button>
             </div>
 
-            <div class="overflow-x-auto border-2 border-slate-100 rounded-3xl bg-slate-50 shadow-inner">
+            <div class="overflow-x-auto border-2 border-slate-100 rounded-3xl bg-slate-50 shadow-inner flex-1">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-slate-200 text-slate-500 border-b-2 border-slate-200 uppercase tracking-widest text-[10px] font-bold">
                         <tr>
                             <th class="px-6 py-4">Code / 代碼</th>
-                            <th class="px-6 py-4">Limit / 每日額度</th>
+                            <th class="px-6 py-4">Limit / 額度</th>
                             <th class="px-6 py-4">Expiry / 到期日</th>
+                            <th class="px-6 py-4">Remark / 備註</th>
                             <th class="px-6 py-4">Users / 綁定人數</th>
                             <th class="px-6 py-4 text-right">Actions / 操作</th>
                         </tr>
                     </thead>
                     <tbody id="promo-table-body" class="divide-y divide-slate-200 text-slate-700 bg-white font-bold">
-                        <tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold italic text-xs uppercase tracking-widest">Loading... / 載入中</td></tr>
+                        <tr><td colspan="6" class="text-center py-10 text-slate-400 font-bold italic text-xs uppercase tracking-widest">Loading... / 載入中</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p class="text-[10px] text-slate-400 mt-4 leading-relaxed font-bold bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-start gap-2">
-                <i class="ph-fill ph-info text-slate-500 mt-0.5"></i> 刪除或過期的邀請碼，將導致已綁定該碼的使用者在下次登入或重新整理時，自動降級為一般註冊會員的預設額度。
+            <p class="text-[10px] text-slate-400 mt-4 leading-relaxed font-bold bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-start gap-2 flex-shrink-0">
+                <i class="ph-fill ph-info text-slate-500 mt-0.5"></i> 點擊「綁定人數」的按鈕，系統將為您自動跳轉並篩選出符合該邀請碼的會員清單。
             </p>
         </div>
     </div>
@@ -583,7 +595,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.23-NEWEBPAY-AUTO-HEAL</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.24-B2B-PROMO-MANAGEMENT</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -659,6 +671,31 @@
         
         window.closePromoModal = () => document.getElementById('promo-manager-modal').classList.add('hidden');
 
+        // 📝 編輯與載入邀請碼
+        window.editPromoCode = function(code) {
+            const p = window.promoCodesData[code];
+            if(!p) return;
+            document.getElementById('new-promo-code').value = code;
+            document.getElementById('new-promo-limit').value = p.limit;
+            document.getElementById('new-promo-expiry').value = p.expiry || '';
+            document.getElementById('new-promo-remark').value = p.remark || '';
+            
+            document.querySelector('#promo-manager-modal .overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' });
+            window.showToast(`編輯模式：正在修改邀請碼 ${code}`);
+        };
+
+        // 🔍 一鍵反向過濾功能
+        window.filterByPromo = function(code) {
+            window.closePromoModal();
+            const searchInput = document.getElementById('admin-search-input');
+            if (searchInput) {
+                searchInput.value = code;
+                window.filterAdminMembers(); 
+                document.getElementById('admin-dashboard-section').scrollIntoView({behavior: 'smooth', block: 'start'});
+                window.showToast(`已為您篩選出綁定「${code}」的會員名單`);
+            }
+        };
+
         window.renderPromoTable = function() {
             const tbody = document.getElementById('promo-table-body');
             let html = '';
@@ -669,20 +706,25 @@
                 const users = window.promoStatsMap[code] || 0;
                 const isExpired = p.expiry && p.expiry < todayStr;
                 const statusDot = isExpired ? `<div class="w-2 h-2 rounded-full bg-red-500 shadow-sm"></div>` : `<div class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm"></div>`;
+                const remarkText = p.remark || '-';
                 
                 html += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-black text-purple-700 flex items-center gap-2">${statusDot} ${code}</td>
                         <td class="px-6 py-4 font-black">${p.limit} 次</td>
-                        <td class="px-6 py-4 text-xs ${isExpired ? 'text-red-500 line-through' : 'text-slate-500'}">${p.expiry || '無期限 (Permanent)'}</td>
-                        <td class="px-6 py-4 text-xs font-black text-indigo-600">${users} 人</td>
-                        <td class="px-6 py-4 text-right">
-                            <button type="button" onclick="window.deletePromoCode('${code}')" class="text-red-500 hover:text-white hover:bg-red-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-red-100">Delete</button>
+                        <td class="px-6 py-4 text-xs ${isExpired ? 'text-red-500 line-through' : 'text-slate-500'}">${p.expiry || '無期限'}</td>
+                        <td class="px-6 py-4 text-xs font-bold text-slate-500 max-w-[120px] truncate" title="${remarkText}">${remarkText}</td>
+                        <td class="px-6 py-4 text-xs font-black">
+                            <button type="button" onclick="window.filterByPromo('${code}')" class="text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors border border-indigo-100 flex items-center gap-1" title="點擊過濾此名單"><i class="ph-bold ph-magnifying-glass"></i> ${users} 人</button>
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <button type="button" onclick="window.editPromoCode('${code}')" class="text-indigo-500 hover:text-indigo-700 font-black text-[10px] px-3 py-1.5 uppercase tracking-widest transition-all">Edit</button>
+                            <button type="button" onclick="window.deletePromoCode('${code}')" class="text-red-500 hover:text-white hover:bg-red-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-red-100 ml-1">Del</button>
                         </td>
                     </tr>
                 `;
             }
-            if (!html) html = `<tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold italic text-xs uppercase tracking-widest">No promo codes active / 尚無邀請碼</td></tr>`;
+            if (!html) html = `<tr><td colspan="6" class="text-center py-10 text-slate-400 font-bold italic text-xs uppercase tracking-widest">No promo codes active / 尚無邀請碼</td></tr>`;
             tbody.innerHTML = html;
         };
 
@@ -690,19 +732,24 @@
             const codeInput = document.getElementById('new-promo-code');
             const limitInput = document.getElementById('new-promo-limit');
             const expiryInput = document.getElementById('new-promo-expiry');
+            const remarkInput = document.getElementById('new-promo-remark'); 
             
             const code = codeInput.value.trim().toUpperCase();
             const limit = parseInt(limitInput.value, 10);
             const expiry = expiryInput.value;
+            const remark = remarkInput ? remarkInput.value.trim() : '';
 
             if (!code || isNaN(limit)) { window.showToast("請填寫代碼與額度", true); return; }
             
-            const newData = { ...window.promoCodesData, [code]: { limit: limit, expiry: expiry || null, createdAt: new Date().toISOString() } };
+            const createdAt = (window.promoCodesData[code] && window.promoCodesData[code].createdAt) ? window.promoCodesData[code].createdAt : new Date().toISOString();
+
+            const newData = { ...window.promoCodesData, [code]: { limit: limit, expiry: expiry || null, remark: remark, createdAt: createdAt } };
             
             try {
                 await setDoc(doc(db, "artifacts", appId, "public", "data", "system_config", "promo_codes"), newData);
                 window.showToast("邀請碼新增/更新成功！");
                 codeInput.value = ''; limitInput.value = ''; expiryInput.value = '';
+                if(remarkInput) remarkInput.value = '';
             } catch(e) {
                 window.showToast("儲存失敗", true);
             }
@@ -794,7 +841,7 @@
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
             if (!emailId) { window.showToast("Please login first / 請先登入", true); return; }
-            // 🌐 強制顯示小數點的真實信箱
+            
             document.getElementById('profile-email').value = emailId.replace(/_/g, '.');
             document.getElementById('profile-modal').classList.remove('hidden');
 
@@ -804,7 +851,6 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    // 🌐 如果資料庫有真正的 email 欄位，就用它覆蓋
                     if (data.email) document.getElementById('profile-email').value = window.getStr(data.email);
                     
                     document.getElementById('profile-name').value = window.getStr(data.name);
@@ -1142,12 +1188,11 @@
                     console.warn("Firebase email fetch blocked, using fallback email:", dbErr);
                 }
 
-                // 🌐 終極自癒防呆：確保送給 Gumroad 的信箱格式絕對正確
                 let safeEmail = customerEmail;
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
                     safeEmail = safeEmail.replace(/_(com|tw|net|org|edu|io)$/i, '.$1');
                     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
-                        safeEmail = ""; // Gumroad 允許為空，讓使用者自己填
+                        safeEmail = ""; 
                     }
                 }
 
@@ -1186,7 +1231,6 @@
                     console.warn("Firebase email fetch blocked, using fallback email:", dbErr);
                 }
 
-                // 🌐 終極自癒防呆：攔截並修復資料庫中被汙染的信箱 (如 abrakai_99@gmail_com)
                 let safeEmail = customerEmail;
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
                     safeEmail = safeEmail.replace(/_(com|tw|net|org|edu|io)$/i, '.$1');
@@ -1206,7 +1250,7 @@
                         data: {
                             planMonths: planMonths, 
                             amount: price, 
-                            email: safeEmail // 送出保證安全無毒的信箱
+                            email: safeEmail 
                         }
                     })
                 });
@@ -1681,7 +1725,7 @@
                     if (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') {
                         customLimitDisplay = `<span class="text-indigo-600 font-black">${data.customLimit}次 (個人)</span>`;
                     } else if (data.inviteCode) {
-                        customLimitDisplay = `<span class="text-purple-600 font-black text-[9px] px-2 py-1 bg-purple-50 rounded-md border border-purple-100" title="專屬邀請碼">${window.getStr(data.inviteCode)}</span>`;
+                        customLimitDisplay = `<span class="text-purple-600 font-black text-[9px] px-2 py-1 bg-purple-50 rounded-md border border-purple-100 cursor-pointer hover:bg-purple-600 hover:text-white transition-colors" title="點擊過濾此邀請碼名單" onclick="window.filterByPromo('${window.getStr(data.inviteCode)}')">${window.getStr(data.inviteCode)}</span>`;
                     }
 
                     html += `

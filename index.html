@@ -185,7 +185,7 @@
                         <label class="text-[10px] text-indigo-200 font-black uppercase">Member / 會員每日</label>
                         <input type="number" id="sys-member-limit" class="w-16 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
                     </div>
-                    <button type="button" onclick="window.saveSystemConfig()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest ml-2 border-b-4 border-emerald-700">Save</button>
+                    <button type="button" onclick="window.saveSystemConfig(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest ml-2 border-b-4 border-emerald-700">Save</button>
                 </div>
             </div>
             
@@ -541,23 +541,26 @@
         window.charCache = {};
         window.currentTargetChar = "";
 
-        window.saveSystemConfig = async function() {
-            const saveBtn = event.target;
+        window.saveSystemConfig = async function(e) {
+            const saveBtn = e ? e.target : null;
             const gl = parseInt(document.getElementById('sys-guest-limit').value, 10);
             const ml = parseInt(document.getElementById('sys-member-limit').value, 10);
             
             if(isNaN(gl) || isNaN(ml)) { window.showToast("請輸入有效數字", true); return; }
             
-            saveBtn.textContent = "Syncing...";
-            saveBtn.disabled = true;
+            if(saveBtn) { saveBtn.textContent = "Syncing..."; saveBtn.disabled = true; }
             try {
                 await setDoc(doc(db, "artifacts", appId, "public", "data", "system_config", "settings"), { guestLimit: gl, memberLimit: ml }, {merge: true});
                 window.showToast("System Config Saved! / 系統設定已同步");
-            } catch(e) {
-                window.showToast("Save failed", true);
+            } catch(error) {
+                console.error("Config Save Error:", error);
+                if (error.code === 'permission-denied' || (error.message && error.message.includes('permission'))) {
+                    window.showToast("儲存失敗：權限不足 (請至 Firebase 更新 Security Rules)", true);
+                } else {
+                    window.showToast("Save failed: " + (error.message || "Unknown error"), true);
+                }
             } finally {
-                saveBtn.textContent = "Save";
-                saveBtn.disabled = false;
+                if(saveBtn) { saveBtn.textContent = "Save"; saveBtn.disabled = false; }
             }
         }
         

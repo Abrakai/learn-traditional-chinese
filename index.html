@@ -6,14 +6,13 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.28-BI-DIRECTIONAL-FIX"
+    version: "6.7.29-REVERSE-TRANS-FAILSAFE"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Product-Led Growth & Bi-directional Polyglot"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Bi-directional UX: Reverse translation now correctly populates Module 1 input box for a true learning loop."
-      - "Error Handling: Fixed Polyglot fallback engine to correctly pass target languages (ja, ko, th, etc.)."
-      - "Error Handling: Improved Reverse Translation error catching to show a UI card instead of silent failure."
+      - "Bi-directional Engine: Added MyMemory API as a robust fallback for Reverse Translation to bypass Google GTX rate-limits."
+      - "UX Improvement: Guaranteed populating of Module 1 input with reverse-translated text upon successful fallback fetch."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -631,7 +630,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.28-BI-DIRECTIONAL-FIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.29-REVERSE-TRANS-FAILSAFE</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -819,7 +818,6 @@
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal').classList.add('hidden');
 
-        // 🌐 Auth Modal Functions
         window.openAuthModal = function() {
             document.getElementById('auth-modal').classList.remove('hidden');
             document.getElementById('modal-member-limit-text').textContent = window.sysConfig.memberLimit || 15;
@@ -2353,15 +2351,14 @@
             const container = document.getElementById('char-container');
             const revWrap = document.getElementById('reverse-trans-wrap');
             
-            // 🔄 雙向學習引擎：反向翻譯邏輯
-            try {
-                let reverseTrans = "";
-                const langCode = window.currentNativeLang || 'en';
-                const langMap = {'en': 'English', 'ja': 'Japanese', 'ko': 'Korean', 'th': 'Thai', 'vi': 'Vietnamese', 'id': 'Indonesian'};
-                const langNameMap = {'en': 'English', 'ja': '日本語', 'ko': '한국어', 'th': 'ภาษาไทย', 'vi': 'Tiếng Việt', 'id': 'Bahasa Indonesia'};
-                const targetLang = langMap[langCode] || 'English';
-                const displayLangName = langNameMap[langCode] || 'English';
+            let reverseTrans = "";
+            const langCode = window.currentNativeLang || 'en';
+            const langMap = {'en': 'English', 'ja': 'Japanese', 'ko': 'Korean', 'th': 'Thai', 'vi': 'Vietnamese', 'id': 'Indonesian'};
+            const langNameMap = {'en': 'English', 'ja': '日本語', 'ko': '한국어', 'th': 'ภาษาไทย', 'vi': 'Tiếng Việt', 'id': 'Bahasa Indonesia'};
+            const targetLang = langMap[langCode] || 'English';
+            const displayLangName = langNameMap[langCode] || 'English';
 
+            try {
                 if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
                     const prompt = `Translate the following Traditional Chinese text to ${targetLang}. Output ONLY the exact translated string. NO explanations, NO quotes, NO pronunciation. Text: "${text}"`;
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
@@ -2379,29 +2376,40 @@
                 }
 
                 reverseTrans = window.getStr(reverseTrans).trim().replace(/[「」""'']/g, '');
+                if (!reverseTrans) throw new Error("Empty reverse translation from primary engine");
 
-                if (reverseTrans) {
-                    // 🌐 完美達成真正的視覺閉環：將翻譯結果同步填回 Module 1 母語框中
-                    document.getElementById('eng-input').value = reverseTrans;
-
-                    const safeTransForFunc = reverseTrans.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    revWrap.innerHTML = `
-                        <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 relative overflow-hidden">
-                            <div class="absolute -right-4 -top-4 text-indigo-100 opacity-50"><i class="ph-fill ph-translate text-6xl"></i></div>
-                            <div class="w-12 h-12 bg-indigo-500 text-white rounded-2xl flex items-center justify-center shadow-md flex-shrink-0 z-10"><i class="ph-bold ph-arrows-left-right text-2xl"></i></div>
-                            <div class="flex-1 z-10">
-                                <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><i class="ph-fill ph-sparkle text-indigo-500"></i> Reverse Translation / 雙向翻譯 (${displayLangName})</h4>
-                                <p class="text-sm font-bold text-indigo-900 leading-relaxed">${reverseTrans}</p>
-                            </div>
-                            <button type="button" data-action="speak-native" data-text="${safeTransForFunc}" class="w-12 h-12 bg-white text-indigo-600 rounded-2xl shadow-sm hover:scale-105 active:scale-95 flex items-center justify-center transition-all z-10 flex-shrink-0 border border-indigo-100"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
-                        </div>
-                    `;
-                    revWrap.classList.remove('hidden');
-                } else {
-                    throw new Error("Empty reverse translation");
-                }
             } catch(e) {
-                console.error("Reverse Trans Error:", e);
+                console.warn("Reverse Trans Error (GTX/AI), trying MyMemory fallback:", e);
+                try {
+                    const res2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh-TW|${langCode}`);
+                    const d2 = await res2.json();
+                    if (d2 && d2.responseData && d2.responseData.translatedText) {
+                        reverseTrans = d2.responseData.translatedText.trim().replace(/[「」""'']/g, '');
+                    }
+                    if (!reverseTrans) throw new Error("MyMemory fallback failed");
+                } catch(fallbackErr) {
+                    console.error("Reverse Trans Fallback Error:", fallbackErr);
+                    reverseTrans = ""; 
+                }
+            }
+
+            if (reverseTrans) {
+                document.getElementById('eng-input').value = reverseTrans;
+
+                const safeTransForFunc = reverseTrans.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                revWrap.innerHTML = `
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-indigo-100 opacity-50"><i class="ph-fill ph-translate text-6xl"></i></div>
+                        <div class="w-12 h-12 bg-indigo-500 text-white rounded-2xl flex items-center justify-center shadow-md flex-shrink-0 z-10"><i class="ph-bold ph-arrows-left-right text-2xl"></i></div>
+                        <div class="flex-1 z-10">
+                            <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><i class="ph-fill ph-sparkle text-indigo-500"></i> Reverse Translation / 雙向翻譯 (${displayLangName})</h4>
+                            <p class="text-sm font-bold text-indigo-900 leading-relaxed">${reverseTrans}</p>
+                        </div>
+                        <button type="button" data-action="speak-native" data-text="${safeTransForFunc}" class="w-12 h-12 bg-white text-indigo-600 rounded-2xl shadow-sm hover:scale-105 active:scale-95 flex items-center justify-center transition-all z-10 flex-shrink-0 border border-indigo-100"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
+                    </div>
+                `;
+                revWrap.classList.remove('hidden');
+            } else {
                 revWrap.innerHTML = `
                     <div class="bg-red-50 border border-red-100 rounded-3xl p-5 shadow-sm flex items-center gap-4">
                         <div class="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md flex-shrink-0"><i class="ph-bold ph-warning-circle text-xl"></i></div>

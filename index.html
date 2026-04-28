@@ -4,21 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
-    <!--
-    ---
-    version: "6.7.17-NEWEBPAY-EMAIL-FIX"
-    author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & NewebPay"
-    disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
-    updates:
-      - "Payment Fix: Resolved NewebPay MPG01013 error by fetching the exact raw email format before initiating the Cloud Function call."
-    ---
-    -->
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Hanzi Writer for Stroke Order -->
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
@@ -49,7 +36,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
-    <!-- Domain Lock Overlay -->
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
             <i class="ph-fill ph-shield-warning"></i>
@@ -62,27 +48,22 @@
         </p>
     </div>
 
-    <!-- InfoSec Honeypot -->
     <div style="position: absolute; overflow: hidden; width: 0; height: 0; left: -9999px;">
         <input type="text" name="fake_user_id" tabindex="-1"><input type="password" name="fake_password" tabindex="-1">
     </div>
 
-    <!-- System Toast -->
     <div id="system-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[2100] px-6 py-3.5 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-2 transition-all border-b-4 border-black/10 w-max max-w-[90%]">
         <i id="toast-icon" class="ph-fill text-lg flex-shrink-0"></i><span id="toast-msg" class="truncate"></span>
     </div>
 
-    <!-- Auth Error Banner -->
     <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
         <i class="ph-fill ph-warning-circle text-lg"></i> 
         <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
     </div>
 
-    <!-- Header (Fluid Scaling Title & Stacked Metrics) -->
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50 transition-all duration-300 ease-in-out">
         <div class="max-w-6xl mx-auto px-3 py-3 md:px-4 md:py-5 flex flex-row items-center justify-between gap-1.5 md:gap-4 w-full">
             
-            <!-- Left Side: Logo & Title (Optimized Fluid Scaling without cutoffs) -->
             <div class="flex items-center gap-1.5 md:gap-3 flex-1 min-w-0 pr-1">
                 <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0 transition-all">
                     <i class="ph-fill ph-book-open-text text-[clamp(1.1rem,3vw,1.5rem)]"></i>
@@ -96,10 +77,8 @@
                 </div>
             </div>
             
-            <!-- Right Side: Actions & Badges -->
             <div class="flex items-center gap-1.5 md:gap-3 justify-end flex-shrink-0">
                 
-                <!-- Fixed: View Counter strictly Stacked (上下排列) to save horizontal space -->
                 <div id="view-counter-badge" class="flex flex-col items-start sm:items-center justify-center bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-md sm:rounded-lg border border-slate-600 shadow-sm transition-all leading-none gap-1 w-max">
                     <div class="flex items-center gap-1 text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
                         <i class="ph-fill ph-eye text-emerald-400 text-[10px] sm:text-sm" title="Total Views"></i>
@@ -113,7 +92,7 @@
 
                 <div class="flex flex-col items-end gap-1 w-auto">
                     <div id="quota-display" class="hidden w-full justify-center bg-red-800/50 text-white px-1.5 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-xs font-bold border border-red-500 flex items-center gap-1 shadow-inner transition-all whitespace-nowrap">
-                        <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Free Uses:</span> <span id="quota-count">20/20</span>
+                        <i class="ph-fill ph-lightning text-yellow-400"></i> <span class="hidden sm:inline">Daily Uses:</span> <span id="quota-count">--/--</span>
                     </div>
                     <div id="vip-expiry-display" class="hidden w-full justify-center flex items-center gap-1 bg-slate-900 px-1.5 py-1 md:px-3 md:py-1.5 rounded-lg border border-slate-700 shadow-md transition-all whitespace-nowrap">
                         <div id="vip-status-light" class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full light-glow bg-slate-400 flex-shrink-0"></div>
@@ -128,7 +107,6 @@
                     <i class="ph-fill ph-crown text-sm sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
-                <!-- Operations -->
                 <button type="button" id="msg-btn" title="Inbox / 訊息中心" class="hidden relative text-[9px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-lg sm:text-base"></i> <span class="hidden md:inline">Inbox</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-2 w-2 md:h-3 md:w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-yellow-500 border border-red-600"></span></span>
@@ -145,7 +123,6 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
         
-        <!-- Auth Section -->
         <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
@@ -196,8 +173,22 @@
             </div>
         </section>
 
-        <!-- Admin Dashboard Section -->
         <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
+            <div class="bg-indigo-900 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-b-4 border-indigo-950">
+                <div class="flex items-center gap-2"><i class="ph-fill ph-sliders text-2xl text-indigo-400"></i><h3 class="font-black text-sm md:text-base text-white uppercase tracking-widest">Global Config / 全域額度設定</h3></div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
+                        <label class="text-[10px] text-indigo-200 font-black uppercase">Guest / 訪客每日</label>
+                        <input type="number" id="sys-guest-limit" class="w-16 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
+                    </div>
+                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
+                        <label class="text-[10px] text-indigo-200 font-black uppercase">Member / 會員每日</label>
+                        <input type="number" id="sys-member-limit" class="w-16 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
+                    </div>
+                    <button type="button" onclick="window.saveSystemConfig()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest ml-2 border-b-4 border-emerald-700">Save</button>
+                </div>
+            </div>
+            
             <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
                 <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
@@ -222,19 +213,19 @@
                             <th class="px-6 py-4">Identity / 姓名與電話</th>
                             <th class="px-6 py-4">Finance / 匯款資訊</th>
                             <th class="px-6 py-4">Expiry / 到期日</th>
+                            <th class="px-6 py-4">Quota / 專屬額度</th>
                             <th class="px-6 py-4 text-right">Actions / 操作</th>
                         </tr>
                     </thead>
                     <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700 bg-white font-bold">
-                        <tr><td colspan="6" class="text-center py-8 text-slate-400 italic">Syncing Cloud Database... / 載入中...</td></tr>
+                        <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Syncing Cloud Database... / 載入中...</td></tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Translation Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
-            <div id="badge-translate" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative flex items-center group">
@@ -245,9 +236,8 @@
             </div>
         </section>
 
-        <!-- Writing Setup Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
-            <div id="badge-select" class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
             <div class="flex flex-col md:flex-row gap-4 mb-6">
                 <div class="flex-1 relative flex items-center group">
@@ -262,7 +252,6 @@
             </div>
         </section>
 
-        <!-- Learning Dashboard -->
         <section id="learning-dashboard" class="hidden bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-500 text-left">
             <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
                 <div class="flex flex-col md:flex-row md:items-center gap-4">
@@ -276,7 +265,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
-                <!-- Strokes Area -->
                 <div class="md:col-span-5 lg:col-span-4 p-10 bg-slate-50 border-r border-slate-200 flex flex-col items-center min-h-[480px] relative text-center">
                     <div class="absolute top-5 left-5 flex flex-col items-start gap-1 text-slate-400">
                         <div class="flex items-center gap-2"><i class="ph-fill ph-scribble-loop text-xl text-slate-400"></i><span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stroke Order / 筆順</span></div>
@@ -292,14 +280,12 @@
                     <p id="quiz-status" class="text-sm mt-6 text-emerald-600 font-black h-6 uppercase tracking-widest"></p>
                 </div>
 
-                <!-- AI Analysis Area -->
                 <div id="ai-data-panel" class="md:col-span-7 lg:col-span-8 p-10 md:p-12 relative bg-white min-h-[480px]">
                     <div id="ai-inner-loader" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-20 space-y-6">
                         <div class="ai-inner-loader"></div>
                         <p class="text-indigo-600 text-xs font-black animate-pulse uppercase tracking-[0.4em]">AI Engine Analyzing... / 解析中...</p>
                     </div>
                     
-                    <!-- AI Error Panel -->
                     <div id="ai-error-panel" class="hidden absolute inset-0 flex flex-col items-center justify-center h-full text-center space-y-4 px-4 bg-white z-20 overflow-y-auto py-10">
                         <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl shadow-inner flex-shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
                         <h3 id="ai-error-title" class="text-xl font-black text-slate-800 tracking-tight uppercase">Connection Issue / 連線異常</h3>
@@ -307,7 +293,6 @@
                         <button type="button" onclick="window.handleAIRetry()" class="bg-slate-800 text-white px-10 py-3.5 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-wider mt-4 flex-shrink-0">Retry / 重新連線</button>
                     </div>
 
-                    <!-- Result Body -->
                     <div id="vip-only-content" class="hidden space-y-6 text-left">
                         <div class="flex items-center gap-3 mb-6 border-b-2 border-slate-100 pb-5">
                             <div class="bg-indigo-50 px-4 py-2 rounded-xl border-2 border-indigo-100 text-xs font-black text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-book-bookmark text-indigo-500 text-base"></i> Radical / 部首：<span id="radical-display" class="text-indigo-600 text-sm">--</span></div>
@@ -322,7 +307,6 @@
                                     <button type="button" id="play-char-btn" class="hidden w-10 h-10 rounded-full bg-yellow-500 text-white shadow-md flex items-center justify-center transition-all hover:scale-105"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                             </div>
-                            <!-- Polyphonic Section -->
                             <div id="poly-section-wrap" class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
                                 <div class="text-[10px] font-black uppercase text-purple-800 tracking-widest mb-1 font-bold">Polyphonic / 破音字</div>
                                 <div id="polyphonic-display" class="flex flex-col gap-2 mt-1"></div>
@@ -335,10 +319,8 @@
             </div>
         </section>
         
-        <!-- Pricing Section Container -->
         <section id="pricing-section-container" class="hidden w-full mt-10"></section>
         
-        <!-- Un-fixed Global Trust Footer (Moved to naturally follow content) -->
         <div id="global-trust-footer" class="w-full bg-emerald-600 text-white py-3 px-4 shadow-sm z-40 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500 mt-16 rounded-3xl mb-8 max-w-6xl mx-auto">
             <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
             <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
@@ -348,7 +330,6 @@
         
     </main>
 
-    <!-- Modals -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200 flex flex-col h-[80vh] text-left">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-4 mb-4">
@@ -426,7 +407,6 @@
         </div>
     </div>
 
-    <!-- Admin Member Modal -->
     <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
             <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
@@ -466,7 +446,7 @@
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-3xl border-2 border-slate-100 shadow-inner">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-50 p-6 rounded-3xl border-2 border-slate-100 shadow-inner">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Pay Date / 匯款日</label>
                         <input type="date" id="admin-pay-date" onchange="window.calculateExpiry()" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
@@ -478,6 +458,10 @@
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Expiry / 到期日</label>
                         <input type="date" id="admin-expiry-date" class="w-full px-4 py-3 rounded-xl border-4 border-emerald-200 outline-none text-xs bg-white shadow-md font-black text-emerald-700">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest ml-2">Custom Quota / 專屬次數</label>
+                        <input type="number" id="admin-member-limit" placeholder="留空用預設" class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 outline-none text-xs bg-indigo-50 shadow-sm font-black text-indigo-700">
                     </div>
                 </div>
                 
@@ -494,7 +478,6 @@
         </div>
     </div>
 
-    <!-- Legal Modal -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
             <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Data Privacy / 個資保護與免責聲明</h3>
@@ -515,7 +498,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.17-NEWEBPAY-EMAIL-FIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.18-TIERED-QUOTA-SYSTEM</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -524,7 +507,6 @@
         </div>
     </footer>
 
-    <!-- 【一體化整合 Firebase Auth, AI, Moedict, Gumroad, NewebPay 與 UI 邏輯】 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -545,7 +527,11 @@
         
         window.firebaseDbInstance = db;
         window.firebaseAppId = appId;
-        window.MAX_FREE_USES = 20;
+        
+        // 🌐 全域動態額度核心設定
+        window.sysConfig = { guestLimit: 10, memberLimit: 15 };
+        window.MAX_FREE_USES = 10; // 初始化預設
+        
         window.freeUsageCount = parseInt(localStorage.getItem('abra_usage_count') || '0', 10);
         window.activeApiKey = localStorage.getItem('gemini_api_key') || "";
         window.isVIP = false;
@@ -554,8 +540,27 @@
         window.currentMsgName = 'User';
         window.charCache = {};
         window.currentTargetChar = "";
+
+        window.saveSystemConfig = async function() {
+            const saveBtn = event.target;
+            const gl = parseInt(document.getElementById('sys-guest-limit').value, 10);
+            const ml = parseInt(document.getElementById('sys-member-limit').value, 10);
+            
+            if(isNaN(gl) || isNaN(ml)) { window.showToast("請輸入有效數字", true); return; }
+            
+            saveBtn.textContent = "Syncing...";
+            saveBtn.disabled = true;
+            try {
+                await setDoc(doc(db, "artifacts", appId, "public", "data", "system_config", "settings"), { guestLimit: gl, memberLimit: ml }, {merge: true});
+                window.showToast("System Config Saved! / 系統設定已同步");
+            } catch(e) {
+                window.showToast("Save failed", true);
+            } finally {
+                saveBtn.textContent = "Save";
+                saveBtn.disabled = false;
+            }
+        }
         
-        // Polyphonic deduplication and TTS Homophone map remains secured
         const bopoToCharMap = {
             'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
             'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
@@ -600,7 +605,6 @@
             window.loadVoices(); 
         }
 
-        // 強制字串有效性檢查：避免渲染層讀取到 undefined 或 null 導致崩潰
         window.getStr = (val) => {
             if (val === null || val === undefined) return "";
             const strVal = String(val);
@@ -619,14 +623,6 @@
             const isAllowedDomain = ["abrakai.github.io", "localhost", "127.0.0.1", "googleusercontent.com", "github.dev"].some(d => host === d || host.endsWith('.' + d));
             if (!isLocal && !isAllowedDomain) { document.getElementById('domain-lock-overlay')?.classList.remove('hidden'); return false; }
             return true;
-        };
-
-        window.triggerSMSReminder = async function(email, diffNum) {
-            const lastSmsDate = localStorage.getItem(`abra_sms_sent_${email}`);
-            const today = new Date().toISOString().split('T')[0];
-            if (lastSmsDate !== today) {
-                localStorage.setItem(`abra_sms_sent_${email}`, today);
-            }
         };
 
         window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
@@ -691,6 +687,16 @@
                 window.isAdmin = (adminStatus === 'active');
             }
             
+            // 🌐 動態額度計算
+            let currentLimit = window.sysConfig.guestLimit;
+            if (window.isVIP || window.isAdmin) {
+                currentLimit = '∞';
+            } else if (emailCode) {
+                const custom = localStorage.getItem('abra_custom_limit');
+                currentLimit = custom && custom !== 'undefined' ? parseInt(custom, 10) : window.sysConfig.memberLimit;
+            }
+            window.MAX_FREE_USES = currentLimit === '∞' ? Infinity : currentLimit;
+            
             const els = {
                 qDisplay: document.getElementById('quota-display'), vBadge: document.getElementById('vip-status-badge'),
                 pBtn: document.getElementById('profile-btn'), logoutBtn: document.getElementById('logout-btn'), mBtn: document.getElementById('msg-btn'),
@@ -713,22 +719,15 @@
             const daysTextEl = document.getElementById('vip-days-text');
             
             if (daysTextEl && cachedDays !== '--') {
-                if (diffNum > 0) {
-                    daysTextEl.innerHTML = `<span id="vip-days-left">${diffNum}</span> Days`;
-                } else if (diffNum === 0) {
-                    daysTextEl.innerHTML = `LAST DAY`;
-                } else {
-                    daysTextEl.innerHTML = `EXPIRED`;
-                }
+                if (diffNum > 0) { daysTextEl.innerHTML = `<span id="vip-days-left">${diffNum}</span> Days`; } 
+                else if (diffNum === 0) { daysTextEl.innerHTML = `LAST DAY`; } 
+                else { daysTextEl.innerHTML = `EXPIRED`; }
             }
 
             const lightEl = document.getElementById('vip-status-light');
             if (lightEl && cachedDays !== '--') {
-                if (diffNum > 7) {
-                    lightEl.className = "w-2 h-2 md:w-2.5 md:h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_8px_#34d399]";
-                } else {
-                    lightEl.className = "w-2 h-2 md:w-2.5 md:h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]";
-                }
+                if (diffNum > 7) { lightEl.className = "w-2 h-2 md:w-2.5 md:h-2.5 rounded-full light-glow bg-emerald-400 shadow-[0_0_8px_#34d399]"; } 
+                else { lightEl.className = "w-2 h-2 md:w-2.5 md:h-2.5 rounded-full light-glow bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]"; }
             }
 
             if (window.isAdmin) {
@@ -769,6 +768,7 @@
                     if(els.qDisplay) {
                         els.qDisplay.classList.remove('hidden');
                         els.qDisplay.classList.add('flex');
+                        els.qCount.textContent = currentLimit === '∞' ? '∞' : `${Math.max(0, currentLimit - window.freeUsageCount)}/${currentLimit}`;
                     }
                     if(els.vBadge) els.vBadge.classList.add('hidden');
                     if(els.headerPricingBtn) {
@@ -776,12 +776,12 @@
                         els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
                         els.headerPricingBtn.classList.remove('hidden');
                     }
-                    if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
                 }
             } else {
                 if(els.qDisplay) {
                     els.qDisplay.classList.remove('hidden');
                     els.qDisplay.classList.add('flex');
+                    els.qCount.textContent = currentLimit === '∞' ? '∞' : `${Math.max(0, currentLimit - window.freeUsageCount)}/${currentLimit}`;
                 }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.headerPricingBtn) {
@@ -789,7 +789,6 @@
                     els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
                     els.headerPricingBtn.classList.remove('hidden');
                 }
-                if(els.qCount) els.qCount.textContent = `${window.MAX_FREE_USES - window.freeUsageCount}/${window.MAX_FREE_USES}`;
             }
         };
 
@@ -802,14 +801,21 @@
                 const diffNum = cachedDays !== '--' ? parseInt(cachedDays, 10) : 999;
                 const emailCode = localStorage.getItem('abra_vip_code');
                 
+                // 🌐 動態行銷公告文案
+                let customLimit = localStorage.getItem('abra_custom_limit');
+                let hasCustom = customLimit && customLimit !== 'undefined';
+                
                 if (window.isVIP && diffNum <= 7) {
                     setupPricingTable('Renew VIP Subscription / 續約尊榮會員', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> Your VIP membership is expiring in ${diffNum} days. Please renew to keep your unlimited AI access.<br><span class="text-[11px] italic font-normal text-slate-500">您的 VIP 會員資格即將到期（剩餘 ${diffNum} 天），請儘速繳費續約以保留無限次 AI 解析功能。</span></p>`);
                 } else if (emailCode && diffNum < 0) {
                     setupPricingTable('VIP Expired / 會員已到期', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100"><i class="ph-fill ph-warning-circle mb-1"></i> 您的 VIP 資格已到期，系統已切換為免費版。請選擇下方方案進行繳費續約以恢復無限次 AI 解析功能。</p>`);
                 } else if (emailCode) {
-                    setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-red-600 font-bold mb-4 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">You are registered. Please complete payment to unlock VIP.<br><span class="text-[11px] italic font-normal text-slate-500">您已註冊會員，請選擇下方方案進行線上開通，或加入官方 LINE @841bihdj 由專人為您服務。</span></p>`);
+                    // 已登入會員/特殊分組
+                    let currentLimitDisplay = hasCustom ? customLimit : window.sysConfig.memberLimit;
+                    setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-indigo-700 font-bold mb-4 leading-relaxed bg-indigo-50 p-4 rounded-xl border border-indigo-100">✨ 會員專屬：您目前享有每日 ${currentLimitDisplay} 次免費額度。<br><span class="text-[11px] italic font-normal text-slate-500">歡迎點擊下方方案升級 VIP 會員，解除次數限制並解鎖 AI 深度解析！</span></p>`);
                 } else {
-                    setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">Please create an account first to unlock AI features.<br><span class="text-[11px] italic font-normal text-slate-500">您目前為訪客，請先註冊帳號後，即可選擇下方方案進行線上升級。</span></p>`);
+                    // 訪客
+                    setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">👋 訪客專屬：您目前享有每日 ${window.sysConfig.guestLimit} 次免費額度。<br><span class="text-[11px] font-black text-indigo-600 underline cursor-pointer" onclick="window.scrollToAuth()">點此免費註冊會員，即可提升至每日 ${window.sysConfig.memberLimit} 次！</span><br><span class="text-[10px] italic font-normal text-slate-500 mt-1 block">或直接選擇下方方案升級 VIP，享受無限次暢遊。</span></p>`);
                 }
                 pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -824,7 +830,7 @@
                     <div class="text-left space-y-3 w-full">
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-2">${window.getStr(title)}</h3>
                         ${prefixDesc}
-                        <div class="border-b border-slate-100 pb-3 pt-4"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">20 basic translations and character splits per day.<br><span class="italic font-normal text-[10px] text-slate-400">每日 20 次基礎拆字與翻譯。</span></p></div>
+                        <div class="border-b border-slate-100 pb-3 pt-4"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與翻譯。</span></p></div>
                         <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">英翻中、中文拆字書寫教學與練習。</span></span></p>
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
@@ -936,7 +942,6 @@
 
             try {
                 let customerEmail = emailCode.replace(/_/g, '.');
-                
                 try {
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode);
                     const docSnap = await getDoc(docRef);
@@ -971,7 +976,6 @@
             btnElement.disabled = true;
 
             try {
-                // Fetch real email to avoid NewebPay MPG01013 format error
                 let customerEmail = emailCode.replace(/_/g, '.');
                 try {
                     const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode);
@@ -994,7 +998,7 @@
                         data: {
                             planMonths: planMonths, 
                             amount: price, 
-                            email: customerEmail // Use the real email format here
+                            email: customerEmail
                         }
                     })
                 });
@@ -1060,12 +1064,34 @@
         };
         initAuth();
 
+        let sysConfigUnsub = null;
+
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
             if (user) {
                 document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
+                
+                // 🌐 確保通過驗證後才監聽資料庫，並加上錯誤捕捉避免崩潰
+                if (!sysConfigUnsub) {
+                    sysConfigUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "system_config", "settings"), (docSnap) => {
+                        if(docSnap.exists()){
+                            const data = docSnap.data();
+                            if(data.guestLimit) window.sysConfig.guestLimit = parseInt(data.guestLimit, 10);
+                            if(data.memberLimit) window.sysConfig.memberLimit = parseInt(data.memberLimit, 10);
+                            if (document.getElementById('sys-guest-limit')) document.getElementById('sys-guest-limit').value = window.sysConfig.guestLimit;
+                            if (document.getElementById('sys-member-limit')) document.getElementById('sys-member-limit').value = window.sysConfig.memberLimit;
+                            if(window.updateGlobalUI) window.updateGlobalUI();
+                        }
+                    }, (error) => {
+                        console.warn("Config Sync restricted by Rules (Waiting for permissions):", error.message);
+                    });
+                }
             } else {
                 document.getElementById('auth-status-msg').textContent = "AUTH ERROR";
+                if (sysConfigUnsub) {
+                    sysConfigUnsub();
+                    sysConfigUnsub = null;
+                }
             }
         });
 
@@ -1161,6 +1187,14 @@
                             }
                             localStorage.setItem('abra_vip_status', status);
                             localStorage.setItem('abra_user_name', data.name || "Member");
+                            
+                            // 🌐 儲存專屬客製化額度
+                            if (data.customLimit !== undefined && data.customLimit !== null) {
+                                localStorage.setItem('abra_custom_limit', data.customLimit);
+                            } else {
+                                localStorage.removeItem('abra_custom_limit');
+                            }
+                            
                             if (data.apiKey && status === 'active') {
                                 localStorage.setItem('gemini_api_key', data.apiKey.trim());
                                 window.activeApiKey = data.apiKey.trim();
@@ -1168,7 +1202,6 @@
                             window.showToast("Login Success! / 登入成功！");
                             setTimeout(() => location.reload(), 800);
                         } else {
-                            // Strict Block mechanism: Account deleted from DB
                             await signOut(auth);
                             window.showToast("此帳號已被管理員移除，拒絕登入 / Account removed by admin", true);
                             if(loader) loader.classList.add('hidden');
@@ -1307,6 +1340,7 @@
             localStorage.removeItem('abra_admin_status');
             localStorage.removeItem('gemini_api_key');
             localStorage.removeItem('abra_vip_days');
+            localStorage.removeItem('abra_custom_limit');
             window.activeApiKey = "";
             try { await signOut(auth); } catch(e) {}
             location.reload(); 
@@ -1346,6 +1380,7 @@
                     const msgBtnText = hasUnread ? "新回覆" : "Chat";
                     
                     const displayRemarks = data.remarks || (data.password ? "[臨時密碼未轉移]" : '-');
+                    const customLimitDisplay = (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') ? `<span class="text-indigo-600 font-black">${data.customLimit}次</span>` : `<span class="text-slate-400 font-medium">預設</span>`;
 
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors group">
@@ -1354,7 +1389,7 @@
                             <td class="px-8 py-6 whitespace-nowrap text-xs font-black text-indigo-700">${data.name || 'N/A'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '-'}</span></td>
                             <td class="px-8 py-6 whitespace-nowrap text-xs font-bold">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' Mos' : '-'}</span></td>
                             <td class="px-8 py-6 whitespace-nowrap text-xs font-black ${daysText === '過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || 'N/A'}</td>
-                            <td class="px-8 py-6 whitespace-nowrap text-xs text-slate-500"><span class="font-mono text-emerald-600 font-black">${data.remittance || '-'}</span><br><span class="text-[10px] whitespace-pre-wrap max-w-[150px] inline-block truncate italic">${displayRemarks}</span></td>
+                            <td class="px-8 py-6 whitespace-nowrap text-xs">${customLimitDisplay}</td>
                             <td class="px-8 py-6 whitespace-nowrap text-right">
                                 <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-black text-[10px] px-4 py-2 rounded-xl mr-2 transition-all shadow-sm uppercase tracking-widest ${msgBtnClass}">${msgBtnText}</button>
                                 <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-white font-black text-[10px] bg-indigo-50 hover:bg-indigo-600 px-4 py-2 rounded-xl mr-2 transition-all shadow-sm uppercase tracking-widest">Edit</button>
@@ -1413,6 +1448,7 @@
                         document.getElementById('admin-months').value = window.getStr(data.months);
                         document.getElementById('admin-expiry-date').value = window.getStr(data.expiryDate);
                         document.getElementById('admin-member-remarks').value = window.getStr(data.remarks);
+                        document.getElementById('admin-member-limit').value = (data.customLimit !== undefined && data.customLimit !== null) ? data.customLimit : '';
                     }
                 } catch(e) { window.showToast("Load Error / 資料讀取失敗", true); }
             } else {
@@ -1430,6 +1466,7 @@
                 document.getElementById('admin-months').value = '';
                 document.getElementById('admin-expiry-date').value = '';
                 document.getElementById('admin-member-remarks').value = '';
+                document.getElementById('admin-member-limit').value = '';
             }
         };
 
@@ -1443,6 +1480,7 @@
             const months = document.getElementById('admin-months').value;
             const expiryDate = document.getElementById('admin-expiry-date').value;
             const remarks = document.getElementById('admin-member-remarks').value.trim();
+            const customLimitRaw = document.getElementById('admin-member-limit').value.trim();
 
             if (!email || !name) { window.showToast("Email & Name required", true); return; }
 
@@ -1459,6 +1497,13 @@
                     remittance: remittance, paymentDate: paymentDate, months: months,
                     expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
                 };
+                
+                // 🌐 儲存客製化額度 (若留空則寫入 null 以便套用全域預設)
+                if (customLimitRaw === '') {
+                    payload.customLimit = null;
+                } else {
+                    payload.customLimit = parseInt(customLimitRaw, 10);
+                }
                 
                 if (password && !document.getElementById('admin-member-pass').disabled) { 
                     payload.password = password; 
@@ -1499,10 +1544,10 @@
             try {
                 window.showToast("Compiling Secure CSV... / 準備匯出 CSV...");
                 const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
-                let csvContent = "Email,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status\n";
+                let csvContent = "Email,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status,CustomLimit\n";
                 querySnapshot.forEach(doc => {
                     const d = doc.data();
-                    const row = [ d.email || doc.id, d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
+                    const row = [ d.email || doc.id, d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '', d.customLimit || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
                     csvContent += row + "\n";
                 });
                 const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
@@ -1535,7 +1580,13 @@
                         if(cols.length === 0 || !cols[emailIdx]) continue;
                         const payload = {};
                         headers.forEach((h, idx) => {
-                            if(h !== 'email' && cols[idx]) { payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; }
+                            if(h !== 'email' && cols[idx]) { 
+                                if(h === 'customlimit') {
+                                    payload.customLimit = cols[idx] ? parseInt(cols[idx], 10) : null;
+                                } else {
+                                    payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; 
+                                }
+                            }
                         });
                         const sanitizedEmail = cols[emailIdx].replace(/[.#$[\]]/g, "_");
                         await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: cols[emailIdx], ...payload }, { merge: true });
@@ -1829,7 +1880,11 @@
         };
 
         window.handleTranslate = async function() {
-            if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); return; }
+            if (window.MAX_FREE_USES !== Infinity && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); 
+                window.togglePricingTable(); 
+                return; 
+            }
             const word = document.getElementById('eng-input').value.trim();
             if (!word) return;
             
@@ -1843,7 +1898,7 @@
             try {
                 let trans = "";
                 
-                if (window.isVIP && window.hasValidApiKey()) {
+                if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
                     const prompt = `Translate to Traditional Chinese (Taiwan). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text: "${word}"`;
                     const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1864,7 +1919,7 @@
                 
                 document.getElementById('zh-input').value = finalStr;
                 
-                if (!window.isVIP) { 
+                if (window.MAX_FREE_USES !== Infinity) { 
                     window.freeUsageCount++; 
                     localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
@@ -1879,7 +1934,7 @@
                     if (d2 && d2.responseData && d2.responseData.translatedText) {
                         const fbTrans = d2.responseData.translatedText.trim().replace(/[「」""'']/g, '');
                         document.getElementById('zh-input').value = fbTrans;
-                        if (!window.isVIP) { window.freeUsageCount++; localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); if(window.updateGlobalUI) window.updateGlobalUI(); }
+                        if (window.MAX_FREE_USES !== Infinity) { window.freeUsageCount++; localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); if(window.updateGlobalUI) window.updateGlobalUI(); }
                         document.getElementById('split-btn').click();
                         window.speak(fbTrans, fbTrans);
                     } else { throw new Error("Fallback failed"); }
@@ -1899,10 +1954,12 @@
             }
             
             if (e && e.isTrusted) {
-                if (!window.isVIP && window.freeUsageCount >= window.MAX_FREE_USES) { 
-                    window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); return; 
+                if (window.MAX_FREE_USES !== Infinity && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                    window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); 
+                    window.togglePricingTable();
+                    return; 
                 }
-                if (!window.isVIP) { 
+                if (window.MAX_FREE_USES !== Infinity) { 
                     window.freeUsageCount++; 
                     localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
@@ -1930,7 +1987,7 @@
                     document.getElementById('hanzi-target').innerHTML = '';
                     window.writerInstance = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
                     
-                    if (window.isVIP && window.hasValidApiKey()) {
+                    if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
                         if(window.executeAIFetch) window.executeAIFetch(char, text);
                     } else {
                         if(window.executeFallbackFetch) window.executeFallbackFetch(char);
@@ -1975,7 +2032,7 @@
         window.handleAIRetry = function() {
             if (window.currentTargetChar) {
                 const text = document.getElementById('zh-input').value.trim();
-                if (window.isVIP && window.hasValidApiKey()) {
+                if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
                     if(window.executeAIFetch) window.executeAIFetch(window.currentTargetChar, text);
                 } else {
                     if(window.executeFallbackFetch) window.executeFallbackFetch(window.currentTargetChar);
@@ -2075,7 +2132,6 @@
                                     meaning = idiomData.heteronyms[0].definitions.map(d => d.def).join('；').replace(/<[^>]+>/g, '');
                                 }
                                 
-                                // 【升級點】降級模式下，依然翻譯整段「成語解釋」，讓所有使用者都能獲得完整的全英文翻譯解析
                                 const queryText = `Idiom: ${idiom}. Explanation: ${meaning}`;
                                 const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(queryText)}`);
                                 const gtData = await gtRes.json();
@@ -2117,7 +2173,7 @@
                             </div>
                         </div>
                     `;
-                } else if (!window.isVIP) {
+                } else if (!window.isVIP && !window.isAdmin) {
                     upsellBox.innerHTML = `
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
@@ -2156,7 +2212,7 @@
             try {
                 if (window.syncVipStatus) await window.syncVipStatus();
                 
-                if (!window.isVIP || !window.hasValidApiKey()) {
+                if ((!window.isVIP && !window.isAdmin) || !window.hasValidApiKey()) {
                     window.executeFallbackFetch(char);
                     return;
                 }

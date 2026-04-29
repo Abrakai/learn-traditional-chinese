@@ -6,15 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.38-FULL-RESTORE-FIX"
+    version: "6.7.24-B2B-PROMO-MANAGEMENT"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Product-Led Growth & On-Demand Analysis"
+    description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & Promo Tracking"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Critical Fix: Resolved script truncation issue that caused 'handleTranslate is not a function'."
-      - "Architecture Reset: Reverted to stable single-direction translation base to eliminate 429 Concurrency Storms."
-      - "Performance: 'Split' button exclusively handles text decomposition without pre-fetching API."
-      - "UX Improvement: Implemented PLG Auth Modal and Legal expansion."
+      - "Admin UI: Added 'Remark' field and column to Promo Codes Manager for B2B tracking."
+      - "Admin UI: Added 'EDIT' action to modify existing Promo Codes without recreating."
+      - "Admin UI: Implemented One-Click cross-filtering. Clicking User count in modal auto-filters main table."
+      - "Search: Upgraded main Admin search bar to explicitly support filtering by Promo Codes."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -123,11 +123,6 @@
                     <i class="ph-fill ph-crown text-sm sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
-                <!-- PLG: Login Trigger -->
-                <button type="button" id="header-auth-btn" title="Login / 註冊" class="hidden text-[9px] md:text-xs bg-slate-800 hover:bg-slate-900 border border-slate-700 text-white p-1.5 sm:px-4 sm:py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-md font-black whitespace-nowrap uppercase tracking-widest" onclick="window.openAuthModal()">
-                    <i class="ph-bold ph-sign-in text-lg sm:text-base"></i> <span class="hidden md:inline">Log In</span>
-                </button>
-
                 <button type="button" id="msg-btn" title="Inbox / 訊息中心" class="hidden relative text-[9px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-lg sm:text-base"></i> <span class="hidden md:inline">Inbox</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-2 w-2 md:h-3 md:w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-yellow-500 border border-red-600"></span></span>
@@ -144,32 +139,125 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
         
+        <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
+                <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
+                <span id="auth-status-msg" class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Initializing...</span>
+            </div>
+            <div class="p-6 md:p-10">
+                <form id="auth-forms-container" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+                    <div class="space-y-4 md:border-r md:border-slate-100 md:pr-16 text-left">
+                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500 text-lg"></i> Step 1: Sign Up / 註冊帳號</h4>
+                        <div class="space-y-3">
+                            <input type="text" id="reg-name" placeholder="Full Name / 姓名" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
+                            <input type="email" id="reg-email" placeholder="Email / 帳號 (登入用)" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold text-indigo-900 bg-white shadow-sm">
+                            <div class="relative">
+                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
+                                <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
+                                <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
+                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE 快速核對匯款開通。 / Strongly recommend using the last 4 digits of your phone number.</p></div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <input type="text" id="reg-invite-code" placeholder="Invite Code (Optional) / 專屬邀請碼 (選填)" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border-2 border-purple-100 focus:ring-2 focus:ring-purple-500 outline-none text-sm shadow-sm bg-purple-50 focus:bg-white font-bold text-purple-800 placeholder:text-purple-300 uppercase">
+                                <i class="ph-fill ph-ticket text-purple-300 text-xl absolute right-4 top-1/2 -translate-y-1/2"></i>
+                            </div>
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
+                                <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                                <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer font-bold">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-black underline">隱私保護與免責聲明 (Privacy Policy)</button>。</label>
+                            </div>
+                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider border-b-4 border-red-900">CREATE ACCOUNT / 建立帳號</button>
+                        </div>
+                    </div>
+                    <div class="space-y-4 text-left">
+                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500 text-lg"></i> Step 2: Login / 會員登入</h4>
+                        <div class="space-y-3">
+                            <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
+                            <div class="relative">
+                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
+                                <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
+                            </div>
+                            <div class="flex justify-between items-center mt-1 mb-2 px-1">
+                                <p class="text-[10px] text-slate-400 font-bold">Login implies agreement to terms. / 登入即代表同意免責聲明</p>
+                                <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-black text-indigo-500 hover:text-indigo-700 underline transition-colors uppercase">Forgot Password? / 忘記密碼</button>
+                            </div>
+                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2 border-b-4 border-yellow-600">
+                                <span id="login-btn-text">UNLOCK VIP / 登入解鎖</span><div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
+                            </button>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-inner">
+                            <div class="flex items-start gap-2"><i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i><p class="text-[11px] text-slate-500 leading-snug font-bold">系統說明：VIP 訂閱到期後，帳號將自動轉換為免付費試用方案。<br><span class="text-[9px] font-normal italic">Downgrades to free plan automatically upon expiry.</span></p></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard Section -->
+        <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
+            <div class="bg-indigo-900 px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 border-b-4 border-indigo-950">
+                <div class="flex items-center gap-2"><i class="ph-fill ph-sliders text-2xl text-indigo-400"></i><h3 class="font-black text-sm md:text-base text-white uppercase tracking-widest">Global Config / 全域額度設定</h3></div>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
+                        <label class="text-[10px] text-indigo-200 font-black uppercase">Guest</label>
+                        <input type="number" id="sys-guest-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
+                    </div>
+                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
+                        <label class="text-[10px] text-indigo-200 font-black uppercase">Member</label>
+                        <input type="number" id="sys-member-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
+                    </div>
+                    <button type="button" onclick="window.saveSystemConfig(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-emerald-700">Save</button>
+                    
+                    <div class="w-px h-6 bg-indigo-700 mx-1"></div>
+                    
+                    <button type="button" onclick="window.openPromoModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest border-b-4 border-purple-800"><i class="ph-bold ph-ticket"></i> Promo Codes</button>
+                </div>
+            </div>
+            
+            <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
+                    <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="window.importCSV(event)">
+                    <button type="button" onclick="document.getElementById('csv-upload').click()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-upload-simple"></i> Import / 匯入</button>
+                    <button type="button" onclick="window.exportCSV()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-download-simple"></i> Export / 匯出</button>
+                    <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-plus"></i> Add VIP / 新增會員</button>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
+                <div class="relative w-full max-w-md">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <!-- 🌐 更新搜尋框提示字眼 -->
+                    <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone, Promo Code... / 搜尋信箱、姓名、手機、邀請碼" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
+                </div>
+            </div>
+            <div class="p-0 overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-500 border-b border-slate-200 uppercase tracking-widest text-[10px] font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Status / 狀態</th>
+                            <th class="px-6 py-4">Email / 帳號</th>
+                            <th class="px-6 py-4">Identity / 姓名與電話</th>
+                            <th class="px-6 py-4">Finance / 匯款資訊</th>
+                            <th class="px-6 py-4">Expiry / 到期日</th>
+                            <th class="px-6 py-4">Quota / 專屬額度</th>
+                            <th class="px-6 py-4 text-right">Actions / 操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700 bg-white font-bold">
+                        <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Syncing Cloud Database... / 載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Translation Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
             <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
-            
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div>
-                    <h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate <span class="hidden md:inline">/ 多國語言翻中</span></h2>
-                </div>
-                <div class="sm:ml-auto flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
-                    <i class="ph-fill ph-translate text-slate-400 text-lg"></i>
-                    <select id="native-lang-selector" onchange="window.saveNativeLang()" class="bg-transparent border-none text-slate-700 text-xs font-black outline-none cursor-pointer w-full sm:w-auto">
-                        <option value="en">English (英文)</option>
-                        <option value="ja">日本語 (日文)</option>
-                        <option value="ko">한국어 (韓文)</option>
-                        <option value="th">ภาษาไทย (泰文)</option>
-                        <option value="vi">Tiếng Việt (越南文)</option>
-                        <option value="id">Bahasa Indonesia (印尼文)</option>
-                    </select>
-                </div>
-            </div>
-
+            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative flex items-center group">
-                    <input type="text" id="eng-input" placeholder="Type text here... / 輸入您的母語進行翻譯" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
-                    <button type="button" onclick="window.speakNative(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
+                    <input type="text" id="eng-input" placeholder="Type English keyword... (e.g. Apple) / 輸入英文單字" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
+                    <button type="button" onclick="window.speakEng(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
                 <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-blue-900 text-sm"><span>Execute / 翻譯</span><div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div></button>
             </div>
@@ -184,12 +272,9 @@
                     <input type="text" id="zh-input" placeholder="Paste Chinese text here... / 貼上繁體中文內容" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-2xl focus:outline-none focus:border-emerald-500 shadow-inner bg-slate-50 focus:bg-white font-black">
                     <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
-                <!-- NO MORE REVERSE TRANSLATION TRIGGER ON SPLIT -->
                 <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-emerald-900 text-sm">Split / 進行拆字</button>
             </div>
-            
             <div id="click-char-guide" class="hidden mb-4 text-center text-sm font-black text-indigo-600 animate-pulse flex items-center justify-center gap-2 tracking-widest uppercase"><i class="ph-fill ph-hand-pointing text-xl"></i> Select a character for deep analysis / 點擊下方單字啟動解析</div>
-            
             <div id="char-container" class="flex flex-wrap gap-4 p-6 bg-slate-50 rounded-3xl min-h-[120px] border-2 border-slate-100 items-center justify-center shadow-inner">
                 <span class="text-slate-400 text-xs italic font-black uppercase tracking-widest">Awaiting Text Input / 請輸入內容</span>
             </div>
@@ -265,62 +350,6 @@
         
         <section id="pricing-section-container" class="hidden w-full mt-10"></section>
         
-        <!-- Admin Dashboard Section -->
-        <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500 mt-10">
-            <div class="bg-indigo-900 px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 border-b-4 border-indigo-950">
-                <div class="flex items-center gap-2"><i class="ph-fill ph-sliders text-2xl text-indigo-400"></i><h3 class="font-black text-sm md:text-base text-white uppercase tracking-widest">Global Config / 全域額度設定</h3></div>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
-                        <label class="text-[10px] text-indigo-200 font-black uppercase">Guest</label>
-                        <input type="number" id="sys-guest-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
-                    </div>
-                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
-                        <label class="text-[10px] text-indigo-200 font-black uppercase">Member</label>
-                        <input type="number" id="sys-member-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
-                    </div>
-                    <button type="button" onclick="window.saveSystemConfig(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-emerald-700">Save</button>
-                    
-                    <div class="w-px h-6 bg-indigo-700 mx-1"></div>
-                    
-                    <button type="button" onclick="window.openPromoModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest border-b-4 border-purple-800"><i class="ph-bold ph-ticket"></i> Promo Codes</button>
-                </div>
-            </div>
-            
-            <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
-                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
-                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
-                    <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="window.importCSV(event)">
-                    <button type="button" onclick="document.getElementById('csv-upload').click()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-upload-simple"></i> Import / 匯入</button>
-                    <button type="button" onclick="window.exportCSV()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-download-simple"></i> Export / 匯出</button>
-                    <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-plus"></i> Add VIP / 新增會員</button>
-                </div>
-            </div>
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
-                <div class="relative w-full max-w-md">
-                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                    <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone, Promo Code... / 搜尋信箱、姓名、手機、邀請碼" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
-                </div>
-            </div>
-            <div class="p-0 overflow-x-auto">
-                <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-slate-100 text-slate-500 border-b border-slate-200 uppercase tracking-widest text-[10px] font-bold">
-                        <tr>
-                            <th class="px-6 py-4">Status / 狀態</th>
-                            <th class="px-6 py-4">Email / 帳號</th>
-                            <th class="px-6 py-4">Identity / 姓名與電話</th>
-                            <th class="px-6 py-4">Finance / 匯款資訊</th>
-                            <th class="px-6 py-4">Expiry / 到期日</th>
-                            <th class="px-6 py-4">Quota / 專屬額度</th>
-                            <th class="px-6 py-4 text-right">Actions / 操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700 bg-white font-bold">
-                        <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Syncing Cloud Database... / 載入中...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        
         <div id="global-trust-footer" class="w-full bg-emerald-600 text-white py-3 px-4 shadow-sm z-40 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500 mt-16 rounded-3xl mb-8 max-w-6xl mx-auto">
             <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
             <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
@@ -329,71 +358,6 @@
         </div>
         
     </main>
-
-    <!-- 🌐 PLG Auth Modal -->
-    <div id="auth-modal" class="hidden fixed inset-0 z-[1600] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 transition-opacity">
-        <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl max-h-[95vh] flex flex-col relative animate-in zoom-in-95">
-            <button type="button" onclick="window.closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors z-10"><i class="ph ph-x text-3xl font-bold"></i></button>
-            
-            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10 flex-shrink-0">
-                <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
-                <span id="auth-status-msg" class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Initializing...</span>
-            </div>
-            
-            <div class="p-6 md:p-10 overflow-y-auto">
-                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-8 text-center flex flex-col items-center justify-center gap-2 shadow-sm">
-                    <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-md"><i class="ph-fill ph-rocket-launch text-2xl"></i></div>
-                    <p class="text-emerald-800 font-bold text-sm tracking-wide">免費註冊即享每日 <span id="modal-member-limit-text" class="text-emerald-600 font-black text-lg">15</span> 次解析額度！<br><span class="text-xs font-medium text-emerald-600 italic">Sign up free to upgrade your daily limits.</span></p>
-                </div>
-                
-                <form id="auth-forms-container" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12">
-                    <div class="space-y-4 md:border-r md:border-slate-100 md:pr-12 text-left">
-                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-user-plus text-red-500 text-lg"></i> Step 1: Sign Up / 註冊帳號</h4>
-                        <div class="space-y-3">
-                            <input type="text" id="reg-name" placeholder="Full Name / 姓名" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
-                            <input type="email" id="reg-email" placeholder="Email / 帳號 (登入用)" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm font-bold text-indigo-900 bg-white shadow-sm">
-                            <div class="relative">
-                                <input type="password" id="reg-pass" placeholder="Password / 設定密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-red-500 outline-none text-sm shadow-sm bg-white font-bold">
-                                <button type="button" onclick="window.togglePassVisibility('reg-pass', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
-                                <div class="bg-red-50 border border-red-100 rounded-lg p-2.5 mt-2 flex flex-col gap-1">
-                                    <div class="flex items-start gap-2"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i><p class="text-[10px] text-red-600 font-bold leading-tight">建議密碼包含您的「手機末 4 碼」，以便透過官方 LINE 快速核對匯款開通。 / Strongly recommend using the last 4 digits of your phone number.</p></div>
-                                </div>
-                            </div>
-                            <div class="relative">
-                                <input type="text" id="reg-invite-code" placeholder="Invite Code (Optional) / 專屬邀請碼 (選填)" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border-2 border-purple-100 focus:ring-2 focus:ring-purple-500 outline-none text-sm shadow-sm bg-purple-50 focus:bg-white font-bold text-purple-800 placeholder:text-purple-300 uppercase">
-                                <i class="ph-fill ph-ticket text-purple-300 text-xl absolute right-4 top-1/2 -translate-y-1/2"></i>
-                            </div>
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2">
-                                <input type="checkbox" id="legal-agree" class="mt-1 w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
-                                <label for="legal-agree" class="text-[10px] text-slate-600 leading-relaxed cursor-pointer font-bold">我已閱讀並同意 <button type="button" onclick="window.openLegalModal()" class="text-indigo-600 font-black underline">隱私保護與免責聲明 (Privacy Policy)</button>。</label>
-                            </div>
-                            <button type="button" id="signup-btn" onclick="window.handleSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider border-b-4 border-red-900">CREATE ACCOUNT / 建立帳號</button>
-                        </div>
-                    </div>
-                    <div class="space-y-4 text-left">
-                        <h4 class="text-xs font-black flex items-center gap-2 uppercase tracking-widest text-slate-400"><i class="ph ph-key text-yellow-500 text-lg"></i> Step 2: Login / 會員登入</h4>
-                        <div class="space-y-3">
-                            <input type="email" id="login-email" placeholder="Enter Email / 輸入註冊信箱" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
-                            <div class="relative">
-                                <input type="password" id="login-vip-code" placeholder="Enter Password / 輸入密碼" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none text-sm shadow-sm bg-white font-bold">
-                                <button type="button" onclick="window.togglePassVisibility('login-vip-code', this)" class="pass-toggle-btn"><i class="ph ph-eye text-xl"></i></button>
-                            </div>
-                            <div class="flex justify-between items-center mt-1 mb-2 px-1">
-                                <p class="text-[10px] text-slate-400 font-bold">Login implies agreement to terms. / 登入即代表同意免責聲明</p>
-                                <button type="button" onclick="window.handleResetPassword()" class="text-[10px] font-black text-indigo-500 hover:text-indigo-700 underline transition-colors uppercase">Forgot Password? / 忘記密碼</button>
-                            </div>
-                            <button type="button" id="login-btn" onclick="window.handleLogin()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-red-900 py-3.5 rounded-xl font-black shadow-lg transition-all active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2 border-b-4 border-yellow-600">
-                                <span id="login-btn-text">UNLOCK VIP / 登入解鎖</span><div id="login-loader" class="loader hidden border-red-900 border-t-yellow-100"></div>
-                            </button>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-inner">
-                            <div class="flex items-start gap-2"><i class="ph ph-info text-slate-400 mt-0.5 text-lg"></i><p class="text-[11px] text-slate-500 leading-snug font-bold">系統說明：VIP 訂閱到期後，帳號將自動轉換為免付費試用方案。<br><span class="text-[9px] font-normal italic">Downgrades to free plan automatically upon expiry.</span></p></div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <!-- 🎟️ Promo Codes Manager Modal -->
     <div id="promo-manager-modal" class="hidden fixed inset-0 z-[1400] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 transition-opacity">
@@ -521,7 +485,7 @@
     </div>
 
     <div id="admin-msg-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
-        <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 text-left">
+        <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 text-left">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-6">
                 <div class="flex items-center gap-3">
                     <i class="ph-fill ph-chat-circle-dots text-emerald-500 text-4xl"></i>
@@ -611,53 +575,27 @@
         </div>
     </div>
 
-    <!-- 🌐 擴充版：電子商務法規與消費者權益保護政策 -->
-    <div id="legal-modal" class="hidden fixed inset-0 z-[1650] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
-        <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-12 w-full max-w-3xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-bold text-left">
-            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> 服務條款與隱私權政策 (Terms of Service & Privacy Policy)</h3>
-            <div class="space-y-8 text-[13px] text-slate-600 leading-relaxed">
-                
-                <section class="border-l-4 border-emerald-500 pl-6 bg-emerald-50/30 py-2">
-                    <h4 class="font-black text-emerald-800 mb-2 text-base uppercase tracking-tight">1. 關於我們 (About Us)</h4>
-                    <p>歡迎使用「Taiwan Chinese Learning Hub (繁體中文學習中心)」。本服務由 **阿布拉.凱 工作室 (Abrakai Studio)** 團隊開發與維護，旨在提供全球用戶一個便捷、智慧的繁體中文輔助學習平台。</p>
+    <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
+        <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
+            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Data Privacy / 個資保護與免責聲明</h3>
+            <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Data Privacy / 個資保護</h4>
+                    <p>Abrakai Studio collects your email and name to provide cloud services. / 本站收集信箱與姓名僅供雲端會員服務。</p>
+                    <p class="mt-2 text-slate-400">Your API Key is stored ONLY in local cache. / 您的金鑰採本地存儲，絕對安全。</p>
                 </section>
-
-                <section class="border-l-4 border-indigo-400 pl-6">
-                    <h4 class="font-black text-indigo-900 mb-2 text-base uppercase tracking-tight">2. 隱私權保護政策 (Privacy Policy)</h4>
-                    <ul class="list-disc list-inside space-y-2 text-slate-500 ml-2">
-                        <li>**資料收集**：為提供您專屬的雲端進度存取與會員權益，我們僅會收集您的「姓名」與「電子信箱 (Email)」。</li>
-                        <li>**金鑰安全**：若您選擇綁定個人的 Google API Key 以啟用進階 AI 功能，該金鑰**僅會加密儲存於您個人裝置的瀏覽器本地端 (Local Storage)**，本站伺服器絕對不會收集、上傳或側錄您的 API Key，請安心使用。</li>
-                        <li>**資料保護**：本站採用 Google Firebase 企業級雲端資料庫作為基礎設施，具備嚴格的資訊安全與防火牆防護，保障您的個資不外洩。</li>
-                    </ul>
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">2. AI Accuracy / 免責聲明</h4>
+                    <p>Analysis relies on Google Gemini models. We do not guarantee 100% linguistic precision. / AI 解析僅供學習參考，不保證絕對精確。</p>
                 </section>
-                
-                <section class="border-l-4 border-blue-400 pl-6">
-                    <h4 class="font-black text-blue-900 mb-2 text-base uppercase tracking-tight">3. 消費者權益與退款政策 (Consumer Rights & Refund Policy)</h4>
-                    <ul class="list-disc list-inside space-y-2 text-slate-500 ml-2">
-                        <li>**服務性質聲明**：本站提供之 VIP 升級服務屬於<span class="text-red-600 font-black">「非以有形媒介提供之數位內容或一經提供即為完成之線上服務 (SaaS)」</span>。</li>
-                        <li>**退款例外情事**：依據台灣《消費者保護法》第19條及《通訊交易解除權合理例外情事適用準則》第2條第5款規定，本數位服務於您付費並經系統（或人工）開通權限後，即視為服務已提供完畢。因此，**本服務一經開通，即不適用七日猶豫期（鑑賞期）之規定，恕不接受退費申請。** 請您於付費升級前，充分利用系統每日提供之「免費額度」進行試用與評估。</li>
-                        <li>**服務中斷處理**：若因不可抗力因素或第三方 API (如 Google 伺服器) 發生異常導致服務暫時中斷，本工作室將盡力搶修，但不負連帶賠償責任。</li>
-                    </ul>
-                </section>
-
-                <section class="border-l-4 border-orange-400 pl-6">
-                    <h4 class="font-black text-orange-900 mb-2 text-base uppercase tracking-tight">4. AI 準確度免責聲明 (AI Disclaimer)</h4>
-                    <p>本系統的「成語深度意譯」、「破音字判斷」與部分翻譯功能，高度依賴 Google Gemini 大語言模型 (LLM) 提供運算結果。AI 模型偶有「幻覺 (Hallucination)」或語境判斷誤差。本系統所產生之所有文字解析，僅供「語言學習與研究參考」，不保證 100% 之絕對語言學精確度。使用者應自行斟酌參考，本工作室不對其內容準確度負擔法律責任。</p>
-                </section>
-
-                <section class="border-l-4 border-slate-300 pl-6">
-                    <h4 class="font-black text-slate-800 mb-2 text-base uppercase tracking-tight">5. 聯絡我們 (Contact Us)</h4>
-                    <p>若您對本服務條款有任何疑問，或需要處理帳務、權限開通等事宜，請透過官方 LINE 客服 (<span class="font-black text-slate-700">@841bihdj</span>) 或系統內建之「訊息中心 (Inbox)」與我們聯繫。</p>
-                </section>
-
             </div>
-            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
+            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱</button></div>
         </div>
     </div>
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.38-FULL-RESTORE-FIX</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.24-B2B-PROMO-MANAGEMENT</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -700,18 +638,8 @@
         window.currentMsgName = 'User';
         window.charCache = {};
         window.currentTargetChar = "";
+        
         window.currentUserInviteCode = "";
-
-        window.currentNativeLang = localStorage.getItem('abra_native_lang') || 'en';
-
-        window.saveNativeLang = function() {
-            const selector = document.getElementById('native-lang-selector');
-            if(selector) {
-                window.currentNativeLang = selector.value;
-                localStorage.setItem('abra_native_lang', window.currentNativeLang);
-                window.showToast("Language Saved / 偏好語言已儲存");
-            }
-        };
 
         window.saveSystemConfig = async function(e) {
             const saveBtn = e ? e.target : null;
@@ -743,6 +671,7 @@
         
         window.closePromoModal = () => document.getElementById('promo-manager-modal').classList.add('hidden');
 
+        // 📝 編輯與載入邀請碼
         window.editPromoCode = function(code) {
             const p = window.promoCodesData[code];
             if(!p) return;
@@ -755,6 +684,7 @@
             window.showToast(`編輯模式：正在修改邀請碼 ${code}`);
         };
 
+        // 🔍 一鍵反向過濾功能
         window.filterByPromo = function(code) {
             window.closePromoModal();
             const searchInput = document.getElementById('admin-search-input');
@@ -825,6 +755,18 @@
             }
         };
 
+        window.deletePromoCode = async function(code) {
+            if(!confirm(`確定要刪除邀請碼 ${code} 嗎？\n刪除後，綁定此碼的會員在下次登入時將自動降級失去特權額度。`)) return;
+            const newData = { ...window.promoCodesData };
+            delete newData[code];
+            try {
+                await setDoc(doc(db, "artifacts", appId, "public", "data", "system_config", "promo_codes"), newData);
+                window.showToast("邀請碼已刪除作廢");
+            } catch(e) {
+                window.showToast("刪除失敗", true);
+            }
+        };
+        
         const bopoToCharMap = {
             'ㄉㄧˊ': '迪', 'ㄉㄧˋ': '帝', 'ㄉㄜ˙': '的', 'ㄉㄜˊ': '德',
             'ㄌㄜ˙': '勒', 'ㄌㄧㄠˇ': '瞭', 'ㄌㄜˋ': '樂', 'ㄩㄝˋ': '月',
@@ -880,7 +822,7 @@
             return window.activeApiKey && typeof window.activeApiKey === 'string' && window.activeApiKey.trim() !== '' && window.activeApiKey !== 'null' && window.activeApiKey !== 'undefined';
         };
 
-        window.sentinelCheck = () => {
+        const sentinelCheck = () => {
             const host = window.location.hostname;
             const proto = window.location.protocol;
             const isLocal = host === "" || host === "localhost" || host === "127.0.0.1" || proto === 'file:';
@@ -895,13 +837,6 @@
         window.openLegalModal = () => document.getElementById('legal-modal').classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal').classList.add('hidden');
-
-        // 🌐 PLG: Auth Modal triggers
-        window.openAuthModal = function() {
-            document.getElementById('auth-modal').classList.remove('hidden');
-            document.getElementById('modal-member-limit-text').textContent = window.sysConfig.memberLimit || 15;
-        };
-        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
 
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
@@ -951,7 +886,7 @@
             }
         };
 
-        window.scrollToAuth = () => { window.openAuthModal(); };
+        window.scrollToAuth = () => { document.getElementById('member-center-section')?.classList.remove('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
         window.updateGlobalUI = function() {
             const emailCode = localStorage.getItem('abra_vip_code');
@@ -993,13 +928,13 @@
             const els = {
                 qDisplay: document.getElementById('quota-display'), vBadge: document.getElementById('vip-status-badge'),
                 pBtn: document.getElementById('profile-btn'), logoutBtn: document.getElementById('logout-btn'), mBtn: document.getElementById('msg-btn'),
-                adminSection: document.getElementById('admin-dashboard-section'),
+                memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
                 qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
-                headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container'),
-                authBtn: document.getElementById('header-auth-btn') 
+                headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container')
             };
 
             if(els.adminSection) els.adminSection.classList.add('hidden');
+            if(els.memberSection) els.memberSection.classList.remove('hidden');
             if(els.pBtn) els.pBtn.classList.add('hidden');
             if(els.mBtn) els.mBtn.classList.add('hidden');
             if(els.logoutBtn) els.logoutBtn.classList.add('hidden');
@@ -1024,7 +959,6 @@
             }
 
             if (window.isAdmin) {
-                if(els.authBtn) els.authBtn.classList.add('hidden');
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
                 if(els.vBadge) {
                     els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">Admin</span>';
@@ -1032,11 +966,12 @@
                     els.vBadge.classList.remove('hidden');
                 }
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; }
+                if(els.memberSection) els.memberSection.classList.add('hidden');
                 if(els.adminSection) els.adminSection.classList.remove('hidden');
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
             } else if (emailCode) {
-                if(els.authBtn) els.authBtn.classList.add('hidden');
+                if(els.memberSection) els.memberSection.classList.add('hidden');
                 if(els.pBtn) els.pBtn.classList.remove('hidden');
                 if(els.mBtn) els.mBtn.classList.remove('hidden');
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; } 
@@ -1071,7 +1006,6 @@
                     }
                 }
             } else {
-                if(els.authBtn) { els.authBtn.classList.remove('hidden'); els.authBtn.style.display = 'flex'; }
                 if(els.qDisplay) {
                     els.qDisplay.classList.remove('hidden');
                     els.qDisplay.classList.add('flex');
@@ -1117,7 +1051,7 @@
                     let prefixMsg = validPromo && !hasCustom ? `✨ 專屬禮遇：系統偵測您已綁定邀請碼「${userInviteCode}」，目前享有每日 ${currentLimitDisplay} 次免費額度。` : `✨ 會員專屬：您目前享有每日 ${currentLimitDisplay} 次免費額度。`;
                     setupPricingTable('Upgrade Required / 需繳費升級', `<p class="text-sm text-indigo-700 font-bold mb-4 leading-relaxed bg-indigo-50 p-4 rounded-xl border border-indigo-100">${prefixMsg}<br><span class="text-[11px] italic font-normal text-slate-500">歡迎點擊下方方案升級 VIP 會員，解除次數限制並解鎖 AI 深度解析！</span></p>`);
                 } else {
-                    setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">👋 訪客專屬：您目前享有每日 ${window.sysConfig.guestLimit} 次免費額度。<br><span class="text-[11px] font-black text-indigo-600 underline cursor-pointer" onclick="window.openAuthModal()">點此免費註冊會員，即可提升至每日 ${window.sysConfig.memberLimit} 次！若有專屬邀請碼，請於註冊時填寫解鎖特權。</span><br><span class="text-[10px] italic font-normal text-slate-500 mt-1 block">或直接選擇下方方案升級 VIP，享受無限次暢遊。</span></p>`);
+                    setupPricingTable('Unlock VIP Access / 解鎖 VIP 權限', `<p class="text-sm text-slate-600 font-bold mb-4 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">👋 訪客專屬：您目前享有每日 ${window.sysConfig.guestLimit} 次免費額度。<br><span class="text-[11px] font-black text-indigo-600 underline cursor-pointer" onclick="window.scrollToAuth()">點此免費註冊會員，即可提升至每日 ${window.sysConfig.memberLimit} 次！若有專屬邀請碼，請於註冊時填寫解鎖特權。</span><br><span class="text-[10px] italic font-normal text-slate-500 mt-1 block">或直接選擇下方方案升級 VIP，享受無限次暢遊。</span></p>`);
                 }
                 pricingContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -1132,9 +1066,9 @@
                     <div class="text-left space-y-3 w-full">
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-2">${window.getStr(title)}</h3>
                         ${prefixDesc}
-                        <div class="border-b border-slate-100 pb-3 pt-4"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與多國語言字面機翻。</span></p></div>
-                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">繁中拆字書寫教學與無限次發音練習。</span></span></p>
-                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, and BILINGUAL idiom explanations.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、最精準的多國語言成語意譯與深度文化解析。</span></p></div>
+                        <div class="border-b border-slate-100 pb-3 pt-4"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與翻譯。</span></p></div>
+                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">英翻中、中文拆字書寫教學與練習。</span></span></p>
+                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
                         
                         <div class="pt-6">
@@ -1234,7 +1168,7 @@
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
                 window.showToast("Registration Required / 請先註冊或登入會員", true);
-                window.openAuthModal();
+                window.scrollToAuth();
                 return;
             }
 
@@ -1277,7 +1211,7 @@
             const emailCode = localStorage.getItem('abra_vip_code');
             if (!emailCode) {
                 window.showToast("請先註冊或登入會員", true);
-                window.openAuthModal();
+                window.scrollToAuth();
                 return;
             }
 
@@ -1364,6 +1298,1120 @@
             }
         };
 
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (tokenError) {
+                        console.warn("Custom token failed, falling back to anonymous:", tokenError.code);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(e) {
+                console.error("Auth Init Error:", e);
+            }
+        };
+        initAuth();
+
+        let sysConfigUnsub = null;
+        let promoCodesUnsub = null;
+        let userProfileUnsub = null; 
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!sentinelCheck()) return;
+            if (user) {
+                document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
+                
+                if (!sysConfigUnsub) {
+                    sysConfigUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "system_config", "settings"), (docSnap) => {
+                        if(docSnap.exists()){
+                            const data = docSnap.data();
+                            if(data.guestLimit) window.sysConfig.guestLimit = parseInt(data.guestLimit, 10);
+                            if(data.memberLimit) window.sysConfig.memberLimit = parseInt(data.memberLimit, 10);
+                            
+                            if (document.getElementById('sys-guest-limit')) document.getElementById('sys-guest-limit').value = window.sysConfig.guestLimit;
+                            if (document.getElementById('sys-member-limit')) document.getElementById('sys-member-limit').value = window.sysConfig.memberLimit;
+                            
+                            if(window.updateGlobalUI) window.updateGlobalUI();
+                        }
+                    }, (error) => {
+                        console.warn("Config Sync restricted:", error.message);
+                    });
+                }
+                
+                if (!promoCodesUnsub) {
+                    promoCodesUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "system_config", "promo_codes"), (docSnap) => {
+                        if(docSnap.exists()){
+                            window.promoCodesData = docSnap.data();
+                        } else {
+                            window.promoCodesData = {};
+                        }
+                        if(window.updateGlobalUI) window.updateGlobalUI();
+                        
+                        const modal = document.getElementById('promo-manager-modal');
+                        if (modal && !modal.classList.contains('hidden')) {
+                            window.renderPromoTable();
+                        }
+                    }, (error) => {
+                        console.warn("Promo Sync restricted:", error.message);
+                    });
+                }
+
+                const emailCode = localStorage.getItem('abra_vip_code');
+                if (emailCode && !userProfileUnsub) {
+                    userProfileUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            
+                            let status = 'pending';
+                            if (data.expiryDate) {
+                                const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                                status = (diff >= 0) ? 'active' : 'expired';
+                                localStorage.setItem('abra_vip_days', diff.toString());
+                            } else {
+                                localStorage.removeItem('abra_vip_days');
+                            }
+                            localStorage.setItem('abra_vip_status', status);
+                            
+                            if (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') {
+                                localStorage.setItem('abra_custom_limit', data.customLimit);
+                            } else {
+                                localStorage.removeItem('abra_custom_limit');
+                            }
+                            
+                            if (data.inviteCode) {
+                                localStorage.setItem('abra_invite_code', data.inviteCode);
+                            } else {
+                                localStorage.removeItem('abra_invite_code');
+                            }
+
+                            if(window.updateGlobalUI) window.updateGlobalUI();
+                        } else {
+                            window.handleLogout();
+                        }
+                    }, (error) => {
+                        console.warn("User Profile Sync restricted:", error.message);
+                    });
+                }
+
+            } else {
+                document.getElementById('auth-status-msg').textContent = "AUTH ERROR";
+                if (sysConfigUnsub) { sysConfigUnsub(); sysConfigUnsub = null; }
+                if (promoCodesUnsub) { promoCodesUnsub(); promoCodesUnsub = null; }
+                if (userProfileUnsub) { userProfileUnsub(); userProfileUnsub = null; }
+            }
+        });
+
+        window.verifyAdminCloud = async function(code) {
+            try {
+                const adminRef = doc(db, "artifacts", appId, "public", "data", "admin_vault", "DASHBOARD_KEY");
+                const adminSnap = await getDoc(adminRef);
+                return adminSnap.exists() && adminSnap.data().pass === code;
+            } catch(e) { 
+                console.error("Verify Admin Error:", e);
+                return false; 
+            }
+        };
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const code = document.getElementById('login-vip-code').value.trim();
+            if (!code) { window.showToast("Password Required / 請輸入密碼", true); return; }
+
+            const loginBtn = document.getElementById('login-btn');
+            const loader = document.getElementById('login-loader');
+            const btnText = document.getElementById('login-btn-text');
+
+            if(loader) loader.classList.remove('hidden');
+            if(btnText) btnText.textContent = "Verifying...";
+            if(loginBtn) loginBtn.disabled = true;
+
+            try {
+                if (await window.verifyAdminCloud(code)) {
+                    localStorage.setItem('abra_admin_status', 'active');
+                    window.showToast("Admin Verified / 管理員身分確認.");
+                    setTimeout(() => location.reload(), 800);
+                    return;
+                }
+
+                if (!email) { window.showToast("Email Required / 請輸入註冊信箱", true); return; }
+
+                let authSuccess = false;
+                try {
+                    await signInWithEmailAndPassword(auth, email, code);
+                    authSuccess = true;
+                } catch (e) {
+                    console.warn("Standard Login failed, checking legacy DB...", e.code);
+                    const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                    
+                    let docSnap;
+                    try {
+                        docSnap = await getDoc(docRef);
+                    } catch (dbErr) {
+                        console.error("Legacy DB Permission/Network Error:", dbErr);
+                        window.showToast("帳號或密碼錯誤 (舊會員轉移請聯絡管理員開放資料庫權限)", true);
+                        return;
+                    }
+                    
+                    if (docSnap && docSnap.exists() && docSnap.data().password === code) {
+                        try {
+                            const userCredential = await createUserWithEmailAndPassword(auth, email, code);
+                            await updateProfile(userCredential.user, { displayName: window.getStr(docSnap.data().name) });
+                            await updateDoc(docRef, { password: "", uid: userCredential.user.uid });
+                            authSuccess = true;
+                        } catch(err) {
+                            console.error("Legacy Migration Error:", err);
+                            if (err.code === 'auth/email-already-in-use') {
+                                await updateDoc(docRef, { password: "" }).catch(() => {});
+                                window.showToast("Account locked. Use Reset Password / 請點擊忘記密碼重新綁定", true);
+                            } else {
+                                window.showToast("System Error / 系統升級遇到阻礙: " + err.message, true);
+                            }
+                            return;
+                        }
+                    } else {
+                        window.showToast("Invalid Credentials / 帳號或密碼錯誤", true);
+                        return;
+                    }
+                }
+
+                if (authSuccess) {
+                    const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                    
+                    try {
+                        const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                        const docSnap = await getDoc(docRef);
+                        
+                        if(docSnap.exists()) {
+                            localStorage.setItem('abra_vip_code', sanitizedEmail);
+                            const data = docSnap.data();
+                            let status = 'pending';
+                            if (data.expiryDate) {
+                                const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                                status = (diff >= 0) ? 'active' : 'expired';
+                                localStorage.setItem('abra_vip_days', diff.toString());
+                            }
+                            localStorage.setItem('abra_vip_status', status);
+                            localStorage.setItem('abra_user_name', data.name || "Member");
+                            
+                            if (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') {
+                                localStorage.setItem('abra_custom_limit', data.customLimit);
+                            } else {
+                                localStorage.removeItem('abra_custom_limit');
+                            }
+                            
+                            if (data.inviteCode) {
+                                localStorage.setItem('abra_invite_code', data.inviteCode);
+                            } else {
+                                localStorage.removeItem('abra_invite_code');
+                            }
+                            
+                            if (data.apiKey && status === 'active') {
+                                localStorage.setItem('gemini_api_key', data.apiKey.trim());
+                                window.activeApiKey = data.apiKey.trim();
+                            }
+                            window.showToast("Login Success! / 登入成功！");
+                            setTimeout(() => location.reload(), 800);
+                        } else {
+                            await signOut(auth);
+                            window.showToast("此帳號已被管理員移除，拒絕登入 / Account removed by admin", true);
+                            if(loader) loader.classList.add('hidden');
+                            if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
+                            if(loginBtn) loginBtn.disabled = false;
+                            return;
+                        }
+                    } catch (syncErr) {
+                         console.error("Post-login getDoc error:", syncErr);
+                         if (syncErr.code === 'permission-denied' || (syncErr.message && syncErr.message.includes('permission'))) {
+                             window.showToast("登入成功但權限不足，無法讀取會員資料 (請更新 Rules)", true);
+                             return;
+                         }
+                    }
+                }
+
+            } catch(e) {
+                console.error("Login Cascade Error:", e);
+                window.showToast("登入發生錯誤，請聯絡管理員確認權限設定", true);
+            } finally {
+                if(loader) loader.classList.add('hidden');
+                if(btnText) btnText.textContent = "UNLOCK FEATURES / 登入解鎖";
+                if(loginBtn) loginBtn.disabled = false;
+            }
+        };
+
+        window.handleSignup = async function() {
+            const agree = document.getElementById('legal-agree')?.checked;
+            if (!agree) { window.showToast("Agree to Terms first / 請先同意免責聲明", true); return; }
+            
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-pass').value.trim();
+            let inviteCode = document.getElementById('reg-invite-code').value.trim().toUpperCase(); 
+            
+            if (!name || !email || !pass) { window.showToast("Fill all fields / 請填寫完整資料", true); return; }
+            
+            if (inviteCode) {
+                const promo = window.promoCodesData[inviteCode];
+                if (!promo) {
+                    window.showToast("該邀請碼不存在，請確認後再試", true);
+                    return;
+                }
+                const todayStr = new Date().toISOString().split('T')[0];
+                if (promo.expiry && promo.expiry < todayStr) {
+                    window.showToast("該專屬邀請碼已過期失效", true);
+                    return;
+                }
+            }
+
+            const signupBtn = document.getElementById('signup-btn');
+            const originalText = signupBtn ? signupBtn.textContent : "Processing...";
+            if(signupBtn) { signupBtn.textContent = "Processing..."; signupBtn.disabled = true; }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                await updateProfile(userCredential.user, { displayName: name });
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                
+                await setDoc(docRef, { 
+                    uid: userCredential.user.uid,
+                    name: name, 
+                    email: email, 
+                    signupDate: new Date().toISOString(), 
+                    status: "pending",
+                    password: "",
+                    inviteCode: inviteCode 
+                }, { merge: true });
+                
+                window.showToast("Account Created! / 註冊成功，請登入");
+                document.getElementById('reg-name').value = '';
+                document.getElementById('reg-email').value = '';
+                document.getElementById('reg-pass').value = '';
+                document.getElementById('reg-invite-code').value = '';
+                document.getElementById('legal-agree').checked = false;
+                
+                document.getElementById('login-email').value = email;
+                document.getElementById('login-vip-code').value = pass;
+                window.handleLogin();
+
+            } catch(e) { 
+                console.error("Signup Error:", e);
+                if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
+                    window.showToast("註冊失敗：資料庫寫入被拒 (請更新 Security Rules)", true);
+                } else if (e.code === 'auth/email-already-in-use') {
+                    window.showToast("Email in use / 信箱已註冊，請登入", true);
+                } else if (e.code === 'auth/weak-password') {
+                    window.showToast("Password too weak / 密碼強度不足 (至少 6 碼)", true);
+                } else {
+                    window.showToast("Signup Error / 註冊失敗: " + (e.message || e.code), true);
+                }
+            } finally { 
+                if(signupBtn) { signupBtn.textContent = originalText; signupBtn.disabled = false; } 
+            }
+        };
+
+        window.handleResetPassword = async function() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            if (!email) { 
+                window.showToast("Enter Email first / 請先輸入信箱", true); 
+                return; 
+            }
+            try {
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.password && data.password.length > 0) {
+                        window.showToast("Upgrading Security / 系統安全升級中，請稍候...");
+                        try {
+                            const userCred = await createUserWithEmailAndPassword(auth, email, data.password);
+                            await updateProfile(userCred.user, { displayName: data.name });
+                            await updateDoc(docRef, { password: "" , uid: userCred.user.uid });
+                            await signOut(auth);
+                        } catch(err) {
+                            if (err.code === 'auth/email-already-in-use') {
+                                await updateDoc(docRef, { password: "" });
+                            } else if (err.code === 'auth/weak-password') {
+                                const tempStrongPass = "Abra" + Math.random().toString(36).slice(-8) + "!";
+                                const userCred = await createUserWithEmailAndPassword(auth, email, tempStrongPass);
+                                await updateProfile(userCred.user, { displayName: data.name });
+                                await updateDoc(docRef, { password: "", uid: userCred.user.uid });
+                                await signOut(auth);
+                            } else {
+                                window.showToast("Upgrade Error / 升級阻礙: " + err.code, true);
+                                return;
+                            }
+                        }
+                    }
+                } else { 
+                    window.showToast("Account not found / 查無此帳號", true); 
+                    return;
+                }
+
+                await sendPasswordResetEmail(auth, email);
+                window.showToast("Reset mail sent! / 密碼重設信已寄出！");
+            } catch(e) {
+                if (e.code === 'auth/invalid-email') window.showToast("Invalid Email / 信箱格式不正確", true);
+                else window.showToast("Request Failed / 發送失敗", true);
+            }
+        };
+
+        window.handleLogout = async function() {
+            if (window.isAdmin || localStorage.getItem('abra_admin_status') === 'active') {
+                localStorage.setItem('abra_usage_count', '0');
+                window.freeUsageCount = 0;
+            }
+            localStorage.removeItem('abra_vip_status');
+            localStorage.removeItem('abra_vip_code');
+            localStorage.removeItem('abra_admin_status');
+            localStorage.removeItem('gemini_api_key');
+            localStorage.removeItem('abra_vip_days');
+            localStorage.removeItem('abra_custom_limit');
+            localStorage.removeItem('abra_invite_code'); 
+            window.activeApiKey = "";
+            try { await signOut(auth); } catch(e) {}
+            location.reload(); 
+        };
+
+        window.loadAdminMembers = async function() {
+            const tbody = document.getElementById('admin-members-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-16 text-slate-400 font-black tracking-widest uppercase">Fetching Cloud Data...</td></tr>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let html = '';
+                let globalUnread = false; 
+                
+                window.promoStatsMap = {}; 
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const emailId = docSnap.id;
+                    
+                    if (data.inviteCode) {
+                        const code = data.inviteCode.toUpperCase();
+                        window.promoStatsMap[code] = (window.promoStatsMap[code] || 0) + 1;
+                    }
+                    
+                    let statusHTML = `<div class="w-3 h-3 rounded-full bg-slate-300"></div>`;
+                    let daysText = "未開通";
+                    if (data.expiryDate) {
+                        const diff = new Date(data.expiryDate).getTime() - Date.now();
+                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        if (daysLeft > 7) { statusHTML = `<div class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>`; daysText = `${daysLeft} 天`; } 
+                        else if (daysLeft > 0) { statusHTML = `<div class="w-3 h-3 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_#f97316]"></div>`; daysText = `(${daysLeft}天)`; } 
+                        else if (daysLeft === 0) { statusHTML = `<div class="w-3 h-3 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_#f97316]"></div>`; daysText = `最後一天`; } 
+                        else { statusHTML = `<div class="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]"></div>`; daysText = "過期"; }
+                    }
+
+                    const messages = data.messages || [];
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+                    const adminReadCount = parseInt(localStorage.getItem(`admin_read_${emailId}`) || '0', 10);
+                    const hasUnread = lastMsg && lastMsg.role === 'user' && messages.length > adminReadCount;
+                    if (hasUnread) globalUnread = true; 
+
+                    const msgBtnClass = hasUnread ? "text-white bg-red-500 hover:bg-red-600 animate-pulse" : "text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white";
+                    const msgBtnText = hasUnread ? "新回覆" : "Chat";
+                    
+                    const displayRemarks = data.remarks || (data.password ? "[臨時密碼未轉移]" : '-');
+                    
+                    let customLimitDisplay = `<span class="text-slate-400 font-medium">預設</span>`;
+                    if (data.customLimit !== undefined && data.customLimit !== null && data.customLimit !== '') {
+                        customLimitDisplay = `<span class="text-indigo-600 font-black">${data.customLimit}次 (個人)</span>`;
+                    } else if (data.inviteCode) {
+                        customLimitDisplay = `<span class="text-purple-600 font-black text-[9px] px-2 py-1 bg-purple-50 rounded-md border border-purple-100 cursor-pointer hover:bg-purple-600 hover:text-white transition-colors" title="點擊過濾此邀請碼名單" onclick="window.filterByPromo('${window.getStr(data.inviteCode)}')">${window.getStr(data.inviteCode)}</span>`;
+                    }
+
+                    html += `
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="px-8 py-6 whitespace-nowrap"><div class="flex items-center gap-2 justify-center">${statusHTML} <span class="text-[10px] font-black">${daysText}</span></div></td>
+                            <td class="px-8 py-6 whitespace-nowrap font-mono text-[11px] font-bold group-hover:text-red-600 transition-colors">${data.email || emailId}</td>
+                            <td class="px-8 py-6 whitespace-nowrap text-xs font-black text-indigo-700">${data.name || 'N/A'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '-'}</span></td>
+                            <td class="px-8 py-6 whitespace-nowrap text-xs font-bold">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' Mos' : '-'}</span></td>
+                            <td class="px-8 py-6 whitespace-nowrap text-xs font-black ${daysText === '過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || 'N/A'}</td>
+                            <td class="px-8 py-6 whitespace-nowrap text-xs">${customLimitDisplay}</td>
+                            <td class="px-8 py-6 whitespace-nowrap text-right">
+                                <button type="button" data-action="admin-msg" data-id="${emailId}" class="admin-action-btn font-black text-[10px] px-4 py-2 rounded-xl mr-2 transition-all shadow-sm uppercase tracking-widest ${msgBtnClass}">${msgBtnText}</button>
+                                <button type="button" data-action="admin-edit" data-id="${emailId}" class="admin-action-btn text-indigo-600 hover:text-white font-black text-[10px] bg-indigo-50 hover:bg-indigo-600 px-4 py-2 rounded-xl mr-2 transition-all shadow-sm uppercase tracking-widest">Edit</button>
+                                <button type="button" data-action="admin-delete" data-id="${emailId}" class="admin-action-btn text-red-600 hover:text-white font-black text-[10px] bg-red-50 hover:bg-red-600 px-4 py-2 rounded-xl transition-all shadow-sm uppercase tracking-widest">Del</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.innerHTML = html === '' ? '<tr><td colspan="7" class="text-center py-20 font-black uppercase tracking-widest text-slate-400">Database Empty / 無會員資料</td></tr>' : html;
+                
+                const modal = document.getElementById('promo-manager-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    window.renderPromoTable();
+                }
+
+                if (window.isAdmin) {
+                    const msgDot = document.getElementById('msg-dot');
+                    if (msgDot) {
+                        if (globalUnread) msgDot.classList.remove('hidden');
+                        else msgDot.classList.add('hidden');
+                    }
+                }
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-20 text-red-500 font-black uppercase tracking-widest">Permission Denied / 載入失敗</td></tr>';
+            }
+        };
+
+        window.openAdminModal = async function(emailId = '') {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const emailInput = document.getElementById('admin-member-email');
+            const passInput = document.getElementById('admin-member-pass');
+            
+            if (emailId && typeof emailId === 'string') {
+                emailInput.value = emailId;
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                try {
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        
+                        if (data.uid || (!data.password && data.status !== 'pending')) {
+                            passInput.value = '';
+                            passInput.placeholder = "Encrypted / 已加密";
+                            passInput.disabled = true;
+                            passInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        } else {
+                            passInput.value = data.password || '';
+                            passInput.placeholder = "Leave empty / 留空";
+                            passInput.disabled = false;
+                            passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                        }
+
+                        document.getElementById('admin-member-name').value = window.getStr(data.name);
+                        document.getElementById('admin-member-phone').value = window.getStr(data.phone);
+                        document.getElementById('admin-member-remittance').value = window.getStr(data.remittance);
+                        document.getElementById('admin-pay-date').value = window.getStr(data.paymentDate);
+                        document.getElementById('admin-months').value = window.getStr(data.months);
+                        document.getElementById('admin-expiry-date').value = window.getStr(data.expiryDate);
+                        document.getElementById('admin-member-remarks').value = window.getStr(data.remarks);
+                        document.getElementById('admin-member-limit').value = (data.customLimit !== undefined && data.customLimit !== null) ? data.customLimit : '';
+                    }
+                } catch(e) { window.showToast("Load Error / 資料讀取失敗", true); }
+            } else {
+                emailInput.value = '';
+                emailInput.removeAttribute('readonly');
+                emailInput.classList.remove('bg-slate-100', 'text-slate-500');
+                passInput.value = '';
+                passInput.placeholder = "Initial Only / 僅供建立使用";
+                passInput.disabled = false;
+                passInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
+                document.getElementById('admin-member-name').value = '';
+                document.getElementById('admin-member-phone').value = '';
+                document.getElementById('admin-member-remittance').value = '';
+                document.getElementById('admin-pay-date').value = '';
+                document.getElementById('admin-months').value = '';
+                document.getElementById('admin-expiry-date').value = '';
+                document.getElementById('admin-member-remarks').value = '';
+                document.getElementById('admin-member-limit').value = '';
+            }
+        };
+
+        window.saveAdminMember = async function() {
+            const email = document.getElementById('admin-member-email').value.trim().toLowerCase();
+            const password = document.getElementById('admin-member-pass').value.trim();
+            const name = document.getElementById('admin-member-name').value.trim();
+            const phone = document.getElementById('admin-member-phone').value.trim();
+            const remittance = document.getElementById('admin-member-remittance').value.trim();
+            const paymentDate = document.getElementById('admin-pay-date').value;
+            const months = document.getElementById('admin-months').value;
+            const expiryDate = document.getElementById('admin-expiry-date').value;
+            const remarks = document.getElementById('admin-member-remarks').value.trim();
+            const customLimitRaw = document.getElementById('admin-member-limit').value.trim();
+
+            if (!email || !name) { window.showToast("Email & Name required", true); return; }
+
+            const saveBtn = document.getElementById('admin-save-btn');
+            saveBtn.textContent = "Syncing...";
+            saveBtn.disabled = true;
+
+            try {
+                const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
+                
+                const payload = {
+                    email: email, name: name, phone: phone,
+                    remittance: remittance, paymentDate: paymentDate, months: months,
+                    expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
+                };
+                
+                if (customLimitRaw === '') {
+                    payload.customLimit = null;
+                } else {
+                    payload.customLimit = parseInt(customLimitRaw, 10);
+                }
+                
+                if (password && !document.getElementById('admin-member-pass').disabled) { 
+                    payload.password = password; 
+                }
+                
+                await setDoc(docRef, payload, { merge: true });
+                
+                window.showToast("Cloud Record Synced / 會員資料儲存成功！");
+                if (window.closeAdminModal) window.closeAdminModal();
+                window.loadAdminMembers(); 
+            } catch(e) { window.showToast("Update Failed / 儲存失敗", true); } 
+            finally { saveBtn.textContent = "Commit / 儲存設定"; saveBtn.disabled = false; }
+        };
+
+        window.deleteAdminMember = async function(emailId, actionEl) {
+            if (actionEl && actionEl.textContent !== 'Confirm?') {
+                const originalText = actionEl.textContent;
+                actionEl.textContent = 'Confirm?';
+                actionEl.classList.replace('bg-red-50', 'bg-red-600');
+                actionEl.classList.replace('text-red-600', 'text-white');
+                setTimeout(() => {
+                    if (actionEl && actionEl.parentNode) {
+                        actionEl.textContent = originalText;
+                        actionEl.classList.replace('bg-red-600', 'bg-red-50');
+                        actionEl.classList.replace('text-white', 'text-red-600');
+                    }
+                }, 3000);
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
+                window.showToast("Member Matrix Erased / 會員已刪除");
+                window.loadAdminMembers();
+            } catch(e) { window.showToast("Delete Error", true); }
+        };
+
+        window.exportCSV = async function() {
+            try {
+                window.showToast("Compiling Secure CSV... / 準備匯出 CSV...");
+                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                let csvContent = "Email,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status,CustomLimit,InviteCode\n";
+                querySnapshot.forEach(doc => {
+                    const d = doc.data();
+                    const row = [ d.email || doc.id, d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '', d.customLimit || '', d.inviteCode || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
+                    csvContent += row + "\n";
+                });
+                const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Abrakai_DB_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.showToast("匯出成功！ / Export Success!");
+            } catch(e) { window.showToast("Export Failed / 匯出失敗", true); }
+        };
+
+        window.importCSV = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    window.showToast("Verifying Data... / 開始比對匯入資料...");
+                    const rows = e.target.result.split('\n').filter(r => r.trim());
+                    if(rows.length < 2) { window.showToast("CSV Invalid / 格式錯誤", true); return; }
+                    const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').toLowerCase().trim());
+                    const emailIdx = headers.indexOf('email');
+                    if(emailIdx === -1) { window.showToast("CSV Missing Email / 需含 Email", true); return; }
+                    let successCount = 0;
+                    for(let i=1; i<rows.length; i++) {
+                        const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        if(cols.length === 0 || !cols[emailIdx]) continue;
+                        const payload = {};
+                        headers.forEach((h, idx) => {
+                            if(h !== 'email' && cols[idx]) { 
+                                if(h === 'customlimit') {
+                                    payload.customLimit = cols[idx] ? parseInt(cols[idx], 10) : null;
+                                } else {
+                                    payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; 
+                                }
+                            }
+                        });
+                        const sanitizedEmail = cols[emailIdx].replace(/[.#$[\]]/g, "_");
+                        await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: cols[emailIdx], ...payload }, { merge: true });
+                        successCount++;
+                    }
+                    window.showToast(`Import Complete! Processed ${successCount} records / 匯入完成`);
+                    window.loadAdminMembers();
+                } catch(err) { window.showToast("Import Error / 匯入錯誤", true); }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
+        };
+
+        window.calculateExpiry = function() {
+            const payDate = document.getElementById('admin-pay-date').value;
+            const months = parseInt(document.getElementById('admin-months').value, 10);
+            if (payDate && !isNaN(months) && months > 0) {
+                const d = new Date(payDate);
+                d.setMonth(d.getMonth() + months);
+                document.getElementById('admin-expiry-date').value = d.toISOString().split('T')[0];
+            }
+        };
+
+        window.filterAdminMembers = function() {
+            const input = document.getElementById('admin-search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#admin-members-tbody tr');
+            rows.forEach(row => {
+                if(row.cells.length < 2) return; 
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        };
+
+        window.saveProfileInfo = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const newName = document.getElementById('profile-name').value.trim();
+            const newPass = document.getElementById('profile-pass').value.trim();
+            const newApiKey = document.getElementById('profile-api-key').value.trim();
+            const newInviteCode = document.getElementById('profile-invite-code').value.trim().toUpperCase(); 
+            
+            if (!window.isVIP && !window.isAdmin && newApiKey) { window.showToast("未繳費開通，無法設定 API 金鑰", true); return; }
+            if (!newName) { window.showToast("請填寫顯示名稱 / Missing fields", true); return; }
+            
+            let inviteCodeToSave = window.currentUserInviteCode;
+            if (newInviteCode !== window.currentUserInviteCode) {
+                if (newInviteCode === '') {
+                    inviteCodeToSave = ''; 
+                } else if (window.promoCodesData[newInviteCode]) {
+                    const promo = window.promoCodesData[newInviteCode];
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    if (promo.expiry && promo.expiry < todayStr) {
+                        window.showToast("該邀請碼已過期失效 / Promo Code Expired", true);
+                        return; 
+                    }
+                    inviteCodeToSave = newInviteCode; 
+                } else {
+                    window.showToast("邀請碼無效 / Invalid Promo Code", true);
+                    return; 
+                }
+            }
+
+            try {
+                if (newPass) {
+                    try {
+                        await updatePassword(auth.currentUser, newPass);
+                    } catch(e) {
+                        if (e.code === 'auth/requires-recent-login') {
+                            window.showToast("修改密碼需重新登入驗證身分", true); return;
+                        } else if (e.code === 'auth/weak-password') {
+                            window.showToast("密碼強度不足，至少需 6 位數", true); return;
+                        } else {
+                            window.showToast("密碼更新失敗: " + e.message, true); return;
+                        }
+                    }
+                }
+                
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, apiKey: newApiKey, inviteCode: inviteCodeToSave });
+                
+                if (newApiKey === '') localStorage.removeItem('gemini_api_key');
+                else localStorage.setItem('gemini_api_key', newApiKey.trim());
+                window.activeApiKey = newApiKey.trim();
+                
+                if (inviteCodeToSave) localStorage.setItem('abra_invite_code', inviteCodeToSave);
+                else localStorage.removeItem('abra_invite_code');
+                
+                window.showToast("設定已同步至雲端並儲存完成！ / Settings Saved!");
+                if (window.closeProfileModal) window.closeProfileModal();
+                
+            } catch(e) { window.showToast("更新失敗 / Save failed", true); }
+        };
+
+        window.openAdminMsgModal = async function(emailId) {
+            window.currentMsgEmail = emailId;
+            document.getElementById('admin-msg-target').textContent = `(${emailId})`;
+            document.getElementById('admin-msg-target-name').textContent = "Loading... / 載入中...";
+            document.getElementById('admin-msg-modal').classList.remove('hidden');
+            const historyDiv = document.getElementById('admin-chat-history');
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-emerald-500"></div>';
+            
+            try {
+                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.currentMsgName = data.name || '未命名會員';
+                    document.getElementById('admin-msg-target-name').textContent = window.currentMsgName;
+                    
+                    const messages = data.messages || [];
+                    if(!messages || messages.length === 0) {
+                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">尚無通訊紀錄 / No messages</div>';
+                    } else {
+                        historyDiv.innerHTML = messages.map((m, index) => {
+                            const isUser = m.role === 'user';
+                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                            const senderName = isUser ? window.currentMsgName : 'Admin';
+                            const delBtn = `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">刪除舊訊</button>`;
+                            return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-700'} px-4 py-2 rounded-2xl shadow-sm text-sm whitespace-pre-wrap">${window.getStr(m.text)}</div><span class="text-[9px] text-slate-400 mt-1 flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
+                        }).join('');
+                        historyDiv.scrollTop = historyDiv.scrollHeight;
+                    }
+                    localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                    window.loadAdminMembers(); 
+                }
+            } catch(e) { 
+                console.error("AdminMsg GetDoc Error:", e);
+                window.showToast("訊息載入失敗 / Load Error", true); 
+            }
+        };
+
+        window.sendAdminMsg = async function() {
+            const emailId = window.currentMsgEmail;
+            const inputEl = document.getElementById('admin-chat-input');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = docSnap.exists() ? (docSnap.data().messages || []) : [];
+                messages.push({ role: 'admin', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                localStorage.setItem(`admin_read_${emailId}`, messages.length.toString());
+                inputEl.value = '';
+                if(window.openAdminMsgModal) window.openAdminMsgModal(emailId); 
+                window.loadAdminMembers(); 
+            } catch(e) { window.showToast("傳送失敗 / Send Error", true); } 
+            finally { inputEl.disabled = false; inputEl.focus(); }
+        };
+
+        window.openUserMsgModal = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            if (!emailId) return;
+            
+            document.getElementById('user-msg-modal').classList.remove('hidden');
+            document.getElementById('msg-dot')?.classList.add('hidden'); 
+            const historyDiv = document.getElementById('user-chat-history');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            
+            historyDiv.innerHTML = '<div class="loader mx-auto mt-10 border-t-blue-500"></div>';
+            
+            try {
+                const docSnap = await getDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const messages = data.messages || [];
+                    window.currentUserMsgName = data.name || 'User';
+                    
+                    if(!messages || messages.length === 0) {
+                        historyDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10 font-bold uppercase tracking-widest italic">No messages / 尚無通訊紀錄</div>';
+                    } else {
+                        historyDiv.innerHTML = messages.map((m, index) => {
+                            const isUser = m.role === 'user';
+                            const timeStr = new Date(m.timestamp).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                            const senderName = isUser ? window.currentUserMsgName : 'Admin';
+                            
+                            const mText = window.getStr(m.text);
+                            const isImportant = mText.includes('【系統自動通知】') || mText.includes('[重要]');
+                            const delBtn = !isImportant ? `<button type="button" data-action="chat-del" data-email="${emailId}" data-index="${index}" class="text-[9px] text-red-400 hover:text-red-600 ml-2 underline transition-colors">Del</button>` : '';
+                            
+                            return `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}"><div class="max-w-[80%] ${isUser ? 'bg-blue-600 text-white' : 'bg-white border-2 border-slate-200 text-slate-800'} px-6 py-4 rounded-[2rem] shadow-xl text-sm font-bold whitespace-pre-wrap">${mText}</div><span class="text-[9px] text-slate-400 mt-2 font-black uppercase tracking-widest italic flex items-center">${senderName} • ${timeStr} ${delBtn}</span></div>`;
+                        }).join('');
+                        historyDiv.scrollTop = historyDiv.scrollHeight;
+                    }
+                    
+                    localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                    const hasAdminMsg = messages.some(m => m.role === 'admin');
+                    if(hasAdminMsg) {
+                        inputEl.disabled = false; btnEl.disabled = false;
+                        inputEl.placeholder = "Type your reply... / 輸入回覆...";
+                    } else {
+                        inputEl.disabled = true; btnEl.disabled = true;
+                        inputEl.placeholder = "Awaiting Admin... / 待管理員回覆...";
+                    }
+                }
+            } catch(e) { 
+                console.error("UserMsg GetDoc Error:", e);
+                window.showToast("Load Error / 載入失敗", true); 
+            }
+        };
+
+        window.sendUserMsg = async function() {
+            const emailId = localStorage.getItem('abra_vip_code');
+            const inputEl = document.getElementById('user-chat-input');
+            const btnEl = document.getElementById('user-chat-send-btn');
+            const text = inputEl.value.trim();
+            if(!text || !emailId) return;
+
+            inputEl.disabled = true; btnEl.disabled = true;
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                let messages = docSnap.exists() ? (docSnap.data().messages || []) : [];
+                messages.push({ role: 'user', text: text, timestamp: new Date().toISOString() });
+                await setDoc(docRef, { messages: messages }, { merge: true });
+                localStorage.setItem(`abra_msg_read_${emailId}`, messages.length.toString());
+                inputEl.value = '';
+                if(window.openUserMsgModal) window.openUserMsgModal();
+            } catch(e) { window.showToast("Send Error / 傳送失敗", true); } 
+            finally { inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); }
+        };
+
+        window.deleteMsg = async function(emailId, index, actionEl) {
+            if (actionEl && actionEl.textContent !== 'Confirm?') {
+                const orig = actionEl.textContent;
+                actionEl.textContent = 'Confirm?';
+                actionEl.classList.add('font-black', 'text-red-600');
+                setTimeout(() => { 
+                    if(actionEl && actionEl.parentNode) { actionEl.textContent = orig; actionEl.classList.remove('font-black', 'text-red-600'); } 
+                }, 3000);
+                return;
+            }
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    let messages = docSnap.data().messages || [];
+                    messages.splice(index, 1);
+                    await setDoc(docRef, { messages }, { merge: true });
+                    window.showToast("Message Erased / 訊息已清除");
+                    if (window.isAdmin && !document.getElementById('admin-msg-modal').classList.contains('hidden')) {
+                        if (window.openAdminMsgModal) window.openAdminMsgModal(emailId);
+                    } else {
+                        if (window.openUserMsgModal) window.openUserMsgModal();
+                    }
+                }
+            } catch(e) { window.showToast("Error / 清除失敗", true); }
+        };
+
+        window.handleMsgBtnClick = function() {
+            if (window.isAdmin) {
+                window.showToast("Check member list below / 請查看下方列表", false);
+                document.getElementById('admin-dashboard-section')?.scrollIntoView({behavior: 'smooth'});
+            } else {
+                if (window.openUserMsgModal) window.openUserMsgModal();
+            }
+        };
+
+        // --- 8. 雙軌制翻譯、語音與拆字引擎 (AI + Moedict) ---
+        
+        window.speak = function(text, fallbackChar = null) {
+            if (!text || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            
+            let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
+            
+            if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
+                const mapBopo = cleanText.replace(/\s/g, '');
+                if (bopoToCharMap[mapBopo]) {
+                    cleanText = bopoToCharMap[mapBopo];
+                } else if (bopoToCharMap[mapBopo.replace('˙', '')]) {
+                    cleanText = bopoToCharMap[mapBopo.replace('˙', '')];
+                } else {
+                    cleanText = fallbackChar || mapBopo;
+                }
+            } else {
+                const ttsDictionary = {
+                    "有的放矢": "有地放矢", "無的放矢": "無地放矢", "眾矢之的": "眾矢之地",
+                    "目的": "目地", "標的": "標地", "的確": "迪確", "的士": "迪士"
+                };
+                for (const [wrong, right] of Object.entries(ttsDictionary)) {
+                    cleanText = cleanText.replace(new RegExp(wrong, 'g'), right);
+                }
+            }
+
+            const ut = new SpeechSynthesisUtterance(cleanText.trim());
+            ut.lang = 'zh-TW';
+            
+            if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
+            if (window.availableVoices && window.availableVoices.length > 0) {
+                const preferredVoice = window.availableVoices.find(v => v.lang === 'zh-TW' && (v.name.includes('Neural') || v.name.includes('Premium') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Yating') || v.name.includes('Hsiao') || v.name.includes('Tingting') || v.name.includes('Hanhan') || v.name.includes('Mei-Jia'))) || window.availableVoices.find(v => v.lang === 'zh-TW');
+                if (preferredVoice) ut.voice = preferredVoice;
+            }
+            
+            ut.rate = 0.85;
+            ut.pitch = 1.0;
+            window.speechSynthesis.speak(ut);
+        };
+
+        window.speakEng = function(text) {
+            if (!text || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const ut = new SpeechSynthesisUtterance(window.getStr(text).trim());
+            ut.lang = 'en-US';
+            
+            if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
+            if (window.availableVoices && window.availableVoices.length > 0) {
+                const preferredVoice = window.availableVoices.find(v => v.lang.startsWith('en') && (v.name.includes('Neural') || v.name.includes('Premium') || v.name.includes('Natural') || v.name.includes('Google'))) || window.availableVoices.find(v => v.lang.startsWith('en-US')) || window.availableVoices.find(v => v.lang.startsWith('en'));
+                if (preferredVoice) ut.voice = preferredVoice;
+            }
+            ut.rate = 0.95;
+            window.speechSynthesis.speak(ut);
+        };
+
+        window.handleTranslate = async function() {
+            if (window.MAX_FREE_USES !== Infinity && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); 
+                window.togglePricingTable(); 
+                return; 
+            }
+            const word = document.getElementById('eng-input').value.trim();
+            if (!word) return;
+            
+            const pricingContainer = document.getElementById('pricing-section-container');
+            if (pricingContainer && !pricingContainer.classList.contains('hidden')) {
+                pricingContainer.classList.add('hidden');
+            }
+
+            document.getElementById('translate-loader').classList.remove('hidden');
+            
+            try {
+                let trans = "";
+                
+                if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
+                    const prompt = `Translate to Traditional Chinese (Taiwan). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text: "${word}"`;
+                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const result = await res.json();
+                    if (result.error) throw new Error(result.error.message);
+                    trans = result.candidates[0].content.parts[0].text;
+                } else {
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                    if (!res.ok) throw new Error("GTX API failed");
+                    const d = await res.json();
+                    if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
+                }
+
+                const finalStr = window.getStr(trans).trim().replace(/[「」""'']/g, '');
+                if (!finalStr) throw new Error("Empty translation");
+                
+                document.getElementById('zh-input').value = finalStr;
+                
+                if (window.MAX_FREE_USES !== Infinity) { 
+                    window.freeUsageCount++; 
+                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                    if(window.updateGlobalUI) window.updateGlobalUI(); 
+                }
+                
+                document.getElementById('split-btn').click();
+                window.speak(finalStr, finalStr);
+            } catch(e) { 
+                try {
+                    const res2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|zh-TW`);
+                    const d2 = await res2.json();
+                    if (d2 && d2.responseData && d2.responseData.translatedText) {
+                        const fbTrans = d2.responseData.translatedText.trim().replace(/[「」""'']/g, '');
+                        document.getElementById('zh-input').value = fbTrans;
+                        if (window.MAX_FREE_USES !== Infinity) { window.freeUsageCount++; localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); if(window.updateGlobalUI) window.updateGlobalUI(); }
+                        document.getElementById('split-btn').click();
+                        window.speak(fbTrans, fbTrans);
+                    } else { throw new Error("Fallback failed"); }
+                } catch(e2) {
+                    window.showToast("Translation Error / 翻譯伺服器連線失敗，請稍後再試", true); 
+                }
+            } finally { document.getElementById('translate-loader').classList.add('hidden'); }
+        };
+
+        window.handleSplit = function(e) {
+            const text = document.getElementById('zh-input').value.trim();
+            if (!text) return;
+            
+            const pricingContainer = document.getElementById('pricing-section-container');
+            if (pricingContainer && !pricingContainer.classList.contains('hidden')) {
+                pricingContainer.classList.add('hidden');
+            }
+            
+            if (e && e.isTrusted) {
+                if (window.MAX_FREE_USES !== Infinity && window.freeUsageCount >= window.MAX_FREE_USES) { 
+                    window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); 
+                    window.togglePricingTable();
+                    return; 
+                }
+                if (window.MAX_FREE_USES !== Infinity) { 
+                    window.freeUsageCount++; 
+                    localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
+                    if(window.updateGlobalUI) window.updateGlobalUI(); 
+                }
+            }
+
+            const container = document.getElementById('char-container'); container.innerHTML = '';
+            const guide = document.getElementById('click-char-guide');
+            const chars = text.split('');
+            let hasChar = false;
+            
+            chars.forEach(char => {
+                if (!/[\u4e00-\u9fa5]/.test(char)) return;
+                hasChar = true;
+                const btn = document.createElement('button');
+                btn.className = 'char-btn w-12 h-12 md:w-14 md:h-14 bg-white rounded-2xl shadow-sm border border-slate-200 text-xl font-bold flex items-center justify-center hover:border-emerald-500 transition-all';
+                btn.textContent = char;
+                btn.onclick = () => {
+                    window.currentTargetChar = char;
+                    document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('learning-dashboard').classList.remove('hidden');
+                    document.getElementById('current-learning-char').textContent = char;
+                    
+                    document.getElementById('hanzi-target').innerHTML = '';
+                    window.writerInstance = HanziWriter.create('hanzi-target', char, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
+                    
+                    if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
+                        if(window.executeAIFetch) window.executeAIFetch(char, text);
+                    } else {
+                        if(window.executeFallbackFetch) window.executeFallbackFetch(char);
+                    }
+                    window.scrollTo({ top: document.getElementById('learning-dashboard').offsetTop - 140, behavior: 'smooth' });
+                };
+                container.appendChild(btn);
+            });
+            
+            if (hasChar && guide) guide.classList.remove('hidden');
+            if (!hasChar && guide) guide.classList.add('hidden');
+            if (!hasChar) container.innerHTML = '<span class="text-slate-400 text-xs italic font-bold">No Chinese characters detected / 未偵測到繁體中文字。</span>';
+        };
+
+        window.handleAnimate = function() {
+            const svg = document.querySelector('#hanzi-target');
+            if (svg && window.currentTargetChar) {
+                svg.innerHTML = '';
+                window.writerInstance = HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
+                window.writerInstance.animateCharacter({
+                    onComplete: function() {
+                        window.speak(window.currentTargetChar, window.currentTargetChar); 
+                    }
+                });
+            }
+        };
+
+        window.handleQuiz = function() {
+            const svg = document.querySelector('#hanzi-target');
+            if (svg && window.currentTargetChar) {
+                svg.innerHTML = '';
+                window.writerInstance = HanziWriter.create('hanzi-target', window.currentTargetChar, { width: 200, height: 200, padding: 15, strokeColor: '#1e293b', radicalColor: '#ef4444' });
+                window.writerInstance.quiz({ 
+                    onComplete: () => {
+                        document.getElementById('quiz-status').textContent = 'Perfect!';
+                        window.speak(window.currentTargetChar, window.currentTargetChar); 
+                    } 
+                });
+            }
+        };
+
+        window.handleAIRetry = function() {
+            if (window.currentTargetChar) {
+                const text = document.getElementById('zh-input').value.trim();
+                if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
+                    if(window.executeAIFetch) window.executeAIFetch(window.currentTargetChar, text);
+                } else {
+                    if(window.executeFallbackFetch) window.executeFallbackFetch(window.currentTargetChar);
+                }
+            }
+        };
+
         window.fetchWithRetry = async function(url, options, maxRetries = 2) {
             const delays = [1000, 2000];
             for (let i = 0; i <= maxRetries; i++) {
@@ -1445,9 +2493,6 @@
                     if(data.words.length === 0) data.words.push(char + "字");
                     
                     const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
-                    const langCode = window.currentNativeLang || 'en';
-                    const langNameMap = {'en': 'English', 'ja': '日本語', 'ko': '한국어', 'th': 'ภาษาไทย', 'vi': 'Tiếng Việt', 'id': 'Bahasa Indonesia'};
-                    const displayLangName = langNameMap[langCode] || 'English';
                     
                     for (let idiom of idiomsArr) {
                         try {
@@ -1459,36 +2504,19 @@
                                     meaning = idiomData.heteronyms[0].definitions.map(d => d.def).join('；').replace(/<[^>]+>/g, '');
                                 }
                                 
-                                let translatedText = "Translation unavailable";
-                                try {
-                                    const queryText = `Idiom: ${idiom}. Explanation: ${meaning}`;
-                                    // STRICTLY NO RETRY for Google Free Tier to avoid Concurrency Storms
-                                    const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${langCode}&dt=t&q=${encodeURIComponent(queryText)}`);
-                                    if(gtRes.ok) {
-                                        const gtData = await gtRes.json();
-                                        translatedText = gtData[0].map(item => item[0]).join('');
-                                    } else { throw new Error("GTX Fail"); }
-                                } catch(e1) {
-                                    try {
-                                        const mmRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(meaning)}&langpair=zh-TW|${langCode}`);
-                                        const mmData = await mmRes.json();
-                                        if (mmData && mmData.responseData && mmData.responseData.translatedText && !mmData.responseData.translatedText.includes("MYMEMORY WARNING")) {
-                                            translatedText = mmData.responseData.translatedText;
-                                        }
-                                    } catch(e2) {
-                                        // Fail silent
-                                    }
-                                }
+                                const queryText = `Idiom: ${idiom}. Explanation: ${meaning}`;
+                                const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q=${encodeURIComponent(queryText)}`);
+                                const gtData = await gtRes.json();
+                                let enTrans = gtData[0].map(item => item[0]).join('');
                                 
                                 data.idioms.push({ 
                                     idiom: idiom, 
                                     meaning: "📜 " + meaning, 
-                                    translation: translatedText,
-                                    targetLang: displayLangName
+                                    english: enTrans 
                                 });
                             }
                         } catch(e) {
-                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典暫無此詞詳解", translation: "Translation unavailable", targetLang: displayLangName });
+                            data.idioms.push({ idiom: idiom, meaning: "⚠️ 基礎靜態字典暫無此詞詳解", english: "Translation unavailable" });
                         }
                     }
                 }
@@ -1522,8 +2550,8 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-rocket-launch text-3xl animate-bounce"></i></div>
                             <div>
-                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Translation Mode / 目前為「基礎字面機翻模式」</h4>
-                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">Upgrade to VIP and enable the AI Engine to unlock "Deep Cultural Context" and "Context-Aware Polyphonic Pronunciation".<br>升級 VIP 並啟用 AI 引擎，即可解鎖「深度文化語境解析」與「上下文自動破音字判斷」。<br><br>Example: The character "重" sounds completely different in "舉足輕重" vs "重逢", which static dictionaries cannot detect!<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態機翻字典無法判斷！</p>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">Upgrade to VIP and enable the AI Engine to unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>升級 VIP 並啟用 AI 引擎，即可解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。<br><br>Example: The character "重" sounds completely different in "舉足輕重" vs "重逢", which static dictionaries cannot detect!<br>例如：「重」字在「舉足輕重」與「重逢」的發音完全不同，靜態字典無法判斷！</p>
                                 <button type="button" onclick="window.scrollToAuth()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">View VIP Plans / 查看 VIP 升級方案</button>
                             </div>
                         </div>
@@ -1533,8 +2561,8 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-indigo-500"><i class="ph-fill ph-magic-wand text-3xl animate-bounce"></i></div>
                             <div>
-                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Translation Mode / 目前為「基礎字面機翻模式」</h4>
-                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">You are a VIP! Simply bind a free Google API Key to activate the AI brain!<br>您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br><br>Unlock "Deep Cultural Context Translation" and "Bilingual Idiom Explanations".<br>解鎖「深度文化語境意譯」與「上下文自動破音字判斷」。</p>
+                                <h4 class="text-base font-black text-indigo-900 mb-1 tracking-tight">Basic Dictionary Mode / 目前為「基礎靜態字典模式」</h4>
+                                <p class="text-xs text-indigo-700 font-bold leading-relaxed mb-4">You are a VIP! Simply bind a free Google API Key to activate the AI brain!<br>您已是 VIP，只要免費綁定 Google API 金鑰，即可啟動 AI 智慧大腦！<br><br>Unlock "Context-Aware Polyphonic Pronunciation" and "Bilingual Idiom Explanations".<br>解鎖「上下文自動破音字判斷」與「中英雙語成語詳解」。</p>
                                 <button type="button" onclick="window.openProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">Bind Free Key / 綁定免費金鑰啟動 AI</button>
                             </div>
                         </div>
@@ -1572,10 +2600,6 @@
 
                 const modelNames = ["gemini-2.0-flash", "gemini-1.5-flash"];
                 
-                const langCode = window.currentNativeLang || 'en';
-                const langMap = {'en': 'English', 'ja': 'Japanese', 'ko': 'Korean', 'th': 'Thai', 'vi': 'Vietnamese', 'id': 'Indonesian'};
-                const targetLang = langMap[langCode] || 'English';
-                
                 let success = false;
                 let modelErrors = [];
                 
@@ -1587,8 +2611,8 @@
 3. strokes: 該字的總筆畫數 (僅需數字)。
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。
-6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；translation 請針對前述的中文解析，進行全【${targetLang}】的翻譯與意譯，並需包含該成語背後的文化語境（Translate the detailed Chinese meaning into ${targetLang} comprehensively with deep cultural context）。
-格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "translation": "${targetLang}"}]}`;
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請針對前述的中文解析，進行全英文翻譯與解析（Translate the detailed Chinese meaning into English comprehensively）。
+格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
                         
                         const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1601,13 +2625,6 @@
                         const matchResult = rawText.match(/\{[\s\S]*\}/);
                         if (!matchResult) throw new Error("Invalid AI format");
                         const data = JSON.parse(matchResult[0]);
-                        
-                        const langNameMap = {'en': 'English', 'ja': '日本語', 'ko': '한국어', 'th': 'ภาษาไทย', 'vi': 'Tiếng Việt', 'id': 'Bahasa Indonesia'};
-                        if (data.idioms && Array.isArray(data.idioms)) {
-                            data.idioms.forEach(i => {
-                                i.targetLang = langNameMap[langCode] || 'English';
-                            });
-                        }
                         
                         window.charCache[char] = data; 
                         window.renderResult(char, data);
@@ -1693,14 +2710,7 @@
             const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
             
             if (validIdioms.length > 0) {
-                idiomsCont.innerHTML = validIdioms.map(i => {
-                    const isAITranslation = window.hasValidApiKey() && (window.isVIP || window.isAdmin);
-                    const displayLangName = i.targetLang || 'English';
-                    const transLabel = isAITranslation ? `<span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">${displayLangName} / AI 文化意譯：</span>` : `<span class="text-xs text-slate-400 uppercase tracking-widest font-black italic flex items-center gap-1"><i class="ph-fill ph-lock-key"></i> ${displayLangName} / 機翻：</span>`;
-                    const transColor = isAITranslation ? `text-indigo-500 font-bold` : `text-slate-500 font-medium`;
-                    const translatedText = window.getStr(i.translation || i.english);
-
-                    return `
+                idiomsCont.innerHTML = validIdioms.map(i => `
                     <div class="p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] text-sm font-bold shadow-sm text-left hover:shadow-md transition-all relative group">
                         <div class="flex-1 pr-16">
                             <div class="text-slate-950 text-2xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-3 inline-block">${window.getStr(i.idiom)}</div>
@@ -1715,15 +2725,15 @@
                             
                             <div class="mt-4 border-t pt-3 border-slate-100 flex flex-col items-start gap-2">
                                 <div class="flex items-center gap-2">
-                                    ${transLabel}
-                                    <button type="button" data-action="speak-native" data-text="${translatedText.replace(/'/g, "\\'")}" class="${isAITranslation ? 'text-indigo-300 hover:text-indigo-500' : 'text-slate-300 hover:text-slate-500'} transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                    <span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">English / 意譯：</span>
+                                    <button type="button" data-action="speak-eng" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
-                                <div class="text-[13px] ${transColor} tracking-wide opacity-90 leading-relaxed">${translatedText || "Translation loading..."}</div>
+                                <div class="text-[13px] text-indigo-500 font-bold tracking-wide opacity-90 leading-relaxed">${window.getStr(i.english) || "Translation loading..."}</div>
                             </div>
                         </div>
                         <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="absolute top-8 right-8 w-12 h-12 bg-emerald-500 text-white rounded-[1.25rem] shadow-lg transition-transform group-hover:scale-110 active:scale-90 flex items-center justify-center" title="播放成語"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
                     </div>
-                `}).join('');
+                `).join('');
             } else {
                 idiomsCont.innerHTML = `<div class="p-10 text-center text-slate-400 italic font-bold">目前無相關成語紀錄。</div>`;
             }
@@ -1734,6 +2744,7 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 const statsRef = doc(db, "artifacts", appId, "public", "data", "system_stats", "visits");
                 
+                // Read local storage to ensure numbers change INSTANTLY on frontend
                 let localTotal = parseInt(localStorage.getItem('abra_local_total') || '1520', 10);
                 let localToday = parseInt(localStorage.getItem('abra_local_today') || '42', 10);
                 let localDate = localStorage.getItem('abra_local_date');
@@ -1743,6 +2754,7 @@
                     localStorage.setItem('abra_local_date', todayStr);
                 }
 
+                // Incremental visual boost
                 localTotal++;
                 localToday++;
                 localStorage.setItem('abra_local_total', localTotal.toString());
@@ -1793,15 +2805,10 @@
             else if (action === 'admin-msg') window.openAdminMsgModal(actionEl.getAttribute('data-id'));
             else if (action === 'chat-del') window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
             else if (action === 'speak') window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
-            else if (action === 'speak-native') window.speakNative(actionEl.getAttribute('data-text'));
+            else if (action === 'speak-eng') window.speakEng(actionEl.getAttribute('data-text'));
         });
 
         window.onload = function() {
-            const langSelector = document.getElementById('native-lang-selector');
-            if(langSelector) {
-                langSelector.value = window.currentNativeLang;
-            }
-            
             const vipContent = document.getElementById('vip-only-content');
             if (vipContent && !document.getElementById('radical-display')) {
                 const headerDiv = document.createElement('div');

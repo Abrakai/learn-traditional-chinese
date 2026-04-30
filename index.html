@@ -6,15 +6,16 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.7.24-B2B-PROMO-MANAGEMENT"
+    version: "6.9.0-MULTILINGUAL-SYNC"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Fluid Typography, Metrics & Promo Tracking"
+    description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Admin UI: Added 'Remark' field and column to Promo Codes Manager for B2B tracking."
-      - "Admin UI: Added 'EDIT' action to modify existing Promo Codes without recreating."
-      - "Admin UI: Implemented One-Click cross-filtering. Clicking User count in modal auto-filters main table."
-      - "Search: Upgraded main Admin search bar to explicitly support filtering by Promo Codes."
+      - "UI: Auth forms hidden by default. Added Login/Signup button in Header for guest experience first."
+      - "Feature: Multi-language selector added to Section 1."
+      - "Feature: Bidirectional translate. Decompose Chinese synchronously translates back to selected native language."
+      - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
+      - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -123,6 +124,11 @@
                     <i class="ph-fill ph-crown text-sm sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
+                <!-- NEW Login / Signup Toggle Button -->
+                <button type="button" id="login-signup-btn" title="Login / 登入註冊" class="text-[9px] md:text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-sm font-bold whitespace-nowrap" onclick="window.toggleMemberSection()">
+                    <i class="ph-bold ph-user-plus text-lg sm:text-base"></i> <span class="hidden md:inline">Sign In / 登入</span>
+                </button>
+
                 <button type="button" id="msg-btn" title="Inbox / 訊息中心" class="hidden relative text-[9px] md:text-xs bg-transparent hover:bg-white/10 border border-white/40 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-sm font-bold backdrop-blur-sm whitespace-nowrap" onclick="window.handleMsgBtnClick()">
                     <i class="ph-fill ph-envelope-simple text-lg sm:text-base"></i> <span class="hidden md:inline">Inbox</span>
                     <span id="msg-dot" class="hidden absolute -top-1 -right-1 flex h-2 w-2 md:h-3 md:w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-yellow-500 border border-red-600"></span></span>
@@ -139,7 +145,8 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
         
-        <section id="member-center-section" class="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
+        <!-- Auth Section - Hidden by default for Guest flow -->
+        <section id="member-center-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
                 <span id="auth-status-msg" class="text-[9px] text-emerald-400 font-bold italic uppercase tracking-widest animate-pulse">Initializing...</span>
@@ -226,7 +233,6 @@
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
                 <div class="relative w-full max-w-md">
                     <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                    <!-- 🌐 更新搜尋框提示字眼 -->
                     <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone, Promo Code... / 搜尋信箱、姓名、手機、邀請碼" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
                 </div>
             </div>
@@ -252,27 +258,43 @@
 
         <!-- Translation Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
-            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate / 英翻中</h2></div>
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT / 免費額度</div>
+            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Smart Translation / 雙向智能翻譯</h2></div>
+            
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="flex-1">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Select Target Native Language / 選擇您的母語</label>
+                    <select id="target-lang-select" class="w-full md:w-auto px-6 py-3.5 rounded-2xl border-2 border-slate-100 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold cursor-pointer">
+                        <option value="en" data-name="English">English / 英文</option>
+                        <option value="ja" data-name="Japanese">日本語 / 日文</option>
+                        <option value="ko" data-name="Korean">한국어 / 韓文</option>
+                        <option value="th" data-name="Thai">ไทย / 泰文</option>
+                        <option value="vi" data-name="Vietnamese">Tiếng Việt / 越文</option>
+                        <option value="id" data-name="Indonesian">Bahasa Indonesia / 印尼文</option>
+                        <option value="ms" data-name="Malay">Bahasa Melayu / 馬來文</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative flex items-center group">
-                    <input type="text" id="eng-input" placeholder="Type English keyword... (e.g. Apple) / 輸入英文單字" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
-                    <button type="button" onclick="window.speakEng(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
+                    <input type="text" id="eng-input" placeholder="Type native language... / 輸入您的母語" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
+                    <button type="button" onclick="window.speakTargetLang(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen / 聆聽發音"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
-                <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-blue-900 text-sm"><span>Execute / 翻譯</span><div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div></button>
+                <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-blue-900 text-sm"><span>Translate / 翻譯為中文</span><div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div></button>
             </div>
         </section>
 
         <!-- Writing Setup Module -->
         <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT</div>
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT / 免費額度</div>
             <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
             <div class="flex flex-col md:flex-row gap-4 mb-6">
                 <div class="flex-1 relative flex items-center group">
                     <input type="text" id="zh-input" placeholder="Paste Chinese text here... / 貼上繁體中文內容" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-2xl focus:outline-none focus:border-emerald-500 shadow-inner bg-slate-50 focus:bg-white font-black">
-                    <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
+                    <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-2xl" title="Listen / 聆聽發音"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
-                <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-emerald-900 text-sm">Split / 進行拆字</button>
+                <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-emerald-900 text-sm">Decompose / 進行拆字</button>
             </div>
             <div id="click-char-guide" class="hidden mb-4 text-center text-sm font-black text-indigo-600 animate-pulse flex items-center justify-center gap-2 tracking-widest uppercase"><i class="ph-fill ph-hand-pointing text-xl"></i> Select a character for deep analysis / 點擊下方單字啟動解析</div>
             <div id="char-container" class="flex flex-wrap gap-4 p-6 bg-slate-50 rounded-3xl min-h-[120px] border-2 border-slate-100 items-center justify-center shadow-inner">
@@ -595,7 +617,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.7.24-B2B-PROMO-MANAGEMENT</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.9.0-MULTILINGUAL-SYNC</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -671,7 +693,6 @@
         
         window.closePromoModal = () => document.getElementById('promo-manager-modal').classList.add('hidden');
 
-        // 📝 編輯與載入邀請碼
         window.editPromoCode = function(code) {
             const p = window.promoCodesData[code];
             if(!p) return;
@@ -684,7 +705,6 @@
             window.showToast(`編輯模式：正在修改邀請碼 ${code}`);
         };
 
-        // 🔍 一鍵反向過濾功能
         window.filterByPromo = function(code) {
             window.closePromoModal();
             const searchInput = document.getElementById('admin-search-input');
@@ -837,6 +857,16 @@
         window.openLegalModal = () => document.getElementById('legal-modal').classList.remove('hidden');
         window.closeLegalModal = () => document.getElementById('legal-modal').classList.add('hidden');
         window.closeProfileModal = () => document.getElementById('profile-modal').classList.add('hidden');
+        
+        window.toggleMemberSection = function() {
+            const sec = document.getElementById('member-center-section');
+            if (sec) {
+                sec.classList.toggle('hidden');
+                if (!sec.classList.contains('hidden')) {
+                    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        };
 
         window.openProfileModal = async function() {
             const emailId = localStorage.getItem('abra_vip_code');
@@ -930,11 +960,11 @@
                 pBtn: document.getElementById('profile-btn'), logoutBtn: document.getElementById('logout-btn'), mBtn: document.getElementById('msg-btn'),
                 memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
                 qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
-                headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container')
+                headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container'),
+                loginSignupBtn: document.getElementById('login-signup-btn')
             };
 
             if(els.adminSection) els.adminSection.classList.add('hidden');
-            if(els.memberSection) els.memberSection.classList.remove('hidden');
             if(els.pBtn) els.pBtn.classList.add('hidden');
             if(els.mBtn) els.mBtn.classList.add('hidden');
             if(els.logoutBtn) els.logoutBtn.classList.add('hidden');
@@ -960,18 +990,20 @@
 
             if (window.isAdmin) {
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
+                if(els.loginSignupBtn) els.loginSignupBtn.classList.add('hidden');
+                if(els.memberSection) els.memberSection.classList.add('hidden');
                 if(els.vBadge) {
                     els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">Admin</span>';
                     els.vBadge.className = "hidden bg-slate-800 text-emerald-400 p-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1 animate-in zoom-in whitespace-nowrap ml-0.5 md:ml-1";
                     els.vBadge.classList.remove('hidden');
                 }
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; }
-                if(els.memberSection) els.memberSection.classList.add('hidden');
                 if(els.adminSection) els.adminSection.classList.remove('hidden');
                 if(typeof window.loadAdminMembers === 'function') window.loadAdminMembers();
 
             } else if (emailCode) {
                 if(els.memberSection) els.memberSection.classList.add('hidden');
+                if(els.loginSignupBtn) els.loginSignupBtn.classList.add('hidden');
                 if(els.pBtn) els.pBtn.classList.remove('hidden');
                 if(els.mBtn) els.mBtn.classList.remove('hidden');
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; } 
@@ -1012,6 +1044,7 @@
                     els.qCount.textContent = currentLimit === '∞' ? '∞' : `${Math.max(0, currentLimit - window.freeUsageCount)}/${currentLimit}`;
                 }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
+                if(els.loginSignupBtn) { els.loginSignupBtn.classList.remove('hidden'); els.loginSignupBtn.style.display = 'flex'; }
                 if(els.headerPricingBtn) {
                     els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
                     els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
@@ -2195,13 +2228,47 @@
             }
         };
 
-        // --- 8. 雙軌制翻譯、語音與拆字引擎 (AI + Moedict) ---
+        // --- 8. 雙向翻譯聯動引擎 (Bidirectional Translation Engine) ---
         
+        window.handleReverseTranslate = async function(text) {
+            if(!text) return;
+            const engInput = document.getElementById('eng-input');
+            const selectEl = document.getElementById('target-lang-select');
+            const targetLangCode = selectEl ? selectEl.value : 'en';
+            const targetLangName = selectEl && selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].getAttribute('data-name') : 'English';
+            
+            if(engInput) engInput.value = "Translating... / 同步反向翻譯中...";
+            try {
+                if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
+                    const prompt = `Translate the following Traditional Chinese text to ${targetLangName}. Output ONLY the exact translated string. NO explanations, NO quotes, NO extra words. Text: "${text}"`;
+                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const result = await res.json();
+                    if (result.error) throw new Error(result.error.message);
+                    if(engInput) engInput.value = window.getStr(result.candidates[0].content.parts[0].text).trim().replace(/[「」""'']/g, '');
+                } else {
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(text)}`);
+                    if (!res.ok) throw new Error("GTX API failed");
+                    const d = await res.json();
+                    if (d && d[0] && engInput) {
+                        engInput.value = window.getStr(d[0].map(item => item[0]).join('')).trim().replace(/[「」""'']/g, '');
+                    }
+                }
+            } catch (e) {
+                console.error("Reverse Translation Error:", e);
+                if(engInput) engInput.value = "Translation Failed / 翻譯失敗";
+            }
+        };
+
+        // --- 9. 語音播報優化引擎 (Voice Engine Optimization) ---
         window.speak = function(text, fallbackChar = null) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            let cleanText = window.getStr(text).replace(/[\/\-_|()]/g, '，'); 
+            // Lookbehind Regex 處理：若符號前後都是數字（數學算式），則不替換，使其唸出；否則替換為全形逗號產生自然停頓
+            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
             
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
@@ -2237,14 +2304,23 @@
         };
 
         window.speakEng = function(text) {
+            window.speakTargetLang(text);
+        };
+        
+        window.speakTargetLang = function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            const ut = new SpeechSynthesisUtterance(window.getStr(text).trim());
-            ut.lang = 'en-US';
+            
+            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
+            const ut = new SpeechSynthesisUtterance(cleanText.trim());
+            
+            const selectEl = document.getElementById('target-lang-select');
+            const targetLangCode = selectEl ? selectEl.value : 'en';
+            ut.lang = targetLangCode;
             
             if (!window.availableVoices || window.availableVoices.length === 0) window.loadVoices();
             if (window.availableVoices && window.availableVoices.length > 0) {
-                const preferredVoice = window.availableVoices.find(v => v.lang.startsWith('en') && (v.name.includes('Neural') || v.name.includes('Premium') || v.name.includes('Natural') || v.name.includes('Google'))) || window.availableVoices.find(v => v.lang.startsWith('en-US')) || window.availableVoices.find(v => v.lang.startsWith('en'));
+                const preferredVoice = window.availableVoices.find(v => v.lang.startsWith(targetLangCode) && (v.name.includes('Neural') || v.name.includes('Premium') || v.name.includes('Natural') || v.name.includes('Google'))) || window.availableVoices.find(v => v.lang.startsWith(targetLangCode));
                 if (preferredVoice) ut.voice = preferredVoice;
             }
             ut.rate = 0.95;
@@ -2317,7 +2393,7 @@
         };
 
         window.handleSplit = function(e) {
-            const text = document.getElementById('zh-input').value.trim();
+            const text = window.getStr(document.getElementById('zh-input').value);
             if (!text) return;
             
             const pricingContainer = document.getElementById('pricing-section-container');
@@ -2325,6 +2401,7 @@
                 pricingContainer.classList.add('hidden');
             }
             
+            // 如果是真人點擊（非 Translate 函數內的自動 click 連動），則執行同步反向翻譯
             if (e && e.isTrusted) {
                 if (window.MAX_FREE_USES !== Infinity && window.freeUsageCount >= window.MAX_FREE_USES) { 
                     window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); 
@@ -2336,6 +2413,8 @@
                     localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
+                // 同步反向翻譯回母語至第一區塊
+                window.handleReverseTranslate(text);
             }
 
             const container = document.getElementById('char-container'); container.innerHTML = '';
@@ -2603,6 +2682,9 @@
                 let success = false;
                 let modelErrors = [];
                 
+                const selectEl = document.getElementById('target-lang-select');
+                const targetLangName = selectEl && selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].getAttribute('data-name') : 'English';
+                
                 for (const model of modelNames) {
                     try {
                         const prompt = `請以台灣教育部辭典標準，根據原文本上下文「${contextText}」，嚴格解析其中的繁體中文字「${char}」並輸出 JSON。
@@ -2611,8 +2693,8 @@
 3. strokes: 該字的總筆畫數 (僅需數字)。
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。
-6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請針對前述的中文解析，進行全英文翻譯與解析（Translate the detailed Chinese meaning into English comprehensively）。
-格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "English"}]}`;
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；english 請針對前述的中文解析，進行全${targetLangName}翻譯與解析（Translate the detailed Chinese meaning into ${targetLangName} comprehensively）。
+格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "english": "${targetLangName} Translation"}]}`;
                         
                         const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2725,8 +2807,8 @@
                             
                             <div class="mt-4 border-t pt-3 border-slate-100 flex flex-col items-start gap-2">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">English / 意譯：</span>
-                                    <button type="button" data-action="speak-eng" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                    <span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">Translation / 母語解析：</span>
+                                    <button type="button" data-action="speak-target" data-text="${window.getStr(i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
                                 </div>
                                 <div class="text-[13px] text-indigo-500 font-bold tracking-wide opacity-90 leading-relaxed">${window.getStr(i.english) || "Translation loading..."}</div>
                             </div>
@@ -2744,7 +2826,6 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 const statsRef = doc(db, "artifacts", appId, "public", "data", "system_stats", "visits");
                 
-                // Read local storage to ensure numbers change INSTANTLY on frontend
                 let localTotal = parseInt(localStorage.getItem('abra_local_total') || '1520', 10);
                 let localToday = parseInt(localStorage.getItem('abra_local_today') || '42', 10);
                 let localDate = localStorage.getItem('abra_local_date');
@@ -2754,7 +2835,6 @@
                     localStorage.setItem('abra_local_date', todayStr);
                 }
 
-                // Incremental visual boost
                 localTotal++;
                 localToday++;
                 localStorage.setItem('abra_local_total', localTotal.toString());
@@ -2805,7 +2885,7 @@
             else if (action === 'admin-msg') window.openAdminMsgModal(actionEl.getAttribute('data-id'));
             else if (action === 'chat-del') window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
             else if (action === 'speak') window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
-            else if (action === 'speak-eng') window.speakEng(actionEl.getAttribute('data-text'));
+            else if (action === 'speak-target' || action === 'speak-eng') window.speakTargetLang(actionEl.getAttribute('data-text'));
         });
 
         window.onload = function() {

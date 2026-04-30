@@ -6,19 +6,19 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.3-PAYMENT-COMPLIANCE"
+    version: "6.9.4-NEWEBPAY-COMPLIANCE"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
       - "UI: Auth forms hidden by default. Added Login/Signup button in Header for guest experience first."
       - "Feature: Multi-language selector added to Section 1."
-      - "Feature: Bidirectional translate. Decompose Chinese synchronously translates back to selected native language."
+      - "Feature: Bidirectional translate with robust API fallback. Decompose Chinese synchronously translates back to native language."
       - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
       - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
-      - "Fix: Idiom translation JSON key updated to 'translation' to force AI context compliance."
-      - "Fix: Handle Translate & Reverse Translate now use full model rotation AND graceful fallback to GTX."
-      - "Compliance: Rewrote Legal Modal to explicitly include Refund Policy and Terms of Service for NewebPay audit."
+      - "Fix: Translate & Reverse Translate now strictly fallback to GTX when API limits are reached to prevent 'Translation Failed'."
+      - "Compliance: Added 'Terms of Service' and 'Refund Policy' directly to pricing section and Legal Modal to pass NewebPay audit."
+      - "Enhancement: Payment sections (USD/TWD) are now collapsible accordions for cleaner UI."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -604,6 +604,12 @@
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
             <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Legal / 隱私政策與服務條款</h3>
+            
+            <div class="bg-yellow-50 text-yellow-800 p-5 rounded-xl border border-yellow-200 mb-8 text-xs font-bold leading-relaxed shadow-sm">
+                本網站僅提供繁體中文字，單字書寫教學、注音、破音字、詞彙、成語解析等服務。<br>
+                至於成為VIP會員後可以搭配AI成語解析與翻譯，所需使用的API Key Token使用量與計費，請與Google API Studio廠商聯繫購買與續約。AI費用與本網站服務產品無關。
+            </div>
+
             <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
                 <section class="border-l-4 border-slate-200 pl-6">
                     <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Consumer Rights & Refund / 消費者權益與退款政策</h4>
@@ -624,7 +630,7 @@
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.9.3-PAYMENT-COMPLIANCE</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.9.4-NEWEBPAY-COMPLIANCE</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -1106,98 +1112,111 @@
                     <div class="text-left space-y-3 w-full">
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-2">${window.getStr(title)}</h3>
                         ${prefixDesc}
-                        <div class="border-b border-slate-100 pb-3 pt-4"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與翻譯。</span></p></div>
+                        
+                        <div class="mt-4 p-5 bg-slate-50 border-2 border-slate-200 rounded-2xl">
+                            <h4 class="font-black text-slate-800 text-sm mb-2 flex items-center gap-1.5"><i class="ph-fill ph-file-text text-indigo-500"></i> 服務項目與會員權利 (Terms of Service)</h4>
+                            <ul class="text-[11px] text-slate-600 leading-relaxed font-bold space-y-2 list-disc pl-4">
+                                <li><span class="text-slate-800">服務項目：</span>本網站僅提供繁體中文字單字書寫教學、注音、破音字、詞彙、成語解析等服務。</li>
+                                <li><span class="text-slate-800">免責聲明：</span>成為 VIP 會員後，可自備 API 金鑰搭配 AI 進行深度解析與翻譯。所需使用的 API Key Token 使用量與計費，請與 Google AI Studio 聯繫購買與續約。AI 費用與本網站服務產品無關。</li>
+                                <li><span class="text-slate-800">退費說明：</span>本平台為數位內容服務，依消保法規定，虛擬商品及服務一經開通，即不適用七天鑑賞期，概不接受退款。</li>
+                            </ul>
+                        </div>
+
+                        <div class="border-b border-slate-100 pb-3 pt-6"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與翻譯。</span></p></div>
                         <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">英翻中、中文拆字書寫教學與練習。</span></span></p>
                             <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
                         </div>
                         
                         <div class="pt-6">
-                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph-fill ph-globe text-base"></i> 🌐 國際美金刷卡區 (USD)</h4>
-                            <div class="space-y-3">
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-slate-800">1-Month Pass / 單月通行證</span> 
-                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">$6 USD</span>
-                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（美金 6 元產品費用 ＋ 海外交易手續費）</span>
+                            <details class="group bg-slate-50 rounded-2xl border-2 border-slate-200 mb-4 overflow-hidden transition-all duration-300">
+                                <summary class="px-5 py-4 font-black text-slate-700 cursor-pointer flex items-center justify-between hover:bg-slate-100 transition-colors select-none">
+                                    <div class="flex items-center gap-2 text-sm"><i class="ph-fill ph-globe text-lg text-indigo-500"></i> 🌐 國際美金刷卡區 (USD)</div>
+                                    <i class="ph-bold ph-caret-down group-open:rotate-180 transition-transform"></i>
+                                </summary>
+                                <div class="p-5 border-t-2 border-slate-200 bg-white space-y-3">
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-bold text-sm block text-slate-800">1-Month Pass / 單月通行證</span> 
+                                            <span class="text-sm text-indigo-600 font-black block mt-1.5">$6 USD</span>
+                                            <span class="text-[10px] text-slate-500 font-medium block mt-1">（美金 6 元產品費用 ＋ 海外交易手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleGumroadCheckout('aqlhnu', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('aqlhnu', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
-                                </div>
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
-                                    <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">SMART</div>
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-indigo-900">3-Month Pass / 季繳通行證</span> 
-                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">$15 USD</span>
-                                        <span class="text-[10px] text-indigo-700 font-medium block mt-1">（美金 15 元產品費用 ＋ 海外交易手續費）</span>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
+                                        <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">SMART</div>
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-bold text-sm block text-indigo-900">3-Month Pass / 季繳通行證</span> 
+                                            <span class="text-sm text-indigo-600 font-black block mt-1.5">$15 USD</span>
+                                            <span class="text-[10px] text-indigo-700 font-medium block mt-1">（美金 15 元產品費用 ＋ 海外交易手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleGumroadCheckout('iodgg', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('iodgg', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
-                                </div>
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-slate-800">6-Month Pass / 半年通行證</span> 
-                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">$25 USD</span>
-                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（美金 25 元產品費用 ＋ 海外交易手續費）</span>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-bold text-sm block text-slate-800">6-Month Pass / 半年通行證</span> 
+                                            <span class="text-sm text-indigo-600 font-black block mt-1.5">$25 USD</span>
+                                            <span class="text-[10px] text-slate-500 font-medium block mt-1">（美金 25 元產品費用 ＋ 海外交易手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleGumroadCheckout('njgrhb', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('njgrhb', this)" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> Pay Now</button>
-                                </div>
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 1-Year Pass / 年度通行證</span> 
-                                        <span class="text-base text-red-600 font-black block mt-1.5">$40 USD</span>
-                                        <span class="text-[10px] text-yellow-800 font-medium block mt-1">（美金 40 元產品費用 ＋ 海外交易手續費）</span>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 1-Year Pass / 年度通行證</span> 
+                                            <span class="text-base text-red-600 font-black block mt-1.5">$40 USD</span>
+                                            <span class="text-[10px] text-yellow-800 font-medium block mt-1">（美金 40 元產品費用 ＋ 海外交易手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleGumroadCheckout('qskre', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
                                     </div>
-                                    <button type="button" onclick="window.handleGumroadCheckout('qskre', this)" class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-red-900 px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-yellow-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> Subscribe</button>
                                 </div>
-                            </div>
-                        </div>
+                            </details>
 
-                        <div class="pt-8">
-                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-credit-card text-base"></i> 🇹🇼 台灣台幣刷卡區 (藍新 NewebPay 全自動)</h4>
-                            <div class="space-y-3">
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-slate-800">尊榮單月通行證 (1-Month)</span> 
-                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 180</span>
-                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                            <details class="group bg-slate-50 rounded-2xl border-2 border-slate-200 mb-4 overflow-hidden transition-all duration-300" open>
+                                <summary class="px-5 py-4 font-black text-slate-700 cursor-pointer flex items-center justify-between hover:bg-slate-100 transition-colors select-none">
+                                    <div class="flex items-center gap-2 text-sm"><i class="ph-fill ph-credit-card text-lg text-emerald-500"></i> 🇹🇼 台灣台幣刷卡區 (藍新 NewebPay 全自動)</div>
+                                    <i class="ph-bold ph-caret-down group-open:rotate-180 transition-transform"></i>
+                                </summary>
+                                <div class="p-5 border-t-2 border-slate-200 bg-white space-y-3">
+                                    <div class="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-start gap-2 shadow-sm">
+                                        <i class="ph-fill ph-info text-blue-500 mt-0.5 text-lg flex-shrink-0"></i>
+                                        <p class="text-[11px] text-blue-800 font-bold leading-relaxed">
+                                            付款後，請將繳費收據證明與您註冊的帳號與 Email，拍照傳給官方 LINE OA。我們會盡快幫您進行開通服務。
+                                        </p>
                                     </div>
-                                    <button type="button" onclick="window.handleNewebPayCheckout(1, 180, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
-                                </div>
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
-                                    <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">首選</div>
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-indigo-900">尊榮季繳通行證 (3-Month)</span> 
-                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 450</span>
-                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-bold text-sm block text-slate-800">尊榮單月通行證 (1-Month)</span> 
+                                            <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 180</span>
+                                            <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleNewebPayCheckout(1, 180, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
                                     </div>
-                                    <button type="button" onclick="window.handleNewebPayCheckout(3, 450, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
-                                </div>
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-bold text-sm block text-slate-800">尊榮半年通行證 (6-Month)</span> 
-                                        <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 750</span>
-                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-200 gap-3 relative overflow-hidden shadow-sm scale-[1.01]">
+                                        <div class="absolute -right-5 top-2 bg-indigo-500 text-white text-[8px] font-black px-6 py-0.5 rotate-45">首選</div>
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-bold text-sm block text-indigo-900">尊榮季繳通行證 (3-Month)</span> 
+                                            <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 450</span>
+                                            <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleNewebPayCheckout(3, 450, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
                                     </div>
-                                    <button type="button" onclick="window.handleNewebPayCheckout(6, 750, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
-                                </div>
-                                <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
-                                    <div class="flex-1 text-center sm:text-left">
-                                        <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 尊榮年度通行證 (1-Year)</span> 
-                                        <span class="text-base text-red-600 font-black block mt-1.5">NT$ 1200</span>
-                                        <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100 gap-3 hover:shadow-md transition-shadow">
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-bold text-sm block text-slate-800">尊榮半年通行證 (6-Month)</span> 
+                                            <span class="text-sm text-indigo-600 font-black block mt-1.5">NT$ 750</span>
+                                            <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleNewebPayCheckout(6, 750, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="ph-bold ph-credit-card"></i> 台幣結帳</button>
                                     </div>
-                                    <button type="button" onclick="window.handleNewebPayCheckout(12, 1200, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> 升級年度 VIP</button>
+                                    <div class="flex flex-col sm:flex-row justify-between items-center bg-yellow-50 p-4 rounded-xl border border-yellow-300 shadow-md gap-3 scale-[1.02]">
+                                        <div class="flex-1 text-center sm:text-left">
+                                            <span class="font-black text-sm block text-yellow-900 flex items-center justify-center sm:justify-start gap-1"><i class="ph-fill ph-star"></i> 尊榮年度通行證 (1-Year)</span> 
+                                            <span class="text-base text-red-600 font-black block mt-1.5">NT$ 1200</span>
+                                            <span class="text-[10px] text-slate-500 font-medium block mt-1">（台灣在地金流，免收海外刷卡手續費）</span>
+                                        </div>
+                                        <button type="button" onclick="window.handleNewebPayCheckout(12, 1200, this)" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-xs font-black shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-500 uppercase tracking-widest"><i class="ph-bold ph-credit-card"></i> 升級年度 VIP</button>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="pt-8 border-t border-slate-100 mt-6">
-                            <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph-fill ph-bank text-base"></i> 🏦 現金匯款 (免除海外手續費 / 人工開通)</h4>
-                            <div class="p-4 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center gap-4 shadow-inner text-center sm:text-left">
-                                <div class="w-14 h-14 bg-slate-400 rounded-full hidden sm:flex items-center justify-center flex-shrink-0 text-white shadow-md"><i class="ph-fill ph-chat-circle-text text-3xl"></i></div>
-                                <div class="leading-tight flex flex-col items-center sm:items-start">
-                                    <p class="text-base font-black text-slate-800 tracking-tight">Official LINE for Remittance / 匯款開通官方 LINE <span class="text-slate-600 font-bold text-lg bg-white px-2 py-0.5 rounded-md shadow-sm ml-1 border border-slate-200">@841bihdj</span></p>
-                                    <p class="text-[11px] font-bold text-slate-500 mt-2">如在台灣，可另採匯款方式免除海外手續費。請洽阿布拉.凱 工作室的官方 LINE 聯繫匯款方式，採原價收費 (180/450/750/1200)，由客服為您核帳並人工開通。</p>
-                                </div>
-                            </div>
+                            </details>
                         </div>
                     </div>
                 </div>`;
@@ -2266,22 +2285,25 @@
                             const result = await res.json();
                             if (result.error) throw new Error(result.error.message);
                             trans = result.candidates[0].content.parts[0].text;
-                            aiSuccess = true;
-                            break;
+                            
+                            if (trans && trans.trim() !== "") {
+                                aiSuccess = true;
+                                break;
+                            }
                         } catch (e) {
                             console.warn(`Reverse Translation AI model ${model} failed, trying next...`);
                         }
                     }
                 }
 
-                if (!aiSuccess) {
+                if (!aiSuccess || !trans || trans.trim() === "") {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(text)}`);
                     if (!res.ok) throw new Error("GTX API failed");
                     const d = await res.json();
                     if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
                 }
 
-                if (engInput && trans) {
+                if (engInput && trans && trans.trim() !== "") {
                     engInput.value = window.getStr(trans).trim().replace(/[「」""'']/g, '');
                 } else {
                     throw new Error("Empty translation result");
@@ -2395,15 +2417,18 @@
                             const result = await res.json();
                             if (result.error) throw new Error(result.error.message);
                             trans = result.candidates[0].content.parts[0].text;
-                            aiSuccess = true;
-                            break;
+                            
+                            if (trans && trans.trim() !== "") {
+                                aiSuccess = true;
+                                break;
+                            }
                         } catch (e) {
                             console.warn(`Translation AI model ${model} failed, trying next...`);
                         }
                     }
                 } 
                 
-                if (!aiSuccess) {
+                if (!aiSuccess || !trans || trans.trim() === "") {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     if (!res.ok) throw new Error("GTX API failed");
                     const d = await res.json();

@@ -6,22 +6,22 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.5-B2B-SEAT-LICENSE-STABLE"
+    version: "6.9.5-ULTIMATE-B2B-SECURE"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Feature (B2B): Added 'Max Users' (Seat licensing) to Promo Codes. Admin table now shows Current / Max users."
-      - "UI/UX: Added explicit hint in Section 2 to guide users that reverse translation happens automatically."
-      - "Fix: Replaced native confirm() in deletePromoCode with an iframe-safe double-click 'Confirm?' button mechanism."
+      - "Security (B2B): Implemented Single-Session Token logic to prevent VIP account sharing (auto-logout on concurrent logins)."
+      - "Feature (Admin): Added real-time search filter inside Promo Codes Manager Modal to easily track expiring B2B seats."
+      - "Fix (Voice): Polyphonic characters now pass their example word as fallback to guarantee perfect natural tone pronunciation from TTS."
+      - "Fix (Voice): Added robust Emoji Stripper regex to prevent TTS engine from reading decorative UI icons (📜, ⚠️, etc)."
+      - "UX (Quota): Upgraded Fallback Quota message to detailed Bilingual text assuring users of zero service interruption."
       - "UI: Auth forms hidden by default. Added Login/Signup button in Header for guest experience first."
       - "Feature: Multi-language selector added to Section 1."
       - "Feature: Bidirectional translate with robust API fallback. Decompose Chinese synchronously translates back to native language."
       - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
       - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
-      - "Fix: Translate & Reverse Translate now strictly fallback to GTX when API limits are reached to prevent 'Translation Failed'."
       - "Compliance: Added 'Terms of Service' and 'Refund Policy' directly to pricing section and Legal Modal to pass NewebPay audit."
-      - "Enhancement: Payment sections (USD/TWD) are now collapsible accordions for cleaner UI."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -438,7 +438,13 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto border-2 border-slate-100 rounded-3xl bg-slate-50 shadow-inner flex-1">
+            <div class="overflow-x-auto border-2 border-slate-100 rounded-3xl bg-slate-50 shadow-inner flex-1 flex flex-col">
+                <div class="px-6 py-4 border-b-2 border-slate-200">
+                    <div class="relative w-full">
+                        <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
+                        <input type="text" id="promo-search-filter" onkeyup="window.filterPromoTable()" placeholder="Search Code, Date or Remark... / 搜尋邀請碼、到期日或備註" class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:ring-2 focus:ring-purple-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
+                    </div>
+                </div>
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-slate-200 text-slate-500 border-b-2 border-slate-200 uppercase tracking-widest text-[10px] font-bold">
                         <tr>
@@ -581,7 +587,7 @@
                 <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">退款政策 (Refund Policy)</a>
                 <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">消費者權益 (Consumer Rights)</a>
             </div>
-            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.5-B2B-SEAT-LICENSE-STABLE</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.5-ULTIMATE-B2B-SECURE</p>
             <p class="uppercase tracking-widest text-[10px]">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed text-[10px] italic">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -691,6 +697,16 @@
             }
         };
 
+        window.filterPromoTable = function() {
+            const input = document.getElementById('promo-search-filter').value.toLowerCase();
+            const rows = document.querySelectorAll('#promo-table-body tr');
+            rows.forEach(row => {
+                if(row.cells.length < 2) return; 
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        };
+
         window.renderPromoTable = function() {
             const tbody = document.getElementById('promo-table-body');
             let html = '';
@@ -724,6 +740,7 @@
             }
             if (!html) html = `<tr><td colspan="6" class="text-center py-10 text-slate-400 font-bold italic text-xs uppercase tracking-widest">No promo codes active / 尚無邀請碼</td></tr>`;
             tbody.innerHTML = html;
+            window.filterPromoTable(); 
         };
 
         window.savePromoCode = async function() {
@@ -1407,6 +1424,13 @@
                         if (docSnap.exists()) {
                             const data = docSnap.data();
                             
+                            // 🌐 B2B Account Sharing Hijack Check
+                            const localToken = localStorage.getItem('abra_session_token');
+                            if (data.sessionToken && localToken && data.sessionToken !== localToken) {
+                                window.handleLogout(true);
+                                return;
+                            }
+                            
                             let status = 'pending';
                             if (data.expiryDate) {
                                 const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -1503,7 +1527,9 @@
                         try {
                             const userCredential = await createUserWithEmailAndPassword(auth, email, code);
                             await updateProfile(userCredential.user, { displayName: window.getStr(docSnap.data().name) });
-                            await updateDoc(docRef, { password: "", uid: userCredential.user.uid });
+                            const sessionToken = crypto.randomUUID();
+                            localStorage.setItem('abra_session_token', sessionToken);
+                            await updateDoc(docRef, { password: "", uid: userCredential.user.uid, sessionToken: sessionToken });
                             authSuccess = true;
                         } catch(err) {
                             console.error("Legacy Migration Error:", err);
@@ -1529,6 +1555,10 @@
                         const docSnap = await getDoc(docRef);
                         
                         if(docSnap.exists()) {
+                            const sessionToken = crypto.randomUUID();
+                            localStorage.setItem('abra_session_token', sessionToken);
+                            await setDoc(docRef, { sessionToken: sessionToken }, { merge: true });
+                            
                             localStorage.setItem('abra_vip_code', sanitizedEmail);
                             const data = docSnap.data();
                             let status = 'pending';
@@ -1612,7 +1642,7 @@
                 if (promo.maxUsers) {
                     const currentUsers = window.promoStatsMap[inviteCode] || 0;
                     if (currentUsers >= promo.maxUsers) {
-                        window.showToast(`該邀請碼已達綁定上限 (${promo.maxUsers} 人)，請聯繫管理員。`, true);
+                        window.showToast(`註冊失敗：該邀請碼已達綁定人數上限 (${promo.maxUsers} 人)，請聯繫管理單位。`, true);
                         return;
                     }
                 }
@@ -1628,6 +1658,9 @@
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 
+                const sessionToken = crypto.randomUUID();
+                localStorage.setItem('abra_session_token', sessionToken);
+                
                 await setDoc(docRef, { 
                     uid: userCredential.user.uid,
                     name: name, 
@@ -1635,7 +1668,8 @@
                     signupDate: new Date().toISOString(), 
                     status: "pending",
                     password: "",
-                    inviteCode: inviteCode 
+                    inviteCode: inviteCode,
+                    sessionToken: sessionToken
                 }, { merge: true });
                 
                 window.showToast("Account Created! / 註冊成功，請登入");
@@ -1713,7 +1747,7 @@
             }
         };
 
-        window.handleLogout = async function() {
+        window.handleLogout = async function(isHijacked = false) {
             if (window.isAdmin || localStorage.getItem('abra_admin_status') === 'active') {
                 localStorage.setItem('abra_usage_count', '0');
                 window.freeUsageCount = 0;
@@ -1725,7 +1759,13 @@
             localStorage.removeItem('abra_vip_days');
             localStorage.removeItem('abra_custom_limit');
             localStorage.removeItem('abra_invite_code'); 
+            localStorage.removeItem('abra_session_token');
             window.activeApiKey = "";
+            
+            if (isHijacked === true) {
+                localStorage.setItem('abra_hijack_warn', 'true');
+            }
+            
             try { await signOut(auth); } catch(e) {}
             location.reload(); 
         };
@@ -2321,9 +2361,13 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            // Lookbehind Regex 處理：若符號前後都是數字（數學算式），則不替換，使其唸出；否則替換為全形逗號產生自然停頓
-            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
+            // 🌐 靜默過濾器 (Emoji Stripper)：過濾掉所有圖示雜音，確保純粹發音
+            let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
             
+            // Lookbehind Regex 處理：若符號前後都是數字（數學算式），則不替換，使其唸出；否則替換為全形逗號產生自然停頓
+            cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
+            
+            // 🌐 破音字防呆：若輸入為純注音且無法在 bopoToCharMap 中對應到字，則使用 fallbackWord (例如該破音字所屬的範例造詞) 發音，保證 TTS 唸出正確聲調
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
                 if (bopoToCharMap[mapBopo]) {
@@ -2365,7 +2409,8 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
+            let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+            cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             
             const selectEl = document.getElementById('target-lang-select');
@@ -2650,6 +2695,9 @@
                     if(data.words.length === 0) data.words.push(char + "字");
                     
                     const idiomsArr = wArr.filter(w => w.length === 4).slice(0, 3);
+                    const langCode = window.currentNativeLang || 'en';
+                    const langNameMap = {'en': 'English', 'ja': '日本語', 'ko': '한국어', 'th': 'ภาษาไทย', 'vi': 'Tiếng Việt', 'id': 'Bahasa Indonesia'};
+                    const displayLangName = langNameMap[langCode] || 'English';
                     
                     for (let idiom of idiomsArr) {
                         try {
@@ -2697,9 +2745,16 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-red-500"><i class="ph-fill ph-warning-circle text-3xl animate-pulse"></i></div>
                             <div class="flex-1">
-                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降級基礎字典</h4>
-                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">System attempted models: ${errorContext.models}, but your API quota is full.<br>系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br><br>Please apply for a new API Key or set up billing in Google AI Studio.<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
-                                <p class="text-[10px] text-slate-500 italic mb-4">Disclaimer: AI feature availability depends on your Google API Key status. / 免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
+                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降維靜態辭典</h4>
+                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">
+                                    The system has attempted the 8 API models, but the quota is full. Please apply for a new key or renew your subscription at Google AI Studio.<br>
+                                    系統已嘗試如下八種 API 模型，額度已滿。請您重新向 Google AI Studio 申請或繳費續約。
+                                </p>
+                                <p class="text-xs text-emerald-700 font-bold leading-relaxed mb-4">
+                                    Meanwhile, the system will downgrade to static dictionary mode. Do not worry about service interruption.<br>
+                                    在此之前，系統將降維採靜態辭典持續服務。您無須擔心使用中斷。
+                                </p>
+                                <p class="text-[10px] text-slate-500 italic mb-4">Attempted / 嘗試模組: ${errorContext.models}</p>
                                 <button type="button" onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">Update API Key / 前往設定更新金鑰</button>
                             </div>
                         </div>
@@ -2847,11 +2902,14 @@
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
                     if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
                         seenPoly.add(pureZhuyin);
+                        // 🌐 破音字語音優化：抓取該破音字的「第一個範例詞彙」，以確保 TTS 唸出正確聲調
+                        const exampleWord = (p.examples && p.examples.length > 0) ? window.getStr(p.examples[0]).replace(/'/g, "\\'") : pureZhuyin;
+                        
                         polyHTML += `
                             <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
                                 <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
                                 <div class="flex-1"></div>
-                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
+                                <button type="button" data-action="speak" data-text="${exampleWord}" data-fallback="${pureZhuyin}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
                                     <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
                                 </button>
                             </div>
@@ -3002,6 +3060,14 @@
             if (window.updateGlobalUI) window.updateGlobalUI();
             window.initViewCounter();
             window.setupTypingMode();
+            
+            // 🌐 Session Token Hijack Alert
+            if (localStorage.getItem('abra_hijack_warn') === 'true') {
+                setTimeout(() => {
+                    window.showToast("⚠️ 您已被強制登出：帳號已在其他裝置登入。為保障權益請勿共用帳號。", true);
+                    localStorage.removeItem('abra_hijack_warn');
+                }, 500);
+            }
         };
     </script>
 </body>

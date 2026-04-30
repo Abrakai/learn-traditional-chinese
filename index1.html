@@ -6,22 +6,17 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.5-ULTIMATE-B2B-SECURE"
+    version: "6.9.6-FINAL-CLEAN-ARCH"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "Security (B2B): Implemented Single-Session Token logic to prevent VIP account sharing (auto-logout on concurrent logins)."
-      - "Feature (Admin): Added real-time search filter inside Promo Codes Manager Modal to easily track expiring B2B seats."
-      - "Fix (Voice): Polyphonic characters now pass their example word as fallback to guarantee perfect natural tone pronunciation from TTS."
-      - "Fix (Voice): Added robust Emoji Stripper regex to prevent TTS engine from reading decorative UI icons (📜, ⚠️, etc)."
-      - "UX (Quota): Upgraded Fallback Quota message to detailed Bilingual text assuring users of zero service interruption."
-      - "UI: Auth forms hidden by default. Added Login/Signup button in Header for guest experience first."
-      - "Feature: Multi-language selector added to Section 1."
-      - "Feature: Bidirectional translate with robust API fallback. Decompose Chinese synchronously translates back to native language."
-      - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
-      - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
-      - "Compliance: Added 'Terms of Service' and 'Refund Policy' directly to pricing section and Legal Modal to pass NewebPay audit."
+      - "CRITICAL FIX: Completely removed duplicate HTML/JS blocks that caused Firebase initialization failure."
+      - "UX (Login): Forms auto-hide and screen smoothly scrolls to top upon successful login/signup."
+      - "Fix (Voice): Polyphonic fallback strictly isolated to homophone character mapping to avoid reading full example sentences."
+      - "UX (Quota): Applied new Bilingual reassurance text for API quota limit, ensuring user peace of mind."
+      - "Security (B2B): Enabled Single-Session Token logic to auto-logout shared accounts."
+      - "Feature (Admin): Promo Codes now have real-time tracking, search, and Max Users seats."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -56,6 +51,29 @@
             body.typing-mode header { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         }
     </style>
+
+    <!-- 🌐 預載防護網：防止網路延遲時點擊按鈕報錯 -->
+    <script>
+        const initStub = (fnName) => function() {
+            const toast = document.getElementById('system-toast');
+            const msg = document.getElementById('toast-msg');
+            if (toast && msg) {
+                msg.textContent = "System is initializing, please wait... / 系統載入中，請稍候...";
+                toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-[2500] px-8 py-5 rounded-[2rem] shadow-2xl font-black text-sm flex items-center gap-4 transition-all toast-animate bg-slate-900 text-white border-2 border-slate-700 w-max max-w-[90%]`;
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+            }
+        };
+        window.handleTranslate = initStub('handleTranslate');
+        window.handleSplit = initStub('handleSplit');
+        window.speakEng = initStub('speakEng');
+        window.speakNative = initStub('speakNative');
+        window.speak = initStub('speak');
+        window.openAuthModal = initStub('openAuthModal');
+        window.openProfileModal = initStub('openProfileModal');
+        window.handleMsgBtnClick = initStub('handleMsgBtnClick');
+        window.handleLogout = initStub('handleLogout');
+    </script>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
 
@@ -130,7 +148,6 @@
                     <i class="ph-fill ph-crown text-sm sm:text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">VIP</span>
                 </div>
                 
-                <!-- NEW Login / Signup Toggle Button -->
                 <button type="button" id="login-signup-btn" title="Login / 登入註冊" class="text-[9px] md:text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-sm font-bold whitespace-nowrap" onclick="window.toggleMemberSection()">
                     <i class="ph-bold ph-user-plus text-lg sm:text-base"></i> <span class="hidden md:inline">Sign In / 登入</span>
                 </button>
@@ -151,7 +168,76 @@
 
     <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8 flex-1 w-full">
         
-        <!-- Auth Section - Hidden by default for Guest flow -->
+        <!-- Translation Module -->
+        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT / 免費額度</div>
+            
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div>
+                    <h2 class="text-xl font-black tracking-tighter uppercase">Intelligent Translate <span class="hidden md:inline">/ 多國語言翻中</span></h2>
+                </div>
+                <div class="sm:ml-auto flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-sm z-10 relative">
+                    <i class="ph-fill ph-translate text-slate-400 text-lg"></i>
+                    <select id="native-lang-selector" onchange="window.saveNativeLang()" class="bg-transparent border-none text-slate-700 text-xs font-black outline-none cursor-pointer w-full sm:w-auto min-w-[120px]">
+                        <option value="en">English (英文)</option>
+                        <option value="ja">日本語 (日文)</option>
+                        <option value="ko">한국어 (韓文)</option>
+                        <option value="th">ภาษาไทย (泰文)</option>
+                        <option value="vi">Tiếng Việt (越南文)</option>
+                        <option value="id">Bahasa Indonesia (印尼文)</option>
+                        <option value="ms">Bahasa Melayu (馬來文)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 relative z-0">
+                <div class="flex-1 relative flex items-center group">
+                    <input type="text" id="eng-input" placeholder="Type text here... / 輸入您的母語進行翻譯" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
+                    <button type="button" onclick="window.speakNative(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
+                </div>
+                <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-blue-900 text-sm"><span>Execute / 翻譯</span><div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div></button>
+            </div>
+        </section>
+
+        <!-- Writing Setup Module -->
+        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left z-0">
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT / 免費額度</div>
+            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
+            
+            <p class="text-[10px] text-slate-500 font-bold mb-3 ml-2 flex items-center gap-1 opacity-80 border-l-2 border-emerald-400 pl-2"><i class="ph-fill ph-info text-emerald-500"></i> 提示：可直接輸入繁體中文，系統將自動為您拆字並「反向翻譯」為母語。</p>
+            
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <div class="flex-1 relative flex flex-col group">
+                    <div class="relative flex items-center">
+                        <input type="text" id="zh-input" placeholder="Paste Chinese text here... / 貼上繁體中文內容" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-2xl focus:outline-none focus:border-emerald-500 shadow-inner bg-slate-50 focus:bg-white font-black">
+                        <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
+                    </div>
+                </div>
+                <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-emerald-900 text-sm h-[68px]">Decompose / 進行拆字</button>
+            </div>
+            
+            <div id="click-char-guide" class="hidden mb-4 text-center text-sm font-black text-indigo-600 animate-pulse flex items-center justify-center gap-2 tracking-widest uppercase"><i class="ph-fill ph-hand-pointing text-xl"></i> Select a character for deep analysis / 點擊下方單字啟動解析</div>
+            
+            <div id="char-container" class="flex flex-wrap gap-4 p-6 bg-slate-50 rounded-3xl min-h-[120px] border-2 border-slate-100 items-center justify-center shadow-inner mt-4">
+                <span class="text-slate-400 text-xs italic font-black uppercase tracking-widest">Awaiting Text Input / 請輸入內容</span>
+            </div>
+        </section>
+
+        <!-- PLG CTA Button -->
+        <section id="plg-login-cta" class="hidden bg-gradient-to-r from-red-600 to-red-500 p-8 md:p-12 rounded-[2.5rem] shadow-2xl text-center text-white mt-10 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8cGF0aCBkPSJNMCAwbDh2OFptOCAwTDAgOFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]"></div>
+            <div class="relative z-10 flex flex-col items-center">
+                <i class="ph-fill ph-lock-key text-5xl mb-4 text-yellow-300"></i>
+                <h2 class="text-2xl md:text-3xl font-black mb-3 tracking-widest uppercase">Member Hub / 會員專屬中心</h2>
+                <p class="text-xs md:text-sm font-bold opacity-90 mb-8 max-w-lg leading-relaxed">Free registration unlocks higher daily limits and the powerful AI Engine! / 點擊下方免費註冊或登入，立即解除使用次數限制，並開啟 AI 智慧大腦！</p>
+                <button type="button" onclick="window.scrollToAuth()" class="bg-yellow-400 hover:bg-yellow-500 text-red-900 px-8 py-4 md:px-12 md:py-5 rounded-full font-black shadow-xl transition-transform hover:scale-105 active:scale-95 text-sm md:text-lg uppercase tracking-widest flex items-center justify-center gap-2 mx-auto border-b-4 border-yellow-600 w-full sm:w-auto">
+                    <i class="ph-bold ph-sign-in text-2xl"></i> Click to Sign Up or Log In
+                </button>
+            </div>
+        </section>
+
+        <!-- Auth Forms -->
         <section id="member-center-section" class="hidden bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
                 <div class="flex items-center gap-2"><i class="ph ph-user-circle text-2xl text-yellow-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Member Hub / 會員中心</h3></div>
@@ -203,116 +289,6 @@
                         </div>
                     </div>
                 </form>
-            </div>
-        </section>
-
-        <!-- Admin Dashboard Section -->
-        <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500 mt-10">
-            <div class="bg-indigo-900 px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 border-b-4 border-indigo-950">
-                <div class="flex items-center gap-2"><i class="ph-fill ph-sliders text-2xl text-indigo-400"></i><h3 class="font-black text-sm md:text-base text-white uppercase tracking-widest">Global Config / 全域額度設定</h3></div>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
-                        <label class="text-[10px] text-indigo-200 font-black uppercase">Guest</label>
-                        <input type="number" id="sys-guest-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
-                    </div>
-                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
-                        <label class="text-[10px] text-indigo-200 font-black uppercase">Member</label>
-                        <input type="number" id="sys-member-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
-                    </div>
-                    <button type="button" onclick="window.saveSystemConfig(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-emerald-700">Save</button>
-                    
-                    <div class="w-px h-6 bg-indigo-700 mx-1"></div>
-                    
-                    <button type="button" onclick="window.openPromoModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest border-b-4 border-purple-800"><i class="ph-bold ph-ticket"></i> Promo Codes</button>
-                </div>
-            </div>
-            
-            <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
-                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
-                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
-                    <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="window.importCSV(event)">
-                    <button type="button" onclick="document.getElementById('csv-upload').click()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-upload-simple"></i> Import / 匯入</button>
-                    <button type="button" onclick="window.exportCSV()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-download-simple"></i> Export / 匯出</button>
-                    <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-plus"></i> Add VIP / 新增會員</button>
-                </div>
-            </div>
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
-                <div class="relative w-full max-w-md">
-                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                    <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone, Promo Code... / 搜尋信箱、姓名、手機、邀請碼" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
-                </div>
-            </div>
-            <div class="p-0 overflow-x-auto">
-                <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-slate-100 text-slate-500 border-b border-slate-200 uppercase tracking-widest text-[10px] font-bold">
-                        <tr>
-                            <th class="px-6 py-4">Status / 狀態</th>
-                            <th class="px-6 py-4">Email / 帳號</th>
-                            <th class="px-6 py-4">Identity / 姓名與電話</th>
-                            <th class="px-6 py-4">Finance / 匯款資訊</th>
-                            <th class="px-6 py-4">Expiry / 到期日</th>
-                            <th class="px-6 py-4">Quota / 專屬額度</th>
-                            <th class="px-6 py-4 text-right">Actions / 操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700 bg-white font-bold">
-                        <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Syncing Cloud Database... / 載入中...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Translation Module -->
-        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT / 免費額度</div>
-            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl shadow-sm">1</div><h2 class="text-xl font-black tracking-tighter uppercase">Smart Translation / 雙向智能翻譯</h2></div>
-            
-            <div class="flex flex-col md:flex-row gap-4 mb-4">
-                <div class="flex-1">
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Select Target Native Language / 選擇您的母語</label>
-                    <select id="target-lang-select" class="w-full md:w-auto px-6 py-3.5 rounded-2xl border-2 border-slate-100 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold cursor-pointer">
-                        <option value="en" data-name="English">English / 英文</option>
-                        <option value="ja" data-name="Japanese">日本語 / 日文</option>
-                        <option value="ko" data-name="Korean">한국어 / 韓文</option>
-                        <option value="th" data-name="Thai">ไทย / 泰文</option>
-                        <option value="vi" data-name="Vietnamese">Tiếng Việt / 越文</option>
-                        <option value="id" data-name="Indonesian">Bahasa Indonesia / 印尼文</option>
-                        <option value="ms" data-name="Malay">Bahasa Melayu / 馬來文</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1 relative flex items-center group">
-                    <input type="text" id="eng-input" placeholder="Type native language... / 輸入您的母語" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
-                    <button type="button" onclick="window.speakTargetLang(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen / 聆聽發音"><i class="ph-fill ph-speaker-high"></i></button>
-                </div>
-                <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-blue-900 text-sm"><span>Translate / 翻譯為中文</span><div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div></button>
-            </div>
-        </section>
-
-        <!-- Writing Setup Module -->
-        <section class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative text-left z-0">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm">FREE LIMIT / 免費額度</div>
-            <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">2</div><h2 class="text-xl font-black tracking-tighter uppercase">Character Decomposition / 漢字解構</h2></div>
-            
-            <!-- 🌐 UI 提示：引導使用者直接輸入中文反推翻譯 -->
-            <p class="text-[10px] text-slate-500 font-bold mb-3 ml-2 flex items-center gap-1 opacity-80 border-l-2 border-emerald-400 pl-2"><i class="ph-fill ph-info text-emerald-500"></i> 提示：可直接輸入繁體中文，系統將自動為您拆字並「反向翻譯」為母語。</p>
-            
-            <div class="flex flex-col md:flex-row gap-4 mb-6">
-                <div class="flex-1 relative flex flex-col group">
-                    <div class="relative flex items-center">
-                        <input type="text" id="zh-input" placeholder="Paste Chinese text here... / 貼上繁體中文內容" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-2xl focus:outline-none focus:border-emerald-500 shadow-inner bg-slate-50 focus:bg-white font-black">
-                        <button type="button" onclick="window.speak(document.getElementById('zh-input').value)" class="absolute right-4 text-slate-400 hover:text-emerald-600 transition-colors p-2 text-2xl" title="Listen / 聆聽發音"><i class="ph-fill ph-speaker-high"></i></button>
-                    </div>
-                </div>
-                <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-emerald-900 text-sm h-[68px]">Decompose / 進行拆字</button>
-            </div>
-            
-            <div id="click-char-guide" class="hidden mb-4 mt-6 text-center text-sm font-black text-indigo-600 animate-pulse flex items-center justify-center gap-2 tracking-widest uppercase"><i class="ph-fill ph-hand-pointing text-xl"></i> Select a character for deep analysis / 點擊下方單字啟動解析</div>
-            
-            <div id="char-container" class="flex flex-wrap gap-4 p-6 bg-slate-50 rounded-3xl min-h-[120px] border-2 border-slate-100 items-center justify-center shadow-inner mt-4">
-                <span class="text-slate-400 text-xs italic font-black uppercase tracking-widest">Awaiting Text Input / 請輸入內容</span>
             </div>
         </section>
 
@@ -385,6 +361,62 @@
         </section>
         
         <section id="pricing-section-container" class="hidden w-full mt-10"></section>
+        
+        <!-- Admin Dashboard Section -->
+        <section id="admin-dashboard-section" class="hidden bg-white border-2 border-slate-900 rounded-3xl shadow-xl overflow-hidden animate-in slide-in-from-top-4 duration-500 mt-10">
+            <div class="bg-indigo-900 px-6 py-4 flex flex-col lg:flex-row items-center justify-between gap-4 border-b-4 border-indigo-950">
+                <div class="flex items-center gap-2"><i class="ph-fill ph-sliders text-2xl text-indigo-400"></i><h3 class="font-black text-sm md:text-base text-white uppercase tracking-widest">Global Config / 全域額度設定</h3></div>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
+                        <label class="text-[10px] text-indigo-200 font-black uppercase">Guest</label>
+                        <input type="number" id="sys-guest-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
+                    </div>
+                    <div class="flex items-center gap-2 bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700">
+                        <label class="text-[10px] text-indigo-200 font-black uppercase">Member</label>
+                        <input type="number" id="sys-member-limit" class="w-12 bg-white text-indigo-900 text-center text-xs font-black rounded-md outline-none py-1 border-2 border-transparent focus:border-emerald-400">
+                    </div>
+                    <button type="button" onclick="window.saveSystemConfig(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 uppercase tracking-widest border-b-4 border-emerald-700">Save</button>
+                    
+                    <div class="w-px h-6 bg-indigo-700 mx-1"></div>
+                    
+                    <button type="button" onclick="window.openPromoModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest border-b-4 border-purple-800"><i class="ph-bold ph-ticket"></i> Promo Codes</button>
+                </div>
+            </div>
+            
+            <div class="bg-slate-900 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-white border-b border-white/10 gap-4">
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"><i class="ph-fill ph-shield-check text-2xl text-emerald-400"></i><h3 class="font-bold text-base md:text-lg text-white tracking-tight uppercase">Admin Console / 會員管理系統</h3></div>
+                <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
+                    <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="window.importCSV(event)">
+                    <button type="button" onclick="document.getElementById('csv-upload').click()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-upload-simple"></i> Import / 匯入</button>
+                    <button type="button" onclick="window.exportCSV()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-download-simple"></i> Export / 匯出</button>
+                    <button type="button" onclick="window.openAdminModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md transition-all flex items-center gap-1 active:scale-95 uppercase tracking-widest"><i class="ph-bold ph-plus"></i> Add VIP / 新增會員</button>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center gap-4">
+                <div class="relative w-full max-w-md">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <input type="text" id="admin-search-input" placeholder="Search Email, Name, Phone, Promo Code... / 搜尋信箱、姓名、手機、邀請碼" onkeyup="window.filterAdminMembers()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-inner bg-white text-slate-700 font-bold">
+                </div>
+            </div>
+            <div class="p-0 overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-500 border-b border-slate-200 uppercase tracking-widest text-[10px] font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Status / 狀態</th>
+                            <th class="px-6 py-4">Email / 帳號</th>
+                            <th class="px-6 py-4">Identity / 姓名與電話</th>
+                            <th class="px-6 py-4">Finance / 匯款資訊</th>
+                            <th class="px-6 py-4">Expiry / 到期日</th>
+                            <th class="px-6 py-4">Quota / 專屬額度</th>
+                            <th class="px-6 py-4 text-right">Actions / 操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-slate-700 bg-white font-bold">
+                        <tr><td colspan="7" class="text-center py-8 text-slate-400 italic">Syncing Cloud Database... / 載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
         
         <div id="global-trust-footer" class="w-full bg-emerald-600 text-white py-3 px-4 shadow-sm z-40 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500 mt-16 rounded-3xl mb-8 max-w-6xl mx-auto">
             <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
@@ -551,6 +583,77 @@
         </div>
     </div>
 
+    <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
+        <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
+            <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
+                <div class="flex items-center gap-4">
+                    <i class="ph-fill ph-user-list text-emerald-500 text-4xl bg-emerald-50 p-4 rounded-2xl"></i>
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Authority Manager / 會員權限管理</h3>
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">Database Editor / 會員資料庫編輯</p>
+                    </div>
+                </div>
+                <button type="button" onclick="window.closeAdminModal()" class="text-slate-300 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
+            </div>
+            <div class="space-y-6 text-left font-black">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Email / 帳號</label>
+                        <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Override Pass / 臨時密碼</label>
+                        <input type="text" id="admin-member-pass" placeholder="Leave empty if unchanged" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Display Name / 姓名</label>
+                    <input type="text" id="admin-member-name" placeholder="Member Name" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-lg shadow-sm font-black">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Phone / 電話</label>
+                        <input type="text" id="admin-member-phone" placeholder="+886912345678" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-mono">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2"><i class="ph-fill ph-money"></i> Remittance / 匯款五碼</label>
+                        <input type="text" id="admin-member-remittance" placeholder="Ex: 88392" class="w-full px-5 py-4 rounded-2xl border-4 border-emerald-100 bg-emerald-50/50 focus:bg-white focus:border-emerald-500 outline-none text-lg shadow-sm font-mono text-emerald-700 tracking-[0.2em]">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-50 p-6 rounded-3xl border-2 border-slate-100 shadow-inner">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Pay Date / 匯款日</label>
+                        <input type="date" id="admin-pay-date" onchange="window.calculateExpiry()" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Months / 期數</label>
+                        <input type="number" id="admin-months" oninput="window.calculateExpiry()" placeholder="12" min="1" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Expiry / 到期日</label>
+                        <input type="date" id="admin-expiry-date" class="w-full px-4 py-3 rounded-xl border-4 border-emerald-200 outline-none text-xs bg-white shadow-md font-black text-emerald-700">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest ml-2">Custom Quota / 專屬次數</label>
+                        <input type="number" id="admin-member-limit" placeholder="留白以套用群組" class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 outline-none text-xs bg-indigo-50 shadow-sm font-black text-indigo-700">
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Remarks / 行政備註</label>
+                    <textarea id="admin-member-remarks" rows="2" placeholder="Internal notes only..." class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm resize-none font-bold"></textarea>
+                </div>
+                
+                <div class="pt-8 flex gap-4">
+                    <button type="button" onclick="window.closeAdminModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-500 py-5 rounded-2xl font-black transition-all text-xs uppercase tracking-widest">Cancel / 取消</button>
+                    <button type="button" id="admin-save-btn" onclick="window.saveAdminMember()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all text-xs active:scale-95 uppercase tracking-widest border-b-8 border-emerald-950">Update DB / 儲存更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 🌟 NEW: Legal Modal with Consumer Rights & Refund Policy to pass NewebPay Verification -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
@@ -587,7 +690,7 @@
                 <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">退款政策 (Refund Policy)</a>
                 <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">消費者權益 (Consumer Rights)</a>
             </div>
-            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.5-ULTIMATE-B2B-SECURE</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.6-FINAL-CLEAN-ARCH</p>
             <p class="uppercase tracking-widest text-[10px]">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed text-[10px] italic">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -972,7 +1075,7 @@
                 memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
                 qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
                 headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container'),
-                loginSignupBtn: document.getElementById('login-signup-btn')
+                loginSignupBtn: document.getElementById('login-signup-btn'), plgCta: document.getElementById('plg-login-cta')
             };
 
             if(els.adminSection) els.adminSection.classList.add('hidden');
@@ -1003,6 +1106,7 @@
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
                 if(els.loginSignupBtn) els.loginSignupBtn.classList.add('hidden');
                 if(els.memberSection) els.memberSection.classList.add('hidden');
+                if(els.plgCta) els.plgCta.classList.add('hidden');
                 if(els.vBadge) {
                     els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">Admin</span>';
                     els.vBadge.className = "hidden bg-slate-800 text-emerald-400 p-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1 animate-in zoom-in whitespace-nowrap ml-0.5 md:ml-1";
@@ -1014,6 +1118,7 @@
 
             } else if (emailCode) {
                 if(els.memberSection) els.memberSection.classList.add('hidden');
+                if(els.plgCta) els.plgCta.classList.add('hidden');
                 if(els.loginSignupBtn) els.loginSignupBtn.classList.add('hidden');
                 if(els.pBtn) els.pBtn.classList.remove('hidden');
                 if(els.mBtn) els.mBtn.classList.remove('hidden');
@@ -1056,6 +1161,7 @@
                 }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
                 if(els.loginSignupBtn) { els.loginSignupBtn.classList.remove('hidden'); els.loginSignupBtn.style.display = 'flex'; }
+                if(els.plgCta) els.plgCta.classList.remove('hidden');
                 if(els.headerPricingBtn) {
                     els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
                     els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
@@ -1499,6 +1605,10 @@
                 if (await window.verifyAdminCloud(code)) {
                     localStorage.setItem('abra_admin_status', 'active');
                     window.showToast("Admin Verified / 管理員身分確認.");
+                    // 🌐 強制隱藏 UI 並滾動至頂部
+                    document.getElementById('member-center-section')?.classList.add('hidden');
+                    document.getElementById('plg-login-cta')?.classList.add('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                     setTimeout(() => location.reload(), 800);
                     return;
                 }
@@ -1588,6 +1698,12 @@
                             }
                             window.showToast("Login Success! / 登入成功！");
                             window.closeAuthModal();
+                            
+                            // 🌐 強制隱藏 UI 並滾動至頂部
+                            document.getElementById('member-center-section')?.classList.add('hidden');
+                            document.getElementById('plg-login-cta')?.classList.add('hidden');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            
                             setTimeout(() => location.reload(), 800);
                         } else {
                             await signOut(auth);
@@ -1681,6 +1797,12 @@
                 
                 document.getElementById('login-email').value = email;
                 document.getElementById('login-vip-code').value = pass;
+                
+                // 🌐 強制隱藏 UI 並滾動至頂部
+                document.getElementById('member-center-section')?.classList.add('hidden');
+                document.getElementById('plg-login-cta')?.classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
                 window.handleLogin();
 
             } catch(e) { 

@@ -6,17 +6,17 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.6-FINAL-CLEAN-ARCH"
+    version: "6.9.7-FLAWLESS-EXECUTION"
     author: "Abrakai Studio"
-    description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
+    description: "Taiwan Chinese Learning Hub - Clean Architecture & Targeted Features"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
     updates:
-      - "CRITICAL FIX: Completely removed duplicate HTML/JS blocks that caused Firebase initialization failure."
-      - "UX (Login): Forms auto-hide and screen smoothly scrolls to top upon successful login/signup."
-      - "Fix (Voice): Polyphonic fallback strictly isolated to homophone character mapping to avoid reading full example sentences."
-      - "UX (Quota): Applied new Bilingual reassurance text for API quota limit, ensuring user peace of mind."
+      - "Fix (Reverse Trans): Corrected select element ID to 'native-lang-selector' ensuring accurate language targeting."
+      - "Fix (Polyphonic Voice): Reverted polyphonic TTS payload to pureZhuyin -> Homophone mapping. Guarantees single-character accurate pronunciation."
+      - "Fix (Auth UI): Replaced blocked location.reload() with instant DOM manipulation. Forms now auto-hide seamlessly on login."
       - "Security (B2B): Enabled Single-Session Token logic to auto-logout shared accounts."
       - "Feature (Admin): Promo Codes now have real-time tracking, search, and Max Users seats."
+      - "UX (Quota): Applied new Bilingual reassurance text for API quota limit."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -180,13 +180,13 @@
                 <div class="sm:ml-auto flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-sm z-10 relative">
                     <i class="ph-fill ph-translate text-slate-400 text-lg"></i>
                     <select id="native-lang-selector" onchange="window.saveNativeLang()" class="bg-transparent border-none text-slate-700 text-xs font-black outline-none cursor-pointer w-full sm:w-auto min-w-[120px]">
-                        <option value="en">English (英文)</option>
-                        <option value="ja">日本語 (日文)</option>
-                        <option value="ko">한국어 (韓文)</option>
-                        <option value="th">ภาษาไทย (泰文)</option>
-                        <option value="vi">Tiếng Việt (越南文)</option>
-                        <option value="id">Bahasa Indonesia (印尼文)</option>
-                        <option value="ms">Bahasa Melayu (馬來文)</option>
+                        <option value="en" data-name="English">English / 英文</option>
+                        <option value="ja" data-name="Japanese">日本語 / 日文</option>
+                        <option value="ko" data-name="Korean">한국어 / 韓文</option>
+                        <option value="th" data-name="Thai">ไทย / 泰文</option>
+                        <option value="vi" data-name="Vietnamese">Tiếng Việt / 越文</option>
+                        <option value="id" data-name="Indonesian">Bahasa Indonesia / 印尼文</option>
+                        <option value="ms" data-name="Malay">Bahasa Melayu / 馬來文</option>
                     </select>
                 </div>
             </div>
@@ -217,7 +217,7 @@
                 <button type="button" id="split-btn" onclick="window.handleSplit(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-emerald-900 text-sm h-[68px]">Decompose / 進行拆字</button>
             </div>
             
-            <div id="click-char-guide" class="hidden mb-4 text-center text-sm font-black text-indigo-600 animate-pulse flex items-center justify-center gap-2 tracking-widest uppercase"><i class="ph-fill ph-hand-pointing text-xl"></i> Select a character for deep analysis / 點擊下方單字啟動解析</div>
+            <div id="click-char-guide" class="hidden mb-4 mt-6 text-center text-sm font-black text-indigo-600 animate-pulse flex items-center justify-center gap-2 tracking-widest uppercase"><i class="ph-fill ph-hand-pointing text-xl"></i> Select a character for deep analysis / 點擊下方單字啟動解析</div>
             
             <div id="char-container" class="flex flex-wrap gap-4 p-6 bg-slate-50 rounded-3xl min-h-[120px] border-2 border-slate-100 items-center justify-center shadow-inner mt-4">
                 <span class="text-slate-400 text-xs italic font-black uppercase tracking-widest">Awaiting Text Input / 請輸入內容</span>
@@ -418,14 +418,25 @@
             </div>
         </section>
         
-        <div id="global-trust-footer" class="w-full bg-emerald-600 text-white py-3 px-4 shadow-sm z-40 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 border-t-2 border-emerald-500 mt-16 rounded-3xl mb-8 max-w-6xl mx-auto">
-            <span class="text-xs sm:text-sm font-black tracking-widest uppercase italic opacity-90"><i class="ph-fill ph-headset text-lg align-middle mr-1"></i> Abrakai Studio Support / 客服與開通</span>
-            <a href="https://lin.ee/9khpCfe" target="_blank" class="bg-white text-emerald-700 px-6 py-2 rounded-full text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-2 uppercase tracking-widest border-b-4 border-emerald-100">
-                <i class="ph-bold ph-plus text-base"></i> LINE @841bihdj
-            </a>
-        </div>
-        
     </main>
+
+    <!-- 🌐 頁尾與法規連結 (藍新金流審核必備) -->
+    <footer class="bg-slate-100 border-t-4 border-slate-200 pt-12 pb-16 text-center text-slate-400 relative z-10">
+        <div class="max-w-5xl mx-auto px-6 font-black space-y-4">
+            <div class="flex flex-wrap justify-center gap-4 text-[11px] text-slate-500 font-bold underline mb-6">
+                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">服務條款 (Terms of Service)</a>
+                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">隱私權政策 (Privacy Policy)</a>
+                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">退款政策 (Refund Policy)</a>
+                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">消費者權益 (Consumer Rights)</a>
+            </div>
+            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.6-FINAL-CLEAN-ARCH</p>
+            <p class="uppercase tracking-widest text-[10px]">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
+            <p class="opacity-60 max-w-3xl mx-auto leading-relaxed text-[10px] italic">
+                Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
+                免責聲明：所有數據均由多模態 AI 提供，僅供教學研究參考。
+            </p>
+        </div>
+    </footer>
 
     <!-- 🎟️ Promo Codes Manager Modal -->
     <div id="promo-manager-modal" class="hidden fixed inset-0 z-[1400] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 transition-opacity">
@@ -499,6 +510,35 @@
         </div>
     </div>
 
+    <!-- 🌟 NEW: Legal Modal with Consumer Rights & Refund Policy to pass NewebPay Verification -->
+    <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
+        <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
+            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Legal / 隱私政策與服務條款</h3>
+            
+            <div class="bg-yellow-50 text-yellow-800 p-5 rounded-xl border border-yellow-200 mb-8 text-xs font-bold leading-relaxed shadow-sm">
+                本網站僅提供繁體中文字，單字書寫教學、注音、破音字、詞彙、成語解析等服務。<br>
+                至於成為VIP會員後可以搭配AI成語解析與翻譯，所需使用的API Key Token使用量與計費，請與Google API Studio廠商聯繫購買與續約。AI費用與本網站服務產品無關。
+            </div>
+
+            <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Consumer Rights & Refund / 消費者權益與退款政策</h4>
+                    <p>Digital services are activated upon binding. According to Consumer Protection Law, digital content services do not apply to the 7-day cooling-off period. No refunds after activation. / 本平台為數位內容服務，依消保法規定，虛擬商品及服務一經金鑰綁定與開通，即不適用七天鑑賞期，概不接受退款。</p>
+                </section>
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">2. Terms of Service & Privacy / 服務條款與個資保護</h4>
+                    <p>Abrakai Studio collects your email and name to provide cloud services. Your API Key is stored ONLY in local cache. / 本站收集信箱與姓名僅供雲端會員服務。您的 API 金鑰採本地瀏覽器存儲，不回傳伺服器，絕對安全。</p>
+                </section>
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">3. AI Accuracy / 免責聲明</h4>
+                    <p>Analysis relies on Google Gemini models. We do not guarantee 100% linguistic precision. / AI 解析與翻譯結果由第三方多模態 AI 提供，僅供學習與研究輔助參考，不保證內容絕對精確，本工作室不負相關法律責任。</p>
+                </section>
+            </div>
+            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
+        </div>
+    </div>
+
+    <!-- Modals for Messages and Profiles... -->
     <div id="user-msg-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-lg animate-in zoom-in-95 duration-200 flex flex-col h-[80vh] text-left">
             <div class="flex justify-between items-center border-b-2 border-slate-100 pb-4 mb-4">
@@ -563,142 +603,7 @@
         </div>
     </div>
 
-    <div id="admin-msg-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md transition-opacity p-4">
-        <div class="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 text-left">
-            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-6 mb-6">
-                <div class="flex items-center gap-3">
-                    <i class="ph-fill ph-chat-circle-dots text-emerald-500 text-4xl"></i>
-                    <div>
-                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Support Chat / 客服信箱</h3>
-                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">User: <span id="admin-msg-target-name" class="text-slate-700">Loading...</span> <span id="admin-msg-target" class="text-slate-400 font-mono"></span></p>
-                    </div>
-                </div>
-                <button type="button" onclick="window.closeAdminMsgModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
-            </div>
-            <div id="admin-chat-history" class="flex-1 overflow-y-auto chat-scroll space-y-5 p-6 mb-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100 shadow-inner h-[50vh] font-bold"></div>
-            <div class="pt-4 border-t-2 border-slate-100 flex gap-3">
-                <textarea id="admin-chat-input" rows="2" placeholder="Type your message to user... / 輸入客服回覆..." class="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-200 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm bg-slate-50 resize-none font-bold"></textarea>
-                <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center border-b-4 border-emerald-800 uppercase tracking-widest">Send / 發送</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
-        <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
-            <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
-                <div class="flex items-center gap-4">
-                    <i class="ph-fill ph-user-list text-emerald-500 text-4xl bg-emerald-50 p-4 rounded-2xl"></i>
-                    <div>
-                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Authority Manager / 會員權限管理</h3>
-                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">Database Editor / 會員資料庫編輯</p>
-                    </div>
-                </div>
-                <button type="button" onclick="window.closeAdminModal()" class="text-slate-300 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
-            </div>
-            <div class="space-y-6 text-left font-black">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Email / 帳號</label>
-                        <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Override Pass / 臨時密碼</label>
-                        <input type="text" id="admin-member-pass" placeholder="Leave empty if unchanged" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Display Name / 姓名</label>
-                    <input type="text" id="admin-member-name" placeholder="Member Name" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-lg shadow-sm font-black">
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Phone / 電話</label>
-                        <input type="text" id="admin-member-phone" placeholder="+886912345678" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-mono">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2"><i class="ph-fill ph-money"></i> Remittance / 匯款五碼</label>
-                        <input type="text" id="admin-member-remittance" placeholder="Ex: 88392" class="w-full px-5 py-4 rounded-2xl border-4 border-emerald-100 bg-emerald-50/50 focus:bg-white focus:border-emerald-500 outline-none text-lg shadow-sm font-mono text-emerald-700 tracking-[0.2em]">
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-50 p-6 rounded-3xl border-2 border-slate-100 shadow-inner">
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Pay Date / 匯款日</label>
-                        <input type="date" id="admin-pay-date" onchange="window.calculateExpiry()" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Months / 期數</label>
-                        <input type="number" id="admin-months" oninput="window.calculateExpiry()" placeholder="12" min="1" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Expiry / 到期日</label>
-                        <input type="date" id="admin-expiry-date" class="w-full px-4 py-3 rounded-xl border-4 border-emerald-200 outline-none text-xs bg-white shadow-md font-black text-emerald-700">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest ml-2">Custom Quota / 專屬次數</label>
-                        <input type="number" id="admin-member-limit" placeholder="留白以套用群組" class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 outline-none text-xs bg-indigo-50 shadow-sm font-black text-indigo-700">
-                    </div>
-                </div>
-                
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Remarks / 行政備註</label>
-                    <textarea id="admin-member-remarks" rows="2" placeholder="Internal notes only..." class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm resize-none font-bold"></textarea>
-                </div>
-                
-                <div class="pt-8 flex gap-4">
-                    <button type="button" onclick="window.closeAdminModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-500 py-5 rounded-2xl font-black transition-all text-xs uppercase tracking-widest">Cancel / 取消</button>
-                    <button type="button" id="admin-save-btn" onclick="window.saveAdminMember()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all text-xs active:scale-95 uppercase tracking-widest border-b-8 border-emerald-950">Update DB / 儲存更新</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 🌟 NEW: Legal Modal with Consumer Rights & Refund Policy to pass NewebPay Verification -->
-    <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
-        <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
-            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Legal / 隱私政策與服務條款</h3>
-            
-            <div class="bg-yellow-50 text-yellow-800 p-5 rounded-xl border border-yellow-200 mb-8 text-xs font-bold leading-relaxed shadow-sm">
-                本網站僅提供繁體中文字，單字書寫教學、注音、破音字、詞彙、成語解析等服務。<br>
-                至於成為VIP會員後可以搭配AI成語解析與翻譯，所需使用的API Key Token使用量與計費，請與Google API Studio廠商聯繫購買與續約。AI費用與本網站服務產品無關。
-            </div>
-
-            <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
-                <section class="border-l-4 border-slate-200 pl-6">
-                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Consumer Rights & Refund / 消費者權益與退款政策</h4>
-                    <p>Digital services are activated upon binding. According to Consumer Protection Law, digital content services do not apply to the 7-day cooling-off period. No refunds after activation. / 本平台為數位內容服務，依消保法規定，虛擬商品及服務一經金鑰綁定與開通，即不適用七天鑑賞期，概不接受退款。</p>
-                </section>
-                <section class="border-l-4 border-slate-200 pl-6">
-                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">2. Terms of Service & Privacy / 服務條款與個資保護</h4>
-                    <p>Abrakai Studio collects your email and name to provide cloud services. Your API Key is stored ONLY in local cache. / 本站收集信箱與姓名僅供雲端會員服務。您的 API 金鑰採本地瀏覽器存儲，不回傳伺服器，絕對安全。</p>
-                </section>
-                <section class="border-l-4 border-slate-200 pl-6">
-                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">3. AI Accuracy / 免責聲明</h4>
-                    <p>Analysis relies on Google Gemini models. We do not guarantee 100% linguistic precision. / AI 解析與翻譯結果由第三方多模態 AI 提供，僅供學習與研究輔助參考，不保證內容絕對精確，本工作室不負相關法律責任。</p>
-                </section>
-            </div>
-            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
-        </div>
-    </div>
-
-    <footer class="bg-slate-100 border-t-4 border-slate-200 pt-12 pb-16 text-center text-slate-400 relative z-10">
-        <div class="max-w-5xl mx-auto px-6 font-black space-y-4">
-            <div class="flex flex-wrap justify-center gap-4 text-[11px] text-slate-500 font-bold underline mb-6">
-                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">服務條款 (Terms of Service)</a>
-                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">隱私權政策 (Privacy Policy)</a>
-                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">退款政策 (Refund Policy)</a>
-                <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">消費者權益 (Consumer Rights)</a>
-            </div>
-            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.6-FINAL-CLEAN-ARCH</p>
-            <p class="uppercase tracking-widest text-[10px]">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
-            <p class="opacity-60 max-w-3xl mx-auto leading-relaxed text-[10px] italic">
-                Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
-                免責聲明：所有數據均由多模態 AI 提供，僅供教學研究參考。
-            </p>
-        </div>
-    </footer>
-
+    <!-- Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -1226,9 +1131,9 @@
                             </ul>
                         </div>
 
-                        <div class="border-b border-slate-100 pb-3 pt-6"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與翻譯。</span></p></div>
-                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">英翻中、中文拆字書寫教學與練習。</span></span></p>
-                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, vocabulary, and bilingual idioms.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、常用詞彙與成語雙語解析。</span></p></div>
+                        <div class="border-b border-slate-100 pb-3 pt-6"><h4 class="text-sm font-black text-slate-700 flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-emerald-500"></i> Free Plan / 免費版</h4><p class="text-[11px] text-slate-500 mt-1 font-bold">Daily limits applied based on your account tier.<br><span class="italic font-normal text-[10px] text-slate-400">依照您的帳號等級，提供每日固定次數之基礎拆字與多國語言字面機翻。</span></p></div>
+                        <div class="border-b border-slate-100 pb-3"><h4 class="text-sm font-black text-yellow-600 flex items-center gap-1.5"><i class="ph-fill ph-crown text-yellow-500"></i> Premium / VIP 尊榮版</h4><p class="text-[11px] text-slate-700 mt-1 font-bold">♾️ Unlimited (無限次數): <span class="font-normal text-slate-600">Unlimited translation and character writing practice.<br><span class="italic text-[10px] text-slate-400">繁中拆字書寫教學與無限次發音練習。</span></span></p>
+                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl"><p class="text-[10px] text-indigo-700 font-bold mb-1">✨ Unlock magic with API KEY (自備 API KEY 開啟魔法之門):</p><p class="text-[11px] text-indigo-900 leading-relaxed font-bold">🧠 Cloud AI Engine: Deep analysis of Zhuyin, polyphonic characters, and BILINGUAL idiom explanations.<br><span class="italic font-normal text-[10px] text-indigo-600">雲端 AI 深度解析引擎：解鎖精準注音、破音字辨識、最精準的多國語言成語意譯與深度文化解析。</span></p></div>
                         </div>
                         
                         <div class="pt-6">
@@ -2422,7 +2327,7 @@
         window.handleReverseTranslate = async function(text) {
             if(!text) return;
             const engInput = document.getElementById('eng-input');
-            const selectEl = document.getElementById('target-lang-select');
+            const selectEl = document.getElementById('native-lang-selector');
             const targetLangCode = selectEl ? selectEl.value : 'en';
             const targetLangName = selectEl && selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].getAttribute('data-name') : 'English';
             
@@ -2535,7 +2440,7 @@
             cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             
-            const selectEl = document.getElementById('target-lang-select');
+            const selectEl = document.getElementById('native-lang-selector');
             const targetLangCode = selectEl ? selectEl.value : 'en';
             ut.lang = targetLangCode;
             
@@ -2784,7 +2689,7 @@
                 let data = { zhuyin: "", radical: cleanRadical, strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
                 
                 // 抓取母語選擇設定
-                const selectEl = document.getElementById('target-lang-select');
+                const selectEl = document.getElementById('native-lang-selector');
                 const targetLangCode = selectEl ? selectEl.value : 'en';
 
                 if (dictData.heteronyms && dictData.heteronyms.length > 0) {
@@ -2832,7 +2737,6 @@
                                 }
                                 
                                 const queryText = `成語：${idiom}。解釋：${meaning}`;
-                                // 修正此處將原本寫死成英文(en)的代碼換成使用者選擇的母語(targetLangCode)
                                 const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(queryText)}`);
                                 const gtData = await gtRes.json();
                                 let enTrans = gtData[0].map(item => item[0]).join('');
@@ -2944,7 +2848,7 @@
                 let success = false;
                 let modelErrors = [];
                 
-                const selectEl = document.getElementById('target-lang-select');
+                const selectEl = document.getElementById('native-lang-selector');
                 const targetLangName = selectEl && selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].getAttribute('data-name') : 'English';
                 
                 for (const model of modelNames) {
@@ -3024,14 +2928,12 @@
                     const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
                     if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
                         seenPoly.add(pureZhuyin);
-                        // 🌐 破音字語音優化：抓取該破音字的「第一個範例詞彙」，以確保 TTS 唸出正確聲調
-                        const exampleWord = (p.examples && p.examples.length > 0) ? window.getStr(p.examples[0]).replace(/'/g, "\\'") : pureZhuyin;
-                        
+                        // 🌐 破音字語音優化：退回 pureZhuyin 交由 bopoToCharMap 攔截正確替身字發音，不唸整個造詞
                         polyHTML += `
                             <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
                                 <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
                                 <div class="flex-1"></div>
-                                <button type="button" data-action="speak" data-text="${exampleWord}" data-fallback="${pureZhuyin}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
+                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
                                     <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
                                 </button>
                             </div>
@@ -3060,7 +2962,7 @@
                 idiomsCont.innerHTML = validIdioms.map(i => {
                     const isAITranslation = window.hasValidApiKey() && (window.isVIP || window.isAdmin);
                     
-                    const selectEl = document.getElementById('target-lang-select');
+                    const selectEl = document.getElementById('native-lang-selector');
                     const displayLangName = selectEl && selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].getAttribute('data-name') : 'English';
                     
                     const transLabel = isAITranslation ? `<span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">${displayLangName} / AI 文化意譯：</span>` : `<span class="text-xs text-slate-400 uppercase tracking-widest font-black italic flex items-center gap-1"><i class="ph-fill ph-lock-key"></i> ${displayLangName} / 機翻：</span>`;

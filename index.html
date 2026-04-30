@@ -6,7 +6,7 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.2-API-EXPANSION"
+    version: "6.9.3-PAYMENT-COMPLIANCE"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
@@ -17,8 +17,8 @@
       - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
       - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
       - "Fix: Idiom translation JSON key updated to 'translation' to force AI context compliance."
-      - "Fix: Fallback Google Translate pure Chinese query string to avoid English bias."
-      - "Enhancement: Expanded API model rotation pool to include Gemini 3.1 and Flash-Lite models based on Google AI Studio limits."
+      - "Fix: Handle Translate & Reverse Translate now use full model rotation AND graceful fallback to GTX."
+      - "Compliance: Rewrote Legal Modal to explicitly include Refund Policy and Terms of Service for NewebPay audit."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -600,27 +600,31 @@
         </div>
     </div>
 
+    <!-- 🌟 NEW: Legal Modal with Consumer Rights & Refund Policy to pass NewebPay Verification -->
     <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
         <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
-            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Data Privacy / 個資保護與免責聲明</h3>
+            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Legal / 隱私政策與服務條款</h3>
             <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
                 <section class="border-l-4 border-slate-200 pl-6">
-                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Data Privacy / 個資保護</h4>
-                    <p>Abrakai Studio collects your email and name to provide cloud services. / 本站收集信箱與姓名僅供雲端會員服務。</p>
-                    <p class="mt-2 text-slate-400">Your API Key is stored ONLY in local cache. / 您的金鑰採本地存儲，絕對安全。</p>
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Consumer Rights & Refund / 消費者權益與退款政策</h4>
+                    <p>Digital services are activated upon binding. According to Consumer Protection Law, digital content services do not apply to the 7-day cooling-off period. No refunds after activation. / 本平台為數位內容服務，依消保法規定，虛擬商品及服務一經金鑰綁定與開通，即不適用七天鑑賞期，概不接受退款。</p>
                 </section>
                 <section class="border-l-4 border-slate-200 pl-6">
-                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">2. AI Accuracy / 免責聲明</h4>
-                    <p>Analysis relies on Google Gemini models. We do not guarantee 100% linguistic precision. / AI 解析僅供學習參考，不保證絕對精確。</p>
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">2. Terms of Service & Privacy / 服務條款與個資保護</h4>
+                    <p>Abrakai Studio collects your email and name to provide cloud services. Your API Key is stored ONLY in local cache. / 本站收集信箱與姓名僅供雲端會員服務。您的 API 金鑰採本地瀏覽器存儲，不回傳伺服器，絕對安全。</p>
+                </section>
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">3. AI Accuracy / 免責聲明</h4>
+                    <p>Analysis relies on Google Gemini models. We do not guarantee 100% linguistic precision. / AI 解析與翻譯結果由第三方多模態 AI 提供，僅供學習與研究輔助參考，不保證內容絕對精確，本工作室不負相關法律責任。</p>
                 </section>
             </div>
-            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱</button></div>
+            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
         </div>
     </div>
 
     <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
         <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.9.1-MULTILINGUAL-ENHANCED</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.9.3-PAYMENT-COMPLIANCE</p>
             <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -2242,23 +2246,47 @@
             
             if(engInput) engInput.value = "Translating... / 同步反向翻譯中...";
             try {
+                let trans = "";
+                let aiSuccess = false;
+
                 if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
+                    const modelNames = [
+                        "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
+                        "gemini-3.1-pro", "gemini-3.1-flash-lite", 
+                        "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"
+                    ];
                     const prompt = `Translate the following Traditional Chinese text to ${targetLangName}. Output ONLY the exact translated string. NO explanations, NO quotes, NO extra words. Text: "${text}"`;
-                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const result = await res.json();
-                    if (result.error) throw new Error(result.error.message);
-                    if(engInput) engInput.value = window.getStr(result.candidates[0].content.parts[0].text).trim().replace(/[「」""'']/g, '');
-                } else {
+
+                    for (const model of modelNames) {
+                        try {
+                            const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                            });
+                            const result = await res.json();
+                            if (result.error) throw new Error(result.error.message);
+                            trans = result.candidates[0].content.parts[0].text;
+                            aiSuccess = true;
+                            break;
+                        } catch (e) {
+                            console.warn(`Reverse Translation AI model ${model} failed, trying next...`);
+                        }
+                    }
+                }
+
+                if (!aiSuccess) {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(text)}`);
                     if (!res.ok) throw new Error("GTX API failed");
                     const d = await res.json();
-                    if (d && d[0] && engInput) {
-                        engInput.value = window.getStr(d[0].map(item => item[0]).join('')).trim().replace(/[「」""'']/g, '');
-                    }
+                    if (d && d[0]) { trans = d[0].map(item => item[0]).join(''); }
                 }
+
+                if (engInput && trans) {
+                    engInput.value = window.getStr(trans).trim().replace(/[「」""'']/g, '');
+                } else {
+                    throw new Error("Empty translation result");
+                }
+
             } catch (e) {
                 console.error("Reverse Translation Error:", e);
                 if(engInput) engInput.value = "Translation Failed / 翻譯失敗";
@@ -2348,17 +2376,34 @@
             
             try {
                 let trans = "";
+                let aiSuccess = false;
                 
                 if ((window.isVIP || window.isAdmin) && window.hasValidApiKey()) {
+                    const modelNames = [
+                        "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
+                        "gemini-3.1-pro", "gemini-3.1-flash-lite", 
+                        "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"
+                    ];
                     const prompt = `Translate to Traditional Chinese (Taiwan). Output ONLY the exact translated Chinese string. NO explanations, NO quotes, NO extra words. Text: "${word}"`;
-                    const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${window.activeApiKey}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const result = await res.json();
-                    if (result.error) throw new Error(result.error.message);
-                    trans = result.candidates[0].content.parts[0].text;
-                } else {
+
+                    for (const model of modelNames) {
+                        try {
+                            const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                            });
+                            const result = await res.json();
+                            if (result.error) throw new Error(result.error.message);
+                            trans = result.candidates[0].content.parts[0].text;
+                            aiSuccess = true;
+                            break;
+                        } catch (e) {
+                            console.warn(`Translation AI model ${model} failed, trying next...`);
+                        }
+                    }
+                } 
+                
+                if (!aiSuccess) {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     if (!res.ok) throw new Error("GTX API failed");
                     const d = await res.json();

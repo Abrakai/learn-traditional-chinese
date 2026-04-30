@@ -6,7 +6,7 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.1-MULTILINGUAL-ENHANCED"
+    version: "6.9.2-API-EXPANSION"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
@@ -17,8 +17,8 @@
       - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
       - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
       - "Fix: Idiom translation JSON key updated to 'translation' to force AI context compliance."
-      - "Fix: Fallback Google Translate now binds to targetLangCode instead of hardcoded 'en'."
-      - "Enhancement: Expanded API model rotation pool to include 2.5-flash and pro models to bypass rate limits."
+      - "Fix: Fallback Google Translate pure Chinese query string to avoid English bias."
+      - "Enhancement: Expanded API model rotation pool to include Gemini 3.1 and Flash-Lite models based on Google AI Studio limits."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -2590,7 +2590,7 @@
                                     meaning = idiomData.heteronyms[0].definitions.map(d => d.def).join('；').replace(/<[^>]+>/g, '');
                                 }
                                 
-                                const queryText = `Idiom: ${idiom}. Explanation: ${meaning}`;
+                                const queryText = `成語：${idiom}。解釋：${meaning}`;
                                 // 修正此處將原本寫死成英文(en)的代碼換成使用者選擇的母語(targetLangCode)
                                 const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(queryText)}`);
                                 const gtData = await gtRes.json();
@@ -2686,7 +2686,12 @@
                 if(errorPanel) errorPanel.classList.add('hidden');
                 document.getElementById('active-engine-badge').classList.add('hidden');
 
-                const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro"];
+                // 擴充模型輪詢陣列，涵蓋最新的 Gemini 3.1/2.5 系列，提升 API 容錯率
+                const modelNames = [
+                    "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
+                    "gemini-3.1-pro", "gemini-3.1-flash-lite", 
+                    "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"
+                ];
                 
                 let success = false;
                 let modelErrors = [];
@@ -2702,8 +2707,8 @@
 3. strokes: 該字的總筆畫數 (僅需數字)。
 4. words: 僅限發音為「主要注音」的常用詞彙 (最多5個)。
 5. polyphonic: 破音字清單。每個破音字需包含 zhuyin 與 examples。
-6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；translation 請針對前述的中文解析，進行全${targetLangName}翻譯與解析（Translate the detailed Chinese meaning into ${targetLangName} comprehensively）。
-格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "translation": "在此填入 ${targetLangName} 的翻譯結果"}]}`;
+6. idioms: 包含「${char}」的成語 (最多4個)。【極度重要】：meaning 請用繁體中文詳細解釋；translation 請將前述的成語與解釋，完整翻譯成「${targetLangName}」（務必直接輸出 ${targetLangName} 的翻譯結果，嚴禁保留英文提示詞，例如 Idiom: 或 Explanation:）。
+格式：{"zhuyin": "注音", "radical": "部首", "strokes": "數字", "polyphonic": [{"zhuyin": "破音", "examples": ["詞"]}], "words": ["詞"], "idioms": [{"idiom": "成語", "meaning": "解釋", "translation": "在此填入純 ${targetLangName} 的翻譯結果"}]}`;
                         
                         const res = await window.fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.activeApiKey}`, {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },

@@ -6,10 +6,19 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.9-ULTIMATE-B2B-SECURE-FULL"
+    version: "6.9.4-NEWEBPAY-COMPLIANCE"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
+    updates:
+      - "UI: Auth forms hidden by default. Added Login/Signup button in Header for guest experience first."
+      - "Feature: Multi-language selector added to Section 1."
+      - "Feature: Bidirectional translate with robust API fallback. Decompose Chinese synchronously translates back to native language."
+      - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
+      - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
+      - "Fix: Translate & Reverse Translate now strictly fallback to GTX when API limits are reached to prevent 'Translation Failed'."
+      - "Compliance: Added 'Terms of Service' and 'Refund Policy' directly to pricing section and Legal Modal to pass NewebPay audit."
+      - "Enhancement: Payment sections (USD/TWD) are now collapsible accordions for cleaner UI."
     ---
     -->
     <!-- Tailwind CSS -->
@@ -38,7 +47,11 @@
         .chat-scroll::-webkit-scrollbar-track { background: transparent; }
         .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         #hanzi-target { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); max-width: 100%; height: auto; }
-        @media (max-width: 767px) { body.typing-mode header { transform: translateY(-100%); opacity: 0; pointer-events: none; } }
+        
+        /* Mobile Typing Mode Auto-Hide CSS */
+        @media (max-width: 767px) {
+            body.typing-mode header { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        }
     </style>
 
     <script>
@@ -85,8 +98,14 @@
         <i id="toast-icon" class="ph-fill text-lg flex-shrink-0"></i><span id="toast-msg" class="truncate"></span>
     </div>
 
+    <div id="auth-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-xs font-bold sticky top-0 z-[60] shadow-lg animate-pulse">
+        <i class="ph-fill ph-warning-circle text-lg"></i> 
+        <span id="error-banner-text">System Connection Stable / 系統連線狀態良好</span>
+    </div>
+
     <header class="bg-red-600 text-white shadow-md sticky top-0 z-50 transition-all duration-300 ease-in-out">
         <div class="max-w-6xl mx-auto px-3 py-3 md:px-4 md:py-5 flex flex-row items-center justify-between gap-1.5 md:gap-4 w-full">
+            
             <div class="flex items-center gap-1.5 md:gap-3 flex-1 min-w-0 pr-1">
                 <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg md:rounded-xl flex items-center justify-center text-red-600 shadow-inner flex-shrink-0 transition-all">
                     <i class="ph-fill ph-book-open-text text-[clamp(1.1rem,3vw,1.5rem)]"></i>
@@ -101,6 +120,7 @@
             </div>
             
             <div class="flex items-center gap-1.5 md:gap-3 justify-end flex-shrink-0">
+                
                 <div id="view-counter-badge" class="flex flex-col items-start sm:items-center justify-center bg-slate-800/80 px-2 py-1 md:px-3 md:py-1.5 rounded-md sm:rounded-lg border border-slate-600 shadow-sm transition-all leading-none gap-1 w-max">
                     <div class="flex items-center gap-1 text-[8px] sm:text-[9px] md:text-[10px] font-black text-slate-300 tracking-widest uppercase">
                         <i class="ph-fill ph-eye text-emerald-400 text-[10px] sm:text-sm" title="Total Views"></i>
@@ -175,7 +195,7 @@
             <div class="flex flex-col md:flex-row gap-4 relative z-0">
                 <div class="flex-1 relative flex items-center group">
                     <input type="text" id="eng-input" placeholder="Type text here... / 輸入您的母語進行翻譯" class="w-full px-6 py-4 pr-12 rounded-2xl border-2 border-slate-100 text-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 focus:bg-white font-bold">
-                    <button type="button" onclick="window.speakNative(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
+                    <button type="button" onclick="window.speakTargetLang(document.getElementById('eng-input').value)" class="absolute right-4 text-slate-400 hover:text-blue-600 transition-colors p-2 text-2xl" title="Listen"><i class="ph-fill ph-speaker-high"></i></button>
                 </div>
                 <button type="button" id="translate-btn" onclick="window.handleTranslate()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black shadow-md active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest transition-all whitespace-nowrap border-b-4 border-blue-900 text-sm"><span>Execute / 翻譯</span><div id="translate-loader" class="loader hidden border-white border-t-blue-300"></div></button>
             </div>
@@ -410,7 +430,7 @@
                 <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">退款政策 (Refund Policy)</a>
                 <a href="#" onclick="window.openLegalModal(); return false;" class="hover:text-red-600 transition-colors">消費者權益 (Consumer Rights)</a>
             </div>
-            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v6.9.9-ULTIMATE-B2B-SECURE-FULL</p>
+            <p class="uppercase tracking-[0.5em] text-slate-300 text-[10px]">Production Core v7.0.0-ULTIMATE-B2B-SECURE-FULL</p>
             <p class="uppercase tracking-widest text-[10px]">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
             <p class="opacity-60 max-w-3xl mx-auto leading-relaxed text-[10px] italic">
                 Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
@@ -443,7 +463,6 @@
                         <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Limit / 每日額度</label>
                         <input type="number" id="new-promo-limit" placeholder="30" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-black text-purple-900 text-center">
                     </div>
-                    <!-- 🌐 B2B Seat Licensing：新增 Max Users 欄位 -->
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">Max Users / 授權人數上限</label>
                         <input type="number" id="new-promo-max-users" placeholder="留空為無限" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:bg-white focus:border-purple-500 outline-none text-sm shadow-sm font-black text-purple-900 text-center">
@@ -571,6 +590,77 @@
             <div class="pt-4 border-t-2 border-slate-100 flex gap-3">
                 <textarea id="admin-chat-input" rows="2" placeholder="Type your message to user... / 輸入客服回覆..." class="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-200 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm bg-slate-50 resize-none font-bold"></textarea>
                 <button type="button" id="admin-chat-send-btn" onclick="window.sendAdminMsg()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center border-b-4 border-emerald-800 uppercase tracking-widest">Send / 發送</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="hidden fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
+        <div class="bg-white rounded-[3.5rem] shadow-2xl p-8 md:p-12 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
+            <div class="flex justify-between items-center border-b-4 border-emerald-50 pb-8 mb-8">
+                <div class="flex items-center gap-4">
+                    <i class="ph-fill ph-user-list text-emerald-500 text-4xl bg-emerald-50 p-4 rounded-2xl"></i>
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tighter uppercase">Authority Manager / 會員權限管理</h3>
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">Database Editor / 會員資料庫編輯</p>
+                    </div>
+                </div>
+                <button type="button" onclick="window.closeAdminModal()" class="text-slate-300 hover:text-red-500 transition-colors"><i class="ph ph-x text-3xl font-bold"></i></button>
+            </div>
+            <div class="space-y-6 text-left font-black">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Email / 帳號</label>
+                        <input type="email" id="admin-member-email" placeholder="example@gmail.com" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Override Pass / 臨時密碼</label>
+                        <input type="text" id="admin-member-pass" placeholder="Leave empty if unchanged" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-bold">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Display Name / 姓名</label>
+                    <input type="text" id="admin-member-name" placeholder="Member Name" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-lg shadow-sm font-black">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Phone / 電話</label>
+                        <input type="text" id="admin-member-phone" placeholder="+886912345678" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm font-mono">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2"><i class="ph-fill ph-money"></i> Remittance / 匯款五碼</label>
+                        <input type="text" id="admin-member-remittance" placeholder="Ex: 88392" class="w-full px-5 py-4 rounded-2xl border-4 border-emerald-100 bg-emerald-50/50 focus:bg-white focus:border-emerald-500 outline-none text-lg shadow-sm font-mono text-emerald-700 tracking-[0.2em]">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-50 p-6 rounded-3xl border-2 border-slate-100 shadow-inner">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Pay Date / 匯款日</label>
+                        <input type="date" id="admin-pay-date" onchange="window.calculateExpiry()" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Months / 期數</label>
+                        <input type="number" id="admin-months" oninput="window.calculateExpiry()" placeholder="12" min="1" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 outline-none text-xs bg-white shadow-sm font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-2">Expiry / 到期日</label>
+                        <input type="date" id="admin-expiry-date" class="w-full px-4 py-3 rounded-xl border-4 border-emerald-200 outline-none text-xs bg-white shadow-md font-black text-emerald-700">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest ml-2">Custom Quota / 專屬次數</label>
+                        <input type="number" id="admin-member-limit" placeholder="留白以套用群組" class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 outline-none text-xs bg-indigo-50 shadow-sm font-black text-indigo-700">
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Remarks / 行政備註</label>
+                    <textarea id="admin-member-remarks" rows="2" placeholder="Internal notes only..." class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-sm shadow-sm resize-none font-bold"></textarea>
+                </div>
+                
+                <div class="pt-8 flex gap-4">
+                    <button type="button" onclick="window.closeAdminModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-500 py-5 rounded-2xl font-black transition-all text-xs uppercase tracking-widest">Cancel / 取消</button>
+                    <button type="button" id="admin-save-btn" onclick="window.saveAdminMember()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all text-xs active:scale-95 uppercase tracking-widest border-b-8 border-emerald-950">Update DB / 儲存更新</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2323,8 +2413,6 @@
             }
         };
 
-        // --- 8. 雙向翻譯聯動引擎 (Bidirectional Translation Engine) ---
-        
         window.handleReverseTranslate = async function(text) {
             if(!text) return;
             const engInput = document.getElementById('eng-input');
@@ -2386,18 +2474,13 @@
             }
         };
 
-        // --- 9. 語音播報優化引擎 (Voice Engine Optimization) ---
         window.speak = function(text, fallbackChar = null) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            // 🌐 靜默過濾器 (Emoji Stripper)：過濾掉所有圖示雜音，確保純粹發音
             let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-            
-            // Lookbehind Regex 處理：若符號前後都是數字（數學算式），則不替換，使其唸出；否則替換為全形逗號產生自然停頓
             cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
             
-            // 🌐 破音字防呆：若輸入為純注音且無法在 bopoToCharMap 中對應到字，則使用 fallbackWord (例如該破音字所屬的範例造詞) 發音，保證 TTS 唸出正確聲調
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
                 if (bopoToCharMap[mapBopo]) {
@@ -2771,16 +2854,9 @@
                         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 text-red-500"><i class="ph-fill ph-warning-circle text-3xl animate-pulse"></i></div>
                             <div class="flex-1">
-                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降維靜態辭典</h4>
-                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">
-                                    The system has attempted the 8 API models, but the quota is full. Please apply for a new key or renew your subscription at Google AI Studio.<br>
-                                    系統已嘗試如下八種 API 模型，額度已滿。請您重新向 Google AI Studio 申請或繳費續約。
-                                </p>
-                                <p class="text-xs text-emerald-700 font-bold leading-relaxed mb-4">
-                                    Meanwhile, the system will downgrade to static dictionary mode. Do not worry about service interruption.<br>
-                                    在此之前，系統將降維採靜態辭典持續服務。您無須擔心使用中斷。
-                                </p>
-                                <p class="text-[10px] text-slate-500 italic mb-4">Attempted / 嘗試模組: ${errorContext.models}</p>
+                                <h4 class="text-base font-black text-red-600 mb-1 tracking-tight">⚠️ API Quota Exceeded / 額度耗盡，降級基礎字典</h4>
+                                <p class="text-xs text-indigo-800 font-bold leading-relaxed mb-2">System attempted models: ${errorContext.models}, but your API quota is full.<br>系統已為您嘗試 ${errorContext.models} 模組，但您的金鑰額度皆已滿。<br><br>Please apply for a new API Key or set up billing in Google AI Studio.<br>請重新申請 API Key，或前往 Google AI Studio 繳費申請更大使用量。</p>
+                                <p class="text-[10px] text-slate-500 italic mb-4">Disclaimer: AI feature availability depends on your Google API Key status. / 免責聲明：此 AI 擴充功能能否使用取決於您的 Google 金鑰狀態，與本系統 (Abrakai Studio) 無關。</p>
                                 <button type="button" onclick="window.openProfileModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-4 border-slate-700">Update API Key / 前往設定更新金鑰</button>
                             </div>
                         </div>
@@ -2896,6 +2972,172 @@
                 if(errorPanel) errorPanel.classList.remove('hidden');
             }
         };
+
+        window.renderResult = function(char, data) {
+            const radicalDisplay = document.getElementById('radical-display');
+            const strokesDisplay = document.getElementById('strokes-display');
+            if (radicalDisplay) radicalDisplay.textContent = window.getStr(data.radical) || 'Unknown / 未知';
+            if (strokesDisplay) strokesDisplay.textContent = window.getStr(data.strokes) ? `${data.strokes}` : '--';
+
+            const pureMainZhuyin = window.getStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+            document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
+            const pb = document.getElementById('play-char-btn');
+            
+            if(pb) {
+                pb.classList.remove('hidden'); 
+                pb.setAttribute('data-action', 'speak'); 
+                pb.setAttribute('data-text', pureMainZhuyin); 
+                pb.setAttribute('data-fallback', char); 
+            }
+            
+            const polyDisp = document.getElementById('polyphonic-display'); 
+            polyDisp.innerHTML = '';
+            const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
+            
+            let seenPoly = new Set();
+            seenPoly.add(pureMainZhuyin);
+
+            let polyHTML = '';
+            if (validPolyphonic.length > 0) {
+                validPolyphonic.forEach(p => {
+                    const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
+                    if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
+                        seenPoly.add(pureZhuyin);
+                        polyHTML += `
+                            <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
+                                <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
+                                <div class="flex-1"></div>
+                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
+                                    <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            if (polyHTML) {
+                document.getElementById('poly-section-wrap').style.display = 'block';
+                polyDisp.innerHTML = polyHTML;
+            } else {
+                document.getElementById('poly-section-wrap').style.display = 'none';
+            }
+            
+            const wordsCont = document.getElementById('words-container');
+            wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
+                    const pureWord = window.getStr(w).replace(/\([^)]*\)/g, '').trim();
+                    return `<span data-action="speak" data-text="${pureWord}" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-md hover:border-indigo-400 transition-all italic">${pureWord}</span>`;
+            }).join('');
+            
+            const idiomsCont = document.getElementById('idioms-container');
+            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
+            
+            if (validIdioms.length > 0) {
+                idiomsCont.innerHTML = validIdioms.map(i => {
+                    const isAITranslation = window.hasValidApiKey() && (window.isVIP || window.isAdmin);
+                    
+                    const selectEl = document.getElementById('native-lang-selector');
+                    const displayLangName = selectEl && selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].getAttribute('data-name') : 'English';
+                    
+                    const transLabel = isAITranslation ? `<span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">${displayLangName} / AI 文化意譯：</span>` : `<span class="text-xs text-slate-400 uppercase tracking-widest font-black italic flex items-center gap-1"><i class="ph-fill ph-lock-key"></i> ${displayLangName} / 機翻：</span>`;
+                    const transColor = isAITranslation ? `text-indigo-500 font-bold` : `text-slate-500 font-medium`;
+                    const translatedText = window.getStr(i.translation || i.english);
+
+                    return `
+                    <div class="p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] text-sm font-bold shadow-sm text-left hover:shadow-md transition-all relative group">
+                        <div class="flex-1 pr-16">
+                            <div class="text-slate-950 text-2xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-3 inline-block">${window.getStr(i.idiom)}</div>
+                            
+                            <div class="mt-4 flex flex-col items-start gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-400 uppercase tracking-widest font-black italic">Meanings / 解析：</span>
+                                    <button type="button" data-action="speak" data-text="${window.getStr(i.meaning)}" class="text-slate-300 hover:text-emerald-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                </div>
+                                <div class="text-base text-slate-600 font-bold leading-relaxed">${window.getStr(i.meaning)}</div>
+                            </div>
+                            
+                            <div class="mt-4 border-t pt-3 border-slate-100 flex flex-col items-start gap-2">
+                                <div class="flex items-center gap-2">
+                                    ${transLabel}
+                                    <button type="button" data-action="speak-target" data-text="${translatedText.replace(/'/g, "\\'")}" class="${isAITranslation ? 'text-indigo-300 hover:text-indigo-500' : 'text-slate-300 hover:text-slate-500'} transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
+                                </div>
+                                <div class="text-[13px] ${transColor} tracking-wide opacity-90 leading-relaxed">${translatedText || "Translation loading..."}</div>
+                            </div>
+                        </div>
+                        <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="absolute top-8 right-8 w-12 h-12 bg-emerald-500 text-white rounded-[1.25rem] shadow-lg transition-transform group-hover:scale-110 active:scale-90 flex items-center justify-center" title="播放成語"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
+                    </div>
+                `}).join('');
+            } else {
+                idiomsCont.innerHTML = `<div class="p-10 text-center text-slate-400 italic font-bold">目前無相關成語紀錄。</div>`;
+            }
+        };
+
+        window.initViewCounter = async function() {
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const statsRef = doc(db, "artifacts", appId, "public", "data", "system_stats", "visits");
+                
+                let localTotal = parseInt(localStorage.getItem('abra_local_total') || '1520', 10);
+                let localToday = parseInt(localStorage.getItem('abra_local_today') || '42', 10);
+                let localDate = localStorage.getItem('abra_local_date');
+
+                if (localDate !== todayStr) {
+                    localToday = 0;
+                    localStorage.setItem('abra_local_date', todayStr);
+                }
+
+                localTotal++;
+                localToday++;
+                localStorage.setItem('abra_local_total', localTotal.toString());
+                localStorage.setItem('abra_local_today', localToday.toString());
+
+                const updateBadge = (total, today) => {
+                    document.getElementById('total-views').textContent = total;
+                    document.getElementById('today-views').textContent = today;
+                };
+
+                updateBadge(localTotal, localToday);
+
+                try {
+                    const docSnap = await getDoc(statsRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const realTotal = (data.total || 0) + 1;
+                        let realToday = (data.lastDate === todayStr) ? (data.todayViews || 0) + 1 : 1;
+                        
+                        updateBadge(realTotal, realToday);
+                        localStorage.setItem('abra_local_total', realTotal.toString());
+                        localStorage.setItem('abra_local_today', realToday.toString());
+
+                        setDoc(statsRef, { total: realTotal, todayViews: realToday, lastDate: todayStr }, { merge: true }).catch(()=>{});
+                    }
+                } catch (dbErr) {
+                    console.warn("View counter background sync restricted. Using local session count.");
+                }
+            } catch(e) {
+                console.error("Counter Error", e);
+            }
+        };
+
+        window.setupTypingMode = function() {
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(el => {
+                el.addEventListener('focus', () => { if (window.innerWidth < 768) document.body.classList.add('typing-mode'); });
+                el.addEventListener('blur', () => { setTimeout(() => document.body.classList.remove('typing-mode'), 150); });
+            });
+        };
+
+        document.addEventListener('click', (e) => {
+            const actionEl = e.target.closest('[data-action]');
+            if (!actionEl) return;
+            const action = actionEl.getAttribute('data-action');
+            if (action === 'admin-edit') window.openAdminModal(actionEl.getAttribute('data-id'));
+            else if (action === 'admin-delete') window.deleteAdminMember(actionEl.getAttribute('data-id'), actionEl);
+            else if (action === 'admin-msg') window.openAdminMsgModal(actionEl.getAttribute('data-id'));
+            else if (action === 'chat-del') window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
+            else if (action === 'speak') window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
+            else if (action === 'speak-target' || action === 'speak-native') window.speakTargetLang(actionEl.getAttribute('data-text'));
+        });
 
         window.onload = function() {
             const langSelector = document.getElementById('native-lang-selector');

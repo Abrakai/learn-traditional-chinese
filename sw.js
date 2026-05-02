@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abra-learn-tw-v1';
+const CACHE_NAME = 'abra-learn-tw-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -10,9 +10,26 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  // 1. 強制接管：跳過等待，立即啟動並安裝新的 Service Worker
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('activate', event => {
+  // 2. 強制接管：接管所有客戶端頁面，並徹底清除舊版 (v1) 的幽靈快取
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
@@ -29,14 +46,22 @@ self.addEventListener('fetch', event => {
       return; // 直接交給瀏覽器原生網路處理，不攔截
   }
 
-  // 3. 一般靜態資源與 UI 介面，執行原本的快取邏輯，確保 PWA 秒開與離線支援
+  // 3. 改為「網路優先 (Network First)」策略：確保每次都抓取最新網頁
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        if (response) { return response; }
-        return fetch(event.request).catch(() => {
-          // Offline fallback logic is handled directly in UI via window 'offline' event
-        });
+        // 如果網路請求成功，將最新版存入快取後回傳給網頁
+        if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseClone);
+            });
+        }
+        return response;
+      })
+      .catch(() => {
+        // 只有在真正「網路斷線」發生 catch 錯誤時，才退而求其次使用本地舊快取 (維持 PWA 離線秒開)
+        return caches.match(event.request);
       })
   );
 });

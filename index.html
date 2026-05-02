@@ -1018,10 +1018,9 @@
                 memberSection: document.getElementById('member-center-section'), adminSection: document.getElementById('admin-dashboard-section'),
                 qCount: document.getElementById('quota-count'), expiryDisplay: document.getElementById('vip-expiry-display'),
                 headerPricingBtn: document.getElementById('header-pricing-btn'), pricingSection: document.getElementById('pricing-section-container'),
-                loginSignupBtn: document.getElementById('login-signup-btn'), plgCta: document.getElementById('plg-login-cta')
+                loginSignupBtn: document.getElementById('login-signup-btn')
             };
 
-            // Requirement 1: Only show the "Sign In" button if NOT logged in
             if (window.isAdmin || emailCode) {
                 if(els.loginSignupBtn) { els.loginSignupBtn.classList.add('hidden'); els.loginSignupBtn.style.display = 'none'; }
                 if(els.logoutBtn) { els.logoutBtn.classList.remove('hidden'); els.logoutBtn.style.display = 'flex'; }
@@ -1056,7 +1055,6 @@
             if (window.isAdmin) {
                 if(els.qDisplay) els.qDisplay.classList.add('hidden');
                 if(els.memberSection) els.memberSection.classList.add('hidden');
-                if(els.plgCta) els.plgCta.classList.add('hidden');
                 if(els.vBadge) {
                     els.vBadge.innerHTML = '<i class="ph-fill ph-shield-check text-base"></i> <span class="hidden sm:inline tracking-tighter uppercase">Admin</span>';
                     els.vBadge.className = "hidden bg-slate-800 text-emerald-400 p-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black border border-emerald-500/30 shadow-lg flex items-center gap-1 animate-in zoom-in whitespace-nowrap ml-0.5 md:ml-1";
@@ -1067,7 +1065,6 @@
 
             } else if (emailCode) {
                 if(els.memberSection) els.memberSection.classList.add('hidden');
-                if(els.plgCta) els.plgCta.classList.add('hidden');
                 if(els.pBtn) els.pBtn.classList.remove('hidden');
                 if(els.mBtn) els.mBtn.classList.remove('hidden');
                 
@@ -1107,7 +1104,6 @@
                     els.qCount.textContent = currentLimit === '∞' ? '∞' : `${Math.max(0, currentLimit - window.freeUsageCount)}/${currentLimit}`;
                 }
                 if(els.vBadge) els.vBadge.classList.add('hidden');
-                if(els.plgCta) els.plgCta.classList.remove('hidden');
                 if(els.headerPricingBtn) {
                     els.headerPricingBtn.innerHTML = `<i class="ph-fill ph-storefront text-base flex-shrink-0"></i> <span id="header-pricing-text" class="hidden sm:inline">Upgrade</span>`;
                     els.headerPricingBtn.className = "hidden w-full justify-center text-[9px] md:text-[10px] bg-yellow-400 hover:bg-yellow-500 text-red-900 p-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-1 shadow-sm font-black whitespace-nowrap";
@@ -1363,7 +1359,6 @@
                         if (docSnap.exists()) {
                             const data = docSnap.data();
                             
-                            // 🌐 B2B Account Sharing Hijack Check
                             const localToken = localStorage.getItem('abra_session_token');
                             if (data.sessionToken && localToken && data.sessionToken !== localToken) {
                                 window.handleLogout(true);
@@ -1376,7 +1371,6 @@
                                 status = (diff >= 0) ? 'active' : 'expired';
                                 localStorage.setItem('abra_vip_days', diff.toString());
                                 
-                                // 【新增】到期日前後 3 天推播通知
                                 if (diff >= -3 && diff <= 3) {
                                     let msgs = data.messages || [];
                                     const todayStr = new Date().toISOString().split('T')[0];
@@ -1384,12 +1378,9 @@
                                     let expStatusText = diff > 0 ? `將於 ${diff} 天後到期` : (diff === 0 ? `將於「今日」到期` : `已過期 ${Math.abs(diff)} 天`);
                                     const todayMsgText = `${msgPrefix}您的尊榮方案${expStatusText}。為確保無間斷使用 AI 解析，請前往「會員中心」續約！(${todayStr})`;
                                     
-                                    // 若今天還沒發過這個特定通知
                                     if (!msgs.some(m => m.text === todayMsgText)) {
-                                        // 刪除過去舊的系統通知
                                         msgs = msgs.filter(m => !m.text.startsWith(msgPrefix));
                                         msgs.push({ role: 'admin', text: todayMsgText, timestamp: new Date().toISOString() });
-                                        // 更新回資料庫 (背景執行)
                                         updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode), { messages: msgs }).catch(e=>console.warn(e));
                                     }
                                 }
@@ -1456,7 +1447,6 @@
                 if (await window.verifyAdminCloud(code)) {
                     localStorage.setItem('abra_admin_status', 'active');
                     window.showToast("Admin Verified / 管理員身分確認.");
-                    // 🌐 強制隱藏 UI 並滾動至頂部
                     document.getElementById('member-center-section')?.classList.add('hidden');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     setTimeout(() => location.reload(), 800);
@@ -1548,7 +1538,6 @@
                             }
                             window.showToast("Login Success! / 登入成功！");
                             
-                            // 🌐 強制隱藏 UI 並滾動至頂部
                             document.getElementById('member-center-section')?.classList.add('hidden');
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                             
@@ -1604,7 +1593,6 @@
                     window.showToast("該專屬邀請碼已過期失效", true);
                     return;
                 }
-                // 🌐 B2B Seat Validation: Check Max Users limit during signup
                 if (promo.maxUsers) {
                     const currentUsers = window.promoStatsMap[inviteCode] || 0;
                     if (currentUsers >= promo.maxUsers) {
@@ -1651,7 +1639,6 @@
                 document.getElementById('login-email').value = email;
                 document.getElementById('login-vip-code').value = pass;
                 
-                // 🌐 強制隱藏 UI 並滾動至頂部
                 document.getElementById('member-center-section')?.classList.add('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
@@ -2042,10 +2029,8 @@
                             if(h !== 'email' && cols[idx] !== undefined) { 
                                 if(h === 'customlimit') {
                                     payload.customLimit = cols[idx] ? parseInt(cols[idx], 10) : null;
-                                } else if(h === 'createdat') {
+                                } else if(h === 'createdat' || h === 'updatedat') {
                                     // Ignore incoming createdat, we handle it internally
-                                } else if(h === 'updatedat') {
-                                    // Ignore incoming updatedat
                                 } else {
                                     payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; 
                                 }
@@ -2117,7 +2102,6 @@
                         return; 
                     }
                     
-                    // 🌐 B2B Seat Validation: Check Max Users limit during profile update
                     if (promo.maxUsers) {
                         const currentUsers = window.promoStatsMap[newInviteCode] || 0;
                         if (currentUsers >= promo.maxUsers) {
@@ -2329,7 +2313,7 @@
             }
         };
 
-window.handleReverseTranslate = async function(text) {
+        window.handleReverseTranslate = async function(text) {
             if(!text) return;
             const engInput = document.getElementById('eng-input');
             const selectEl = document.getElementById('target-lang-select');
@@ -2379,7 +2363,6 @@ window.handleReverseTranslate = async function(text) {
                 if (engInput && trans && trans.trim() !== "") {
                     const finalStr = window.getStr(trans).trim().replace(/[「」""'']/g, '');
                     engInput.value = finalStr;
-                    // 【修復核心】：反向翻譯完成後，自動呼叫對應的母語語音唸出結果！
                     window.speakTargetLang(finalStr);
                 } else {
                     throw new Error("Empty translation result");
@@ -2396,8 +2379,8 @@ window.handleReverseTranslate = async function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            // Lookbehind Regex 處理：若符號前後都是數字（數學算式），則不替換，使其唸出；否則替換為全形逗號產生自然停頓
-            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
+            let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+            cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
             
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
@@ -2440,7 +2423,8 @@ window.handleReverseTranslate = async function(text) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
+            let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+            cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             
             const selectEl = document.getElementById('target-lang-select');
@@ -2691,7 +2675,6 @@ window.handleReverseTranslate = async function(text) {
                 
                 let data = { zhuyin: "", radical: cleanRadical, strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
                 
-                // 抓取母語選擇設定
                 const selectEl = document.getElementById('target-lang-select');
                 const targetLangCode = selectEl ? selectEl.value : 'en';
 
@@ -2737,7 +2720,6 @@ window.handleReverseTranslate = async function(text) {
                                 }
                                 
                                 const queryText = `成語：${idiom}。解釋：${meaning}`;
-                                // 修正此處將原本寫死成英文(en)的代碼換成使用者選擇的母語(targetLangCode)
                                 const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(queryText)}`);
                                 const gtData = await gtRes.json();
                                 let enTrans = gtData[0].map(item => item[0]).join('');
@@ -2832,7 +2814,6 @@ window.handleReverseTranslate = async function(text) {
                 if(errorPanel) errorPanel.classList.add('hidden');
                 document.getElementById('active-engine-badge').classList.add('hidden');
 
-                // 擴充模型輪詢陣列，涵蓋最新的 Gemini 3.1/2.5 系列，提升 API 容錯率
                 const modelNames = [
                     "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
                     "gemini-3.1-pro", "gemini-3.1-flash-lite", 
@@ -2892,7 +2873,11 @@ window.handleReverseTranslate = async function(text) {
             }
         };
 
-        window.onload = function() {
+        let appInitialized = false;
+        const initApp = function() {
+            if (appInitialized) return;
+            appInitialized = true;
+
             const updateOnlineStatus = () => {
                 const banner = document.getElementById('offline-banner');
                 if(banner) {
@@ -2904,9 +2889,9 @@ window.handleReverseTranslate = async function(text) {
             window.addEventListener('offline', updateOnlineStatus);
             updateOnlineStatus();
 
-            const langSelector = document.getElementById('native-lang-selector');
+            const langSelector = document.getElementById('target-lang-select');
             if(langSelector) {
-                langSelector.value = window.currentNativeLang;
+                langSelector.value = window.currentNativeLang || 'en';
             }
             
             const vipContent = document.getElementById('vip-only-content');
@@ -2919,11 +2904,11 @@ window.handleReverseTranslate = async function(text) {
                 `;
                 vipContent.insertBefore(headerDiv, vipContent.firstChild);
             }
+            
             if (window.updateGlobalUI) window.updateGlobalUI();
             if (window.initViewCounter) window.initViewCounter();
             if (window.setupTypingMode) window.setupTypingMode();
             
-            // 🌐 Session Token Hijack Alert
             if (localStorage.getItem('abra_hijack_warn') === 'true') {
                 setTimeout(() => {
                     window.showToast("⚠️ 您已被強制登出：帳號已在其他裝置登入。為保障權益請勿共用帳號。", true);
@@ -2931,6 +2916,14 @@ window.handleReverseTranslate = async function(text) {
                 }, 500);
             }
         };
+
+        // 解決 PWA 載入過快導致的 window.onload Race Condition 問題
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(initApp, 10);
+        } else {
+            window.addEventListener('DOMContentLoaded', initApp);
+            window.addEventListener('load', initApp);
+        }
     </script>
 </body>
 </html>

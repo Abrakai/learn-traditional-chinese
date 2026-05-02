@@ -2329,7 +2329,7 @@
             }
         };
 
-        window.handleReverseTranslate = async function(text) {
+window.handleReverseTranslate = async function(text) {
             if(!text) return;
             const engInput = document.getElementById('eng-input');
             const selectEl = document.getElementById('target-lang-select');
@@ -2377,7 +2377,10 @@
                 }
 
                 if (engInput && trans && trans.trim() !== "") {
-                    engInput.value = window.getStr(trans).trim().replace(/[「」""'']/g, '');
+                    const finalStr = window.getStr(trans).trim().replace(/[「」""'']/g, '');
+                    engInput.value = finalStr;
+                    // 【修復核心】：反向翻譯完成後，自動呼叫對應的母語語音唸出結果！
+                    window.speakTargetLang(finalStr);
                 } else {
                     throw new Error("Empty translation result");
                 }

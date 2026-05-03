@@ -2472,6 +2472,18 @@
         };
 
         // --- 9. 語音播報優化引擎 (Voice Engine Optimization) ---
+        
+        // 【新增】語音引擎先鋒喚醒機制 (Audio Unlocker) - 突破安卓防騷擾靜音限制
+        window.audioUnlocked = false;
+        window.unlockSpeechSynthesis = function() {
+            if (!window.audioUnlocked && window.speechSynthesis) {
+                const silentUtterance = new SpeechSynthesisUtterance('');
+                silentUtterance.volume = 0;
+                window.speechSynthesis.speak(silentUtterance);
+                window.audioUnlocked = true;
+            }
+        };
+
         window.speak = function(text, fallbackChar = null) {
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
@@ -2536,7 +2548,9 @@
             window.speechSynthesis.speak(ut);
         };
 
-        window.handleTranslate = async function() {
+            window.handleTranslate = async function() {
+            window.unlockSpeechSynthesis(); // 【新增】手指點擊瞬間喚醒語音引擎
+            
             if (window.MAX_FREE_USES !== Infinity && window.freeUsageCount >= window.MAX_FREE_USES) { 
                 window.showToast("Daily Limit Reached / 每日試用額度已達上限", true); 
                 window.togglePricingTable(); 
@@ -2622,6 +2636,8 @@
         };
 
         window.handleSplit = function(e) {
+            window.unlockSpeechSynthesis(); // 【新增】手指點擊瞬間喚醒語音引擎
+            
             const text = window.getStr(document.getElementById('zh-input').value);
             if (!text) return;
             
@@ -3113,31 +3129,28 @@
             });
         };
 
-        let appInitialized = false;
+    let appInitialized = false;
         const initApp = function() {
             if (appInitialized) return;
             appInitialized = true;
 
-            // 🔒 安全註冊 PWA，並防堵 iframe/預覽環境的 InvalidStateError 崩潰
+            // 🔒 PWA 註冊正規化：移除強制刪除快取，讓 Android 將其視為正式 App 並提示安裝
             if ('serviceWorker' in navigator && window.isSecureContext) {
                 if (window.self !== window.top) {
                     console.warn('⚠️ 預覽環境已自動停用 PWA 註冊，避免 InvalidStateError。');
                 } else {
                     try {
-                        navigator.serviceWorker.getRegistrations()
-                            .then(registrations => {
-                                for (let registration of registrations) {
-                                    registration.unregister();
-                                }
-                                return navigator.serviceWorker.register('sw.js');
-                            })
-                            .then(reg => console.log('PWA SW 安全註冊與清理成功'))
-                            .catch(err => console.warn('PWA 註冊受阻 (若已刪除 sw.js 屬正常現象):', err));
+                        navigator.serviceWorker.register('sw.js')
+                            .then(reg => console.log('PWA SW 註冊成功，App 體驗已啟動'))
+                            .catch(err => console.warn('PWA 註冊受阻:', err));
                     } catch (e) {
                         console.warn('環境隱私限制，自動停用 PWA API:', e);
                     }
                 }
             }
+
+            const updateOnlineStatus = () => {
+                const banner = document.getElementById('offline-banner');
 
             const updateOnlineStatus = () => {
                 const banner = document.getElementById('offline-banner');
@@ -3187,6 +3200,7 @@
         }
         
         document.addEventListener('click', (e) => {
+            window.unlockSpeechSynthesis(); // 【新增】全域解鎖語音引擎
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
             const action = actionEl.getAttribute('data-action');

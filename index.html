@@ -6,21 +6,15 @@
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
     <!--
     ---
-    version: "6.9.4-NEWEBPAY-COMPLIANCE"
+    version: "7.0.0-PWA-FRESH-DEPLOY"
     author: "Abrakai Studio"
     description: "Taiwan Chinese Learning Hub - Bidirectional Translation & Hidden Auth Flow"
     disclaimer: "本軟體為教學輔助工具，內容由 AI 生成，不保證 100% 正確性。資料存儲於雲端，請勿上傳機敏資訊。"
-    updates:
-      - "UI: Auth forms hidden by default. Added Login/Signup button in Header for guest experience first."
-      - "Feature: Multi-language selector added to Section 1."
-      - "Feature: Bidirectional translate with robust API fallback. Decompose Chinese synchronously translates back to native language."
-      - "UX: Comprehensive Bilingual text updates across all buttons and UI states."
-      - "Core: Voice engine RegExp update to smartly handle math formulas vs sentence pauses using lookbehind."
-      - "Fix: Translate & Reverse Translate now strictly fallback to GTX when API limits are reached to prevent 'Translation Failed'."
-      - "Compliance: Added 'Terms of Service' and 'Refund Policy' directly to pricing section and Legal Modal to pass NewebPay audit."
-      - "Enhancement: Payment sections (USD/TWD) are now collapsible accordions for cleaner UI."
     ---
     -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#dc2626">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Hanzi Writer for Stroke Order -->
@@ -55,6 +49,15 @@
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 selection:bg-red-200 flex flex-col relative">
+
+    <div id="offline-banner" class="hidden bg-red-600 text-white px-4 py-2 text-center text-xs font-bold sticky top-0 z-[1000] shadow-md w-full">
+        <i class="ph-bold ph-wifi-slash text-white align-middle text-sm mr-1"></i>網路離線中，請趕緊接上網路享會員專屬權利唷!!
+    </div>
+
+    <a href="https://lin.ee/9khpCfe" target="_blank" class="fixed bottom-6 right-6 z-[1000] w-14 h-14 bg-emerald-500 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all animate-bounce border-2 border-white">
+        <i class="ph-bold ph-chats-teardrop text-3xl text-white"></i>
+        <span class="absolute -top-2 -left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">客服</span>
+    </a>
 
     <div id="domain-lock-overlay" class="hidden fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center text-center p-10">
         <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-4xl text-white mb-6 animate-bounce">
@@ -627,17 +630,6 @@
             <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
         </div>
     </div>
-
-    <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
-        <div class="max-w-5xl mx-auto font-black space-y-4">
-            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v6.9.4-NEWEBPAY-COMPLIANCE</p>
-            <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
-            <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
-                Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
-                免責聲明：所有數據均由多模態 AI 提供，僅供教學研究參考。
-            </p>
-        </div>
-    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
@@ -1382,7 +1374,8 @@
         onAuthStateChanged(auth, async (user) => {
             if (!sentinelCheck()) return;
             if (user) {
-                document.getElementById('auth-status-msg').textContent = "CLOUD LINK ACTIVE";
+                const authMsg = document.getElementById('auth-status-msg');
+                if (authMsg) authMsg.textContent = "CLOUD LINK ACTIVE";
                 
                 if (!sysConfigUnsub) {
                     sysConfigUnsub = onSnapshot(doc(db, "artifacts", appId, "public", "data", "system_config", "settings"), (docSnap) => {
@@ -1430,6 +1423,21 @@
                                 const diff = Math.ceil((new Date(data.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                                 status = (diff >= 0) ? 'active' : 'expired';
                                 localStorage.setItem('abra_vip_days', diff.toString());
+                                
+                                // 【新增】到期日前後 3 天推播通知
+                                if (diff >= -3 && diff <= 3) {
+                                    let msgs = data.messages || [];
+                                    const todayStr = new Date().toISOString().split('T')[0];
+                                    const msgPrefix = '【系統自動通知】VIP 權益提醒：';
+                                    let expStatusText = diff > 0 ? `將於 ${diff} 天後到期` : (diff === 0 ? `將於「今日」到期` : `已過期 ${Math.abs(diff)} 天`);
+                                    const todayMsgText = `${msgPrefix}您的尊榮方案${expStatusText}。為確保無間斷使用 AI 解析，請前往「會員中心」續約！(${todayStr})`;
+                                    
+                                    if (!msgs.some(m => m.text === todayMsgText)) {
+                                        msgs = msgs.filter(m => !m.text.startsWith(msgPrefix));
+                                        msgs.push({ role: 'admin', text: todayMsgText, timestamp: new Date().toISOString() });
+                                        updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailCode), { messages: msgs }).catch(e=>console.warn(e));
+                                    }
+                                }
                             } else {
                                 localStorage.removeItem('abra_vip_days');
                             }
@@ -1457,7 +1465,8 @@
                 }
 
             } else {
-                document.getElementById('auth-status-msg').textContent = "AUTH ERROR";
+                const msgEl = document.getElementById('auth-status-msg');
+                if (msgEl) msgEl.textContent = "AUTH ERROR";
                 if (sysConfigUnsub) { sysConfigUnsub(); sysConfigUnsub = null; }
                 if (promoCodesUnsub) { promoCodesUnsub(); promoCodesUnsub = null; }
                 if (userProfileUnsub) { userProfileUnsub(); userProfileUnsub = null; }
@@ -1492,6 +1501,8 @@
                 if (await window.verifyAdminCloud(code)) {
                     localStorage.setItem('abra_admin_status', 'active');
                     window.showToast("Admin Verified / 管理員身分確認.");
+                    document.getElementById('member-center-section')?.classList.add('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                     setTimeout(() => location.reload(), 800);
                     return;
                 }
@@ -1574,7 +1585,13 @@
                                 window.activeApiKey = data.apiKey.trim();
                             }
                             window.showToast("Login Success! / 登入成功！");
-                            setTimeout(() => location.reload(), 800);
+                            
+                            document.getElementById('member-center-section')?.classList.add('hidden');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            
+                            setTimeout(() => {
+                                if(window.updateGlobalUI) window.updateGlobalUI();
+                            }, 500);
                         } else {
                             await signOut(auth);
                             window.showToast("此帳號已被管理員移除，拒絕登入 / Account removed by admin", true);
@@ -1655,6 +1672,10 @@
                 
                 document.getElementById('login-email').value = email;
                 document.getElementById('login-vip-code').value = pass;
+                
+                document.getElementById('member-center-section')?.classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
                 window.handleLogin();
 
             } catch(e) { 
@@ -1734,6 +1755,7 @@
             localStorage.removeItem('abra_custom_limit');
             localStorage.removeItem('abra_invite_code'); 
             window.activeApiKey = "";
+            
             try { await signOut(auth); } catch(e) {}
             location.reload(); 
         };
@@ -1748,10 +1770,13 @@
                 let globalUnread = false; 
                 
                 window.promoStatsMap = {}; 
+                window.currentAdminData = []; 
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const emailId = docSnap.id;
+                    data._id = emailId;
+                    window.currentAdminData.push(data);
                     
                     if (data.inviteCode) {
                         const code = data.inviteCode.toUpperCase();
@@ -1786,12 +1811,15 @@
                     } else if (data.inviteCode) {
                         customLimitDisplay = `<span class="text-purple-600 font-black text-[9px] px-2 py-1 bg-purple-50 rounded-md border border-purple-100 cursor-pointer hover:bg-purple-600 hover:text-white transition-colors" title="點擊過濾此邀請碼名單" onclick="window.filterByPromo('${window.getStr(data.inviteCode)}')">${window.getStr(data.inviteCode)}</span>`;
                     }
-
+                    
                     html += `
                         <tr class="hover:bg-slate-50 transition-colors group">
                             <td class="px-8 py-6 whitespace-nowrap"><div class="flex items-center gap-2 justify-center">${statusHTML} <span class="text-[10px] font-black">${daysText}</span></div></td>
                             <td class="px-8 py-6 whitespace-nowrap font-mono text-[11px] font-bold group-hover:text-red-600 transition-colors">${data.email || emailId}</td>
-                            <td class="px-8 py-6 whitespace-nowrap text-xs font-black text-indigo-700">${data.name || 'N/A'}<br><span class="text-slate-400 font-mono font-normal">${data.phone || '-'}</span></td>
+                            <td class="px-8 py-6 whitespace-nowrap text-xs font-black text-indigo-700">
+                                ${data.name || 'N/A'}<br>
+                                <span class="text-slate-400 font-mono font-normal">${data.phone || '-'}</span>
+                            </td>
                             <td class="px-8 py-6 whitespace-nowrap text-xs font-bold">${data.paymentDate || '-'}<br><span class="text-slate-400">${data.months ? data.months + ' Mos' : '-'}</span></td>
                             <td class="px-8 py-6 whitespace-nowrap text-xs font-black ${daysText === '過期' ? 'text-red-500' : 'text-slate-700'}">${data.expiryDate || 'N/A'}</td>
                             <td class="px-8 py-6 whitespace-nowrap text-xs">${customLimitDisplay}</td>
@@ -1902,11 +1930,18 @@
                 const sanitizedEmail = email.replace(/[.#$[\]]/g, "_");
                 const docRef = doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail);
                 
+                const nowIso = new Date().toISOString();
                 const payload = {
                     email: email, name: name, phone: phone,
                     remittance: remittance, paymentDate: paymentDate, months: months,
-                    expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending"
+                    expiryDate: expiryDate, remarks: remarks, status: expiryDate ? "active" : "pending",
+                    updatedAt: nowIso
                 };
+                
+                const docSnap = await getDoc(docRef);
+                if (!docSnap.exists() && !payload.createdAt && !payload.signupDate) {
+                    payload.createdAt = nowIso;
+                }
                 
                 if (customLimitRaw === '') {
                     payload.customLimit = null;
@@ -1952,13 +1987,24 @@
         window.exportCSV = async function() {
             try {
                 window.showToast("Compiling Secure CSV... / 準備匯出 CSV...");
-                const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
-                let csvContent = "Email,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status,CustomLimit,InviteCode\n";
-                querySnapshot.forEach(doc => {
-                    const d = doc.data();
-                    const row = [ d.email || doc.id, d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '', d.customLimit || '', d.inviteCode || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
-                    csvContent += row + "\n";
+                const searchInput = document.getElementById('admin-search-input').value.toLowerCase();
+                let csvContent = "Email,Name,Phone,Remittance,PaymentDate,Months,ExpiryDate,Remarks,Status,CustomLimit,InviteCode,CreatedAt,UpdatedAt\n";
+                let exportCount = 0;
+                
+                window.currentAdminData.forEach(d => {
+                    const searchStr = `${d.email||''} ${d.name||''} ${d.phone||''} ${d.inviteCode||''} ${d.remarks||''}`.toLowerCase();
+                    if (searchInput === '' || searchStr.includes(searchInput)) {
+                        const row = [ d.email || d._id, d.name || '', d.phone || '', d.remittance || '', d.paymentDate || '', d.months || '', d.expiryDate || '', d.remarks || '', d.status || '', d.customLimit || '', d.inviteCode || '', d.createdAt || d.signupDate || '', d.updatedAt || '' ].map(v => `"${window.getStr(v).replace(/"/g, '""')}"`).join(',');
+                        csvContent += row + "\n";
+                        exportCount++;
+                    }
                 });
+                
+                if (exportCount === 0) {
+                    window.showToast("No data matched / 無符合資料可匯出", true);
+                    return;
+                }
+                
                 const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
@@ -1967,41 +2013,71 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                window.showToast("匯出成功！ / Export Success!");
+                window.showToast(`Success! Exported ${exportCount} rows / 成功匯出 ${exportCount} 筆資料`);
             } catch(e) { window.showToast("Export Failed / 匯出失敗", true); }
         };
 
         window.importCSV = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
+            
+            if (!confirm(`系統確認：您即將執行會員資料庫匯入作業。\n\n⚠️ 匯入規則：\n1. 若 Email 已存在 -> 進行資料更新\n2. 若 Email 不存在 -> 新增會員資料\n\n確定要繼續嗎？`)) {
+                event.target.value = '';
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    window.showToast("Verifying Data... / 開始比對匯入資料...");
+                    window.showToast("Verifying Data... / 處理匯入資料中，請稍候...");
                     const rows = e.target.result.split('\n').filter(r => r.trim());
                     if(rows.length < 2) { window.showToast("CSV Invalid / 格式錯誤", true); return; }
                     const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').toLowerCase().trim());
                     const emailIdx = headers.indexOf('email');
                     if(emailIdx === -1) { window.showToast("CSV Missing Email / 需含 Email", true); return; }
-                    let successCount = 0;
+                    
+                    const querySnapshot = await getDocs(collection(db, "artifacts", appId, "public", "data", "vip_codes"));
+                    const existingEmails = new Set();
+                    querySnapshot.forEach(doc => existingEmails.add(doc.id));
+                    
+                    let totalCount = 0;
+                    let newCount = 0;
+                    let updateCount = 0;
+                    const nowIso = new Date().toISOString();
+                    
                     for(let i=1; i<rows.length; i++) {
                         const cols = rows[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
                         if(cols.length === 0 || !cols[emailIdx]) continue;
+                        
                         const payload = {};
                         headers.forEach((h, idx) => {
-                            if(h !== 'email' && cols[idx]) { 
+                            if(h !== 'email' && cols[idx] !== undefined) { 
                                 if(h === 'customlimit') {
                                     payload.customLimit = cols[idx] ? parseInt(cols[idx], 10) : null;
+                                } else if(h === 'createdat' || h === 'updatedat') {
+                                    // Ignore incoming createdat, we handle it internally
                                 } else {
                                     payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; 
                                 }
                             }
                         });
-                        const sanitizedEmail = cols[emailIdx].replace(/[.#$[\]]/g, "_");
-                        await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: cols[emailIdx], ...payload }, { merge: true });
-                        successCount++;
+                        
+                        const rawEmail = cols[emailIdx];
+                        const sanitizedEmail = rawEmail.replace(/[.#$[\]]/g, "_");
+                        
+                        payload.updatedAt = nowIso;
+                        if (!existingEmails.has(sanitizedEmail)) {
+                            payload.createdAt = nowIso;
+                            newCount++;
+                        } else {
+                            updateCount++;
+                        }
+                        totalCount++;
+                        
+                        await setDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", sanitizedEmail), { email: rawEmail, ...payload }, { merge: true });
                     }
-                    window.showToast(`Import Complete! Processed ${successCount} records / 匯入完成`);
+                    
+                    alert(`✅ 匯入作業完成！\n\n📊 報表統計：\n- 總共處理：${totalCount} 筆\n- 新增資料：${newCount} 筆\n- 更新資料：${updateCount} 筆`);
                     window.loadAdminMembers();
                 } catch(err) { window.showToast("Import Error / 匯入錯誤", true); }
             };
@@ -2050,6 +2126,14 @@
                         window.showToast("該邀請碼已過期失效 / Promo Code Expired", true);
                         return; 
                     }
+                    
+                    if (promo.maxUsers) {
+                        const currentUsers = window.promoStatsMap[newInviteCode] || 0;
+                        if (currentUsers >= promo.maxUsers) {
+                            window.showToast(`綁定失敗：該邀請碼已達人數上限 (${promo.maxUsers} 人)`, true);
+                            return;
+                        }
+                    }
                     inviteCodeToSave = newInviteCode; 
                 } else {
                     window.showToast("邀請碼無效 / Invalid Promo Code", true);
@@ -2072,7 +2156,7 @@
                     }
                 }
                 
-                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, apiKey: newApiKey, inviteCode: inviteCodeToSave });
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "vip_codes", emailId), { name: newName, apiKey: newApiKey, inviteCode: inviteCodeToSave, updatedAt: new Date().toISOString() });
                 
                 if (newApiKey === '') localStorage.removeItem('gemini_api_key');
                 else localStorage.setItem('gemini_api_key', newApiKey.trim());
@@ -2254,8 +2338,6 @@
             }
         };
 
-        // --- 8. 雙向翻譯聯動引擎 (Bidirectional Translation Engine) ---
-        
         window.handleReverseTranslate = async function(text) {
             if(!text) return;
             const engInput = document.getElementById('eng-input');
@@ -2304,7 +2386,9 @@
                 }
 
                 if (engInput && trans && trans.trim() !== "") {
-                    engInput.value = window.getStr(trans).trim().replace(/[「」""'']/g, '');
+                    const finalStr = window.getStr(trans).trim().replace(/[「」""'']/g, '');
+                    engInput.value = finalStr;
+                    window.speakTargetLang(finalStr);
                 } else {
                     throw new Error("Empty translation result");
                 }
@@ -2320,8 +2404,8 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            // Lookbehind Regex 處理：若符號前後都是數字（數學算式），則不替換，使其唸出；否則替換為全形逗號產生自然停頓
-            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
+            let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+            cleanText = cleanText.replace(/(?<!\d)[\/\-_|()](?!\d)/g, '，'); 
             
             if (/^[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄧㄨㄩˊˇˋ˙]+$/.test(cleanText.replace(/\s/g, ''))) {
                 const mapBopo = cleanText.replace(/\s/g, '');
@@ -2364,7 +2448,7 @@
             if (!text || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             
-            let cleanText = window.getStr(text).replace(/(?<!\d)[\/\-_|()](?!\d)/g, ','); 
+            let cleanText = window.getStr(text).replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ','); 
             const ut = new SpeechSynthesisUtterance(cleanText.trim());
             
             const selectEl = document.getElementById('target-lang-select');
@@ -2486,7 +2570,6 @@
                     localStorage.setItem('abra_usage_count', window.freeUsageCount.toString()); 
                     if(window.updateGlobalUI) window.updateGlobalUI(); 
                 }
-                // 同步反向翻譯回母語至第一區塊
                 window.handleReverseTranslate(text);
             }
 
@@ -2615,7 +2698,6 @@
                 
                 let data = { zhuyin: "", radical: cleanRadical, strokes: dictData.stroke_count || "-", polyphonic: [], words: [], idioms: [] };
                 
-                // 抓取母語選擇設定
                 const selectEl = document.getElementById('target-lang-select');
                 const targetLangCode = selectEl ? selectEl.value : 'en';
 
@@ -2661,7 +2743,6 @@
                                 }
                                 
                                 const queryText = `成語：${idiom}。解釋：${meaning}`;
-                                // 修正此處將原本寫死成英文(en)的代碼換成使用者選擇的母語(targetLangCode)
                                 const gtRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=${targetLangCode}&dt=t&q=${encodeURIComponent(queryText)}`);
                                 const gtData = await gtRes.json();
                                 let enTrans = gtData[0].map(item => item[0]).join('');
@@ -2756,7 +2837,6 @@
                 if(errorPanel) errorPanel.classList.add('hidden');
                 document.getElementById('active-engine-badge').classList.add('hidden');
 
-                // 擴充模型輪詢陣列，涵蓋最新的 Gemini 3.1/2.5 系列，提升 API 容錯率
                 const modelNames = [
                     "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite",
                     "gemini-3.1-pro", "gemini-3.1-flash-lite", 
@@ -2816,163 +2896,27 @@
             }
         };
 
-        window.renderResult = function(char, data) {
-            const radicalDisplay = document.getElementById('radical-display');
-            const strokesDisplay = document.getElementById('strokes-display');
-            if (radicalDisplay) radicalDisplay.textContent = window.getStr(data.radical) || 'Unknown / 未知';
-            if (strokesDisplay) strokesDisplay.textContent = window.getStr(data.strokes) ? `${data.strokes}` : '--';
+        let appInitialized = false;
+        const initApp = function() {
+            if (appInitialized) return;
+            appInitialized = true;
 
-            const pureMainZhuyin = window.getStr(data.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-            document.getElementById('zhuyin-display').textContent = pureMainZhuyin;
-            const pb = document.getElementById('play-char-btn');
-            
-            if(pb) {
-                pb.classList.remove('hidden'); 
-                pb.setAttribute('data-action', 'speak'); 
-                pb.setAttribute('data-text', pureMainZhuyin); 
-                pb.setAttribute('data-fallback', char); 
-            }
-            
-            const polyDisp = document.getElementById('polyphonic-display'); 
-            polyDisp.innerHTML = '';
-            const validPolyphonic = (data.polyphonic || []).filter(p => p.zhuyin && p.zhuyin !== data.zhuyin);
-            
-            let seenPoly = new Set();
-            seenPoly.add(pureMainZhuyin);
-
-            let polyHTML = '';
-            if (validPolyphonic.length > 0) {
-                validPolyphonic.forEach(p => {
-                    const pureZhuyin = window.getStr(p.zhuyin).replace(/[a-zA-Z]/g, '').replace(/\s+/g, '');
-                    if (!seenPoly.has(pureZhuyin) && pureZhuyin) {
-                        seenPoly.add(pureZhuyin);
-                        polyHTML += `
-                            <div class="bg-white p-4 rounded-2xl border-2 border-purple-100 flex items-center shadow-sm mt-3 gap-4 italic font-bold">
-                                <span class="text-2xl font-black text-purple-800 whitespace-nowrap tracking-tighter flex-shrink-0 px-4">${pureZhuyin}</span>
-                                <div class="flex-1"></div>
-                                <button type="button" data-action="speak" data-text="${pureZhuyin}" data-fallback="${char}" class="w-12 h-12 rounded-[1rem] bg-purple-100 text-purple-600 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-b-4 border-purple-300">
-                                    <i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i>
-                                </button>
-                            </div>
-                        `;
-                    }
-                });
-            }
-            
-            if (polyHTML) {
-                document.getElementById('poly-section-wrap').style.display = 'block';
-                polyDisp.innerHTML = polyHTML;
-            } else {
-                document.getElementById('poly-section-wrap').style.display = 'none';
-            }
-            
-            const wordsCont = document.getElementById('words-container');
-            wordsCont.innerHTML = (data.words || []).slice(0, 6).map(w => {
-                    const pureWord = window.getStr(w).replace(/\([^)]*\)/g, '').trim();
-                    return `<span data-action="speak" data-text="${pureWord}" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl text-base font-black text-slate-700 cursor-pointer shadow-md hover:border-indigo-400 transition-all italic">${pureWord}</span>`;
-            }).join('');
-            
-            const idiomsCont = document.getElementById('idioms-container');
-            const validIdioms = (data.idioms || []).filter(i => i.idiom && i.idiom.includes(char) && i.idiom.length >= 3).slice(0, 6);
-            
-            if (validIdioms.length > 0) {
-                idiomsCont.innerHTML = validIdioms.map(i => `
-                    <div class="p-8 bg-white border-2 border-slate-100 rounded-[2.5rem] text-sm font-bold shadow-sm text-left hover:shadow-md transition-all relative group">
-                        <div class="flex-1 pr-16">
-                            <div class="text-slate-950 text-2xl font-black tracking-tighter italic border-b-2 border-emerald-500/20 pb-3 inline-block">${window.getStr(i.idiom)}</div>
-                            
-                            <div class="mt-4 flex flex-col items-start gap-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-slate-400 uppercase tracking-widest font-black italic">Meanings / 解析：</span>
-                                    <button type="button" data-action="speak" data-text="${window.getStr(i.meaning)}" class="text-slate-300 hover:text-emerald-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
-                                </div>
-                                <div class="text-base text-slate-600 font-bold leading-relaxed">${window.getStr(i.meaning)}</div>
-                            </div>
-                            
-                            <div class="mt-4 border-t pt-3 border-slate-100 flex flex-col items-start gap-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-indigo-400 uppercase tracking-widest font-black italic">Translation / 母語解析：</span>
-                                    <button type="button" data-action="speak-target" data-text="${window.getStr(i.translation || i.english)}" class="text-indigo-300 hover:text-indigo-500 transition-colors"><i class="ph-fill ph-speaker-high text-lg pointer-events-none"></i></button>
-                                </div>
-                                <div class="text-[13px] text-indigo-500 font-bold tracking-wide opacity-90 leading-relaxed">${window.getStr(i.translation || i.english) || "Translation loading..."}</div>
-                            </div>
-                        </div>
-                        <button type="button" data-action="speak" data-text="${window.getStr(i.idiom)}" class="absolute top-8 right-8 w-12 h-12 bg-emerald-500 text-white rounded-[1.25rem] shadow-lg transition-transform group-hover:scale-110 active:scale-90 flex items-center justify-center" title="播放成語"><i class="ph-fill ph-speaker-high text-xl pointer-events-none"></i></button>
-                    </div>
-                `).join('');
-            } else {
-                idiomsCont.innerHTML = `<div class="p-10 text-center text-slate-400 italic font-bold">目前無相關成語紀錄。</div>`;
-            }
-        };
-
-        window.initViewCounter = async function() {
-            try {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const statsRef = doc(db, "artifacts", appId, "public", "data", "system_stats", "visits");
-                
-                let localTotal = parseInt(localStorage.getItem('abra_local_total') || '1520', 10);
-                let localToday = parseInt(localStorage.getItem('abra_local_today') || '42', 10);
-                let localDate = localStorage.getItem('abra_local_date');
-
-                if (localDate !== todayStr) {
-                    localToday = 0;
-                    localStorage.setItem('abra_local_date', todayStr);
+            const updateOnlineStatus = () => {
+                const banner = document.getElementById('offline-banner');
+                if(banner) {
+                    if(navigator.onLine) { banner.classList.add('hidden'); }
+                    else { banner.classList.remove('hidden'); }
                 }
+            };
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
 
-                localTotal++;
-                localToday++;
-                localStorage.setItem('abra_local_total', localTotal.toString());
-                localStorage.setItem('abra_local_today', localToday.toString());
-
-                const updateBadge = (total, today) => {
-                    document.getElementById('total-views').textContent = total;
-                    document.getElementById('today-views').textContent = today;
-                };
-
-                updateBadge(localTotal, localToday);
-
-                try {
-                    const docSnap = await getDoc(statsRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const realTotal = (data.total || 0) + 1;
-                        let realToday = (data.lastDate === todayStr) ? (data.todayViews || 0) + 1 : 1;
-                        
-                        updateBadge(realTotal, realToday);
-                        localStorage.setItem('abra_local_total', realTotal.toString());
-                        localStorage.setItem('abra_local_today', realToday.toString());
-
-                        setDoc(statsRef, { total: realTotal, todayViews: realToday, lastDate: todayStr }, { merge: true }).catch(()=>{});
-                    }
-                } catch (dbErr) {
-                    console.warn("View counter background sync restricted. Using local session count.");
-                }
-            } catch(e) {
-                console.error("Counter Error", e);
+            const langSelector = document.getElementById('target-lang-select');
+            if(langSelector) {
+                langSelector.value = window.currentNativeLang || 'en';
             }
-        };
-
-        window.setupTypingMode = function() {
-            const inputs = document.querySelectorAll('input, textarea');
-            inputs.forEach(el => {
-                el.addEventListener('focus', () => { if (window.innerWidth < 768) document.body.classList.add('typing-mode'); });
-                el.addEventListener('blur', () => { setTimeout(() => document.body.classList.remove('typing-mode'), 150); });
-            });
-        };
-
-        document.addEventListener('click', (e) => {
-            const actionEl = e.target.closest('[data-action]');
-            if (!actionEl) return;
-            const action = actionEl.getAttribute('data-action');
-            if (action === 'admin-edit') window.openAdminModal(actionEl.getAttribute('data-id'));
-            else if (action === 'admin-delete') window.deleteAdminMember(actionEl.getAttribute('data-id'), actionEl);
-            else if (action === 'admin-msg') window.openAdminMsgModal(actionEl.getAttribute('data-id'));
-            else if (action === 'chat-del') window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
-            else if (action === 'speak') window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
-            else if (action === 'speak-target' || action === 'speak-eng') window.speakTargetLang(actionEl.getAttribute('data-text'));
-        });
-
-        window.onload = function() {
+            
             const vipContent = document.getElementById('vip-only-content');
             if (vipContent && !document.getElementById('radical-display')) {
                 const headerDiv = document.createElement('div');
@@ -2983,10 +2927,38 @@
                 `;
                 vipContent.insertBefore(headerDiv, vipContent.firstChild);
             }
+            
             if (window.updateGlobalUI) window.updateGlobalUI();
-            window.initViewCounter();
-            window.setupTypingMode();
+            if (window.initViewCounter) window.initViewCounter();
+            if (window.setupTypingMode) window.setupTypingMode();
+            
+            if (localStorage.getItem('abra_hijack_warn') === 'true') {
+                setTimeout(() => {
+                    window.showToast("⚠️ 您已被強制登出：帳號已在其他裝置登入。為保障權益請勿共用帳號。", true);
+                    localStorage.removeItem('abra_hijack_warn');
+                }, 500);
+            }
         };
+
+        // 解決 PWA 載入過快導致的 window.onload Race Condition 問題
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(initApp, 10);
+        } else {
+            window.addEventListener('DOMContentLoaded', initApp);
+            window.addEventListener('load', initApp);
+        }
+        
+        document.addEventListener('click', (e) => {
+            const actionEl = e.target.closest('[data-action]');
+            if (!actionEl) return;
+            const action = actionEl.getAttribute('data-action');
+            if (action === 'admin-edit') window.openAdminModal(actionEl.getAttribute('data-id'));
+            else if (action === 'admin-delete') window.deleteAdminMember(actionEl.getAttribute('data-id'), actionEl);
+            else if (action === 'admin-msg') window.openAdminMsgModal(actionEl.getAttribute('data-id'));
+            else if (action === 'chat-del') window.deleteMsg(actionEl.getAttribute('data-email'), parseInt(actionEl.getAttribute('data-index')), actionEl);
+            else if (action === 'speak') window.speak(actionEl.getAttribute('data-text'), actionEl.getAttribute('data-fallback'));
+            else if (action === 'speak-target' || action === 'speak-native') window.speakTargetLang(actionEl.getAttribute('data-text'));
+        });
     </script>
 </body>
 </html>

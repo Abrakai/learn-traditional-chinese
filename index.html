@@ -3129,28 +3129,32 @@
             });
         };
 
-    let appInitialized = false;
+        // --- 終極語音先鋒喚醒機制 (Audio Unlocker) ---
+        window.audioUnlocked = false;
+        window.unlockSpeechSynthesis = function() {
+            if (!window.audioUnlocked && window.speechSynthesis) {
+                const silentUtterance = new SpeechSynthesisUtterance('');
+                silentUtterance.volume = 0;
+                window.speechSynthesis.speak(silentUtterance);
+                window.audioUnlocked = true;
+            }
+        };
+
+        let appInitialized = false;
         const initApp = function() {
             if (appInitialized) return;
             appInitialized = true;
 
-            // 🔒 PWA 註冊正規化：移除強制刪除快取，讓 Android 將其視為正式 App 並提示安裝
+            // 🔒 PWA 安全註冊與正規化 (加入 iframe 防護)
             if ('serviceWorker' in navigator && window.isSecureContext) {
-                if (window.self !== window.top) {
-                    console.warn('⚠️ 預覽環境已自動停用 PWA 註冊，避免 InvalidStateError。');
-                } else {
+                if (window.self === window.top) { // 確保不是在預覽環境
                     try {
                         navigator.serviceWorker.register('sw.js')
-                            .then(reg => console.log('PWA SW 註冊成功，App 體驗已啟動'))
-                            .catch(err => console.warn('PWA 註冊受阻:', err));
-                    } catch (e) {
-                        console.warn('環境隱私限制，自動停用 PWA API:', e);
-                    }
+                            .then(() => console.log('PWA SW 註冊成功，App 體驗已啟動'))
+                            .catch(() => {});
+                    } catch (e) {}
                 }
             }
-
-            const updateOnlineStatus = () => {
-                const banner = document.getElementById('offline-banner');
 
             const updateOnlineStatus = () => {
                 const banner = document.getElementById('offline-banner');
@@ -3200,7 +3204,7 @@
         }
         
         document.addEventListener('click', (e) => {
-            window.unlockSpeechSynthesis(); // 【新增】全域解鎖語音引擎
+            window.unlockSpeechSynthesis(); // 使用者任何點擊，立刻解鎖語音引擎
             const actionEl = e.target.closest('[data-action]');
             if (!actionEl) return;
             const action = actionEl.getAttribute('data-action');

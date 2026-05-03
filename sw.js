@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abra-learn-tw-v-app-mode';
+const CACHE_NAME = 'abra-learn-tw-v-pwa-final';
 const urlsToCache = [
   './',
   './index.html',
@@ -16,7 +16,9 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.map(key => { if (key !== CACHE_NAME) return caches.delete(key); })
+      keys.map(key => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      })
     )).then(() => self.clients.claim())
   );
 });
@@ -24,11 +26,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  
-  // 終極白名單：非同網域 (Firebase, Gemini API, 字典 API) 絕對不攔截
+  // 終極白名單：絕對放行 Firebase 與所有外部 API 連線
   if (url.origin !== self.location.origin) return; 
 
-  // 網路優先 (Network First)：找回一般 App 的即時性與離線備援
   event.respondWith(
     fetch(event.request)
       .then(response => {

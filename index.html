@@ -632,7 +632,46 @@
             <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
         </div>
     </div>
-<script type="module">
+<!-- 🌟 NEW: Legal Modal with Consumer Rights & Refund Policy to pass NewebPay Verification -->
+    <div id="legal-modal" class="hidden fixed inset-0 z-[1200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4">
+        <div class="bg-white rounded-[3.5rem] shadow-2xl p-10 md:p-16 w-full max-w-2xl max-h-[85vh] overflow-y-auto animate-in zoom-in-95 font-black text-left">
+            <h3 class="text-2xl font-black text-slate-900 border-b-4 border-slate-50 pb-6 mb-8 flex items-center gap-3 uppercase"><i class="ph-fill ph-scroll text-red-600 text-4xl"></i> Legal / 隱私政策與服務條款</h3>
+            
+            <div class="bg-yellow-50 text-yellow-800 p-5 rounded-xl border border-yellow-200 mb-8 text-xs font-bold leading-relaxed shadow-sm">
+                本網站僅提供繁體中文字，單字書寫教學、注音、破音字、詞彙、成語解析等服務。<br>
+                至於成為VIP會員後可以搭配AI成語解析與翻譯，所需使用的API Key Token使用量與計費，請與Google API Studio廠商聯繫購買與續約。AI費用與本網站服務產品無關。
+            </div>
+
+            <div class="space-y-8 text-[13px] text-slate-600 leading-loose">
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">1. Consumer Rights & Refund / 消費者權益與退款政策</h4>
+                    <p>Digital services are activated upon binding. According to Consumer Protection Law, digital content services do not apply to the 7-day cooling-off period. No refunds after activation. / 本平台為數位內容服務，依消保法規定，虛擬商品及服務一經金鑰綁定與開通，即不適用七天鑑賞期，概不接受退款。</p>
+                </section>
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">2. Terms of Service & Privacy / 服務條款與個資保護</h4>
+                    <p>Abrakai Studio collects your email and name to provide cloud services. Your API Key is stored ONLY in local cache. / 本站收集信箱與姓名僅供雲端會員服務。您的 API 金鑰採本地瀏覽器存儲，不回傳伺服器，絕對安全。</p>
+                </section>
+                <section class="border-l-4 border-slate-200 pl-6">
+                    <h4 class="font-black text-slate-800 mb-2 text-lg uppercase tracking-tight">3. AI Accuracy / 免責聲明</h4>
+                    <p>Analysis relies on Google Gemini models. We do not guarantee 100% linguistic precision. / AI 解析與翻譯結果由第三方多模態 AI 提供，僅供學習與研究輔助參考，不保證內容絕對精確，本工作室不負相關法律責任。</p>
+                </section>
+            </div>
+            <div class="mt-12"><button type="button" onclick="window.closeLegalModal()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl border-b-8 border-slate-950 active:scale-95 transition-all">Understood / 我已詳閱並同意</button></div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-100 border-t-4 border-slate-200 pt-16 pb-16 text-center text-slate-400 text-[10px] italic px-6 relative z-10">
+        <div class="max-w-5xl mx-auto font-black space-y-4">
+            <p class="uppercase tracking-[0.5em] text-slate-300">Production Core v7.1.5-FULL-RECOVERY</p>
+            <p class="uppercase tracking-widest">&copy; 2026 Abrakai Studio | Taiwan Chinese Hub</p>
+            <p class="opacity-60 max-w-3xl mx-auto leading-relaxed">
+                Disclaimer: VIP status unlocks internal limits. AI services are provided by Google Gemini. Studio is not liable for data inaccuracies.<br>
+                免責聲明：所有數據均由多模態 AI 提供，僅供教學研究參考。
+            </p>
+        </div>
+    </footer>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
@@ -1974,6 +2013,7 @@
                                 if(h === 'customlimit') {
                                     payload.customLimit = cols[idx] ? parseInt(cols[idx], 10) : null;
                                 } else if(h === 'createdat' || h === 'updatedat') {
+                                    // Ignore incoming createdat, we handle it internally
                                 } else {
                                     payload[h === 'paymentdate' ? 'paymentDate' : h === 'expirydate' ? 'expiryDate' : h] = cols[idx]; 
                                 }
@@ -2797,5 +2837,3 @@
             else if (action === 'speak-target' || action === 'speak-eng') window.speakTargetLang(actionEl.getAttribute('data-text'));
         });
     </script>
-</body>
-</html>

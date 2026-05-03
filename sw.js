@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abra-learn-tw-v-stable-2';
+const CACHE_NAME = 'abra-learn-tw-v-stable-3';
 const urlsToCache = [
   './',
   './index.html',
@@ -25,7 +25,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  // 啟動階段：徹底清除舊版幽靈快取，並加入 catch 防護
+  // 啟動階段：徹底清除舊版所有幽靈快取，保證系統能載入最新設定
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.map(key => {
@@ -43,10 +43,11 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(event.request.url);
   
-  // 2. 終極白名單：非同網域 (Firebase, Gemini API, 教育部字典 API) 絕對不攔截，保證計數器與字典運作！
+  // 2. 終極防護白名單：只要不是當前網域的資源 (代表是 Firebase, Gemini API 或 教育部字典 API)
+  // 絕對不予攔截，直接放行給瀏覽器原生處理，保證 API 暢通無阻！
   if (url.origin !== self.location.origin) return; 
 
-  // 3. 網路優先 (Network First)：先抓最新網頁，斷網時才退回快取
+  // 3. 網路優先 (Network First)：先抓最新網頁，真斷網時才退回快取
   event.respondWith(
     fetch(event.request)
       .then(response => {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abra-learn-tw-v-stable-1';
+const CACHE_NAME = 'abra-learn-tw-v-stable-2';
 const urlsToCache = [
   './',
   './index.html',

@@ -1,26 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <!-- 引入 PWA 描述檔 -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#dc2626">
-
-    <script>
-        // 🔒 安全註冊 PWA，防堵 InvalidStateError 崩潰
-        window.addEventListener('load', () => {
-            if ('serviceWorker' in navigator) {
-                try {
-                    navigator.serviceWorker.register('sw.js')
-                        .then(reg => console.log('PWA SW 安全註冊成功'))
-                        .catch(err => console.warn('PWA 註冊受阻，但不影響網頁運行:', err));
-                } catch (e) {
-                    console.warn('環境限制，自動停用 PWA 註冊:', e);
-                }
-            }
-        });
-        
-        // ... (下方接著原本的 initStub 等程式碼) ...
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Taiwan Chinese Learning Hub | Abrakai Studio Official</title>
